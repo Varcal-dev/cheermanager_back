@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import com.varcal.cheermanager.Service.AuthService;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api")
 public class AuthController {
 
     @Autowired
