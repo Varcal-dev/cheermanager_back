@@ -26,7 +26,9 @@ CheerManager es una aplicación para la gestión de gimnasios y equipos de cheer
    cd CheerManager
 
 2. Configura la base de datos en el archivo
+
     src/main/resources/application.properties:
+    
     ```bash
     - spring.datasource.url=jdbc:mysql://localhost:3306/cheermanager_db
     - spring.datasource.username=TU_USUARIO
@@ -39,7 +41,7 @@ CheerManager es una aplicación para la gestión de gimnasios y equipos de cheer
 ## Ejecución
    Para iniciar la aplicación, ejecuta:
     ```bash
-   - ./mvnw spring-boot:run
+    - ./mvnw spring-boot:run
 
    La aplicación estará disponible en http://localhost:8080.
 
