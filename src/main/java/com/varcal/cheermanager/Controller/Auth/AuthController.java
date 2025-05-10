@@ -18,11 +18,24 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
-        boolean isAuthenticated = authService.authenticate(loginRequest.getEmail(), loginRequest.getPassword(), request);
-        if (isAuthenticated) {
-            return ResponseEntity.ok(new LoginResponse(true, "Login exitoso"));
+        String authResult = authService.authenticate(loginRequest.getEmail(), loginRequest.getPassword(), request);
+
+        switch (authResult) {
+            case "success":
+                return ResponseEntity.ok(new LoginResponse(true, "Login exitoso"));
+
+            case "invalid_password":
+                return ResponseEntity.status(401).body(new LoginResponse(false, "Contraseña incorrecta"));
+
+            case "email_not_found":
+                return ResponseEntity.status(404).body(new LoginResponse(false, "El correo proporcionado no está registrado"));
+
+            case "invalid_hash":
+                return ResponseEntity.status(500).body(new LoginResponse(false, "Error en el formato del hash de la contraseña"));
+
+            default:
+                return ResponseEntity.status(500).body(new LoginResponse(false, "Error desconocido"));
         }
-        return ResponseEntity.status(401).body(new LoginResponse(false, "Credenciales inválidas"));
     }
 
     @PostMapping("/logout")

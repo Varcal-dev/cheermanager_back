@@ -19,20 +19,26 @@ public class AuthService {
     @Autowired
     private UserRepository userRepository;
 
-    public boolean authenticate(String email, String password, HttpServletRequest request) {
+    public String authenticate(String email, String password, HttpServletRequest request) {
         return userRepository.findByEmail(email).map(user -> {
-            boolean isAuthenticated = BCrypt.checkpw(password, user.getPasswordHash());
-            if (isAuthenticated) {
-                // Llamar al procedimiento almacenado para actualizar el último acceso
-                userRepository.actualizar_ultimo_acceso(user.getId(), java.time.LocalDateTime.now());
+            try {
+                boolean isAuthenticated = BCrypt.checkpw(password, user.getPasswordHash());
+                if (isAuthenticated) {
+                    // Llamar al procedimiento almacenado para actualizar el último acceso
+                    userRepository.actualizar_ultimo_acceso(user.getId(), java.time.LocalDateTime.now());
 
-                // Guardar información del usuario en la sesión
-                HttpSession session = request.getSession();
-                session.setAttribute("userId", user.getId());
-                session.setAttribute("email", user.getEmail());
+                    // Guardar información del usuario en la sesión
+                    HttpSession session = request.getSession();
+                    session.setAttribute("userId", user.getId());
+                    session.setAttribute("email", user.getEmail());
+                    return "success"; // Login exitoso
+                } else {
+                    return "invalid_password"; // Contraseña incorrecta
+                }
+            } catch (IllegalArgumentException e) {
+                return "invalid_hash"; // Hash inválido
             }
-            return isAuthenticated;
-        }).orElse(false);
+        }).orElse("email_not_found"); // Correo no encontrado
     }
 
     public boolean tienePermiso(int userId, String permisoRequerido) {
@@ -52,17 +58,19 @@ public class AuthService {
     }
 
     /*
-    @RestController
-    @RequestMapping("/api/some-feature")
-    public class SomeController {
-
-        @GetMapping("/restricted")
-        @RequiresPermission("some_permission") // Restringir acceso a usuarios con este permiso
-        public String restrictedFunctionality() {
-            return "Acceso permitido a la funcionalidad restringida";
-        }
-    }
+     * @RestController
+     * 
+     * @RequestMapping("/api/some-feature")
+     * public class SomeController {
+     * 
+     * @GetMapping("/restricted")
+     * 
+     * @RequiresPermission("some_permission") // Restringir acceso a usuarios con
+     * este permiso
+     * public String restrictedFunctionality() {
+     * return "Acceso permitido a la funcionalidad restringida";
+     * }
+     * }
      */
-
 
 }
