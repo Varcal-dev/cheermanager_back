@@ -52,14 +52,17 @@ public class AuthService {
     }
 
     /*
-    @GetMapping("/funcionalidad")
-    public ResponseEntity<?> funcionalidad(HttpSession session) {
-        Integer userId = (Integer) session.getAttribute("userId");
-        if (userId == null || !authService.tienePermiso(userId, "acceder_funcionalidad")) {
-            return ResponseEntity.status(403).body("No tienes permiso para acceder a esta funcionalidad");
-        }
+    @RestController
+    @RequestMapping("/api/some-feature")
+    public class SomeController {
 
-        // Lógica de la funcionalidad
-        return ResponseEntity.ok("Acceso permitido");
-    } */
+        @GetMapping("/restricted")
+        @RequiresPermission("some_permission") // Restringir acceso a usuarios con este permiso
+        public String restrictedFunctionality() {
+            return "Acceso permitido a la funcionalidad restringida";
+        }
+    }
+     */
+
+
 }

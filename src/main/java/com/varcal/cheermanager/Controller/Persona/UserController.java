@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.varcal.cheermanager.Service.AuthService;
+import com.varcal.cheermanager.Utils.RequiresPermission;
 
 @RestController
 @RequestMapping("/api/user")
@@ -20,6 +21,7 @@ public class UserController {
     private AuthService authService;
 
     @GetMapping("/me")
+    @RequiresPermission("ver_usuarios") // Requiere el permiso "some_permission"
     public ResponseEntity<?> getCurrentUser(HttpSession session) {
         Integer userId = (Integer) session.getAttribute("userId");
         String email = (String) session.getAttribute("email");
