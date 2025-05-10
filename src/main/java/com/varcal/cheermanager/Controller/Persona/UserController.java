@@ -11,7 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.varcal.cheermanager.Service.AuthService;
-import com.varcal.cheermanager.Utils.RequiresPermission;
+import com.varcal.cheermanager.repository.Auth.UserRepository;
+import com.varcal.cheermanager.DTO.UsuarioDTO;
 
 @RestController
 @RequestMapping("/api/user")
@@ -20,17 +21,21 @@ public class UserController {
     @Autowired
     private AuthService authService;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @GetMapping("/me")
-    @RequiresPermission("ver_usuarios") // Requiere el permiso "some_permission"
     public ResponseEntity<?> getCurrentUser(HttpSession session) {
         Integer userId = (Integer) session.getAttribute("userId");
-        String email = (String) session.getAttribute("email");
 
         if (userId == null) {
             return ResponseEntity.status(401).body("No hay usuario autenticado");
         }
 
-        return ResponseEntity.ok("Usuario autenticado: " + email);
+        // Obtener el usuario desde la base de datos y mapearlo al DTO
+        return userRepository.findById((long) userId)
+                .map(user -> ResponseEntity.ok(new UsuarioDTO(user))) // Usar el DTO
+                .orElseGet(() -> ResponseEntity.status(404).body(null));
     }
 
     @GetMapping("/permisos")
