@@ -1,10 +1,13 @@
-package com.varcal.cheermanager.Controller;
+package com.varcal.cheermanager.Controller.Auth;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.varcal.cheermanager.Service.AuthService;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 @RestController
 @RequestMapping("/api")
@@ -14,12 +17,18 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
-        boolean isAuthenticated = authService.authenticate(loginRequest.getEmail(), loginRequest.getPassword());
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
+        boolean isAuthenticated = authService.authenticate(loginRequest.getEmail(), loginRequest.getPassword(), request);
         if (isAuthenticated) {
             return ResponseEntity.ok(new LoginResponse(true, "Login exitoso"));
         }
         return ResponseEntity.status(401).body(new LoginResponse(false, "Credenciales inválidas"));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpSession session) {
+        session.invalidate();
+        return ResponseEntity.ok("Sesión cerrada exitosamente");
     }
 
     // Clase interna para manejar el cuerpo de la solicitud
