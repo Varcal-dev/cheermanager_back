@@ -3,8 +3,10 @@ package com.varcal.cheermanager.Service;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import com.varcal.cheermanager.repository.Auth.UserRepository;
 
@@ -48,4 +50,16 @@ public class AuthService {
                     .collect(Collectors.toSet());
         }).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
     }
+
+    /*
+    @GetMapping("/funcionalidad")
+    public ResponseEntity<?> funcionalidad(HttpSession session) {
+        Integer userId = (Integer) session.getAttribute("userId");
+        if (userId == null || !authService.tienePermiso(userId, "acceder_funcionalidad")) {
+            return ResponseEntity.status(403).body("No tienes permiso para acceder a esta funcionalidad");
+        }
+
+        // Lógica de la funcionalidad
+        return ResponseEntity.ok("Acceso permitido");
+    } */
 }
