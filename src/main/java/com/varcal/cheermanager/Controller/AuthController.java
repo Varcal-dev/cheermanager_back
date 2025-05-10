@@ -17,9 +17,9 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         boolean isAuthenticated = authService.authenticate(loginRequest.getEmail(), loginRequest.getPassword());
         if (isAuthenticated) {
-            return ResponseEntity.ok("Login exitoso");
+            return ResponseEntity.ok(new LoginResponse(true, "Login exitoso"));
         }
-        return ResponseEntity.status(401).body("Credenciales inválidas");
+        return ResponseEntity.status(401).body(new LoginResponse(false, "Credenciales inválidas"));
     }
 
     // Clase interna para manejar el cuerpo de la solicitud
@@ -42,6 +42,33 @@ public class AuthController {
 
         public void setPassword(String password) {
             this.password = password;
+        }
+    }
+
+    // Clase interna para manejar la respuesta
+    public static class LoginResponse {
+        private boolean success;
+        private String message;
+
+        public LoginResponse(boolean success, String message) {
+            this.success = success;
+            this.message = message;
+        }
+
+        public boolean isSuccess() {
+            return success;
+        }
+
+        public void setSuccess(boolean success) {
+            this.success = success;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public void setMessage(String message) {
+            this.message = message;
         }
     }
 }
