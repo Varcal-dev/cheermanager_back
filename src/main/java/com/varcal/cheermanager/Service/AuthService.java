@@ -2,13 +2,10 @@ package com.varcal.cheermanager.Service;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
-import com.varcal.cheermanager.Models.Auth.Usuario;
 import com.varcal.cheermanager.repository.Auth.UserRepository;
 
 @Service
