@@ -1,6 +1,6 @@
 package com.varcal.cheermanager.config;
 
-import com.varcal.cheermanager.Service.AuthService;
+import com.varcal.cheermanager.Service.Auth.AuthService;
 import com.varcal.cheermanager.Utils.RequiresPermission;
 
 import jakarta.servlet.http.HttpServletRequest;
