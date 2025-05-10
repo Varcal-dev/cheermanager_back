@@ -8,6 +8,9 @@ import org.springframework.stereotype.Service;
 
 import com.varcal.cheermanager.repository.Auth.UserRepository;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @Service
 public class AuthService {
 
@@ -28,5 +31,21 @@ public class AuthService {
             }
             return isAuthenticated;
         }).orElse(false);
+    }
+
+    public boolean tienePermiso(int userId, String permisoRequerido) {
+        return userRepository.findById((long) userId).map(user -> {
+            return user.getRol().getPermisos().stream()
+                    .anyMatch(permiso -> permiso.getNombre().equals(permisoRequerido));
+        }).orElse(false);
+    }
+
+    public Set<String> getPermisosUsuario(int userId) {
+        return userRepository.findById((long) userId).map(user -> {
+            // Obtener los nombres de los permisos asociados al rol del usuario
+            return user.getRol().getPermisos().stream()
+                    .map(permiso -> permiso.getNombre())
+                    .collect(Collectors.toSet());
+        }).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
     }
 }
