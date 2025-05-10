@@ -9,7 +9,7 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
 import com.varcal.cheermanager.Models.Auth.Usuario;
-import com.varcal.cheermanager.repository.Auth.Auth.UserRepository;
+import com.varcal.cheermanager.repository.Auth.UserRepository;
 
 @Service
 public class AuthService {
