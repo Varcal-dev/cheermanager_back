@@ -30,12 +30,4 @@ public class AuthService {
             return isAuthenticated;
         }).orElse(false);
     }
-
-    public void registerUser(String email, String password) {
-        String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
-        Usuario user = new Usuario();
-        user.setEmail(email);
-        user.setPasswordHash(hashedPassword);
-        userRepository.save(user);
-    }
 }
