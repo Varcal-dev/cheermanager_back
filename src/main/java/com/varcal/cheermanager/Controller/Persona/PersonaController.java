@@ -12,7 +12,6 @@ import com.varcal.cheermanager.Models.Personas.Deportista;
 import com.varcal.cheermanager.Models.Personas.Entrenador;
 import com.varcal.cheermanager.Models.Personas.Persona;
 import com.varcal.cheermanager.Service.PersonaService;
-
 import java.util.List;
 
 @RestController
