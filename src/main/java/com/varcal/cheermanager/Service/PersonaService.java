@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import com.varcal.cheermanager.DTO.Persona.DeportistaDTO;
 import com.varcal.cheermanager.DTO.Persona.EntrenadorDTO;
 import com.varcal.cheermanager.DTO.Persona.PersonaDTO;
+import com.varcal.cheermanager.DTO.Persona.DeportistaVistaDTO;
 import com.varcal.cheermanager.Models.Personas.Deportista;
 import com.varcal.cheermanager.Models.Personas.Persona;
 import com.varcal.cheermanager.Models.Personas.Entrenador;
@@ -13,6 +14,8 @@ import com.varcal.cheermanager.repository.Personas.DeportistaRepository;
 import com.varcal.cheermanager.repository.Personas.PersonaRepository;
 import com.varcal.cheermanager.repository.Personas.EntrenadorRepository;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.time.LocalDate;
 
 @Service
 public class PersonaService {
@@ -109,6 +112,36 @@ public class PersonaService {
     // Método para listar todos los deportistas 
     public List<Deportista> listarDeportistas() {
         return deportistaRepository.findAll();
+    }
+
+    // Método para listar deportistas con detalles
+    public List<DeportistaVistaDTO> listarDeportistasConDetalles() {
+        List<Object[]> resultados = deportistaRepository.obtenerDeportistasConDetalles();
+
+        // Mapear los resultados al DTO
+        return resultados.stream().map(obj -> {
+            DeportistaVistaDTO dto = new DeportistaVistaDTO();
+            dto.setDeportistaId((Integer) obj[0]);
+            dto.setPersonaId((Integer) obj[1]);
+            dto.setNombre((String) obj[2]);
+            dto.setApellidos((String) obj[3]);
+            dto.setDireccion((String) obj[4]);
+            dto.setTelefono((String) obj[5]);
+
+            // Convertir java.sql.Date a java.time.LocalDate
+            dto.setFechaNacimiento(obj[6] != null ? ((java.sql.Date) obj[6]).toLocalDate() : null);
+            dto.setGeneroId((Integer) obj[7]);
+            dto.setGenero((String) obj[8]);
+            dto.setFechaInscripcion(obj[9] != null ? ((java.sql.Date) obj[9]).toLocalDate() : null);
+            dto.setContactoEmergencia((String) obj[10]);
+            dto.setEstadoId((Integer) obj[11]);
+            dto.setEstadoNombre((String) obj[12]);
+            dto.setNivelActualId((Integer) obj[13]);
+            dto.setNivelNombre((String) obj[14]);
+            dto.setConvenioId((Integer) obj[15]);
+            dto.setConvenioNombre((String) obj[16]);
+            return dto;
+        }).collect(Collectors.toList());
     }
 
     // Método para eliminar un deportista 

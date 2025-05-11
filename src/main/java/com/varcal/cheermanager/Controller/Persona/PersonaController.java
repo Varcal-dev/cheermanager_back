@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.varcal.cheermanager.DTO.Persona.DeportistaDTO;
+import com.varcal.cheermanager.DTO.Persona.DeportistaVistaDTO;
 import com.varcal.cheermanager.DTO.Persona.EntrenadorDTO;
 import com.varcal.cheermanager.DTO.Persona.PersonaDTO;
 import com.varcal.cheermanager.Models.Personas.Deportista;
@@ -89,10 +90,10 @@ public class PersonaController {
     }
 
     @GetMapping("/listar/deportistas")
-    public ResponseEntity<?> listarDeportistas() {
+    public ResponseEntity<?> listarDeportistasConDetalles() {
         try {
-            List<Deportista> deportistas = personaService.listarDeportistas();
-            return ResponseEntity.ok(deportistas); // Devolver la lista de deportistas
+            List<DeportistaVistaDTO> deportistas = personaService.listarDeportistasConDetalles();
+            return ResponseEntity.ok(deportistas); // Devolver la lista de deportistas con detalles
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error al listar los deportistas: " + e.getMessage());
         }

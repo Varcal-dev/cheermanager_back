@@ -10,7 +10,7 @@ import com.varcal.cheermanager.Models.Personas.Deportista;
 @Repository
 public interface DeportistaRepository extends JpaRepository<Deportista, Integer> {
 
-    @Query(value = "CALL obtener_deportistas_con_detalles()", nativeQuery = true)
+    @Query(value = "SELECT * FROM vista_info_deportistas", nativeQuery = true)
     List<Object[]> obtenerDeportistasConDetalles();
 
 }
