@@ -16,4 +16,7 @@ public interface UserRepository extends JpaRepository<Usuario, Long> {
     @Procedure(name = "actualizar_ultimo_acceso")
     void actualizar_ultimo_acceso(@Param("p_usuario_id") Integer usuarioId,
             @Param("p_fecha_acceso") LocalDateTime fechaAcceso);
+
+    boolean existsByUsername(String username);
+    boolean existsByEmail(String email);
 }

@@ -7,6 +7,7 @@ import lombok.Data;
 @Data
 public class DeportistaDTO {
     private String nombre;
+    private String apellidos;
     private String direccion;
     private String telefono;
     private LocalDate fechaNacimiento;

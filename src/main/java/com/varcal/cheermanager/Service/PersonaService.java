@@ -1,15 +1,20 @@
 package com.varcal.cheermanager.Service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
 import com.varcal.cheermanager.DTO.Persona.DeportistaDTO;
 import com.varcal.cheermanager.DTO.Persona.EntrenadorDTO;
 import com.varcal.cheermanager.DTO.Persona.PersonaDTO;
 import com.varcal.cheermanager.DTO.Persona.DeportistaVistaDTO;
+import com.varcal.cheermanager.Models.Auth.Rol;
+import com.varcal.cheermanager.Models.Auth.Usuario;
 import com.varcal.cheermanager.Models.Personas.Deportista;
 import com.varcal.cheermanager.Models.Personas.Persona;
 import com.varcal.cheermanager.Models.Personas.Entrenador;
+import com.varcal.cheermanager.repository.Auth.RolRepository;
+import com.varcal.cheermanager.repository.Auth.UserRepository;
 import com.varcal.cheermanager.repository.Personas.DeportistaRepository;
 import com.varcal.cheermanager.repository.Personas.PersonaRepository;
 import com.varcal.cheermanager.repository.Personas.EntrenadorRepository;
@@ -21,6 +26,12 @@ import java.time.LocalDate;
 public class PersonaService {
 
     @Autowired
+    private RolRepository rolRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private PersonaRepository personaRepository;
 
     @Autowired
@@ -29,7 +40,34 @@ public class PersonaService {
     @Autowired
     private EntrenadorRepository entrenadorRepository;
 
-    // Método para registrar una nueva persona ======================================
+    // Método para registrar un nuevo usuario ======================================
+    public Usuario registrarUsuario(Persona persona, String username, String email, String password, Integer rolId) {
+        // Verificar si el username o email ya existen
+        if (userRepository.existsByUsername(username)) {
+            throw new RuntimeException("El nombre de usuario ya está en uso");
+        }
+        if (userRepository.existsByEmail(email)) {
+            throw new RuntimeException("El correo electrónico ya está en uso");
+        }
+
+        // Obtener el rol correspondiente
+        Rol rol = rolRepository.findById(rolId)
+                .orElseThrow(() -> new RuntimeException("El rol con ID '" + rolId + "' no existe en la base de datos"));
+
+        // Crear el usuario
+        Usuario usuario = new Usuario();
+        usuario.setUsername(username);
+        usuario.setPasswordHash(BCrypt.hashpw(password, BCrypt.gensalt())); // Hashear la contraseña
+        usuario.setEmail(email);
+        usuario.setRol(rol);
+        usuario.setActivo(true);
+        usuario.setPersona(persona);
+        usuario.setUltimoAcceso(null); // Inicialmente no hay acceso
+        return userRepository.save(usuario);
+    }
+
+    // Método para registrar una nueva persona
+    // ======================================
     // Este método recibe un DTO de Persona y lo convierte a una entidad Persona
     public Persona registrarPersona(PersonaDTO personaDTO) {
         // Mapear el DTO a la entidad Persona
@@ -65,13 +103,16 @@ public class PersonaService {
         }
         personaRepository.deleteById(id);
     }
-    
-    // Método para registrar un deportista ==========================================
-    // Este método recibe un DTO de Deportista y lo convierte a una entidad Deportista
+
+    // Método para registrar un deportista
+    // ==========================================
+    // Este método recibe un DTO de Deportista y lo convierte a una entidad
+    // Deportista
     public Deportista registrarDeportista(DeportistaDTO deportistaDTO) {
         // Registrar la persona
         Persona persona = new Persona();
         persona.setNombre(deportistaDTO.getNombre());
+        persona.setApellidos(deportistaDTO.getApellidos());
         persona.setDireccion(deportistaDTO.getDireccion());
         persona.setTelefono(deportistaDTO.getTelefono());
         persona.setFechaNacimiento(deportistaDTO.getFechaNacimiento());
@@ -83,10 +124,19 @@ public class PersonaService {
         deportista.setPersona(personaGuardada);
         deportista.setEstadoId(deportistaDTO.getEstadoId());
         deportista.setNivelActualId(deportistaDTO.getNivelActualId());
-        deportista.setFechaInscripcion(java.time.LocalDate.now()); // Fecha de inscripción como la fecha actual
+        deportista.setFechaInscripcion(LocalDate.now());
         deportista.setContactoEmergencia(deportistaDTO.getContactoEmergencia());
         deportista.setConvenioId(deportistaDTO.getConvenioId());
-        return deportistaRepository.save(deportista);
+        Deportista deportistaGuardado = deportistaRepository.save(deportista);
+
+        // Registrar al deportista como usuario
+        String username = deportistaDTO.getNombre().toLowerCase() + "." + deportistaDTO.getApellidos().toLowerCase();
+        String email = username + "@cheermanager.com"; // Generar un email ficticio o usar uno proporcionado
+        String password = "0000"; // Generar una contraseña por defecto o usar una proporcionada
+        Integer rolId = 2; // ID del rol para deportista
+        registrarUsuario(personaGuardada, username, email, password, rolId);
+
+        return deportistaGuardado;
     }
 
     // Método para modificar un deportista
@@ -109,7 +159,7 @@ public class PersonaService {
         }).orElseThrow(() -> new RuntimeException("Deportista no encontrado con el ID: " + id));
     }
 
-    // Método para listar todos los deportistas 
+    // Método para listar todos los deportistas
     public List<Deportista> listarDeportistas() {
         return deportistaRepository.findAll();
     }
@@ -149,7 +199,7 @@ public class PersonaService {
         }).collect(Collectors.toList());
     }
 
-    // Método para eliminar un deportista 
+    // Método para eliminar un deportista
     public void eliminarDeportista(Integer id) {
         if (!deportistaRepository.existsById(id)) {
             throw new RuntimeException("Deportista no encontrado con el ID: " + id);
@@ -158,11 +208,13 @@ public class PersonaService {
     }
 
     // Método para registrar un entrenador ==========================================
-    // Este método recibe un DTO de Entrenador y lo convierte a una entidad Entrenador
+    // Este método recibe un DTO de Entrenador y lo convierte a una entidad
+    // Entrenador
     public Entrenador registrarEntrenador(EntrenadorDTO entrenadorDTO) {
         // Registrar la persona
         Persona persona = new Persona();
         persona.setNombre(entrenadorDTO.getNombre());
+        persona.setApellidos(entrenadorDTO.getApellidos());
         persona.setDireccion(entrenadorDTO.getDireccion());
         persona.setTelefono(entrenadorDTO.getTelefono());
         persona.setFechaNacimiento(entrenadorDTO.getFechaNacimiento());
@@ -174,13 +226,23 @@ public class PersonaService {
         entrenador.setPersona(personaGuardada);
         entrenador.setFechaContratacion(entrenadorDTO.getFechaContratacion());
         entrenador.setEstadoId(entrenadorDTO.getEstadoId());
-        return entrenadorRepository.save(entrenador);
+        Entrenador entrenadorGuardado = entrenadorRepository.save(entrenador);
+
+        // Registrar al entrenador como usuario
+        String username = entrenadorDTO.getNombre().toLowerCase() + "." + entrenadorDTO.getApellidos().toLowerCase();
+        String email = username + "@chermanger.com"; // Generar un email ficticio o usar uno proporcionado
+        String password = "0000"; // Generar una contraseña por defecto o usar una proporcionada
+        Integer rolId = 3; // ID del rol para entrenador
+        registrarUsuario(personaGuardada, username, email, password, rolId);
+
+        return entrenadorGuardado;
     }
 
-    // Método para modificar un entrenador 
+    // Método para modificar un entrenador
     public Entrenador modificarEntrenador(Integer id, EntrenadorDTO entrenadorDTO) {
         return entrenadorRepository.findById(id).map(entrenador -> {
             Persona persona = entrenador.getPersona();
+            persona.setApellidos(entrenadorDTO.getApellidos());
             persona.setNombre(entrenadorDTO.getNombre());
             persona.setDireccion(entrenadorDTO.getDireccion());
             persona.setTelefono(entrenadorDTO.getTelefono());
@@ -194,16 +256,17 @@ public class PersonaService {
         }).orElseThrow(() -> new RuntimeException("Entrenador no encontrado con el ID: " + id));
     }
 
-    // Método para listar todos los entrenadores 
+    // Método para listar todos los entrenadores
     public List<Entrenador> listarEntrenadores() {
         return entrenadorRepository.findAll();
     }
 
-    // Método para eliminar un entrenador 
+    // Método para eliminar un entrenador
     public void eliminarEntrenador(Integer id) {
         if (!entrenadorRepository.existsById(id)) {
             throw new RuntimeException("Entrenador no encontrado con el ID: " + id);
         }
         entrenadorRepository.deleteById(id);
     }
+
 }
