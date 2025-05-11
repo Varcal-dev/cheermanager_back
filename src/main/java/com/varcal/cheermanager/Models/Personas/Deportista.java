@@ -22,6 +22,12 @@ public class Deportista {
     @Column(name = "estado_id")
     private Integer estadoId;
 
+    @Column(name = "altura")
+    private Float altura;
+
+    @Column(name = "peso")
+    private Float peso;
+
     @Column(name = "nivel_actual_id")
     private Integer nivelActualId;
 
