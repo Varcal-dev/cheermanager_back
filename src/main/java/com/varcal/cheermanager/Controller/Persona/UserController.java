@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.varcal.cheermanager.Service.AuthService;
 import com.varcal.cheermanager.repository.Auth.UserRepository;
 import com.varcal.cheermanager.DTO.UsuarioDTO;
+import com.varcal.cheermanager.Service.Auth.AuthService;
 
 @RestController
 @RequestMapping("/api/user")
