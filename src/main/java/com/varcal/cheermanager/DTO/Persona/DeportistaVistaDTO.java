@@ -4,7 +4,6 @@ import java.time.LocalDate;
 
 import lombok.Data;
 
-
 @Data
 public class DeportistaVistaDTO {
     private Integer deportistaId;
@@ -16,6 +15,8 @@ public class DeportistaVistaDTO {
     private LocalDate fechaNacimiento;
     private Integer generoId;
     private String genero;
+    private Float altura; // Nuevo campo
+    private Float peso;   // Nuevo campo
     private LocalDate fechaInscripcion;
     private String contactoEmergencia;
     private Integer estadoId;

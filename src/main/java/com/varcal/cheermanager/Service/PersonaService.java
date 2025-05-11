@@ -132,14 +132,19 @@ public class PersonaService {
             dto.setFechaNacimiento(obj[6] != null ? ((java.sql.Date) obj[6]).toLocalDate() : null);
             dto.setGeneroId((Integer) obj[7]);
             dto.setGenero((String) obj[8]);
-            dto.setFechaInscripcion(obj[9] != null ? ((java.sql.Date) obj[9]).toLocalDate() : null);
-            dto.setContactoEmergencia((String) obj[10]);
-            dto.setEstadoId((Integer) obj[11]);
-            dto.setEstadoNombre((String) obj[12]);
-            dto.setNivelActualId((Integer) obj[13]);
-            dto.setNivelNombre((String) obj[14]);
-            dto.setConvenioId((Integer) obj[15]);
-            dto.setConvenioNombre((String) obj[16]);
+
+            // Nuevos campos: altura y peso
+            dto.setAltura(obj[9] != null ? ((Number) obj[9]).floatValue() : null);
+            dto.setPeso(obj[10] != null ? ((Number) obj[10]).floatValue() : null);
+
+            dto.setFechaInscripcion(obj[11] != null ? ((java.sql.Date) obj[11]).toLocalDate() : null);
+            dto.setContactoEmergencia((String) obj[12]);
+            dto.setEstadoId((Integer) obj[13]);
+            dto.setEstadoNombre((String) obj[14]);
+            dto.setNivelActualId((Integer) obj[15]);
+            dto.setNivelNombre((String) obj[16]);
+            dto.setConvenioId((Integer) obj[17]);
+            dto.setConvenioNombre((String) obj[18]);
             return dto;
         }).collect(Collectors.toList());
     }
