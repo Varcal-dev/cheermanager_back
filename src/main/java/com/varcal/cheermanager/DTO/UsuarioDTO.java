@@ -1,6 +1,7 @@
 package com.varcal.cheermanager.DTO;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import com.varcal.cheermanager.Models.Auth.Usuario;
 import com.varcal.cheermanager.Models.Personas.Persona;
@@ -19,6 +20,8 @@ public class UsuarioDTO {
     private String password;
     private Integer rolId;
     private String rolNombre;
+    private LocalDateTime ultimoAcceso;
+    private Boolean activo;
     private Integer personaId;
 
     // Datos de la persona
@@ -36,7 +39,8 @@ public class UsuarioDTO {
         this.email = usuario.getEmail();
         this.rolId = usuario.getRol() != null ? usuario.getRol().getId() : null;
         this.rolNombre = usuario.getRol() != null ? usuario.getRol().getNombre() : null; // Asignar el nombre del rol
-
+        this.ultimoAcceso = usuario.getUltimoAcceso();
+        this.activo = usuario.getActivo();
         // Mapear los datos de la persona asociada
         Persona persona = usuario.getPersona();
         if (persona != null) {

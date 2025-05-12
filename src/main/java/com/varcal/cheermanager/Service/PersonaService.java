@@ -97,6 +97,10 @@ public class PersonaService {
         return personaRepository.findAll();
     }
 
+     public List<Persona> buscarPersonasByNombre(String nombre) {
+        return personaRepository.findByNombre(nombre); // Assuming you have this method in your repository
+    }
+
     public void eliminarPersona(Integer id) {
         if (!personaRepository.existsById(id)) {
             throw new RuntimeException("Persona no encontrada con el ID: " + id);

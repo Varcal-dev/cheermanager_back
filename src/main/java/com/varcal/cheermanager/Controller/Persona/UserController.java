@@ -23,9 +23,12 @@ import com.varcal.cheermanager.repository.Personas.PersonaRepository;
 import com.varcal.cheermanager.DTO.UsuarioDTO;
 import com.varcal.cheermanager.Models.Auth.Rol;
 import com.varcal.cheermanager.Models.Auth.Usuario;
+import com.varcal.cheermanager.Models.Personas.Genero;
 import com.varcal.cheermanager.Models.Personas.Persona;
 import com.varcal.cheermanager.Service.PersonaService;
 import com.varcal.cheermanager.Service.Auth.AuthService;
+import com.varcal.cheermanager.Service.Auth.RolService;
+import com.varcal.cheermanager.Service.Persona.GeneroService;
 import com.varcal.cheermanager.Utils.RequiresPermission;
 import com.varcal.cheermanager.repository.Auth.RolRepository;
 
@@ -46,6 +49,13 @@ public class UserController {
 
     @Autowired
     private PersonaRepository personaRepository;
+
+    @Autowired
+    private GeneroService generoService;
+
+    @Autowired
+    private RolService rolService;
+    
 
     @PostMapping("/registrar")
     @RequiresPermission("crear_usuario")
@@ -180,6 +190,16 @@ public class UserController {
         return userRepository.findById((long) userId)
                 .map(user -> ResponseEntity.ok(new UsuarioDTO(user))) // Usar el DTO
                 .orElseGet(() -> ResponseEntity.status(404).body(null));
+    }
+
+    @GetMapping("/genero/listar")
+    public ResponseEntity<List<Genero>> listarGeneros() {
+        return ResponseEntity.ok(generoService.listar());
+    }
+
+    @GetMapping("/rol/listar")
+    public ResponseEntity<List<Rol>> listarRoles() {
+        return ResponseEntity.ok(rolService.listar());
     }
 
 }

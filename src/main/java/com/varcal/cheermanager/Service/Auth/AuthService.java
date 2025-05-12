@@ -5,8 +5,11 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
+
+import com.varcal.cheermanager.Models.Auth.Rol;
 import com.varcal.cheermanager.repository.Auth.UserRepository;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -54,20 +57,6 @@ public class AuthService {
         }).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
     }
 
-    /*
-     * @RestController
-     * 
-     * @RequestMapping("/api/some-feature")
-     * public class SomeController {
-     * 
-     * @GetMapping("/restricted")
-     * 
-     * @RequiresPermission("some_permission") // Restringir acceso a usuarios con
-     * este permiso
-     * public String restrictedFunctionality() {
-     * return "Acceso permitido a la funcionalidad restringida";
-     * }
-     * }
-     */
+   
 
 }

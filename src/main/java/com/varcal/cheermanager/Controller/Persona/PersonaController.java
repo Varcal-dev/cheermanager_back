@@ -53,6 +53,12 @@ public class PersonaController {
         }
     }
 
+    @GetMapping("/buscar")
+    public ResponseEntity<List<Persona>> buscarPersonasByNombre(@RequestParam String nombre) {
+        List<Persona> personas = personaService.buscarPersonasByNombre(nombre);
+        return ResponseEntity.ok(personas);
+    }
+
     @DeleteMapping("/eliminar/{id}")
     public ResponseEntity<?> eliminarPersona(@PathVariable Integer id) {
         try {
