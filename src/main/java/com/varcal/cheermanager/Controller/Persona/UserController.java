@@ -55,22 +55,22 @@ public class UserController {
 
     @Autowired
     private RolService rolService;
-    
 
     @PostMapping("/registrar")
     @RequiresPermission("crear_usuario")
     public ResponseEntity<?> registrarUsuario(@RequestBody UsuarioDTO usuarioDTO) {
         try {
-            Persona persona;
+            Persona persona = null;
 
-            // Verificar si se proporciona un personaId
+            // Caso: persona existente
             if (usuarioDTO.getPersonaId() != null) {
-                // Buscar la persona existente
                 persona = personaRepository.findById(usuarioDTO.getPersonaId())
                         .orElseThrow(() -> new RuntimeException(
                                 "Persona no encontrada con el ID: " + usuarioDTO.getPersonaId()));
-            } else {
-                // Crear una nueva persona si no se proporciona personaId
+            }
+
+            // Caso: datos de persona nueva explícitamente enviados
+            else if (usuarioDTO.getNombre() != null && usuarioDTO.getApellidos() != null) {
                 persona = new Persona();
                 persona.setNombre(usuarioDTO.getNombre());
                 persona.setApellidos(usuarioDTO.getApellidos());
@@ -81,6 +81,7 @@ public class UserController {
                 persona = personaRepository.save(persona);
             }
 
+            // Si no hay persona, el valor queda en null — se permite
             // Registrar el usuario
             Usuario usuario = personaService.registrarUsuario(
                     persona,
