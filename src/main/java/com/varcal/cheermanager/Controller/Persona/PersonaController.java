@@ -12,6 +12,8 @@ import com.varcal.cheermanager.Models.Personas.Deportista;
 import com.varcal.cheermanager.Models.Personas.Entrenador;
 import com.varcal.cheermanager.Models.Personas.Persona;
 import com.varcal.cheermanager.Service.PersonaService;
+import com.varcal.cheermanager.Utils.RequiresPermission;
+
 import java.util.List;
 
 @RestController
@@ -22,6 +24,7 @@ public class PersonaController {
     private PersonaService personaService;
 
     @PostMapping("/registrar")
+    @RequiresPermission("crear_persona")
     public ResponseEntity<?> registrarPersona(@RequestBody PersonaDTO personaDTO) {
         try {
             Persona persona = personaService.registrarPersona(personaDTO);
@@ -32,6 +35,7 @@ public class PersonaController {
     }
 
     @PutMapping("/modificar/{id}")
+    @RequiresPermission("modificar_persona")
     public ResponseEntity<?> modificarPersona(@PathVariable Integer id, @RequestBody PersonaDTO personaDTO) {
         try {
             Persona persona = personaService.modificarPersona(id, personaDTO);
@@ -44,6 +48,7 @@ public class PersonaController {
     }
 
     @GetMapping("/listar")
+    @RequiresPermission("ver_persona")
     public ResponseEntity<?> listarPersonas() {
         try {
             List<Persona> personas = personaService.listarPersonas();
@@ -60,6 +65,7 @@ public class PersonaController {
     }
 
     @DeleteMapping("/eliminar/{id}")
+    @RequiresPermission("eliminar_persona")
     public ResponseEntity<?> eliminarPersona(@PathVariable Integer id) {
         try {
             personaService.eliminarPersona(id);
@@ -73,6 +79,7 @@ public class PersonaController {
 
     // Método para registrar un deportista
     @PostMapping("/registrar/deportista")
+    @RequiresPermission("crear_deportista")
     public ResponseEntity<?> registrarDeportista(@RequestBody DeportistaDTO deportistaDTO) {
         try {
             Deportista deportista = personaService.registrarDeportista(deportistaDTO);
@@ -83,6 +90,7 @@ public class PersonaController {
     }
 
     @PutMapping("/modificar/deportista/{id}")
+    @RequiresPermission("modificar_deportista")
     public ResponseEntity<?> modificarDeportista(@PathVariable Integer id, @RequestBody DeportistaDTO deportistaDTO) {
         try {
             Deportista deportista = personaService.modificarDeportista(id, deportistaDTO);
@@ -95,6 +103,7 @@ public class PersonaController {
     }
 
     @GetMapping("/listar/deportistas")
+    @RequiresPermission("ver_deportista")
     public ResponseEntity<?> listarDeportistasConDetalles() {
         try {
             List<DeportistaVistaDTO> deportistas = personaService.listarDeportistasConDetalles();
@@ -105,6 +114,7 @@ public class PersonaController {
     }
 
     @DeleteMapping("/eliminar/deportista/{id}")
+    @RequiresPermission("eliminar_deportista")
     public ResponseEntity<?> eliminarDeportista(@PathVariable Integer id) {
         try {
             personaService.eliminarDeportista(id);
@@ -118,6 +128,7 @@ public class PersonaController {
 
     // Método para registrar un entrenador
     @PostMapping("/registrar/entrenador")
+    @RequiresPermission("crear_entrenador")
     public ResponseEntity<?> registrarEntrenador(@RequestBody EntrenadorDTO entrenadorDTO) {
         try {
             Entrenador entrenador = personaService.registrarEntrenador(entrenadorDTO);
@@ -128,6 +139,7 @@ public class PersonaController {
     }
 
     @PutMapping("/modificar/entrenador/{id}")
+    @RequiresPermission("modificar_entrenador")
     public ResponseEntity<?> modificarEntrenador(@PathVariable Integer id, @RequestBody EntrenadorDTO entrenadorDTO) {
         try {
             Entrenador entrenador = personaService.modificarEntrenador(id, entrenadorDTO);
@@ -140,6 +152,7 @@ public class PersonaController {
     }
 
     @GetMapping("/listar/entrenadores")
+    @RequiresPermission("ver_entrenador")
     public ResponseEntity<?> listarEntrenadores() {
         try {
             List<Entrenador> entrenadores = personaService.listarEntrenadores();
@@ -150,6 +163,7 @@ public class PersonaController {
     }
 
     @DeleteMapping("/eliminar/entrenador/{id}")
+    @RequiresPermission("eliminar_entrenador")
     public ResponseEntity<?> eliminarEntrenador(@PathVariable Integer id) {
         try {
             personaService.eliminarEntrenador(id);

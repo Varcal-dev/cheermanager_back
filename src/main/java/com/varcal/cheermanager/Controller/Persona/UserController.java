@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.varcal.cheermanager.repository.Auth.UserRepository;
 import com.varcal.cheermanager.repository.Personas.PersonaRepository;
+import com.varcal.cheermanager.DTO.RolConConteoDTO;
 import com.varcal.cheermanager.DTO.UsuarioDTO;
 import com.varcal.cheermanager.Models.Auth.Rol;
 import com.varcal.cheermanager.Models.Auth.Usuario;
@@ -97,6 +98,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
+    @RequiresPermission("ver_usuario")
     public ResponseEntity<?> obtenerUsuarioPorId(@PathVariable Integer id) {
         try {
             Usuario usuario = userRepository.findById(id.longValue())
@@ -165,6 +167,7 @@ public class UserController {
     // metodos para permisos ==========================
 
     @GetMapping("/permisos")
+    //@RequiresPermission("ver_permisos")
     public ResponseEntity<?> getPermisos(HttpSession session) {
         Integer userId = (Integer) session.getAttribute("userId");
         if (userId == null) {
@@ -199,8 +202,14 @@ public class UserController {
     }
 
     @GetMapping("/rol/listar")
+    //@RequiresPermission("ver_roles")
     public ResponseEntity<List<Rol>> listarRoles() {
         return ResponseEntity.ok(rolService.listar());
+    }
+
+    @GetMapping("/rol/listar-con-usuarios")
+    public ResponseEntity<List<RolConConteoDTO>> listarConUsuarios() {
+        return ResponseEntity.ok(rolService.listarRolesConConteo());
     }
 
 }

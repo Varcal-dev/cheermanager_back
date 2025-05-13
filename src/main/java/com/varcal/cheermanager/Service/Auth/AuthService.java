@@ -6,10 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
-import com.varcal.cheermanager.Models.Auth.Rol;
 import com.varcal.cheermanager.repository.Auth.UserRepository;
 
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
