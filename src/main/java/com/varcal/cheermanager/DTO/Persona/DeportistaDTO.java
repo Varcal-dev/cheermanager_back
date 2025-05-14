@@ -14,10 +14,10 @@ public class DeportistaDTO {
     private LocalDate fechaNacimiento;
     private Integer generoId;
     private Integer estadoId;
+    private Integer altura;
+    private Integer peso;
     private Integer nivelActualId;
     private LocalDate fechaInscripcion;
     private String contactoEmergencia;
-    private Integer convenioId;
-
-    
+    private Integer convenioId;    
 }

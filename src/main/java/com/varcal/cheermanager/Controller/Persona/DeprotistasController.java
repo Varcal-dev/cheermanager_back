@@ -20,7 +20,7 @@ import com.varcal.cheermanager.Service.PersonaService;
 import com.varcal.cheermanager.Utils.RequiresPermission;
 
 @RestController
-@RequestMapping("/api/entrenadores")
+@RequestMapping("/api/deportistas")
 public class DeprotistasController {
     @Autowired
     private PersonaService personaService;

@@ -127,6 +127,8 @@ public class PersonaService {
         Deportista deportista = new Deportista();
         deportista.setPersona(personaGuardada);
         deportista.setEstadoId(deportistaDTO.getEstadoId());
+        deportista.setAltura(deportistaDTO.getAltura());
+        deportista.setPeso(deportistaDTO.getPeso());
         deportista.setNivelActualId(deportistaDTO.getNivelActualId());
         deportista.setFechaInscripcion(LocalDate.now());
         deportista.setContactoEmergencia(deportistaDTO.getContactoEmergencia());
