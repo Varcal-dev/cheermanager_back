@@ -77,54 +77,7 @@ public class PersonaController {
         }
     }
 
-    // Método para registrar un deportista
-    @PostMapping("/registrar/deportista")
-    @RequiresPermission("crear_deportista")
-    public ResponseEntity<?> registrarDeportista(@RequestBody DeportistaDTO deportistaDTO) {
-        try {
-            Deportista deportista = personaService.registrarDeportista(deportistaDTO);
-            return ResponseEntity.ok(deportista);
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al registrar el deportista: " + e.getMessage());
-        }
-    }
-
-    @PutMapping("/modificar/deportista/{id}")
-    @RequiresPermission("modificar_deportista")
-    public ResponseEntity<?> modificarDeportista(@PathVariable Integer id, @RequestBody DeportistaDTO deportistaDTO) {
-        try {
-            Deportista deportista = personaService.modificarDeportista(id, deportistaDTO);
-            return ResponseEntity.ok(deportista); // Devolver el deportista actualizado
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al modificar el deportista: " + e.getMessage());
-        }
-    }
-
-    @GetMapping("/listar/deportistas")
-    @RequiresPermission("ver_deportista")
-    public ResponseEntity<?> listarDeportistasConDetalles() {
-        try {
-            List<DeportistaVistaDTO> deportistas = personaService.listarDeportistasConDetalles();
-            return ResponseEntity.ok(deportistas); // Devolver la lista de deportistas con detalles
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al listar los deportistas: " + e.getMessage());
-        }
-    }
-
-    @DeleteMapping("/eliminar/deportista/{id}")
-    @RequiresPermission("eliminar_deportista")
-    public ResponseEntity<?> eliminarDeportista(@PathVariable Integer id) {
-        try {
-            personaService.eliminarDeportista(id);
-            return ResponseEntity.ok("Deportista eliminado exitosamente");
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al eliminar el deportista: " + e.getMessage());
-        }
-    }
+   
 
     // Método para registrar un entrenador
     @PostMapping("/registrar/entrenador")
