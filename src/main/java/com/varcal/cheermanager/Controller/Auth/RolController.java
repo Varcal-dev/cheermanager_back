@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,8 +15,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.varcal.cheermanager.DTO.CrearRolConPermisosDTO;
 import com.varcal.cheermanager.Models.Auth.Rol;
 import com.varcal.cheermanager.Service.Auth.RolService;
+
 @RestController
 @RequestMapping("/api/roles")
 public class RolController {
@@ -57,10 +60,18 @@ public class RolController {
         return ResponseEntity.ok().build();
     }
 
-    /* 
-    @GetMapping("/user-counts")
-    public ResponseEntity<List<Map<String, Object>>> getRolesWithUserCount() {
-        List<Map<String, Object>> rolesWithUserCount = rolService.getRolesWithUserCount();
-        return ResponseEntity.ok(rolesWithUserCount);
-    }*/
+    /*
+     * @GetMapping("/user-counts")
+     * public ResponseEntity<List<Map<String, Object>>> getRolesWithUserCount() {
+     * List<Map<String, Object>> rolesWithUserCount =
+     * rolService.getRolesWithUserCount();
+     * return ResponseEntity.ok(rolesWithUserCount);
+     * }
+     */
+
+    @PostMapping("/asignar-permisos")
+    public ResponseEntity<Rol> asignarPermisosARol(@RequestBody CrearRolConPermisosDTO request) {
+        Rol rolActualizado = rolService.assignPermissionsToRol(request.getRolId(), request.getPermisoIds());
+        return ResponseEntity.ok(rolActualizado);
+    }
 }

@@ -12,11 +12,15 @@ public class GrupoEntrenamiento {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
     @Column(name = "nombre", nullable = false)
     private String nombre;
-    @Column(name = "tipo_grupo_id")
-    private Integer tipoGrupoId;
+
     @ManyToOne
-    @JoinColumn(name = "categorias_nivel_id", nullable = false)
+    @JoinColumn(name = "tipo_grupo_id")
+    private TipoGrupo tipoGrupo;
+
+    @ManyToOne
+    @JoinColumn(name = "categorias_nivel_id")
     private CategoriaNivel categoriaNivel;
 }
