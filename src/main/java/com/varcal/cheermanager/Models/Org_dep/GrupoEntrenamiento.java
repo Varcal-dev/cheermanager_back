@@ -1,5 +1,7 @@
 package com.varcal.cheermanager.Models.Org_dep;
 
+import java.util.List;
+
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,4 +25,7 @@ public class GrupoEntrenamiento {
     @ManyToOne
     @JoinColumn(name = "categorias_nivel_id")
     private CategoriaNivel categoriaNivel;
+
+    @OneToMany(mappedBy = "grupo")
+    private List<DeportistaPerteneceGrupo> deportistas;
 }

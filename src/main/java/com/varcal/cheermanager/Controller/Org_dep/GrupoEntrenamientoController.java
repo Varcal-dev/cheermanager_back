@@ -26,6 +26,7 @@ import com.varcal.cheermanager.repository.Org_dep.TipoGrupoRepository;
 @RestController
 @RequestMapping("/api/grupos")
 public class GrupoEntrenamientoController {
+
     @Autowired
     private GrupoEntrenamientoRepository grupoRepo;
     @Autowired
@@ -44,6 +45,7 @@ public class GrupoEntrenamientoController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+    
 
     @PostMapping
     public ResponseEntity<?> crear(@RequestBody GrupoEntrenamientoDTO dto) {

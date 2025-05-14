@@ -24,6 +24,8 @@ public class CategoriaNivel {
     @JoinColumn(name = "division_id", nullable = false)
     private Division division;
 
-    @Column(name = "estado_categorias_nivel_id", nullable = false)
-    private Integer estadoCategoriasNivelId;
+    @ManyToOne
+    @JoinColumn(name = "estado_categorias_nivel_id", nullable = false)
+    private EstadoCategoriaNivel estadoCategoriaNivel; // Nombre de campo más descriptivo
+
 }
