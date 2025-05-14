@@ -1,4 +1,4 @@
-package com.varcal.cheermanager.DTO;
+package com.varcal.cheermanager.DTO.Ath;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,4 +1,4 @@
-package com.varcal.cheermanager.DTO;
+package com.varcal.cheermanager.DTO.Ath;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

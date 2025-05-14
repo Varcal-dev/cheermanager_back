@@ -12,7 +12,6 @@ import com.varcal.cheermanager.repository.Org_dep.CategoriaNivelRepository;
 
 @RestController
 @RequestMapping("/api/categorias-nivel")
-@CrossOrigin(origins = "*")
 public class CategoriaNivelController {
 
     private final CategoriaNivelRepository categoriaNivelRepo;

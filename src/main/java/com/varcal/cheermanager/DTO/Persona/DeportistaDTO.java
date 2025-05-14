@@ -6,6 +6,7 @@ import lombok.Data;
 
 @Data
 public class DeportistaDTO {
+    private Integer id;
     private String nombre;
     private String apellidos;
     private String direccion;

@@ -12,7 +12,6 @@ import com.varcal.cheermanager.repository.Org_dep.TipoGrupoRepository;
 
 @RestController
 @RequestMapping("/api/tipo-grupos")
-@CrossOrigin(origins = "*")
 public class TipoGrupoController {
 
     private final TipoGrupoRepository tipoGrupoRepo;

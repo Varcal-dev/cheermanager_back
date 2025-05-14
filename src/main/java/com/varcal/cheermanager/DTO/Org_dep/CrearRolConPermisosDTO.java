@@ -1,4 +1,4 @@
-package com.varcal.cheermanager.DTO;
+package com.varcal.cheermanager.DTO.Org_dep;
 
 import java.util.List;
 

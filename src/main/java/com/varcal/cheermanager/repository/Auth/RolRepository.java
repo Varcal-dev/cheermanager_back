@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import com.varcal.cheermanager.DTO.RolConConteoDTO;
+import com.varcal.cheermanager.DTO.Ath.RolConConteoDTO;
 import com.varcal.cheermanager.Models.Auth.Rol;
 
 @Repository

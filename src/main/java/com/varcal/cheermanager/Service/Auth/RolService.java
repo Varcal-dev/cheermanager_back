@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-import com.varcal.cheermanager.DTO.RolConConteoDTO;
+import com.varcal.cheermanager.DTO.Ath.RolConConteoDTO;
 import com.varcal.cheermanager.Models.Auth.Permiso;
 import com.varcal.cheermanager.Models.Auth.Rol;
 import com.varcal.cheermanager.repository.Auth.PermisoRepository;
@@ -65,7 +65,7 @@ public class RolService {
 
     List<Permiso> permisos = permisoRepository.findAllById(permisoIds);
 
-    rol.setPermisos(new HashSet<>(permisos)); // ❗ Importante: evitar el cast inseguro
+    rol.setPermisos(new HashSet<>(permisos)); 
 
     return rolRepository.save(rol);
 }

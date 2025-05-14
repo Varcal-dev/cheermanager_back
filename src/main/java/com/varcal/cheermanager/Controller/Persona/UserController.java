@@ -20,8 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.varcal.cheermanager.repository.Auth.UserRepository;
 import com.varcal.cheermanager.repository.Personas.PersonaRepository;
-import com.varcal.cheermanager.DTO.RolConConteoDTO;
-import com.varcal.cheermanager.DTO.UsuarioDTO;
+import com.varcal.cheermanager.DTO.Ath.RolConConteoDTO;
+import com.varcal.cheermanager.DTO.Ath.UsuarioDTO;
 import com.varcal.cheermanager.Models.Auth.Rol;
 import com.varcal.cheermanager.Models.Auth.Usuario;
 import com.varcal.cheermanager.Models.Personas.Genero;
