@@ -4,12 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.varcal.cheermanager.DTO.Persona.DeportistaDTO;
-import com.varcal.cheermanager.DTO.Persona.DeportistaVistaDTO;
-import com.varcal.cheermanager.DTO.Persona.EntrenadorDTO;
 import com.varcal.cheermanager.DTO.Persona.PersonaDTO;
-import com.varcal.cheermanager.Models.Personas.Deportista;
-import com.varcal.cheermanager.Models.Personas.Entrenador;
 import com.varcal.cheermanager.Models.Personas.Persona;
 import com.varcal.cheermanager.Service.PersonaService;
 import com.varcal.cheermanager.Utils.RequiresPermission;
@@ -23,7 +18,7 @@ public class PersonaController {
     @Autowired
     private PersonaService personaService;
 
-    @PostMapping("/registrar")
+    @PostMapping()
     @RequiresPermission("crear_persona")
     public ResponseEntity<?> registrarPersona(@RequestBody PersonaDTO personaDTO) {
         try {
@@ -34,7 +29,7 @@ public class PersonaController {
         }
     }
 
-    @PutMapping("/modificar/{id}")
+    @PutMapping("/{id}")
     @RequiresPermission("modificar_persona")
     public ResponseEntity<?> modificarPersona(@PathVariable Integer id, @RequestBody PersonaDTO personaDTO) {
         try {
@@ -47,7 +42,7 @@ public class PersonaController {
         }
     }
 
-    @GetMapping("/listar")
+    @GetMapping()
     @RequiresPermission("ver_persona")
     public ResponseEntity<?> listarPersonas() {
         try {
@@ -64,7 +59,7 @@ public class PersonaController {
         return ResponseEntity.ok(personas);
     }
 
-    @DeleteMapping("/eliminar/{id}")
+    @DeleteMapping("/{id}")
     @RequiresPermission("eliminar_persona")
     public ResponseEntity<?> eliminarPersona(@PathVariable Integer id) {
         try {
@@ -74,57 +69,6 @@ public class PersonaController {
             return ResponseEntity.status(404).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error al eliminar la persona: " + e.getMessage());
-        }
-    }
-
-   
-
-    // Método para registrar un entrenador
-    @PostMapping("/registrar/entrenador")
-    @RequiresPermission("crear_entrenador")
-    public ResponseEntity<?> registrarEntrenador(@RequestBody EntrenadorDTO entrenadorDTO) {
-        try {
-            Entrenador entrenador = personaService.registrarEntrenador(entrenadorDTO);
-            return ResponseEntity.ok(entrenador);
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al registrar el entrenador: " + e.getMessage());
-        }
-    }
-
-    @PutMapping("/modificar/entrenador/{id}")
-    @RequiresPermission("modificar_entrenador")
-    public ResponseEntity<?> modificarEntrenador(@PathVariable Integer id, @RequestBody EntrenadorDTO entrenadorDTO) {
-        try {
-            Entrenador entrenador = personaService.modificarEntrenador(id, entrenadorDTO);
-            return ResponseEntity.ok(entrenador); // Devolver el entrenador actualizado
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al modificar el entrenador: " + e.getMessage());
-        }
-    }
-
-    @GetMapping("/listar/entrenadores")
-    @RequiresPermission("ver_entrenador")
-    public ResponseEntity<?> listarEntrenadores() {
-        try {
-            List<Entrenador> entrenadores = personaService.listarEntrenadores();
-            return ResponseEntity.ok(entrenadores); // Devolver la lista de entrenadores
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al listar los entrenadores: " + e.getMessage());
-        }
-    }
-
-    @DeleteMapping("/eliminar/entrenador/{id}")
-    @RequiresPermission("eliminar_entrenador")
-    public ResponseEntity<?> eliminarEntrenador(@PathVariable Integer id) {
-        try {
-            personaService.eliminarEntrenador(id);
-            return ResponseEntity.ok("Entrenador eliminado exitosamente");
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al eliminar el entrenador: " + e.getMessage());
         }
     }
 
