@@ -13,11 +13,14 @@ import com.varcal.cheermanager.Models.Auth.Usuario;
 import com.varcal.cheermanager.Models.Personas.Deportista;
 import com.varcal.cheermanager.Models.Personas.Persona;
 import com.varcal.cheermanager.Models.Personas.Entrenador;
+import com.varcal.cheermanager.Models.Personas.EstadoPersona;
 import com.varcal.cheermanager.repository.Auth.RolRepository;
 import com.varcal.cheermanager.repository.Auth.UserRepository;
 import com.varcal.cheermanager.repository.Personas.DeportistaRepository;
 import com.varcal.cheermanager.repository.Personas.PersonaRepository;
 import com.varcal.cheermanager.repository.Personas.EntrenadorRepository;
+import com.varcal.cheermanager.repository.Personas.EstadoPersonaRepository;
+
 import java.util.List;
 import java.util.stream.Collectors;
 import java.time.LocalDate;
@@ -39,6 +42,9 @@ public class PersonaService {
 
     @Autowired
     private EntrenadorRepository entrenadorRepository;
+
+    @Autowired
+    private EstadoPersonaRepository estadoPersonaRepository;
 
     // Método para registrar un nuevo usuario ======================================
     public Usuario registrarUsuario(Persona persona, String username, String email, String password, Integer rolId) {
@@ -97,7 +103,7 @@ public class PersonaService {
         return personaRepository.findAll();
     }
 
-     public List<Persona> buscarPersonasByNombre(String nombre) {
+    public List<Persona> buscarPersonasByNombre(String nombre) {
         return personaRepository.findByNombre(nombre); // Assuming you have this method in your repository
     }
 
@@ -213,7 +219,8 @@ public class PersonaService {
         deportistaRepository.deleteById(id);
     }
 
-    // Método para registrar un entrenador ==========================================
+    // Método para registrar un entrenador
+    // ==========================================
     // Este método recibe un DTO de Entrenador y lo convierte a una entidad
     // Entrenador
     public Entrenador registrarEntrenador(EntrenadorDTO entrenadorDTO) {
@@ -231,12 +238,17 @@ public class PersonaService {
         Entrenador entrenador = new Entrenador();
         entrenador.setPersona(personaGuardada);
         entrenador.setFechaContratacion(entrenadorDTO.getFechaContratacion());
-        entrenador.setEstadoId(entrenadorDTO.getEstadoId());
+        entrenador.setFechaContratacion(entrenadorDTO.getFechaContratacion());
+        // entrenador.setEstadoId(entrenadorDTO.getEstadoId());
+        // Setear el estado usando la relación
+        EstadoPersona estado = estadoPersonaRepository.findById(entrenadorDTO.getEstadoId())
+                .orElseThrow(() -> new RuntimeException("Estado no encontrado"));
+        entrenador.setEstado(estado);
         Entrenador entrenadorGuardado = entrenadorRepository.save(entrenador);
 
         // Registrar al entrenador como usuario
         String username = entrenadorDTO.getNombre().toLowerCase() + "." + entrenadorDTO.getApellidos().toLowerCase();
-        String email = username + "@chermanger.com"; // Generar un email ficticio o usar uno proporcionado
+        String email = username + "@cheermanager.com"; // Generar un email ficticio o usar uno proporcionado
         String password = "0000"; // Generar una contraseña por defecto o usar una proporcionada
         Integer rolId = 3; // ID del rol para entrenador
         registrarUsuario(personaGuardada, username, email, password, rolId);
@@ -257,7 +269,11 @@ public class PersonaService {
             personaRepository.save(persona);
 
             entrenador.setFechaContratacion(entrenadorDTO.getFechaContratacion());
-            entrenador.setEstadoId(entrenadorDTO.getEstadoId());
+            // entrenador.setEstadoId(entrenadorDTO.getEstadoId());
+            // Setear el estado usando la relación
+            EstadoPersona estado = estadoPersonaRepository.findById(entrenadorDTO.getEstadoId())
+                    .orElseThrow(() -> new RuntimeException("Estado no encontrado"));
+            entrenador.setEstado(estado);
             return entrenadorRepository.save(entrenador);
         }).orElseThrow(() -> new RuntimeException("Entrenador no encontrado con el ID: " + id));
     }

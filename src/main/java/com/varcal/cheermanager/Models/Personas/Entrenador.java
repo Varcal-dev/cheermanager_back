@@ -18,10 +18,15 @@ public class Entrenador {
     @ManyToOne
     @JoinColumn(name = "persona_id", nullable = false)
     private Persona persona;
+    
+    @Column(name = "especializacion")
+    private String especializacion;
 
     @Column(name = "fecha_contratacion")
-    private LocalDate fechaContratacion;
+    private LocalDate fechaContratacion;  
 
-    @Column(name = "estado_id", nullable = false)
-    private Integer estadoId;
+    // Después: Relación con EstadoPersona
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "estado_id")
+    private EstadoPersona estado;
 }

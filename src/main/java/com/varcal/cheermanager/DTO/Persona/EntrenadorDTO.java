@@ -12,6 +12,7 @@ public class EntrenadorDTO {
     private String telefono;
     private LocalDate fechaNacimiento;
     private Integer generoId;
+    private String especializacion;
     private LocalDate fechaContratacion;
     private Integer estadoId;
 
