@@ -17,7 +17,7 @@ public class DeportistaDTO {
     private Integer altura;
     private Integer peso;
     private Integer nivelActualId;
-    private LocalDate fechaInscripcion;
+    private LocalDate fechaRegistro;
     private String contactoEmergencia;
-    private Integer convenioId;    
+    private Integer convenioId;   
 }

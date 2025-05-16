@@ -16,8 +16,9 @@ public class PlanPago {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "nombre", nullable = false)
-    private String nombre;
+    @ManyToOne
+    @JoinColumn(name = "tipo_plan_id", nullable = false)
+    private TipoPlanPago tipoPlan;
 
     @Column(name = "descripcion")
     private String descripcion;

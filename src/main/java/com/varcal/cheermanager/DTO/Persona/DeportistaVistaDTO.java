@@ -17,7 +17,7 @@ public class DeportistaVistaDTO {
     private String genero;
     private Float altura; // Nuevo campo
     private Float peso;   // Nuevo campo
-    private LocalDate fechaInscripcion;
+    private LocalDate fechaRegistro;
     private String contactoEmergencia;
     private Integer estadoId;
     private String estadoNombre;

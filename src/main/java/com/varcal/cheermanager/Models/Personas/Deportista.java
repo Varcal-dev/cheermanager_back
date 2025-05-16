@@ -34,8 +34,8 @@ public class Deportista {
     @Column(name = "nivel_actual_id")
     private Integer nivelActualId;
 
-    @Column(name = "fecha_inscripcion")
-    private LocalDate fechaInscripcion;
+    @Column(name = "fecha_registro")
+    private LocalDate fechaRegistro;
 
     @Column(name = "contacto_emergencia")
     private String contactoEmergencia;

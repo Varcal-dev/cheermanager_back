@@ -136,7 +136,7 @@ public class PersonaService {
         deportista.setAltura(deportistaDTO.getAltura());
         deportista.setPeso(deportistaDTO.getPeso());
         deportista.setNivelActualId(deportistaDTO.getNivelActualId());
-        deportista.setFechaInscripcion(LocalDate.now());
+        deportista.setFechaRegistro(deportistaDTO.getFechaRegistro());
         deportista.setContactoEmergencia(deportistaDTO.getContactoEmergencia());
         deportista.setConvenioId(deportistaDTO.getConvenioId());
         Deportista deportistaGuardado = deportistaRepository.save(deportista);
@@ -164,7 +164,7 @@ public class PersonaService {
 
             deportista.setEstadoId(deportistaDTO.getEstadoId());
             deportista.setNivelActualId(deportistaDTO.getNivelActualId());
-            deportista.setFechaInscripcion(deportistaDTO.getFechaInscripcion());
+            deportista.setFechaRegistro(deportistaDTO.getFechaRegistro());
             deportista.setContactoEmergencia(deportistaDTO.getContactoEmergencia());
             deportista.setConvenioId(deportistaDTO.getConvenioId());
             return deportistaRepository.save(deportista);
@@ -199,7 +199,7 @@ public class PersonaService {
             dto.setAltura(obj[9] != null ? ((Number) obj[9]).floatValue() : null);
             dto.setPeso(obj[10] != null ? ((Number) obj[10]).floatValue() : null);
 
-            dto.setFechaInscripcion(obj[11] != null ? ((java.sql.Date) obj[11]).toLocalDate() : null);
+            dto.setFechaRegistro(obj[11] != null ? ((java.sql.Date) obj[11]).toLocalDate() : null);
             dto.setContactoEmergencia((String) obj[12]);
             dto.setEstadoId((Integer) obj[13]);
             dto.setEstadoNombre((String) obj[14]);
