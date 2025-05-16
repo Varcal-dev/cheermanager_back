@@ -113,6 +113,7 @@ public class NivelService {
             dto.setCategorias(categoriasDTO);
             return dto;
         }).toList();
+        
     }
 
 }

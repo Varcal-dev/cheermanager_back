@@ -1,6 +1,9 @@
 package com.varcal.cheermanager.Models.Personas;
 
 import java.time.LocalDate;
+import java.util.List;
+
+import com.varcal.cheermanager.Models.Org_dep.DeportistaPerteneceGrupo;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -39,4 +42,8 @@ public class Deportista {
 
     @Column(name = "convenio_id")
     private Integer convenioId;
+
+    @OneToMany(mappedBy = "deportista", cascade = CascadeType.ALL)
+    private List<DeportistaPerteneceGrupo> historialGrupos;
+
 }

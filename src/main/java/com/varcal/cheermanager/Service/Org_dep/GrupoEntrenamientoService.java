@@ -1,7 +1,6 @@
 package com.varcal.cheermanager.Service.Org_dep;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.varcal.cheermanager.Models.Org_dep.GrupoEntrenamiento;

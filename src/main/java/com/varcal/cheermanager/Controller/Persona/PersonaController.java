@@ -4,12 +4,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.varcal.cheermanager.DTO.Persona.EstadoPersonaDTO;
 import com.varcal.cheermanager.DTO.Persona.PersonaDTO;
+import com.varcal.cheermanager.Models.Personas.EstadoPersona;
 import com.varcal.cheermanager.Models.Personas.Persona;
 import com.varcal.cheermanager.Service.PersonaService;
 import com.varcal.cheermanager.Utils.RequiresPermission;
+import com.varcal.cheermanager.repository.Personas.EstadoPersonaRepository;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/personas")
@@ -17,6 +21,9 @@ public class PersonaController {
 
     @Autowired
     private PersonaService personaService;
+
+    @Autowired
+    private EstadoPersonaRepository estadoPersonaRepository;
 
     @PostMapping()
     @RequiresPermission("crear_persona")
@@ -71,5 +78,14 @@ public class PersonaController {
             return ResponseEntity.status(500).body("Error al eliminar la persona: " + e.getMessage());
         }
     }
+
+    @GetMapping("/estados")
+public ResponseEntity<List<EstadoPersonaDTO>> listarEstadosPersona() {
+    List<EstadoPersona> estados = estadoPersonaRepository.findAll();
+    List<EstadoPersonaDTO> estadosDTO = estados.stream()
+        .map(e -> new EstadoPersonaDTO(e.getId(), e.getEstado()))
+        .collect(Collectors.toList());  // ← necesita el import
+    return ResponseEntity.ok(estadosDTO);
+}
 
 }

@@ -1,14 +1,12 @@
 package com.varcal.cheermanager.Controller.Org_dep;
 
 import java.time.LocalDate;
-import java.time.Period;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -128,12 +126,11 @@ public class GrupoEntrenamientoController {
                         deportistaDTO.setNivelActualId(d.getNivelActualId());
                         return deportistaDTO;
                     })
-                    .collect(Collectors.toList()); // Corrección aquí, cambiamos 'toList()' por
-                                                   // 'collect(Collectors.toList())'
+                    .collect(Collectors.toList());
 
             dto.setDeportistas(deportistas);
             return dto;
-        }).collect(Collectors.toList()); // También aseguramos que toda la lista sea procesada correctamente
+        }).collect(Collectors.toList()); 
     }
 
 }
