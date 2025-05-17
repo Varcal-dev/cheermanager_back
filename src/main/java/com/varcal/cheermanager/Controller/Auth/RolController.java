@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.varcal.cheermanager.DTO.Org_dep.CrearRolConPermisosDTO;
+import com.varcal.cheermanager.DTO.Ath.CrearRolConPermisosDTO;
 import com.varcal.cheermanager.Models.Auth.Rol;
 import com.varcal.cheermanager.Service.Auth.RolService;
 

@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-import com.varcal.cheermanager.DTO.Financiero.PlanPagoRequestDTO;
 import com.varcal.cheermanager.DTO.Financiero.PlanPagoResponseDTO;
 import com.varcal.cheermanager.Models.Financiero.PlanPago;
 import com.varcal.cheermanager.Models.Financiero.TipoPlanPago;
@@ -22,8 +21,8 @@ public class PlanPagoService {
     private final PlanPagoRepository planPagoRepository;
     private final TipoPlanPagoRepository tipoPlanPagoRepository;
 
-    public PlanPagoResponseDTO crearPlan(PlanPagoRequestDTO dto) {
-        TipoPlanPago tipo = tipoPlanPagoRepository.findById(dto.getTipoPlanId())
+    public PlanPagoResponseDTO crearPlan(PlanPagoResponseDTO dto) {
+        TipoPlanPago tipo = tipoPlanPagoRepository.findById(dto.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Tipo de plan no encontrado"));
 
         PlanPago plan = new PlanPago();
@@ -62,11 +61,11 @@ public class PlanPagoService {
         return toDTO(plan);
     }
 
-    public PlanPagoResponseDTO actualizarPlan(Integer id, PlanPagoRequestDTO dto) {
+    public PlanPagoResponseDTO actualizarPlan(Integer id, PlanPagoResponseDTO dto) {
         PlanPago plan = planPagoRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Plan no encontrado"));
 
-        TipoPlanPago tipo = tipoPlanPagoRepository.findById(dto.getTipoPlanId())
+        TipoPlanPago tipo = tipoPlanPagoRepository.findById(dto.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Tipo de plan no encontrado"));
 
         plan.setTipoPlan(tipo);

@@ -6,11 +6,13 @@ import java.time.LocalDate;
 import lombok.Data;
 
 @Data
-public class PlanPagoRequestDTO {
-    private Long tipoPlanId;
+public class PlanPagoDTO {
+    private Integer tipoPlan; // solo el ID
     private String descripcion;
     private BigDecimal valorMensual;
     private LocalDate fechaVigenciaInicio;
     private LocalDate fechaVigenciaFin;
     private Boolean activo;
+
+    // getters y setters
 }
