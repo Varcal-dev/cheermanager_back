@@ -4,22 +4,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.varcal.cheermanager.Models.Org_dep.GrupoEntrenamiento;
-import com.varcal.cheermanager.Models.Personas.Deportista;
 import com.varcal.cheermanager.repository.Org_dep.GrupoEntrenamientoRepository;
-import com.varcal.cheermanager.repository.Personas.DeportistaRepository;
-
-import jakarta.transaction.Transactional;
 
 @Service
 public class GrupoEntrenamientoService {
 
     @Autowired
     private GrupoEntrenamientoRepository grupoEntrenamientoRepository;
-    @Autowired
-    private Deportista deportista;
-    @Autowired
-    private DeportistaRepository deportistaRepository;
-
     public GrupoEntrenamiento crearGrupoEntrenamiento(GrupoEntrenamiento grupo) throws Exception {
         try {
             return grupoEntrenamientoRepository.save(grupo);
@@ -36,6 +27,8 @@ public class GrupoEntrenamientoService {
     public String verificarElegibilidadDeportista(Integer grupoId, Integer deportistaId) {
         return grupoEntrenamientoRepository.verificarElegibilidadDeportista(deportistaId, grupoId);
     }
+
+    
 
     // Otros métodos del servicio (actualizar, eliminar, buscar, etc.)
 }
