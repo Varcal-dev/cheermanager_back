@@ -60,6 +60,11 @@ public class InscripcionController {
         return ResponseEntity.ok(inscripciones);
     }
 
+    @GetMapping("/inscritos")
+    public ResponseEntity<List<Object[]>> getDeportistasInscritos() {
+        return ResponseEntity.ok(inscripcionService.obtenerDeportistasInscritos());
+    }
+
     @GetMapping("/no-inscritos")
     public ResponseEntity<List<Object[]>> getDeportistasNoInscritos() {
         return ResponseEntity.ok(inscripcionService.obtenerDeportistasNoInscritos());

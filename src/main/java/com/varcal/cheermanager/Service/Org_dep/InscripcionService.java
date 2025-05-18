@@ -94,4 +94,8 @@ public class InscripcionService {
     public List<Object[]> obtenerDeportistasNoInscritos() {
         return inscripcionRepository.obtenerVistaDeportistasNoInscritos();
     }
+
+    public List<Object[]> obtenerDeportistasInscritos() {
+        return inscripcionRepository.obtenerVistaDeportistasInscritos();
+    }
 }

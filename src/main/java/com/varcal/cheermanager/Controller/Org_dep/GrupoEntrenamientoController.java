@@ -1,7 +1,9 @@
 package com.varcal.cheermanager.Controller.Org_dep;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.varcal.cheermanager.DTO.Org_dep.GrupoConDeportistasDTO;
@@ -23,6 +26,7 @@ import com.varcal.cheermanager.Models.Org_dep.CategoriaNivel;
 import com.varcal.cheermanager.Models.Org_dep.GrupoEntrenamiento;
 import com.varcal.cheermanager.Models.Org_dep.TipoGrupo;
 import com.varcal.cheermanager.Models.Personas.Deportista;
+import com.varcal.cheermanager.Service.Org_dep.GrupoEntrenamientoService;
 import com.varcal.cheermanager.repository.Org_dep.CategoriaNivelRepository;
 import com.varcal.cheermanager.repository.Org_dep.GrupoEntrenamientoRepository;
 import com.varcal.cheermanager.repository.Org_dep.TipoGrupoRepository;
@@ -37,6 +41,8 @@ public class GrupoEntrenamientoController {
     private TipoGrupoRepository tipoGrupoRepo;
     @Autowired
     private CategoriaNivelRepository categoriaNivelRepo;
+    @Autowired
+    private GrupoEntrenamientoService  grupoEntrenamientoService;
 
     @GetMapping
     public List<GrupoEntrenamiento> listar() {
@@ -132,5 +138,19 @@ public class GrupoEntrenamientoController {
             return dto;
         }).collect(Collectors.toList()); 
     }
+
+     @GetMapping("/{grupoId}/verificar-elegibilidad")
+    public ResponseEntity<Map<String, String>> verificarElegibilidad(
+            @PathVariable Integer grupoId,
+            @RequestParam("deportistaId") Integer deportistaId) {
+
+        String resultado = grupoEntrenamientoService.verificarElegibilidadDeportista(grupoId, deportistaId);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("resultado", resultado);
+
+        return ResponseEntity.ok(response);
+    }
+
 
 }

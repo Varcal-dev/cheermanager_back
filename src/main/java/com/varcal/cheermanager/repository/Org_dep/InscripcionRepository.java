@@ -18,4 +18,7 @@ public interface InscripcionRepository extends JpaRepository<Inscripcion, Intege
     @Query(value = "SELECT * FROM vista_deportistas_no_inscritos", nativeQuery = true)
     List<Object[]> obtenerVistaDeportistasNoInscritos();
 
+     @Query(value = "SELECT * FROM vista_deportistas_inscritos", nativeQuery = true)
+    List<Object[]> obtenerVistaDeportistasInscritos();
+
 }
