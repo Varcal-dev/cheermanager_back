@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.varcal.cheermanager.DTO.Org_dep.InscripcionDetalleDto;
 import com.varcal.cheermanager.DTO.Org_dep.InscripcionDto;
 import com.varcal.cheermanager.DTO.Org_dep.InscripcionSimpleDTO;
 import com.varcal.cheermanager.Models.Financiero.PlanPago;
@@ -50,7 +49,7 @@ public class InscripcionService {
 
         // Setear las relaciones
         inscripcion.setDeportista(deportista);
-        inscripcion.setPlanPago(planPago);
+        inscripcion.setPlanPago(planPago);  
         inscripcion.setFechaInscripcion(dto.getFechaInscripcion());
         inscripcion.setFechaVencimiento(dto.getFechaVencimiento());
         inscripcion.setEstado(Inscripcion.EstadoInscripcion.valueOf(dto.getEstado()));

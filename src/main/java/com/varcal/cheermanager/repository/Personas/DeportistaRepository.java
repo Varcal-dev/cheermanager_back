@@ -1,6 +1,7 @@
 package com.varcal.cheermanager.repository.Personas;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,5 +13,7 @@ public interface DeportistaRepository extends JpaRepository<Deportista, Integer>
 
     @Query(value = "SELECT * FROM vista_info_deportistas", nativeQuery = true)
     List<Object[]> obtenerDeportistasConDetalles();
+
+    Optional<Deportista> findById(Integer id);
 
 }

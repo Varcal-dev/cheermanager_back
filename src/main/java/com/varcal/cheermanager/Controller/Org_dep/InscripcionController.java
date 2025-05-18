@@ -14,10 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.varcal.cheermanager.DTO.Org_dep.InscripcionDetalleDto;
 import com.varcal.cheermanager.DTO.Org_dep.InscripcionDto;
 import com.varcal.cheermanager.DTO.Org_dep.InscripcionSimpleDTO;
-import com.varcal.cheermanager.DTO.Persona.DeportistaDTO;
 import com.varcal.cheermanager.Models.Org_dep.Inscripcion;
 import com.varcal.cheermanager.Service.Org_dep.InscripcionService;
 
