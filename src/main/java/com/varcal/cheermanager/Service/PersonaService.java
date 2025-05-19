@@ -21,9 +21,9 @@ import com.varcal.cheermanager.repository.Personas.PersonaRepository;
 import com.varcal.cheermanager.repository.Personas.EntrenadorRepository;
 import com.varcal.cheermanager.repository.Personas.EstadoPersonaRepository;
 
-import java.util.List;
-import java.util.stream.Collectors;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors; 
 
 @Service
 public class PersonaService {
@@ -136,7 +136,7 @@ public class PersonaService {
         deportista.setAltura(deportistaDTO.getAltura());
         deportista.setPeso(deportistaDTO.getPeso());
         deportista.setNivelActualId(deportistaDTO.getNivelActualId());
-        deportista.setFechaRegistro(deportistaDTO.getFechaRegistro());
+        deportista.setFechaRegistro(LocalDate.now());
         deportista.setContactoEmergencia(deportistaDTO.getContactoEmergencia());
         deportista.setConvenioId(deportistaDTO.getConvenioId());
         Deportista deportistaGuardado = deportistaRepository.save(deportista);
@@ -145,7 +145,7 @@ public class PersonaService {
         String username = deportistaDTO.getNombre().toLowerCase() + "." + deportistaDTO.getApellidos().toLowerCase();
         String email = username + "@cheermanager.com"; // Generar un email ficticio o usar uno proporcionado
         String password = "0000"; // Generar una contraseña por defecto o usar una proporcionada
-        Integer rolId = 2; // ID del rol para deportista
+        Integer rolId = 9; // ID del rol para deportista
         registrarUsuario(personaGuardada, username, email, password, rolId);
 
         return deportistaGuardado;
@@ -239,6 +239,7 @@ public class PersonaService {
         entrenador.setPersona(personaGuardada);
         entrenador.setFechaContratacion(entrenadorDTO.getFechaContratacion());
         entrenador.setFechaContratacion(entrenadorDTO.getFechaContratacion());
+        entrenador.setEspecializacion(entrenadorDTO.getEspecializacion());
         // entrenador.setEstadoId(entrenadorDTO.getEstadoId());
         // Setear el estado usando la relación
         EstadoPersona estado = estadoPersonaRepository.findById(entrenadorDTO.getEstadoId())
@@ -250,7 +251,7 @@ public class PersonaService {
         String username = entrenadorDTO.getNombre().toLowerCase() + "." + entrenadorDTO.getApellidos().toLowerCase();
         String email = username + "@cheermanager.com"; // Generar un email ficticio o usar uno proporcionado
         String password = "0000"; // Generar una contraseña por defecto o usar una proporcionada
-        Integer rolId = 3; // ID del rol para entrenador
+        Integer rolId = entrenadorDTO.getRolIdE(); // ID del rol para entrenador
         registrarUsuario(personaGuardada, username, email, password, rolId);
 
         return entrenadorGuardado;

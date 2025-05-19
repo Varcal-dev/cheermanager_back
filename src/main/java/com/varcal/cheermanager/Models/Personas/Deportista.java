@@ -1,6 +1,7 @@
 package com.varcal.cheermanager.Models.Personas;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.varcal.cheermanager.Models.Org_dep.DeportistaPerteneceGrupo;

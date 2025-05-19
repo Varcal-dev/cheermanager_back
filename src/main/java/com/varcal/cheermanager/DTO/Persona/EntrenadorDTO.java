@@ -6,6 +6,7 @@ import lombok.Data;
 
 @Data
 public class EntrenadorDTO {
+    private Integer rolIdE;
     private String nombre;
     private String apellidos;
     private String direccion;

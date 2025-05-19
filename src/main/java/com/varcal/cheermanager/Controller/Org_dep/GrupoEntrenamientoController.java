@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.varcal.cheermanager.DTO.Org_dep.GrupoConDeportistasDTO;
 import com.varcal.cheermanager.DTO.Org_dep.GrupoEntrenamientoDTO;
 import com.varcal.cheermanager.DTO.Persona.AgregarDeportistaRequest;
+import com.varcal.cheermanager.DTO.Persona.AsignacionEntrenadorDTO;
 import com.varcal.cheermanager.DTO.Persona.DeportistaDTO;
 import com.varcal.cheermanager.Models.Org_dep.CategoriaNivel;
 import com.varcal.cheermanager.Models.Org_dep.GrupoEntrenamiento;
@@ -43,7 +44,7 @@ public class GrupoEntrenamientoController {
     @Autowired
     private CategoriaNivelRepository categoriaNivelRepo;
     @Autowired
-    private GrupoEntrenamientoService  grupoEntrenamientoService;
+    private GrupoEntrenamientoService grupoEntrenamientoService;
 
     @GetMapping
     public List<GrupoEntrenamiento> listar() {
@@ -124,12 +125,15 @@ public class GrupoEntrenamientoController {
                         // Si tienes la persona relacionada, puedes obtener su nombre, de lo contrario
                         // puedes dejarlo como null o alguna cadena vacía.
                         deportistaDTO.setNombre(d.getPersona() != null ? d.getPersona().getNombre() : "Desconocido");
-                        deportistaDTO.setApellidos(d.getPersona() != null ? d.getPersona().getApellidos() : "Desconocido");
-                        deportistaDTO.setDireccion(d.getPersona() != null ? d.getPersona().getDireccion() : "Desconocido");
-                        deportistaDTO.setTelefono(d.getPersona() != null ? d.getPersona().getTelefono() : "Desconocido");
-                        deportistaDTO.setFechaNacimiento(d.getPersona() != null ? d.getPersona().getFechaNacimiento() : LocalDate.now());
-                        
-                        
+                        deportistaDTO
+                                .setApellidos(d.getPersona() != null ? d.getPersona().getApellidos() : "Desconocido");
+                        deportistaDTO
+                                .setDireccion(d.getPersona() != null ? d.getPersona().getDireccion() : "Desconocido");
+                        deportistaDTO
+                                .setTelefono(d.getPersona() != null ? d.getPersona().getTelefono() : "Desconocido");
+                        deportistaDTO.setFechaNacimiento(
+                                d.getPersona() != null ? d.getPersona().getFechaNacimiento() : LocalDate.now());
+
                         deportistaDTO.setNivelActualId(d.getNivelActualId());
                         return deportistaDTO;
                     })
@@ -137,10 +141,10 @@ public class GrupoEntrenamientoController {
 
             dto.setDeportistas(deportistas);
             return dto;
-        }).collect(Collectors.toList()); 
+        }).collect(Collectors.toList());
     }
 
-     @GetMapping("/{grupoId}/verificar-elegibilidad")
+    @GetMapping("/{grupoId}/verificar-elegibilidad")
     public ResponseEntity<Map<String, String>> verificarElegibilidad(
             @PathVariable Integer grupoId,
             @RequestParam("deportistaId") Integer deportistaId) {
@@ -154,14 +158,25 @@ public class GrupoEntrenamientoController {
     }
 
     @PostMapping("/{grupoId}/agregar-deportistas")
-public ResponseEntity<?> agregarDeportistaAGrupo(
-        @PathVariable Integer grupoId,
-        @RequestBody AgregarDeportistaRequest request) {
-    try {
-        String resultado = grupoEntrenamientoService.agregarDeportistaAGrupo(request.getDeportistaId(), grupoId, request.getObservaciones());
-        return ResponseEntity.ok(resultado);
-    } catch (RuntimeException e) {
-        return ResponseEntity.badRequest().body(e.getMessage());
+    public ResponseEntity<?> agregarDeportistaAGrupo(
+            @PathVariable Integer grupoId,
+            @RequestBody AgregarDeportistaRequest request) {
+        try {
+            String resultado = grupoEntrenamientoService.agregarDeportistaAGrupo(request.getDeportistaId(), grupoId,
+                    request.getObservaciones());
+            return ResponseEntity.ok(resultado);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
-}
+
+    @PostMapping("/{grupoId}/asignar-entrenadores")
+    public ResponseEntity<?> asignarEntrenadorAGrupo(
+            @PathVariable int grupoId,
+            @RequestBody AsignacionEntrenadorDTO dto) {
+        dto.setGrupoId(grupoId); // asegúrate de que coincida
+        String respuesta = grupoEntrenamientoService.asignarEntrenadorAGrupo(dto);
+        return ResponseEntity.ok(respuesta);
+    }
+
 }
