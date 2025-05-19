@@ -28,7 +28,7 @@ public class DocumentoMySqlSyncService {
             documento.getCargadoPor(),
             java.sql.Timestamp.valueOf(documento.getFechaCarga()),
             documento.getId(),
-            documento.getEstado()
+            documento.getEstado().getValor()
         );
         
         // Obtener el ID generado
@@ -49,7 +49,7 @@ public class DocumentoMySqlSyncService {
             sql,
             documento.getNombre(),
             documento.getTipoDocumento(),
-            documento.getEstado(),
+            documento.getEstado().getValor(),
             documento.getId()
         );
     }

@@ -5,6 +5,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 
 import com.varcal.cheermanager.MongoDB.model.Documento;
+import com.varcal.cheermanager.MongoDB.model.EstadoDocumento;
 
 import java.util.List;
 
@@ -14,7 +15,7 @@ public interface DocumentoRepositoryMongo extends MongoRepository<Documento, Str
     
     List<Documento> findByCargadoPor(Integer usuarioId);
     
-    List<Documento> findByEstado(Integer estado);
+    List<Documento> findByEstado(EstadoDocumento estado);
     
     @Query("{'$text': {'$search': ?0}}")
     List<Documento> buscarPorTexto(String texto);

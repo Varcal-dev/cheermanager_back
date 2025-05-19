@@ -5,6 +5,9 @@ import com.mongodb.client.gridfs.GridFSDownloadStream;
 import com.mongodb.client.gridfs.model.GridFSFile;
 import com.varcal.cheermanager.MongoDB.Repo.DocumentoRepositoryMongo;
 import com.varcal.cheermanager.MongoDB.model.Documento;
+import com.varcal.cheermanager.MongoDB.model.TipoAlmacenamiento;
+
+import jakarta.transaction.Transactional;
 
 import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
@@ -68,13 +71,13 @@ public class DocumentoService {
                 documento.setContenido(bytes);
 
                 Documento.Almacenamiento almacenamiento = new Documento.Almacenamiento();
-                almacenamiento.setTipo("embedded");
+                almacenamiento.setTipo(TipoAlmacenamiento.GRIDFS);
                 documento.setAlmacenamiento(almacenamiento);
             } else { // Archivo grande, usar GridFS
                 ObjectId fileId = almacenarEnGridFS(bytes, documento);
 
                 Documento.Almacenamiento almacenamiento = new Documento.Almacenamiento();
-                almacenamiento.setTipo("gridfs");
+                almacenamiento.setTipo(TipoAlmacenamiento.GRIDFS);
                 almacenamiento.setRuta(fileId.toString());
                 documento.setAlmacenamiento(almacenamiento);
             }
@@ -191,7 +194,7 @@ public class DocumentoService {
                 documento.setContenido(bytes);
 
                 Documento.Almacenamiento almacenamiento = new Documento.Almacenamiento();
-                almacenamiento.setTipo("embedded");
+                almacenamiento.setTipo(TipoAlmacenamiento.EMBEDDED);
                 documento.setAlmacenamiento(almacenamiento);
             } else { // Archivo grande, usar GridFS
                 // Si antes estaba en GridFS, eliminar el anterior
@@ -202,7 +205,7 @@ public class DocumentoService {
                 ObjectId fileId = almacenarEnGridFS(bytes, documento);
 
                 Documento.Almacenamiento almacenamiento = new Documento.Almacenamiento();
-                almacenamiento.setTipo("gridfs");
+                almacenamiento.setTipo(TipoAlmacenamiento.GRIDFS);
                 almacenamiento.setRuta(fileId.toString());
                 documento.setAlmacenamiento(almacenamiento);
             }
@@ -252,14 +255,15 @@ public class DocumentoService {
      */
     private boolean tienePermiso(Documento documento, Integer usuarioId) {
         // Implementar lógica de verificación de permisos
-        if ("público".equals(documento.getPermisos().getNivelAcceso()))
+        if (documento.getPermisos().getNivelAcceso().equals("público"))
             return true;
         if (documento.getCargadoPor().equals(usuarioId))
             return true;
         if (documento.getPermisos().getUsuariosPermitidos().contains(usuarioId))
             return true;
-        // Verificar roles también si es necesario
-        return false;
+        // Verificar roles también
+        return documento.getPermisos().getRolesPermitidos().stream()
+                .anyMatch(rol -> tieneRol(usuarioId, rol));
     }
 
     /**
@@ -379,4 +383,101 @@ public class DocumentoService {
             return contenido;
         }
     }
+
+    @Transactional
+    public Documento crearDocumentoConTransaccion(Documento documento, MultipartFile archivo) throws IOException {
+        try {
+            // Crear documento en MongoDB
+            Documento documentoGuardado = crearDocumentoEnMongo(documento, archivo);
+
+            // Crear referencia en MySQL
+            Integer mysqlId = syncService.crearReferencia(documentoGuardado);
+            documentoGuardado.setMysqlDocumentoId(mysqlId);
+
+            // Actualizar documento con ID de MySQL
+            return documentoRepository.save(documentoGuardado);
+        } catch (Exception e) {
+            // En caso de error, rollback
+            throw new RuntimeException("Error al crear documento: " + e.getMessage(), e);
+        }
+    }
+
+    // Método auxiliar para verificar si un usuario tiene un rol específico
+    private boolean tieneRol(Integer usuarioId, String rol) {
+        // Implementar lógica para verificar roles desde MySQL
+        // Este es un ejemplo, necesitarías una implementación real
+        return false;
+    }
+
+    // Método auxiliar para crear documento en MongoDB
+private Documento crearDocumentoEnMongo(Documento documento, MultipartFile archivo) throws IOException {
+    // Implementación original del método crearDocumento sin la parte de MySQL
+    byte[] bytes = archivo.getBytes();
+    String hash = calcularHash(bytes);
+    
+    documento.setFormato(obtenerExtension(archivo.getOriginalFilename()));
+    documento.setTamaño((int) archivo.getSize());
+    documento.setHash(hash);
+    
+    Documento.Historia historia = new Documento.Historia();
+    historia.setAccion("creación");
+    historia.setUsuarioId(documento.getCargadoPor());
+    historia.setFecha(LocalDateTime.now());
+    historia.setDetalles(new Object() {
+        public final int version = 1;
+    });
+    
+    documento.getHistoria().add(historia);
+    
+    // Determinar tipo de almacenamiento según tamaño
+    if (bytes.length < 16_000_000) { // Menos de 16MB, guardar directamente
+        documento.setContenido(bytes);
+        
+        Documento.Almacenamiento almacenamiento = new Documento.Almacenamiento();
+        almacenamiento.setTipo(TipoAlmacenamiento.EMBEDDED);
+        documento.setAlmacenamiento(almacenamiento);
+    } else { // Archivo grande, usar GridFS
+        ObjectId fileId = almacenarEnGridFS(bytes, documento);
+        
+        Documento.Almacenamiento almacenamiento = new Documento.Almacenamiento();
+        almacenamiento.setTipo(TipoAlmacenamiento.GRIDFS);
+        almacenamiento.setRuta(fileId.toString());
+        documento.setAlmacenamiento(almacenamiento);
+    }
+    
+    return documentoRepository.save(documento);
+}
+
+@Transactional
+public void eliminarDocumentoConTransaccion(String id, Integer usuarioId) {
+    try {
+        Optional<Documento> documentoOpt = documentoRepository.findById(id);
+        
+        if (!documentoOpt.isPresent()) {
+            throw new RuntimeException("Documento no encontrado");
+        }
+        
+        Documento documento = documentoOpt.get();
+        
+        // Verificar permisos
+        if (!tienePermiso(documento, usuarioId)) {
+            throw new RuntimeException("No tiene permiso para eliminar este documento");
+        }
+        
+        // Eliminar referencia en MySQL primero
+        syncService.eliminarReferencia(documento.getId());
+        
+        // Si está en GridFS, eliminar archivo
+        if ("gridfs".equals(documento.getAlmacenamiento().getTipo())) {
+            eliminarDeGridFS(documento.getAlmacenamiento().getRuta());
+        }
+        
+        // Eliminar el documento de MongoDB
+        documentoRepository.delete(documento);
+    } catch (Exception e) {
+        // En caso de error, rollback
+        throw new RuntimeException("Error al eliminar documento: " + e.getMessage(), e);
+    }
+}
+
 }

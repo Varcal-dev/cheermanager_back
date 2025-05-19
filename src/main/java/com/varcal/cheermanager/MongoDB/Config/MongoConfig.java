@@ -24,11 +24,4 @@ public class MongoConfig extends AbstractMongoClientConfiguration {
         return GridFSBuckets.create(database);
     }
     
-    /* 
-    @Override
-    public MongoCustomConversions customConversions() {
-        return new MongoCustomConversions(
-            // aquí puedes añadir conversiones personalizadas si las necesitas
-        );
-    }*/
 }

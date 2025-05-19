@@ -55,7 +55,7 @@ public class Documento {
     private Permisos permisos = new Permisos();
     
     // Estado y seguimiento
-    private String estado = "activo"; // 'activo', 'archivado', 'eliminado'
+    private EstadoDocumento estado = EstadoDocumento.ACTIVO;
     
     @CreatedDate
     private LocalDateTime fechaCarga;
@@ -68,14 +68,14 @@ public class Documento {
     
     @Data
     public static class Almacenamiento {
-        private String tipo = "gridfs"; // 'embedded', 'gridfs', 's3', 'local'
+        private TipoAlmacenamiento tipo = TipoAlmacenamiento.GRIDFS;
         private String ruta;           // Ruta o ID de referencia
         private String url;            // URL para acceso (si aplica)
     }
     
     @Data
     public static class Permisos {
-        private String nivelAcceso = "privado"; // 'público', 'privado', 'restringido'
+        private NivelAcceso nivelAcceso = NivelAcceso.PRIVADO;
         private List<String> rolesPermitidos = new ArrayList<>();  // Roles que pueden acceder
         private List<Integer> usuariosPermitidos = new ArrayList<>(); // IDs de usuarios que pueden acceder
     }
