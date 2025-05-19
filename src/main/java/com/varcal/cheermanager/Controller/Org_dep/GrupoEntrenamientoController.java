@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.varcal.cheermanager.DTO.Org_dep.GrupoConDeportistasDTO;
 import com.varcal.cheermanager.DTO.Org_dep.GrupoEntrenamientoDTO;
+import com.varcal.cheermanager.DTO.Persona.AgregarDeportistaRequest;
 import com.varcal.cheermanager.DTO.Persona.DeportistaDTO;
 import com.varcal.cheermanager.Models.Org_dep.CategoriaNivel;
 import com.varcal.cheermanager.Models.Org_dep.GrupoEntrenamiento;
@@ -152,5 +153,15 @@ public class GrupoEntrenamientoController {
         return ResponseEntity.ok(response);
     }
 
-
+    @PostMapping("/{grupoId}/agregar-deportistas")
+public ResponseEntity<?> agregarDeportistaAGrupo(
+        @PathVariable Integer grupoId,
+        @RequestBody AgregarDeportistaRequest request) {
+    try {
+        String resultado = grupoEntrenamientoService.agregarDeportistaAGrupo(request.getDeportistaId(), grupoId, request.getObservaciones());
+        return ResponseEntity.ok(resultado);
+    } catch (RuntimeException e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
+    }
+}
 }

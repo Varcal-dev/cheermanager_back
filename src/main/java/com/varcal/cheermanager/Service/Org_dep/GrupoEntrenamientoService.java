@@ -11,6 +11,7 @@ public class GrupoEntrenamientoService {
 
     @Autowired
     private GrupoEntrenamientoRepository grupoEntrenamientoRepository;
+
     public GrupoEntrenamiento crearGrupoEntrenamiento(GrupoEntrenamiento grupo) throws Exception {
         try {
             return grupoEntrenamientoRepository.save(grupo);
@@ -29,6 +30,12 @@ public class GrupoEntrenamientoService {
     }
 
     
+    public String agregarDeportistaAGrupo(Integer deportistaId, Integer grupoId, String observaciones) {
+        // Aquí puedes agregar lógica de negocio adicional si es necesaria
+        // Por ejemplo, verificar si el deportista ya está en el grupo, etc.
+
+        return grupoEntrenamientoRepository.agregarDeportistaAGrupo(deportistaId, grupoId, observaciones);
+    }
 
     // Otros métodos del servicio (actualizar, eliminar, buscar, etc.)
 }
