@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.varcal.cheermanager.DTO.Persona.EntrenadorDTO;
 import com.varcal.cheermanager.Models.Personas.Entrenador;
-import com.varcal.cheermanager.Service.PersonaService;
+import com.varcal.cheermanager.Service.Persona.PersonaService;
 import com.varcal.cheermanager.Utils.RequiresPermission;
 
 @RestController

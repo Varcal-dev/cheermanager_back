@@ -1,5 +1,5 @@
 # CheerManager
-
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Varcal-dev/cheermanager_back)
 CheerManager es una aplicación para la gestión de gimnasios y equipos de cheerleading. Proporciona funcionalidades para manejar usuarios, entrenadores, deportistas, horarios, eventos, inventarios y más.
 
 ## Características

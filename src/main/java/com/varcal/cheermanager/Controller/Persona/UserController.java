@@ -26,10 +26,10 @@ import com.varcal.cheermanager.Models.Auth.Rol;
 import com.varcal.cheermanager.Models.Auth.Usuario;
 import com.varcal.cheermanager.Models.Personas.Genero;
 import com.varcal.cheermanager.Models.Personas.Persona;
-import com.varcal.cheermanager.Service.PersonaService;
 import com.varcal.cheermanager.Service.Auth.AuthService;
 import com.varcal.cheermanager.Service.Auth.RolService;
 import com.varcal.cheermanager.Service.Persona.GeneroService;
+import com.varcal.cheermanager.Service.Persona.PersonaService;
 import com.varcal.cheermanager.Utils.RequiresPermission;
 import com.varcal.cheermanager.repository.Auth.RolRepository;
 

@@ -8,7 +8,7 @@ import com.varcal.cheermanager.DTO.Persona.EstadoPersonaDTO;
 import com.varcal.cheermanager.DTO.Persona.PersonaDTO;
 import com.varcal.cheermanager.Models.Personas.EstadoPersona;
 import com.varcal.cheermanager.Models.Personas.Persona;
-import com.varcal.cheermanager.Service.PersonaService;
+import com.varcal.cheermanager.Service.Persona.PersonaService;
 import com.varcal.cheermanager.Utils.RequiresPermission;
 import com.varcal.cheermanager.repository.Personas.EstadoPersonaRepository;
 

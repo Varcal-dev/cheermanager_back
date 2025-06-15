@@ -78,12 +78,13 @@
 			<version>6.2.6.Final</version>			<!-- Versión compatible con Java 24 -->
 		</dependency>
 
-		<!-- Spring Data MongoDB -->
+		<!-- Spring Data MongoDB -->		
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-mongodb</artifactId>
 		</dependency>
-		
+
+
 	</dependencies>
 
 	<build>

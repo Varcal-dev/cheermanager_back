@@ -1,4 +1,4 @@
-package com.varcal.cheermanager.Service;
+package com.varcal.cheermanager.Service.Persona;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCrypt;

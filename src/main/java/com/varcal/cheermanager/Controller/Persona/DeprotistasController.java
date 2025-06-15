@@ -18,7 +18,7 @@ import com.varcal.cheermanager.DTO.Persona.DeportistaDTO;
 import com.varcal.cheermanager.DTO.Persona.DeportistaVistaDTO;
 import com.varcal.cheermanager.Models.Financiero.Convenio;
 import com.varcal.cheermanager.Models.Personas.Deportista;
-import com.varcal.cheermanager.Service.PersonaService;
+import com.varcal.cheermanager.Service.Persona.PersonaService;
 import com.varcal.cheermanager.Utils.RequiresPermission;
 import com.varcal.cheermanager.repository.Financiero.ConvenioRepository;
 import com.varcal.cheermanager.repository.Personas.DeportistaRepository;
