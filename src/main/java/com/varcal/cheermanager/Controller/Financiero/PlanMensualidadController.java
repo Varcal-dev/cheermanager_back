@@ -14,46 +14,47 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.varcal.cheermanager.DTO.Financiero.PlanPagoDTO;
-import com.varcal.cheermanager.DTO.Financiero.PlanPagoResponseDTO;
-import com.varcal.cheermanager.Models.Financiero.PlanPago;
+import com.varcal.cheermanager.DTO.Financiero.PlanMensualidadDTO;
+import com.varcal.cheermanager.DTO.Financiero.PlanMensualidadResponseDTO;
+import com.varcal.cheermanager.Models.Financiero.PlanMensualidad;
 import com.varcal.cheermanager.Models.Financiero.TipoPlanPago;
-import com.varcal.cheermanager.Service.Financiero.PlanPagoService;
+import com.varcal.cheermanager.Service.Financiero.PlanMensualidadService;
 import com.varcal.cheermanager.Service.Financiero.TipoPlanPagoService;
-import com.varcal.cheermanager.repository.Financiero.PlanPagoRepository;
+import com.varcal.cheermanager.repository.Financiero.PlanMensualidadRepository;
 import com.varcal.cheermanager.repository.Financiero.TipoPlanPagoRepository;
 
 @RestController
-@RequestMapping("/api/planes-pago")
-public class PlanPagoController {
+@RequestMapping("/api/planes-mensualidad")
+public class PlanMensualidadController {
 
-    private final PlanPagoService planPagoService;
+    private final PlanMensualidadService planPagoService;
 
     @Autowired
     private TipoPlanPagoService service;
 
     @Autowired
-    private PlanPagoRepository planPagoRepository;
+    private PlanMensualidadRepository planPagoRepository;
 
     @Autowired
     private TipoPlanPagoRepository tipoPlanPagoRepository;
 
     @Autowired
-    public PlanPagoController(PlanPagoService planPagoService) {
+    public PlanMensualidadController(PlanMensualidadService planPagoService) {
         this.planPagoService = planPagoService;
     }
 
     @GetMapping
-    public List<PlanPagoResponseDTO> listarTodos() {
+    public List<PlanMensualidadResponseDTO> listarTodos() {
         return planPagoService.listarPlanes();
     }
 
     @PostMapping
-public ResponseEntity<PlanPago> crearPlan(@RequestBody PlanPagoDTO dto) {
-    TipoPlanPago tipo = tipoPlanPagoRepository.findById(dto.getTipoPlan())
+public ResponseEntity<PlanMensualidad> crearPlan(@RequestBody PlanMensualidadDTO dto) {
+    Integer tipoPlanId = Integer.valueOf(dto.getTipoPlan());
+    TipoPlanPago tipo = tipoPlanPagoRepository.findById(tipoPlanId)
         .orElseThrow(() -> new RuntimeException("Tipo de plan no encontrado"));
 
-    PlanPago plan = new PlanPago();
+    PlanMensualidad plan = new PlanMensualidad();
     plan.setTipoPlan(tipo);
     plan.setDescripcion(dto.getDescripcion());
     plan.setValorMensual(dto.getValorMensual());
@@ -61,22 +62,22 @@ public ResponseEntity<PlanPago> crearPlan(@RequestBody PlanPagoDTO dto) {
     plan.setFechaVigenciaFin(dto.getFechaVigenciaFin());
     plan.setActivo(dto.getActivo());
 
-    PlanPago creado = planPagoRepository.save(plan);
+    PlanMensualidad creado = planPagoRepository.save(plan);
     return ResponseEntity.status(HttpStatus.CREATED).body(creado);
 }
 
 
     // Obtener un plan por ID
     @GetMapping("/{id}")
-    public ResponseEntity<PlanPagoResponseDTO> obtenerPorId(@PathVariable Integer id) {
+    public ResponseEntity<PlanMensualidadResponseDTO> obtenerPorId(@PathVariable Integer id) {
         return ResponseEntity.ok(planPagoService.obtenerPorId(id));
     }
 
     // Actualizar plan de pago
     @PutMapping("/{id}")
-    public ResponseEntity<PlanPagoResponseDTO> actualizar(
+    public ResponseEntity<PlanMensualidadResponseDTO> actualizar(
             @PathVariable Integer id,
-            @RequestBody PlanPagoResponseDTO dto) {
+            @RequestBody PlanMensualidadResponseDTO dto) {
         return ResponseEntity.ok(planPagoService.actualizarPlan(id, dto));
     }
 
