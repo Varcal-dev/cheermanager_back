@@ -12,5 +12,6 @@ public interface PersonaRepository extends JpaRepository<Persona, Integer> {
 
      List<Persona> findByNombre(String nombre);
 
+     @SuppressWarnings("null")
      Optional<Persona> findById(Integer personaId);
 }

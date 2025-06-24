@@ -12,7 +12,6 @@ import com.varcal.cheermanager.Models.Org_dep.CategoriaNivel;
 import com.varcal.cheermanager.Models.Org_dep.Nivel;
 import com.varcal.cheermanager.Models.Org_dep.ReglaCategoria;
 import com.varcal.cheermanager.repository.Org_dep.CategoriaNivelRepository;
-import com.varcal.cheermanager.repository.Org_dep.DivisionRepository;
 import com.varcal.cheermanager.repository.Org_dep.EstadoCategoriaNivelRepository;
 import com.varcal.cheermanager.repository.Org_dep.NivelRepository;
 import com.varcal.cheermanager.repository.Org_dep.ReglaCategoriaRepository;
@@ -26,9 +25,7 @@ public class NivelService {
     @Autowired
     private CategoriaNivelRepository categoriaNivelRepository;
 
-    @Autowired
-    private DivisionRepository divisionRepository;
-
+    @SuppressWarnings("unused")
     @Autowired
     private EstadoCategoriaNivelRepository estadoCategoriaNivelRepository;
 

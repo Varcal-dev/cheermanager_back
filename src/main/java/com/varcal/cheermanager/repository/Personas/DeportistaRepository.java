@@ -14,6 +14,7 @@ public interface DeportistaRepository extends JpaRepository<Deportista, Integer>
     @Query(value = "SELECT * FROM vista_info_deportistas", nativeQuery = true)
     List<Object[]> obtenerDeportistasConDetalles();
 
+    @SuppressWarnings("null")
     Optional<Deportista> findById(Integer id);
 
 }
