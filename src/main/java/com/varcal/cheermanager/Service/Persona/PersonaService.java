@@ -156,6 +156,7 @@ public class PersonaService {
         return deportistaRepository.findById(id).map(deportista -> {
             Persona persona = deportista.getPersona();
             persona.setNombre(deportistaDTO.getNombre());
+            persona.setApellidos(deportistaDTO.getApellidos());
             persona.setDireccion(deportistaDTO.getDireccion());
             persona.setTelefono(deportistaDTO.getTelefono());
             persona.setFechaNacimiento(deportistaDTO.getFechaNacimiento());
@@ -163,6 +164,8 @@ public class PersonaService {
             personaRepository.save(persona);
 
             deportista.setEstadoId(deportistaDTO.getEstadoId());
+            deportista.setAltura(deportistaDTO.getAltura());
+            deportista.setPeso(deportistaDTO.getPeso());
             deportista.setNivelActualId(deportistaDTO.getNivelActualId());
             deportista.setFechaRegistro(deportistaDTO.getFechaRegistro());
             deportista.setContactoEmergencia(deportistaDTO.getContactoEmergencia());
