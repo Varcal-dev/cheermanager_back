@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -36,7 +37,7 @@ public class EntrenadoresController {
         }
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     @RequiresPermission("modificar_entrenador")
     public ResponseEntity<?> modificarEntrenador(@PathVariable Integer id, @RequestBody EntrenadorDTO entrenadorDTO) {
         try {
@@ -60,7 +61,8 @@ public class EntrenadoresController {
         }
     }
 
-    @DeleteMapping("/{id}")
+    /* 
+    @PatchMapping("/{id}")
     @RequiresPermission("eliminar_entrenador")
     public ResponseEntity<?> eliminarEntrenador(@PathVariable Integer id) {
         try {
@@ -71,5 +73,5 @@ public class EntrenadoresController {
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error al eliminar el entrenador: " + e.getMessage());
         }
-    }
+    }*/
 }

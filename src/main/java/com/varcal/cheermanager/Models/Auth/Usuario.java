@@ -2,6 +2,9 @@ package com.varcal.cheermanager.Models.Auth;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
+
 import com.varcal.cheermanager.Models.Personas.Persona;
 
 import jakarta.persistence.*;
@@ -11,6 +14,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @Entity
+@SQLDelete(sql = "UPDATE usuario SET activo = false WHERE id = ?")
+@Where(clause = "activo = true")
 @Table(name = "usuarios")
 public class Usuario {
     @Id
