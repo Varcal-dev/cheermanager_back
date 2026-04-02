@@ -1,13 +1,15 @@
 package com.varcal.cheermanager.Service.Auth;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
+import com.varcal.cheermanager.Models.Auth.Rol;
+import com.varcal.cheermanager.Models.Auth.Usuario;
 import com.varcal.cheermanager.repository.Auth.UserRepository;
+import com.varcal.cheermanager.security.JwtUtil;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -17,27 +19,58 @@ public class AuthService {
     @Autowired
     private UserRepository userRepository;
 
-    public String authenticate(String email, String password, HttpServletRequest request) {
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    public LoginResult authenticate(String email, String password) {
         return userRepository.findByEmail(email).map(user -> {
             try {
                 boolean isAuthenticated = BCrypt.checkpw(password, user.getPasswordHash());
                 if (isAuthenticated) {
-                    // Llamar al procedimiento almacenado para actualizar el último acceso
                     userRepository.actualizar_ultimo_acceso(user.getId(), java.time.LocalDateTime.now());
 
-                    // Guardar información del usuario en la sesión
-                    HttpSession session = request.getSession();
-                    session.setAttribute("userId", user.getId());
-                    session.setAttribute("email", user.getEmail());
-                    return "success"; // Login exitoso
+                    Rol rol = user.getRol();
+                    List<String> permisos = (rol != null && rol.getPermisos() != null)
+                            ? rol.getPermisos().stream().map(p -> p.getNombre()).collect(Collectors.toList())
+                            : List.of();
+
+                    String token = jwtUtil.generateToken(user.getId().longValue(), user.getEmail(),
+                            rol != null ? rol.getNombre() : "", permisos);
+
+                    return new LoginResult(true, token, null);
                 } else {
-                    return "invalid_password"; // Contraseña incorrecta
+                    return new LoginResult(false, null, "invalid_password");
                 }
             } catch (IllegalArgumentException e) {
-                return "invalid_hash"; // Hash inválido
+                return new LoginResult(false, null, "invalid_hash");
             }
-        }).orElse("email_not_found"); // Correo no encontrado
+        }).orElse(new LoginResult(false, null, "email_not_found"));
     }
+
+    public static class LoginResult {
+        private final boolean success;
+        private final String token;
+        private final String errorCode;
+
+        public LoginResult(boolean success, String token, String errorCode) {
+            this.success = success;
+            this.token = token;
+            this.errorCode = errorCode;
+        }
+
+        public boolean isSuccess() {
+            return success;
+        }
+
+        public String getToken() {
+            return token;
+        }
+
+        public String getErrorCode() {
+            return errorCode;
+        }
+    }
+
 
     public boolean tienePermiso(int userId, String permisoRequerido) {
         return userRepository.findById((long) userId).map(user -> {

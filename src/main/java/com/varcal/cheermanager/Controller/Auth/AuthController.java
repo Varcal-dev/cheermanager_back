@@ -1,13 +1,14 @@
 package com.varcal.cheermanager.Controller.Auth;
 
+import com.varcal.cheermanager.Service.Auth.AuthService;
+import com.varcal.cheermanager.security.JwtUtil;
+import com.varcal.cheermanager.security.TokenBlacklistService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.varcal.cheermanager.Service.Auth.AuthService;
-
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
+import java.util.Date;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -16,40 +17,60 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @Autowired
+    private TokenBlacklistService tokenBlacklistService;
+
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
-        String authResult = authService.authenticate(loginRequest.getEmail(), loginRequest.getPassword(), request);
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+        AuthService.LoginResult result = authService.authenticate(loginRequest.getEmail(), loginRequest.getPassword());
 
-        switch (authResult) {
-            case "success":
-                return ResponseEntity.ok(new LoginResponse(true, "Login exitoso"));
-
-            case "invalid_password":
-                return ResponseEntity.status(401).body(new LoginResponse(false, "Contraseña incorrecta"));
-
-            case "email_not_found":
-                return ResponseEntity.status(404).body(new LoginResponse(false, "El correo proporcionado no está registrado"));
-
-            case "invalid_hash":
-                return ResponseEntity.status(500).body(new LoginResponse(false, "Error en el formato del hash de la contraseña"));
-
-            default:
-                return ResponseEntity.status(500).body(new LoginResponse(false, "Error desconocido"));
+        if (!result.isSuccess()) {
+            String code = result.getErrorCode();
+            switch (code) {
+                case "invalid_password":
+                    return ResponseEntity.status(401).body(Map.of("success", false, "message", "Contraseña incorrecta"));
+                case "email_not_found":
+                    return ResponseEntity.status(404).body(Map.of("success", false, "message", "El correo proporcionado no está registrado"));
+                case "invalid_hash":
+                    return ResponseEntity.status(500).body(Map.of("success", false, "message", "Error en el formato del hash de la contraseña"));
+                default:
+                    return ResponseEntity.status(500).body(Map.of("success", false, "message", "Error desconocido"));
+            }
         }
+
+        return ResponseEntity.ok(Map.of("success", true, "token", result.getToken()));
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpSession session) {
-        session.invalidate();
-        return ResponseEntity.ok("Sesión cerrada exitosamente");
+    public ResponseEntity<?> logout(@RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Token no proporcionado"));
+        }
+
+        String token = authorizationHeader.substring(7);
+
+        if (!jwtUtil.isTokenValid(token)) {
+            return ResponseEntity.status(400).body(Map.of("success", false, "message", "Token inválido o expirado"));
+        }
+
+        Date expiration;
+        try {
+            expiration = jwtUtil.getClaims(token).getExpiration();
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(Map.of("success", false, "message", "No se pudo obtener expiración del token"));
+        }
+        tokenBlacklistService.blacklistToken(token, expiration);
+
+        return ResponseEntity.ok(Map.of("success", true, "message", "Logout exitoso"));
     }
 
-    // Clase interna para manejar el cuerpo de la solicitud
     public static class LoginRequest {
         private String email;
         private String password;
 
-        // Getters y setters
         public String getEmail() {
             return email;
         }
@@ -64,33 +85,6 @@ public class AuthController {
 
         public void setPassword(String password) {
             this.password = password;
-        }
-    }
-
-    // Clase interna para manejar la respuesta
-    public static class LoginResponse {
-        private boolean success;
-        private String message;
-
-        public LoginResponse(boolean success, String message) {
-            this.success = success;
-            this.message = message;
-        }
-
-        public boolean isSuccess() {
-            return success;
-        }
-
-        public void setSuccess(boolean success) {
-            this.success = success;
-        }
-
-        public String getMessage() {
-            return message;
-        }
-
-        public void setMessage(String message) {
-            this.message = message;
         }
     }
 }
