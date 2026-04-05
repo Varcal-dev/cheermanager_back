@@ -1,8 +1,10 @@
 package com.varcal.cheermanager.Controller.Persona;
 
-import jakarta.servlet.http.HttpSession;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -168,8 +170,8 @@ public class UserController {
 
     @GetMapping("/permisos")
     //@RequiresPermission("ver_permisos")
-    public ResponseEntity<?> getPermisos(HttpSession session) {
-        Integer userId = (Integer) session.getAttribute("userId");
+    public ResponseEntity<?> getPermisos() {
+        Integer userId = getAuthenticatedUserId();
         if (userId == null) {
             return ResponseEntity.status(401).body("Usuario no autenticado");
         }
@@ -183,17 +185,33 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<?> getCurrentUser(HttpSession session) {
-        Integer userId = (Integer) session.getAttribute("userId");
+    public ResponseEntity<?> getCurrentUser() {
+        Integer userId = getAuthenticatedUserId();
 
         if (userId == null) {
             return ResponseEntity.status(401).body("No hay usuario autenticado");
         }
 
-        // Obtener el usuario desde la base de datos y mapearlo al DTO
         return userRepository.findById((long) userId)
-                .map(user -> ResponseEntity.ok(new UsuarioDTO(user))) // Usar el DTO
+                .map(user -> ResponseEntity.ok(new UsuarioDTO(user)))
                 .orElseGet(() -> ResponseEntity.status(404).body(null));
+    }
+
+    private Integer getAuthenticatedUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return null;
+        }
+
+        Object details = authentication.getDetails();
+        if (details instanceof Map<?, ?> detailMap) {
+            Object userId = detailMap.get("userId");
+            if (userId instanceof Number) {
+                return ((Number) userId).intValue();
+            }
+        }
+
+        return null;
     }
 
     @GetMapping("/genero/listar")

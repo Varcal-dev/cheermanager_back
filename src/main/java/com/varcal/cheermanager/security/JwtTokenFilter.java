@@ -15,6 +15,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
@@ -51,7 +52,11 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 User userDetails = new User(email, "", authorities);
 
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, token, authorities);
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                authToken.setDetails(Map.of(
+                        "userId", id,
+                        "token", token,
+                        "requestDetails", new WebAuthenticationDetailsSource().buildDetails(request)
+                ));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
