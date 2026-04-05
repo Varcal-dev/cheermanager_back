@@ -2,7 +2,8 @@ package com.varcal.cheermanager.Models.Org_dep;
 
 import java.time.LocalDate;
 
-import com.varcal.cheermanager.Models.Financiero.PlanPago;
+import com.varcal.cheermanager.Models.Financiero.PlanMensualidad;
+import com.varcal.cheermanager.Models.Financiero.PlanMensualidad;
 import com.varcal.cheermanager.Models.Personas.Deportista;
 
 import jakarta.persistence.Id;
@@ -36,7 +37,7 @@ public class Inscripcion {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "plan_pago_id")
-    private PlanPago planPago;
+    private PlanMensualidad planPago;
 
     @Column(name = "fecha_inscripcion", nullable = false)
     private LocalDate fechaInscripcion;

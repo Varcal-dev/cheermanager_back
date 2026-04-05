@@ -22,8 +22,9 @@ public class Deportista {
     @JoinColumn(name = "persona_id", nullable = false)
     private Persona persona;
 
-    @Column(name = "estado_id")
-    private Integer estadoId;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "estado_id")
+    private EstadoPersona estado;
 
     @Column(name = "altura")
     private Integer altura;

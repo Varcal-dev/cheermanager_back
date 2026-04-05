@@ -6,13 +6,15 @@ import java.time.LocalDate;
 import lombok.Data;
 
 @Data
-public class PlanPagoDTO {
-    private Integer tipoPlan; // solo el ID
+public class PlanMensualidadResponseDTO {
+    private Integer id;
+    private String nombre;
+    private String tipoPlan;
     private String descripcion;
     private BigDecimal valorMensual;
+    private BigDecimal descuentoPorcentaje;
+    private Integer sesionesSemanales;
+    private Boolean activo;
     private LocalDate fechaVigenciaInicio;
     private LocalDate fechaVigenciaFin;
-    private Boolean activo;
-
-    // getters y setters
 }

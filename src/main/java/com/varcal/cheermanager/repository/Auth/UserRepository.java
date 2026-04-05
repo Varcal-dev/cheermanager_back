@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.data.repository.query.Param;
 
 import com.varcal.cheermanager.Models.Auth.Usuario;
+import com.varcal.cheermanager.Models.Personas.Persona;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -12,6 +13,7 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<Usuario, Long> {
 
     Optional<Usuario> findByEmail(String email);
+    Optional<Usuario> findByPersona(Persona persona);
 
     @Procedure(name = "actualizar_ultimo_acceso")
     void actualizar_ultimo_acceso(@Param("p_usuario_id") Integer usuarioId,
@@ -19,4 +21,7 @@ public interface UserRepository extends JpaRepository<Usuario, Long> {
 
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
+
+    long countByUsernameStartingWith(String base);
+
 }
