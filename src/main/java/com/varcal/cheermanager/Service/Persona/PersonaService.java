@@ -3,15 +3,22 @@ package com.varcal.cheermanager.Service.Persona;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.varcal.cheermanager.DTO.Persona.DeportistaDTO;
 import com.varcal.cheermanager.DTO.Persona.EntrenadorDTO;
 import com.varcal.cheermanager.DTO.Persona.PersonaDTO;
 import com.varcal.cheermanager.DTO.Persona.DeportistaVistaDTO;
+import com.varcal.cheermanager.DTO.Persona.DeportistaPerfilCompletoDTO;
+import com.varcal.cheermanager.DTO.Persona.VincularDeportistaUsuarioDTO;
+import com.varcal.cheermanager.DTO.Persona.ValidarDocumentoDTO;
+import com.varcal.cheermanager.DTO.Persona.HistorialDeportistaEstadoDTO;
+import com.varcal.cheermanager.DTO.Persona.UploadFotoDTO;
 import com.varcal.cheermanager.Models.Auth.Rol;
 import com.varcal.cheermanager.Models.Auth.Usuario;
 import com.varcal.cheermanager.Models.Personas.Deportista;
 import com.varcal.cheermanager.Models.Personas.Persona;
+import com.varcal.cheermanager.Models.Personas.HistorialDeportistaEstado;
 import com.varcal.cheermanager.Utils.UsernameUtils;
 import com.varcal.cheermanager.Models.Personas.Entrenador;
 import com.varcal.cheermanager.Models.Personas.EstadoPersona;
@@ -21,8 +28,11 @@ import com.varcal.cheermanager.repository.Personas.DeportistaRepository;
 import com.varcal.cheermanager.repository.Personas.PersonaRepository;
 import com.varcal.cheermanager.repository.Personas.EntrenadorRepository;
 import com.varcal.cheermanager.repository.Personas.EstadoPersonaRepository;
+import com.varcal.cheermanager.repository.Personas.HistorialDeportistaEstadoRepository;
+import com.varcal.cheermanager.Service.File.FileStorageService;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -46,6 +56,12 @@ public class PersonaService {
 
     @Autowired
     private EstadoPersonaRepository estadoPersonaRepository;
+
+    @Autowired
+    private HistorialDeportistaEstadoRepository historialDeportistaEstadoRepository;
+
+    @Autowired
+    private FileStorageService fileStorageService;
 
     public String generarUsername(String nombre, String apellidos) {
 
@@ -133,10 +149,15 @@ public class PersonaService {
     // Este método recibe un DTO de Deportista y lo convierte a una entidad
     // Deportista
     public Deportista registrarDeportista(DeportistaDTO deportistaDTO) {
+        // Validar documento único
+        validarDocumentoEnRegistro(deportistaDTO.getNumeroDocumento());
+
         // Registrar la persona
         Persona persona = new Persona();
         persona.setNombre(deportistaDTO.getNombre());
         persona.setApellidos(deportistaDTO.getApellidos());
+        persona.setNumeroDocumento(deportistaDTO.getNumeroDocumento());
+        persona.setTipoDocumento(deportistaDTO.getTipoDocumento());
         persona.setDireccion(deportistaDTO.getDireccion());
         persona.setTelefono(deportistaDTO.getTelefono());
         persona.setFechaNacimiento(deportistaDTO.getFechaNacimiento());
@@ -173,16 +194,31 @@ public class PersonaService {
     public Deportista modificarDeportista(Integer id, DeportistaDTO deportistaDTO) {
         return deportistaRepository.findById(id).map(deportista -> {
             Persona persona = deportista.getPersona();
+
+            // Validar documento único si está siendo modificado
+            if (deportistaDTO.getNumeroDocumento() != null && !deportistaDTO.getNumeroDocumento().isEmpty()) {
+                validarDocumentoEnModificacion(persona.getId(), deportistaDTO.getNumeroDocumento());
+            }
+
             persona.setNombre(deportistaDTO.getNombre());
             persona.setApellidos(deportistaDTO.getApellidos());
+            persona.setNumeroDocumento(deportistaDTO.getNumeroDocumento());
+            persona.setTipoDocumento(deportistaDTO.getTipoDocumento());
             persona.setDireccion(deportistaDTO.getDireccion());
             persona.setTelefono(deportistaDTO.getTelefono());
             persona.setFechaNacimiento(deportistaDTO.getFechaNacimiento());
             persona.setGeneroId(deportistaDTO.getGeneroId());
             personaRepository.save(persona);
 
+            // Registrar cambio de estado si es que hay
+            EstadoPersona estadoAnterior = deportista.getEstado();
             EstadoPersona estado = estadoPersonaRepository.findById(deportistaDTO.getEstadoId())
                     .orElseThrow(() -> new RuntimeException("Estado no encontrado"));
+
+            if (!estado.getId().equals(estadoAnterior.getId())) {
+                registrarCambioEstado(deportista, estadoAnterior, estado, null, null);
+            }
+
             deportista.setEstado(estado);
             deportista.setAltura(deportistaDTO.getAltura());
             deportista.setPeso(deportistaDTO.getPeso());
@@ -234,16 +270,346 @@ public class PersonaService {
         }).collect(Collectors.toList());
     }
 
+    // Método para listar deportistas con filtros (estado, nivel, grupo)
+    public List<DeportistaVistaDTO> listarDeportistasConFiltros(Integer estadoId, Integer nivelId, Integer grupoId) {
+        List<Deportista> deportistas = deportistaRepository.findByFiltros(estadoId, nivelId, grupoId);
+
+        if (deportistas.isEmpty()) {
+            return List.of();
+        }
+
+        // Mapear entidades a DTOs
+        return deportistas.stream().map(deportista -> {
+            DeportistaVistaDTO dto = new DeportistaVistaDTO();
+            Persona persona = deportista.getPersona();
+
+            dto.setDeportistaId(deportista.getId());
+            dto.setPersonaId(persona.getId());
+            dto.setNombre(persona.getNombre());
+            dto.setApellidos(persona.getApellidos());
+            dto.setDireccion(persona.getDireccion());
+            dto.setTelefono(persona.getTelefono());
+            dto.setFechaNacimiento(persona.getFechaNacimiento());
+            dto.setGeneroId(persona.getGeneroId());
+            dto.setAltura(deportista.getAltura() != null ? deportista.getAltura().floatValue() : null);
+            dto.setPeso(deportista.getPeso() != null ? deportista.getPeso().floatValue() : null);
+            dto.setFechaRegistro(deportista.getFechaRegistro());
+            dto.setContactoEmergencia(deportista.getContactoEmergencia());
+
+            if (deportista.getEstado() != null) {
+                dto.setEstadoId(deportista.getEstado().getId());
+                dto.setEstadoNombre(deportista.getEstado().getNombre());
+            }
+
+            dto.setNivelActualId(deportista.getNivelActualId());
+            dto.setConvenioId(deportista.getConvenioId());
+
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
+    // Método para obtener el perfil completo del deportista
+    public DeportistaPerfilCompletoDTO obtenerPerfilCompleto(Integer deportistaId) {
+        Deportista deportista = deportistaRepository.findById(deportistaId)
+                .orElseThrow(() -> new RuntimeException("Deportista no encontrado con ID: " + deportistaId));
+
+        DeportistaPerfilCompletoDTO perfil = new DeportistaPerfilCompletoDTO();
+        Persona persona = deportista.getPersona();
+
+        // Datos personales
+        perfil.setDeportistaId(deportista.getId());
+        perfil.setPersonaId(persona.getId());
+        perfil.setNombre(persona.getNombre());
+        perfil.setApellidos(persona.getApellidos());
+        perfil.setDireccion(persona.getDireccion());
+        perfil.setTelefono(persona.getTelefono());
+        perfil.setFechaNacimiento(persona.getFechaNacimiento());
+        perfil.setGeneroId(persona.getGeneroId());
+
+        // Datos deportivos
+        perfil.setAltura(deportista.getAltura() != null ? deportista.getAltura().floatValue() : null);
+        perfil.setPeso(deportista.getPeso() != null ? deportista.getPeso().floatValue() : null);
+        perfil.setFechaRegistro(deportista.getFechaRegistro());
+        perfil.setContactoEmergencia(deportista.getContactoEmergencia());
+
+        if (deportista.getEstado() != null) {
+            perfil.setEstadoId(deportista.getEstado().getId());
+            perfil.setEstadoNombre(deportista.getEstado().getNombre());
+        }
+
+        perfil.setNivelActualId(deportista.getNivelActualId());
+        perfil.setConvenioId(deportista.getConvenioId());
+
+        // Información del usuario vinculado
+        Usuario usuario = userRepository.findByPersona(persona).orElse(null);
+        if (usuario != null) {
+            perfil.setUsuarioId(usuario.getId());
+            perfil.setUsername(usuario.getUsername());
+            perfil.setEmail(usuario.getEmail());
+            perfil.setUsuarioActivo(usuario.getActivo());
+            perfil.setUltimoAcceso(usuario.getUltimoAcceso());
+
+            // Roles del usuario
+            List<String> roleNames = usuario.getRoles().stream()
+                    .map(Rol::getNombre)
+                    .collect(Collectors.toList());
+            perfil.setRoles(roleNames);
+
+            // Permisos del usuario
+            List<String> permisos = usuario.getRoles().stream()
+                    .flatMap(rol -> rol.getPermisos().stream())
+                    .map(p -> p.getNombre())
+                    .distinct()
+                    .collect(Collectors.toList());
+            perfil.setPermisos(permisos);
+        }
+
+        return perfil;
+    }
+
+    // Método para vincular un deportista con un usuario existente
+    public void vincularDeportistaConUsuario(Integer deportistaId, Integer usuarioId) {
+        Deportista deportista = deportistaRepository.findById(deportistaId)
+                .orElseThrow(() -> new RuntimeException("Deportista no encontrado con ID: " + deportistaId));
+
+        Usuario usuario = userRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + usuarioId));
+
+        // Validar que el usuario no esté ya vinculado a otra persona
+        if (usuario.getPersona() != null) {
+            throw new RuntimeException("El usuario " + usuario.getUsername() + " ya está vinculado a otra persona");
+        }
+
+        // Validar que el deportista no esté ya vinculado a otro usuario
+        Usuario usuarioExistente = userRepository.findByPersona(deportista.getPersona()).orElse(null);
+        if (usuarioExistente != null && !usuarioExistente.getId().equals(usuarioId)) {
+            throw new RuntimeException("El deportista ya está vinculado al usuario " + usuarioExistente.getUsername());
+        }
+
+        // Vincular
+        usuario.setPersona(deportista.getPersona());
+        userRepository.save(usuario);
+    }
+
+    // Método para desvinculcar un deportista de su usuario
+    public void desvinculcarDeportistaDeUsuario(Integer deportistaId) {
+        Deportista deportista = deportistaRepository.findById(deportistaId)
+                .orElseThrow(() -> new RuntimeException("Deportista no encontrado con ID: " + deportistaId));
+
+        Usuario usuario = userRepository.findByPersona(deportista.getPersona())
+                .orElseThrow(() -> new RuntimeException("El deportista no tiene un usuario vinculado"));
+
+        // Desvinculcar
+        usuario.setPersona(null);
+        userRepository.save(usuario);
+    }
+
+    // Método para obtener el usuario vinculado a un deportista
+    public Usuario obtenerUsuarioDeDeportista(Integer deportistaId) {
+        Deportista deportista = deportistaRepository.findById(deportistaId)
+                .orElseThrow(() -> new RuntimeException("Deportista no encontrado con ID: " + deportistaId));
+
+        return userRepository.findByPersona(deportista.getPersona())
+                .orElseThrow(() -> new RuntimeException("El deportista no tiene un usuario vinculado"));
+    }
+
+    // Método para validar si un documento de identidad está disponible (único)
+    public ValidarDocumentoDTO validarDocumentoUnico(String numeroDocumento) {
+        if (numeroDocumento == null || numeroDocumento.trim().isEmpty()) {
+            return new ValidarDocumentoDTO(false, "El número de documento no puede estar vacío");
+        }
+
+        java.util.Optional<Persona> persona = personaRepository.findByNumeroDocumento(numeroDocumento);
+        if (persona.isPresent()) {
+            return new ValidarDocumentoDTO(false, "El documento " + numeroDocumento + " ya está registrado");
+        }
+
+        return new ValidarDocumentoDTO(true, "El documento " + numeroDocumento + " está disponible");
+    }
+
+    // Validación en el registro de deportista
+    private void validarDocumentoEnRegistro(String numeroDocumento) {
+        if (numeroDocumento != null && !numeroDocumento.trim().isEmpty()) {
+            java.util.Optional<Persona> persona = personaRepository.findByNumeroDocumento(numeroDocumento);
+            if (persona.isPresent()) {
+                throw new RuntimeException("El documento " + numeroDocumento + " ya está registrado en el sistema");
+            }
+        }
+    }
+
+    // Validación en la modificación de deportista
+    private void validarDocumentoEnModificacion(Integer personaId, String numeroDocumento) {
+        if (numeroDocumento != null && !numeroDocumento.trim().isEmpty()) {
+            java.util.Optional<Persona> persona = personaRepository.findByNumeroDocumento(numeroDocumento);
+            if (persona.isPresent() && !persona.get().getId().equals(personaId)) {
+                throw new RuntimeException("El documento " + numeroDocumento + " ya está registrado en otro deportista");
+            }
+        }
+    }
+
+    // Método para registrar cambios de estado en el historial
+    private void registrarCambioEstado(Deportista deportista, EstadoPersona estadoAnterior,
+                                       EstadoPersona estadoNuevo, Integer usuarioId, String motivo) {
+        // No registrar si el estado no cambió
+        if (estadoAnterior != null && estadoAnterior.getId().equals(estadoNuevo.getId())) {
+            return;
+        }
+
+        HistorialDeportistaEstado historial = new HistorialDeportistaEstado();
+        historial.setDeportista(deportista);
+        historial.setEstadoAnterior(estadoAnterior);
+        historial.setEstadoNuevo(estadoNuevo);
+        historial.setFechaCambio(LocalDateTime.now());
+        historial.setUsuarioId(usuarioId);
+        historial.setMotivoCambio(motivo);
+        historialDeportistaEstadoRepository.save(historial);
+    }
+
+    // Método para obtener el historial de cambios de estado de un deportista
+    public List<HistorialDeportistaEstadoDTO> obtenerHistorialEstadoDeportista(Integer deportistaId) {
+        Deportista deportista = deportistaRepository.findById(deportistaId)
+                .orElseThrow(() -> new RuntimeException("Deportista no encontrado con ID: " + deportistaId));
+
+        List<HistorialDeportistaEstado> historial = historialDeportistaEstadoRepository
+                .findByDeportistaIdOrderByFechaCambioDesc(deportistaId);
+
+        return historial.stream().map(h -> {
+            HistorialDeportistaEstadoDTO dto = new HistorialDeportistaEstadoDTO();
+            dto.setId(h.getId());
+            dto.setDeportistaId(h.getDeportista().getId());
+            dto.setNombreDeportista(h.getDeportista().getPersona().getNombre());
+            dto.setApellidosDeportista(h.getDeportista().getPersona().getApellidos());
+
+            if (h.getEstadoAnterior() != null) {
+                dto.setEstadoAnteriorId(h.getEstadoAnterior().getId());
+                dto.setEstadoAnteriorNombre(h.getEstadoAnterior().getNombre());
+            }
+
+            dto.setEstadoNuevoId(h.getEstadoNuevo().getId());
+            dto.setEstadoNuevoNombre(h.getEstadoNuevo().getNombre());
+            dto.setFechaCambio(h.getFechaCambio());
+            dto.setUsuarioId(h.getUsuarioId());
+
+            if (h.getUsuarioId() != null) {
+                java.util.Optional<Usuario> usuario = userRepository.findById(h.getUsuarioId());
+                if (usuario.isPresent()) {
+                    dto.setUsuarioUsername(usuario.get().getUsername());
+                }
+            }
+
+            dto.setMotivoCambio(h.getMotivoCambio());
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
+    // Método para obtener todo el historial de cambios de estado
+    public List<HistorialDeportistaEstadoDTO> obtenerHistorialEstadoGlobal() {
+        List<HistorialDeportistaEstado> historial = historialDeportistaEstadoRepository.findAllByOrderByFechaCambioDesc();
+
+        return historial.stream().map(h -> {
+            HistorialDeportistaEstadoDTO dto = new HistorialDeportistaEstadoDTO();
+            dto.setId(h.getId());
+            dto.setDeportistaId(h.getDeportista().getId());
+            dto.setNombreDeportista(h.getDeportista().getPersona().getNombre());
+            dto.setApellidosDeportista(h.getDeportista().getPersona().getApellidos());
+
+            if (h.getEstadoAnterior() != null) {
+                dto.setEstadoAnteriorId(h.getEstadoAnterior().getId());
+                dto.setEstadoAnteriorNombre(h.getEstadoAnterior().getNombre());
+            }
+
+            dto.setEstadoNuevoId(h.getEstadoNuevo().getId());
+            dto.setEstadoNuevoNombre(h.getEstadoNuevo().getNombre());
+            dto.setFechaCambio(h.getFechaCambio());
+            dto.setUsuarioId(h.getUsuarioId());
+
+            if (h.getUsuarioId() != null) {
+                java.util.Optional<Usuario> usuario = userRepository.findById(h.getUsuarioId());
+                if (usuario.isPresent()) {
+                    dto.setUsuarioUsername(usuario.get().getUsername());
+                }
+            }
+
+            dto.setMotivoCambio(h.getMotivoCambio());
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
+    // Método para guardar foto de perfil del deportista
+    public UploadFotoDTO guardarFotoDeportista(Integer deportistaId, MultipartFile archivo) {
+        try {
+            Deportista deportista = deportistaRepository.findById(deportistaId)
+                    .orElseThrow(() -> new RuntimeException("Deportista no encontrado con ID: " + deportistaId));
+
+            // Eliminar foto anterior si existe
+            if (deportista.getFotoPerfil() != null && !deportista.getFotoPerfil().isEmpty()) {
+                try {
+                    fileStorageService.eliminarFoto(deportista.getFotoPerfil());
+                } catch (Exception e) {
+                    // Log del error pero continuar
+                }
+            }
+
+            // Guardar nueva foto
+            String rutaFoto = fileStorageService.guardarFoto(archivo, "deportistas");
+
+            // Actualizar deportista con la ruta de la foto
+            deportista.setFotoPerfil(rutaFoto);
+            deportistaRepository.save(deportista);
+
+            return new UploadFotoDTO(
+                    true,
+                    "Foto guardada exitosamente",
+                    archivo.getOriginalFilename(),
+                    "/api/deportistas/" + deportistaId + "/foto"
+            );
+        } catch (Exception e) {
+            return new UploadFotoDTO(
+                    false,
+                    "Error al guardar la foto: " + e.getMessage(),
+                    null,
+                    null
+            );
+        }
+    }
+
+    // Método para obtener la foto del deportista
+    public byte[] obtenerFotoDeportista(Integer deportistaId) throws Exception {
+        Deportista deportista = deportistaRepository.findById(deportistaId)
+                .orElseThrow(() -> new RuntimeException("Deportista no encontrado con ID: " + deportistaId));
+
+        if (deportista.getFotoPerfil() == null || deportista.getFotoPerfil().isEmpty()) {
+            throw new RuntimeException("El deportista no tiene foto de perfil");
+        }
+
+        return fileStorageService.descargarFoto(deportista.getFotoPerfil());
+    }
+
+    // Método para eliminar foto del deportista
+    public void eliminarFotoDeportista(Integer deportistaId) throws Exception {
+        Deportista deportista = deportistaRepository.findById(deportistaId)
+                .orElseThrow(() -> new RuntimeException("Deportista no encontrado con ID: " + deportistaId));
+
+        if (deportista.getFotoPerfil() != null && !deportista.getFotoPerfil().isEmpty()) {
+            fileStorageService.eliminarFoto(deportista.getFotoPerfil());
+            deportista.setFotoPerfil(null);
+            deportistaRepository.save(deportista);
+        }
+    }
+
     // Método para eliminar un deportista
     public void eliminarDeportista(Integer deportistaId) {
 
         Deportista deportista = deportistaRepository.findById(deportistaId)
                 .orElseThrow(() -> new RuntimeException("Deportista no encontrado"));
 
-        // Cambiar estado: obtener la entidad EstadoPersona con ID 2 (Retirado) y
-        // setearla
+        // Cambiar estado: obtener la entidad EstadoPersona con ID 2 (Retirado) y setearla
         EstadoPersona estadoRetirado = estadoPersonaRepository.findById(2)
                 .orElseThrow(() -> new RuntimeException("Estado 'Retirado' no encontrado"));
+
+        // Registrar el cambio de estado en el historial
+        registrarCambioEstado(deportista, deportista.getEstado(), estadoRetirado, null, "Deportista eliminado del sistema");
+
         deportista.setEstado(estadoRetirado);
         deportistaRepository.save(deportista);
 

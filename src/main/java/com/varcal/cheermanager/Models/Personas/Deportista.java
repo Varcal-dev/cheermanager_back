@@ -44,6 +44,9 @@ public class Deportista {
     @Column(name = "convenio_id")
     private Integer convenioId;
 
+    @Column(name = "foto_perfil")
+    private String fotoPerfil;
+
     @OneToMany(mappedBy = "deportista", cascade = CascadeType.ALL)
     private List<DeportistaPerteneceGrupo> historialGrupos;
 
