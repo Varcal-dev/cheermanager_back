@@ -97,13 +97,13 @@ public class UsuarioService {
             return Set.of();
         }
 
-        Set<String> permisos = Set.of();
+        Set<String> permisos = new java.util.HashSet<>();
 
         // Obtener permisos del rol único (si existe)
         if (usuario.getRol() != null && usuario.getRol().getPermisos() != null) {
-            permisos = usuario.getRol().getPermisos().stream()
+            permisos.addAll(usuario.getRol().getPermisos().stream()
                     .map(p -> p.getNombre())
-                    .collect(Collectors.toSet());
+                    .collect(Collectors.toSet()));
         }
 
         // Agregar permisos de múltiples roles

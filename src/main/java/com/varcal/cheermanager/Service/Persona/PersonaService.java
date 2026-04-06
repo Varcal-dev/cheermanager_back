@@ -298,7 +298,7 @@ public class PersonaService {
 
             if (deportista.getEstado() != null) {
                 dto.setEstadoId(deportista.getEstado().getId());
-                dto.setEstadoNombre(deportista.getEstado().getNombre());
+                dto.setEstadoNombre(deportista.getEstado().getEstado());
             }
 
             dto.setNivelActualId(deportista.getNivelActualId());
@@ -334,7 +334,7 @@ public class PersonaService {
 
         if (deportista.getEstado() != null) {
             perfil.setEstadoId(deportista.getEstado().getId());
-            perfil.setEstadoNombre(deportista.getEstado().getNombre());
+            perfil.setEstadoNombre(deportista.getEstado().getEstado());
         }
 
         perfil.setNivelActualId(deportista.getNivelActualId());
@@ -350,17 +350,17 @@ public class PersonaService {
             perfil.setUltimoAcceso(usuario.getUltimoAcceso());
 
             // Roles del usuario
-            List<String> roleNames = usuario.getRoles().stream()
+            List<String> roleNames = usuario.getRoles() != null ? usuario.getRoles().stream()
                     .map(Rol::getNombre)
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toList()) : List.of();
             perfil.setRoles(roleNames);
 
             // Permisos del usuario
-            List<String> permisos = usuario.getRoles().stream()
-                    .flatMap(rol -> rol.getPermisos().stream())
+            List<String> permisos = usuario.getRoles() != null ? usuario.getRoles().stream()
+                    .flatMap(rol -> rol.getPermisos() != null ? rol.getPermisos().stream() : java.util.stream.Stream.empty())
                     .map(p -> p.getNombre())
                     .distinct()
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toList()) : List.of();
             perfil.setPermisos(permisos);
         }
 
@@ -372,7 +372,7 @@ public class PersonaService {
         Deportista deportista = deportistaRepository.findById(deportistaId)
                 .orElseThrow(() -> new RuntimeException("Deportista no encontrado con ID: " + deportistaId));
 
-        Usuario usuario = userRepository.findById(usuarioId)
+        Usuario usuario = userRepository.findById(usuarioId.longValue())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + usuarioId));
 
         // Validar que el usuario no esté ya vinculado a otra persona
@@ -482,16 +482,16 @@ public class PersonaService {
 
             if (h.getEstadoAnterior() != null) {
                 dto.setEstadoAnteriorId(h.getEstadoAnterior().getId());
-                dto.setEstadoAnteriorNombre(h.getEstadoAnterior().getNombre());
+                dto.setEstadoAnteriorNombre(h.getEstadoAnterior().getEstado());
             }
 
             dto.setEstadoNuevoId(h.getEstadoNuevo().getId());
-            dto.setEstadoNuevoNombre(h.getEstadoNuevo().getNombre());
+            dto.setEstadoNuevoNombre(h.getEstadoNuevo().getEstado());
             dto.setFechaCambio(h.getFechaCambio());
             dto.setUsuarioId(h.getUsuarioId());
 
             if (h.getUsuarioId() != null) {
-                java.util.Optional<Usuario> usuario = userRepository.findById(h.getUsuarioId());
+                java.util.Optional<Usuario> usuario = userRepository.findById(h.getUsuarioId().longValue());
                 if (usuario.isPresent()) {
                     dto.setUsuarioUsername(usuario.get().getUsername());
                 }
@@ -515,16 +515,16 @@ public class PersonaService {
 
             if (h.getEstadoAnterior() != null) {
                 dto.setEstadoAnteriorId(h.getEstadoAnterior().getId());
-                dto.setEstadoAnteriorNombre(h.getEstadoAnterior().getNombre());
+                dto.setEstadoAnteriorNombre(h.getEstadoAnterior().getEstado());
             }
 
             dto.setEstadoNuevoId(h.getEstadoNuevo().getId());
-            dto.setEstadoNuevoNombre(h.getEstadoNuevo().getNombre());
+            dto.setEstadoNuevoNombre(h.getEstadoNuevo().getEstado());
             dto.setFechaCambio(h.getFechaCambio());
             dto.setUsuarioId(h.getUsuarioId());
 
             if (h.getUsuarioId() != null) {
-                java.util.Optional<Usuario> usuario = userRepository.findById(h.getUsuarioId());
+                java.util.Optional<Usuario> usuario = userRepository.findById(h.getUsuarioId().longValue());
                 if (usuario.isPresent()) {
                     dto.setUsuarioUsername(usuario.get().getUsername());
                 }
