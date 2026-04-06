@@ -37,6 +37,18 @@ public class Usuario {
     @Column(name = "activo", nullable = false)
     private Boolean activo;
 
+    @Column(name = "bloqueado", nullable = false)
+    private Boolean bloqueado = false;
+
+    @Column(name = "intentos_fallidos", nullable = false)
+    private Integer intentosFallidos = 0;
+
+    @Column(name = "token_reset_password")
+    private String tokenResetPassword;
+
+    @Column(name = "token_reset_password_expiracion")
+    private LocalDateTime tokenResetPasswordExpiracion;
+
     @ManyToOne
     @JoinColumn(name = "rol_id")
     private Rol rol;
