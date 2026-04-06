@@ -23,6 +23,9 @@ public class AuthService {
     private UserRepository userRepository;
 
     @Autowired
+    private UsuarioService usuarioService;
+
+    @Autowired
     private JwtUtil jwtUtil;
 
     @Value("${auth.max-login-attempts}")
@@ -49,13 +52,22 @@ public class AuthService {
                     user.setUltimoAcceso(LocalDateTime.now());
                     userRepository.save(user);
 
-                    Rol rol = user.getRol();
-                    List<String> permisos = (rol != null && rol.getPermisos() != null)
-                            ? rol.getPermisos().stream().map(p -> p.getNombre()).collect(Collectors.toList())
-                            : List.of();
+                    // Obtener permisos del usuario (soporta tanto rol único como múltiples roles)
+                    Set<String> permisos = usuarioService.obtenerPermisos(user.getId().intValue());
+                    List<String> permisosList = permisos.stream().collect(Collectors.toList());
+
+                    // Obtener nombre del rol principal (compatibilidad)
+                    String rolNombre = "";
+                    if (user.getRol() != null) {
+                        rolNombre = user.getRol().getNombre();
+                    } else if (user.getRoles() != null && !user.getRoles().isEmpty()) {
+                        rolNombre = user.getRoles().stream()
+                                .map(Rol::getNombre)
+                                .collect(Collectors.joining(", "));
+                    }
 
                     String token = jwtUtil.generateToken(user.getId().longValue(), user.getEmail(),
-                            rol != null ? rol.getNombre() : "", permisos);
+                            rolNombre, permisosList);
 
                     return new LoginResult(true, token, null);
                 } else {
@@ -131,18 +143,12 @@ public class AuthService {
     }
 
     public boolean tienePermiso(int userId, String permisoRequerido) {
-        return userRepository.findById((long) userId).map(user -> {
-            return user.getRol().getPermisos().stream()
-                    .anyMatch(permiso -> permiso.getNombre().equals(permisoRequerido));
-        }).orElse(false);
+        Set<String> permisos = usuarioService.obtenerPermisos(userId);
+        return permisos.contains(permisoRequerido);
     }
 
     public Set<String> getPermisosUsuario(int userId) {
-        return userRepository.findById((long) userId).map(user -> {
-            return user.getRol().getPermisos().stream()
-                    .map(permiso -> permiso.getNombre())
-                    .collect(Collectors.toSet());
-        }).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        return usuarioService.obtenerPermisos(userId);
     }
 
     public static class LoginResult {
