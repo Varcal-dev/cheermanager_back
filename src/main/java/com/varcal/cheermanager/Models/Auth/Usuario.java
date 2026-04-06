@@ -5,8 +5,6 @@ import java.time.LocalDateTime;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
-import com.varcal.cheermanager.Models.Personas.Persona;
-
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -40,8 +38,4 @@ public class Usuario {
     @ManyToOne
     @JoinColumn(name = "rol_id")
     private Rol rol;
-
-    @ManyToOne
-    @JoinColumn(name = "persona_id")
-    private Persona persona;
 }

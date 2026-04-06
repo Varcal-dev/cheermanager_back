@@ -2,8 +2,7 @@ package com.varcal.cheermanager.Models.Org_dep;
 
 import java.time.LocalDate;
 
-import com.varcal.cheermanager.Models.Financiero.PlanMensualidad;
-import com.varcal.cheermanager.Models.Financiero.PlanMensualidad;
+import com.varcal.cheermanager.Models.Financiero.PlanPago;
 import com.varcal.cheermanager.Models.Personas.Deportista;
 
 import jakarta.persistence.Id;
@@ -29,7 +28,7 @@ import jakarta.persistence.GenerationType;
 public class Inscripcion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "deportista_id")
@@ -37,7 +36,7 @@ public class Inscripcion {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "plan_pago_id")
-    private PlanMensualidad planPago;
+    private PlanPago planPago;
 
     @Column(name = "fecha_inscripcion", nullable = false)
     private LocalDate fechaInscripcion;
@@ -53,3 +52,4 @@ public class Inscripcion {
         Inactiva
     }
 }
+

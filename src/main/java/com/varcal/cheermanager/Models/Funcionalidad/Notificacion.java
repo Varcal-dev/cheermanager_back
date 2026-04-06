@@ -12,32 +12,28 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@NoArgsConstructor
 @Entity
-@Table(name = "logs_acceso")
-public class LogAcceso {
+@Table(name = "notificaciones")
+public class Notificacion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    
+    private Integer id;
+
     @ManyToOne
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
-    
-    @Column(name = "direccion_ip", nullable = false, length = 45)
-    private String direccionIp;
-    
-    @Column(name = "user_agent")
-    private String userAgent;
-    
-    @Column(name = "exito", nullable = false)
-    private Boolean exito = true;
-    
-    @Column(name = "mensaje_error")
-    private String mensajeError;
-    
-    @Column(name = "fecha_acceso", nullable = false)
-    private LocalDateTime fechaAcceso = LocalDateTime.now();
-    
-    // Getters, setters, constructores
+
+    @Column(name = "mensaje", nullable = false, columnDefinition = "TEXT")
+    private String mensaje;
+
+    @Column(name = "fecha", nullable = false)
+    private LocalDateTime fecha = LocalDateTime.now();
+
+    @Column(name = "vista", nullable = false)
+    private Boolean vista = false;
 }

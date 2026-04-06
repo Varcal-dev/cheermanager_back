@@ -1,5 +1,8 @@
 package com.varcal.cheermanager.Models.Inventario;
 
+
+import com.varcal.cheermanager.Models.Financiero.Factura;
+
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,8 +17,8 @@ public class DetalleVenta {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "venta_id", nullable = false)
-    private Venta venta;
+    @JoinColumn(name = "factura_id", nullable = false)
+    private Factura factura;
 
     @ManyToOne
     @JoinColumn(name = "producto_id", nullable = false)

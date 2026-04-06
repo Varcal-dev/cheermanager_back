@@ -30,6 +30,7 @@ public class Objetivo {
     @Column(name = "fecha_creacion", nullable = false)
     private LocalDate fechaCreacion;
 
-    @Column(name = "estado_objetivo_id", nullable = false)
-    private Integer estadoObjetivoId;
+    @ManyToOne
+    @JoinColumn(name = "estado_objetivo_id", nullable = false)
+    private EstadoObjetivo estadoObjetivo;
 }

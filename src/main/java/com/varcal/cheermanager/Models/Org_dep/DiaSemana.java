@@ -1,4 +1,4 @@
-package com.varcal.cheermanager.Models.Personas;
+package com.varcal.cheermanager.Models.Org_dep;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -9,15 +9,15 @@ import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity
 @Data
 @NoArgsConstructor
-@Table(name = "generos")
-public class Genero {
+@Entity
+@Table(name = "dias_semana")
+public class DiaSemana {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "genero", nullable = false)
-    private String genero;
+    @Column(name = "dia", nullable = false, unique = true)
+    private String dia;
 }

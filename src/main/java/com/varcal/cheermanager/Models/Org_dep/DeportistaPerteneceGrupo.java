@@ -15,7 +15,7 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "deportista_pertenece_grupo")
+@Table(name = "grupo_deportista")
 public class DeportistaPerteneceGrupo {
 
     @Id
@@ -23,14 +23,10 @@ public class DeportistaPerteneceGrupo {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "grupo_id")
+    @JoinColumn(name = "grupo_entrenamiento_id")
     private GrupoEntrenamiento grupo;
 
     @ManyToOne
     @JoinColumn(name = "deportista_id")
     private Deportista deportista;
-
-    private LocalDate fechaInicio;
-    private LocalDate fechaFin;
-    private String observaciones;
 }

@@ -1,6 +1,7 @@
 package com.varcal.cheermanager.Models.Eventos;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -21,12 +22,16 @@ public class Evento {
     @Column(name = "fecha")
     private LocalDate fecha;
 
-    @Column(name = "tipo_evento_id")
-    private Integer tipoEventoId;
+    @ManyToOne
+    @JoinColumn(name = "tipo_evento_id")
+    private TipoEvento tipoEvento;
 
     @Column(name = "ubicacion")
     private String ubicacion;
 
     @Column(name = "tiene_resultados", nullable = false)
     private Boolean tieneResultados;
+
+    @OneToMany(mappedBy = "evento", cascade = CascadeType.ALL)
+    private List<PremioEvento> premios;
 }

@@ -15,8 +15,8 @@ public class Entrenador {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne
-    @JoinColumn(name = "persona_id", nullable = false)
+    @OneToOne(optional = false)
+    @JoinColumn(name = "persona_id", nullable = false, unique = true)
     private Persona persona;
     
     @Column(name = "especializacion")
