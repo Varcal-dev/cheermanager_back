@@ -22,12 +22,13 @@ public class Asistencia {
     private Deportista deportista;
 
     @ManyToOne
-    @JoinColumn(name = "horario_entrenamiento_id", nullable = false)
-    private HorarioEntrenamiento horarioEntrenamiento;
+    @JoinColumn(name = "horario_id", nullable = false)
+    private Horario horario;
 
     @Column(name = "fecha", nullable = false)
     private LocalDate fecha;
 
-    @Column(name = "estado_asistencia_id", nullable = false)
-    private Integer estadoAsistenciaId;
+    @ManyToOne
+    @JoinColumn(name = "estado_asistencia_id", nullable = false)
+    private EstadoAsistencia estadoAsistencia;
 }

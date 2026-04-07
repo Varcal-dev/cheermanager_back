@@ -18,8 +18,8 @@ public class Deportista {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne
-    @JoinColumn(name = "persona_id", nullable = false)
+    @OneToOne(optional = false)
+    @JoinColumn(name = "persona_id", nullable = false, unique = true)
     private Persona persona;
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -35,7 +35,7 @@ public class Deportista {
     @Column(name = "nivel_actual_id")
     private Integer nivelActualId;
 
-    @Column(name = "fecha_registro")
+    @Column(name = "fecha_inscripcion")
     private LocalDate fechaRegistro;
 
     @Column(name = "contacto_emergencia")
