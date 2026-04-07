@@ -30,6 +30,7 @@ import com.varcal.cheermanager.Models.Personas.Genero;
 import com.varcal.cheermanager.Models.Personas.Persona;
 import com.varcal.cheermanager.Service.Auth.AuthService;
 import com.varcal.cheermanager.Service.Auth.RolService;
+import com.varcal.cheermanager.Service.Auth.UsuarioService;
 import com.varcal.cheermanager.Service.Persona.GeneroService;
 import com.varcal.cheermanager.Service.Persona.PersonaService;
 import com.varcal.cheermanager.Utils.RequiresPermission;
@@ -58,6 +59,9 @@ public class UserController {
 
     @Autowired
     private RolService rolService;
+
+    @Autowired
+    private UsuarioService usuarioService;
 
     @PostMapping("/registrar")
     @RequiresPermission("crear_usuario")
@@ -228,6 +232,47 @@ public class UserController {
     @GetMapping("/rol/listar-con-usuarios")
     public ResponseEntity<List<RolConConteoDTO>> listarConUsuarios() {
         return ResponseEntity.ok(rolService.listarRolesConConteo());
+    }
+
+    // Métodos para multi-rol support
+    @PostMapping("/{usuarioId}/asignar-roles")
+    @RequiresPermission("ASIGNAR_PERMISO")
+    public ResponseEntity<?> asignarRoles(@PathVariable Integer usuarioId, @RequestBody Set<Integer> rolIds) {
+        try {
+            Usuario usuarioActualizado = usuarioService.asignarRoles(usuarioId, rolIds);
+            if (usuarioActualizado == null) {
+                return ResponseEntity.status(404).body("Usuario no encontrado");
+            }
+            return ResponseEntity.ok(usuarioActualizado);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error al asignar roles: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/{usuarioId}/roles")
+    public ResponseEntity<?> obtenerRolesUsuario(@PathVariable Integer usuarioId) {
+        try {
+            Set<Rol> roles = usuarioService.obtenerRoles(usuarioId);
+            if (roles.isEmpty()) {
+                return ResponseEntity.status(404).body("Usuario sin roles asignados");
+            }
+            return ResponseEntity.ok(roles);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error al obtener roles: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/{usuarioId}/permisos-todos")
+    public ResponseEntity<?> obtenerPermisosUsuario(@PathVariable Integer usuarioId) {
+        try {
+            Set<String> permisos = usuarioService.obtenerPermisos(usuarioId);
+            if (permisos.isEmpty()) {
+                return ResponseEntity.status(404).body("Usuario sin permisos asignados");
+            }
+            return ResponseEntity.ok(permisos);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error al obtener permisos: " + e.getMessage());
+        }
     }
 
 }

@@ -14,6 +14,7 @@ public interface UserRepository extends JpaRepository<Usuario, Long> {
 
     Optional<Usuario> findByEmail(String email);
     Optional<Usuario> findByPersona(Persona persona);
+    Optional<Usuario> findByTokenResetPassword(String token);
 
     @Procedure(name = "actualizar_ultimo_acceso")
     void actualizar_ultimo_acceso(@Param("p_usuario_id") Integer usuarioId,

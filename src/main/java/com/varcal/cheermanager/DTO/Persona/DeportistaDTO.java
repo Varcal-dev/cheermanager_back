@@ -10,6 +10,8 @@ public class DeportistaDTO {
     private Integer id;
     private String nombre;
     private String apellidos;
+    private String numeroDocumento;
+    private String tipoDocumento;
     private String direccion;
     private String telefono;
     private LocalDate fechaNacimiento;
@@ -20,5 +22,5 @@ public class DeportistaDTO {
     private Integer nivelActualId;
     private LocalDate fechaRegistro;
     private String contactoEmergencia;
-    private Integer convenioId;   
+    private Integer convenioId;
 }

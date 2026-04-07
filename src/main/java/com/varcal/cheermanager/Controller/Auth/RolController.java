@@ -42,6 +42,15 @@ public class RolController {
         return rol != null ? ResponseEntity.ok(rol) : ResponseEntity.notFound().build();
     }
 
+    @GetMapping("/{id}/permisos")
+    public ResponseEntity<Object> getPermisosByRol(@PathVariable Integer id) {
+        Rol rol = rolService.getRolById(id);
+        if (rol == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(rol.getPermisos());
+    }
+
     @PostMapping
     public ResponseEntity<Rol> createRol(@RequestBody Rol rol) {
         Rol createdRol = rolService.createRol(rol);

@@ -18,8 +18,14 @@ public class Persona {
     @Column(name = "nombre", nullable = false)
     private String nombre;
 
-    @Column(name = "apellidos", nullable = false) // Agregar el campo apellidos
+    @Column(name = "apellidos", nullable = false)
     private String apellidos;
+
+    @Column(name = "numero_documento", unique = true)
+    private String numeroDocumento;
+
+    @Column(name = "tipo_documento")
+    private String tipoDocumento;
 
     @Column(name = "direccion")
     private String direccion;

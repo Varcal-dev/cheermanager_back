@@ -1,6 +1,7 @@
 package com.varcal.cheermanager.Service.Auth;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
@@ -9,8 +10,10 @@ import com.varcal.cheermanager.Models.Auth.Usuario;
 import com.varcal.cheermanager.repository.Auth.UserRepository;
 import com.varcal.cheermanager.security.JwtUtil;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,31 +23,132 @@ public class AuthService {
     private UserRepository userRepository;
 
     @Autowired
+    private UsuarioService usuarioService;
+
+    @Autowired
     private JwtUtil jwtUtil;
+
+    @Value("${auth.max-login-attempts}")
+    private int maxLoginAttempts;
+
+    @Value("${auth.lock-duration-minutes}")
+    private int lockDurationMinutes;
+
+    @Value("${auth.reset-password-token-expiration-minutes}")
+    private int resetPasswordTokenExpirationMinutes;
 
     public LoginResult authenticate(String email, String password) {
         return userRepository.findByEmail(email).map(user -> {
+            // Verificar si la cuenta está bloqueada
+            if (user.getBloqueado()) {
+                return new LoginResult(false, null, "account_locked");
+            }
+
             try {
                 boolean isAuthenticated = BCrypt.checkpw(password, user.getPasswordHash());
                 if (isAuthenticated) {
-                    userRepository.actualizar_ultimo_acceso(user.getId(), java.time.LocalDateTime.now());
+                    // Reset intentos fallidos y actualizar último acceso
+                    user.setIntentosFallidos(0);
+                    user.setUltimoAcceso(LocalDateTime.now());
+                    userRepository.save(user);
 
-                    Rol rol = user.getRol();
-                    List<String> permisos = (rol != null && rol.getPermisos() != null)
-                            ? rol.getPermisos().stream().map(p -> p.getNombre()).collect(Collectors.toList())
-                            : List.of();
+                    // Obtener permisos del usuario (soporta tanto rol único como múltiples roles)
+                    Set<String> permisos = usuarioService.obtenerPermisos(user.getId().intValue());
+                    List<String> permisosList = permisos.stream().collect(Collectors.toList());
+
+                    // Obtener nombre del rol principal (compatibilidad)
+                    String rolNombre = "";
+                    if (user.getRol() != null) {
+                        rolNombre = user.getRol().getNombre();
+                    } else if (user.getRoles() != null && !user.getRoles().isEmpty()) {
+                        rolNombre = user.getRoles().stream()
+                                .map(Rol::getNombre)
+                                .collect(Collectors.joining(", "));
+                    }
 
                     String token = jwtUtil.generateToken(user.getId().longValue(), user.getEmail(),
-                            rol != null ? rol.getNombre() : "", permisos);
+                            rolNombre, permisosList);
 
                     return new LoginResult(true, token, null);
                 } else {
+                    // Incrementar intentos fallidos
+                    user.setIntentosFallidos(user.getIntentosFallidos() + 1);
+
+                    // Bloquear si se alcanzaron los intentos máximos
+                    if (user.getIntentosFallidos() >= maxLoginAttempts) {
+                        user.setBloqueado(true);
+                        userRepository.save(user);
+                        return new LoginResult(false, null, "account_locked");
+                    }
+
+                    userRepository.save(user);
                     return new LoginResult(false, null, "invalid_password");
                 }
             } catch (IllegalArgumentException e) {
                 return new LoginResult(false, null, "invalid_hash");
             }
         }).orElse(new LoginResult(false, null, "email_not_found"));
+    }
+
+    public PasswordResetResult forgotPassword(String email) {
+        return userRepository.findByEmail(email).map(user -> {
+            String resetToken = UUID.randomUUID().toString();
+            LocalDateTime expirationTime = LocalDateTime.now().plusMinutes(resetPasswordTokenExpirationMinutes);
+
+            user.setTokenResetPassword(resetToken);
+            user.setTokenResetPasswordExpiracion(expirationTime);
+            userRepository.save(user);
+
+            return new PasswordResetResult(true, resetToken, null);
+        }).orElse(new PasswordResetResult(false, null, "email_not_found"));
+    }
+
+    public PasswordResetResult resetPassword(String token, String newPassword) {
+        return userRepository.findByTokenResetPassword(token).map(user -> {
+            // Validar que el token no haya expirado
+            if (user.getTokenResetPasswordExpiracion() == null || LocalDateTime.now().isAfter(user.getTokenResetPasswordExpiracion())) {
+                return new PasswordResetResult(false, null, "token_expired");
+            }
+
+            // Actualizar contraseña y limpiar token
+            String hashedPassword = BCrypt.hashpw(newPassword, BCrypt.gensalt());
+            user.setPasswordHash(hashedPassword);
+            user.setTokenResetPassword(null);
+            user.setTokenResetPasswordExpiracion(null);
+            user.setBloqueado(false);  // Desbloquear la cuenta
+            user.setIntentosFallidos(0);
+            userRepository.save(user);
+
+            return new PasswordResetResult(true, null, null);
+        }).orElse(new PasswordResetResult(false, null, "token_not_found"));
+    }
+
+    public PasswordChangeResult changePassword(Long userId, String currentPassword, String newPassword) {
+        return userRepository.findById(userId).map(user -> {
+            try {
+                boolean isAuthenticated = BCrypt.checkpw(currentPassword, user.getPasswordHash());
+                if (!isAuthenticated) {
+                    return new PasswordChangeResult(false, "current_password_incorrect");
+                }
+
+                String hashedPassword = BCrypt.hashpw(newPassword, BCrypt.gensalt());
+                user.setPasswordHash(hashedPassword);
+                userRepository.save(user);
+
+                return new PasswordChangeResult(true, null);
+            } catch (IllegalArgumentException e) {
+                return new PasswordChangeResult(false, "invalid_hash");
+            }
+        }).orElse(new PasswordChangeResult(false, "user_not_found"));
+    }
+
+    public boolean tienePermiso(int userId, String permisoRequerido) {
+        Set<String> permisos = usuarioService.obtenerPermisos(userId);
+        return permisos.contains(permisoRequerido);
+    }
+
+    public Set<String> getPermisosUsuario(int userId) {
+        return usuarioService.obtenerPermisos(userId);
     }
 
     public static class LoginResult {
@@ -71,23 +175,45 @@ public class AuthService {
         }
     }
 
+    public static class PasswordResetResult {
+        private final boolean success;
+        private final String resetToken;
+        private final String errorCode;
 
-    public boolean tienePermiso(int userId, String permisoRequerido) {
-        return userRepository.findById((long) userId).map(user -> {
-            return user.getRol().getPermisos().stream()
-                    .anyMatch(permiso -> permiso.getNombre().equals(permisoRequerido));
-        }).orElse(false);
+        public PasswordResetResult(boolean success, String resetToken, String errorCode) {
+            this.success = success;
+            this.resetToken = resetToken;
+            this.errorCode = errorCode;
+        }
+
+        public boolean isSuccess() {
+            return success;
+        }
+
+        public String getResetToken() {
+            return resetToken;
+        }
+
+        public String getErrorCode() {
+            return errorCode;
+        }
     }
 
-    public Set<String> getPermisosUsuario(int userId) {
-        return userRepository.findById((long) userId).map(user -> {
-            // Obtener los nombres de los permisos asociados al rol del usuario
-            return user.getRol().getPermisos().stream()
-                    .map(permiso -> permiso.getNombre())
-                    .collect(Collectors.toSet());
-        }).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+    public static class PasswordChangeResult {
+        private final boolean success;
+        private final String errorCode;
+
+        public PasswordChangeResult(boolean success, String errorCode) {
+            this.success = success;
+            this.errorCode = errorCode;
+        }
+
+        public boolean isSuccess() {
+            return success;
+        }
+
+        public String getErrorCode() {
+            return errorCode;
+        }
     }
-
-   
-
 }
