@@ -16,6 +16,7 @@ public class CriterioEvaluacion {
     @Column(name = "nombre", nullable = false)
     private String nombre;
 
-    @Column(name = "categoria_id", nullable = false)
-    private Integer categoriaId;
+    @ManyToOne
+    @JoinColumn(name = "categoria_id", nullable = false)
+    private TipoCategoria categoria;
 }

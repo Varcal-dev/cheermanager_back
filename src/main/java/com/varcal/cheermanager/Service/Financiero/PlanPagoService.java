@@ -5,10 +5,10 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-import com.varcal.cheermanager.DTO.Financiero.PlanMensualidadResponseDTO;
-import com.varcal.cheermanager.Models.Financiero.PlanMensualidad;
+import com.varcal.cheermanager.DTO.Financiero.PlanPagoResponseDTO;
+import com.varcal.cheermanager.Models.Financiero.PlanPago;
 import com.varcal.cheermanager.Models.Financiero.TipoPlanPago;
-import com.varcal.cheermanager.repository.Financiero.PlanMensualidadRepository;
+import com.varcal.cheermanager.repository.Financiero.PlanPagoRepository;
 import com.varcal.cheermanager.repository.Financiero.TipoPlanPagoRepository;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -16,16 +16,16 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class PlanMensualidadService {
+public class PlanPagoService {
 
-    private final PlanMensualidadRepository planMensualidadRepository;
+    private final PlanPagoRepository planPagoRepository;
     private final TipoPlanPagoRepository tipoPlanPagoRepository;
 
-    public PlanMensualidadResponseDTO crearPlan(PlanMensualidadResponseDTO dto) {
+    public PlanPagoResponseDTO crearPlan(PlanPagoResponseDTO dto) {
         TipoPlanPago tipo = tipoPlanPagoRepository.findById(dto.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Tipo de plan no encontrado"));
 
-        PlanMensualidad plan = new PlanMensualidad();
+        PlanPago plan = new PlanPago();
         plan.setNombre(dto.getNombre());
         plan.setTipoPlan(tipo);
         plan.setDescripcion(dto.getDescripcion());
@@ -36,18 +36,18 @@ public class PlanMensualidadService {
         plan.setFechaVigenciaFin(dto.getFechaVigenciaFin());
         plan.setActivo(dto.getActivo() != null ? dto.getActivo() : true);
 
-        PlanMensualidad guardado = planMensualidadRepository.save(plan);
+        PlanPago guardado = planPagoRepository.save(plan);
         return toDTO(guardado);
     }
 
-    public List<PlanMensualidadResponseDTO> listarPlanes() {
-        return planMensualidadRepository.findAll().stream()
+    public List<PlanPagoResponseDTO> listarPlanes() {
+        return planPagoRepository.findAll().stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
-    private PlanMensualidadResponseDTO toDTO(PlanMensualidad plan) {
-        PlanMensualidadResponseDTO dto = new PlanMensualidadResponseDTO();
+    private PlanPagoResponseDTO toDTO(PlanPago plan) {
+        PlanPagoResponseDTO dto = new PlanPagoResponseDTO();
         dto.setId(plan.getId());
         dto.setNombre(plan.getNombre());
         dto.setTipoPlan(plan.getTipoPlan().getNombre());
@@ -61,14 +61,14 @@ public class PlanMensualidadService {
         return dto;
     }
 
-    public PlanMensualidadResponseDTO obtenerPorId(Integer id) {
-        PlanMensualidad plan = planMensualidadRepository.findById(id)
+    public PlanPagoResponseDTO obtenerPorId(Integer id) {
+        PlanPago plan = planPagoRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Plan no encontrado"));
         return toDTO(plan);
     }
 
-    public PlanMensualidadResponseDTO actualizarPlan(Integer id, PlanMensualidadResponseDTO dto) {
-        PlanMensualidad plan = planMensualidadRepository.findById(id)
+    public PlanPagoResponseDTO actualizarPlan(Integer id, PlanPagoResponseDTO dto) {
+        PlanPago plan = planPagoRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Plan no encontrado"));
 
         TipoPlanPago tipo = tipoPlanPagoRepository.findById(dto.getId())
@@ -83,14 +83,14 @@ public class PlanMensualidadService {
         plan.setFechaVigenciaFin(dto.getFechaVigenciaFin());
         plan.setActivo(dto.getActivo());
 
-        return toDTO(planMensualidadRepository.save(plan));
+        return toDTO(planPagoRepository.save(plan));
     }
 
     public void eliminarPlan(Integer id) {
-        if (!planMensualidadRepository.existsById(id)) {
+        if (!planPagoRepository.existsById(id)) {
             throw new EntityNotFoundException("Plan no encontrado");
         }
-        planMensualidadRepository.deleteById(id);
+        planPagoRepository.deleteById(id);
     }
 
 }

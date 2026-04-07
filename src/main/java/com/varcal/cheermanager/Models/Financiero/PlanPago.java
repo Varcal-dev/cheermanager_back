@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "planes_mensualidad")
-public class PlanMensualidad {
+@Table(name = "planes_pago")
+public class PlanPago {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;

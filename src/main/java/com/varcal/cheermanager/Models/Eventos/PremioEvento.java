@@ -1,6 +1,4 @@
-package com.varcal.cheermanager.Models.Historiales;
-
-import com.varcal.cheermanager.Models.Personas.Persona;
+package com.varcal.cheermanager.Models.Eventos;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -8,32 +6,27 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "historial_medico")
-public class HistorialMedico {
-
+@Table(name = "premios_evento")
+public class PremioEvento {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @OneToOne(optional = false)
-    @JoinColumn(name = "persona_id", nullable = false, unique = true)
-    private Persona persona;
+    @ManyToOne
+    @JoinColumn(name = "evento_id", nullable = false)
+    private Evento evento;
 
-    @Column(nullable = false)
+    @Column(name = "descripcion")
     private String descripcion;
 
-    @Column(nullable = false)
-    private LocalDate fechaRegistro;
-
+    @Column(name = "premio")
+    private String premio;
 }
-

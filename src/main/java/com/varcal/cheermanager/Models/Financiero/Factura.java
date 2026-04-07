@@ -32,9 +32,9 @@ public class Factura {
     private String descripcion;
 
     @ManyToOne
-    @JoinColumn(name = "descuento_id", nullable = false)
+    @JoinColumn(name = "descuento_id", nullable = true)
     private Descuento descuento;
 
-    @Column(name = "total", precision = 10, scale = 2)
+    @Column(name = "total", precision = 10, scale = 2, nullable = false)
     private BigDecimal total;
 }

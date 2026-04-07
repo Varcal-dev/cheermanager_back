@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import lombok.Data;
 
 @Data
-public class PlanMensualidadResponseDTO {
+public class PlanPagoDTO {
     private Integer id;
     private String nombre;
     private String tipoPlan;

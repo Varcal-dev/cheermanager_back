@@ -28,7 +28,7 @@ public class Descuento {
     @Column(name = "fecha_inicio", nullable = false)
     private LocalDate fechaInicio;
 
-    @Column(name = "fecha_fin", nullable = false)
+    @Column(name = "fecha_fin")
     private LocalDate fechaFin;
 
     @Column(name = "activo", nullable = false)

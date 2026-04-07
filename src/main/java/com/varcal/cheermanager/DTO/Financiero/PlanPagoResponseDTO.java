@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import lombok.Data;
 
 @Data
-public class PlanMensualidadDTO {
+public class PlanPagoResponseDTO {
     private Integer id;
     private String nombre;
     private String tipoPlan;
@@ -17,6 +17,4 @@ public class PlanMensualidadDTO {
     private Boolean activo;
     private LocalDate fechaVigenciaInicio;
     private LocalDate fechaVigenciaFin;
-
-    // getters y setters
 }

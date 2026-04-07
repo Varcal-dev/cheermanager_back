@@ -20,17 +20,20 @@ public class Pago {
     @JoinColumn(name = "factura_id", nullable = false)
     private Factura factura;
 
-    @Column(name = "tipo_pago_id", nullable = false)
-    private Integer tipoPagoId;
+    @ManyToOne
+    @JoinColumn(name = "tipo_pago_id", nullable = false)
+    private TipoPago tipoPago;
 
-    @Column(name = "metodo_pago_id", nullable = false)
-    private Integer metodoPagoId;
+    @ManyToOne
+    @JoinColumn(name = "metodo_pago_id", nullable = false)
+    private MetodoPago metodoPago;
 
     @Column(name = "fecha", nullable = false)
     private LocalDate fecha;
 
-    @Column(name = "estado_id", nullable = false)
-    private Integer estadoId;
+    @Column(name = "estado", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private EstadoPago estado;
 
     @Column(name = "monto", precision = 10, scale = 2, nullable = false)
     private BigDecimal monto;

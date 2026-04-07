@@ -8,10 +8,10 @@ import org.springframework.stereotype.Service;
 
 import com.varcal.cheermanager.DTO.Org_dep.InscripcionDto;
 import com.varcal.cheermanager.DTO.Org_dep.InscripcionSimpleDTO;
-import com.varcal.cheermanager.Models.Financiero.PlanMensualidad;
+import com.varcal.cheermanager.Models.Financiero.PlanPago;
 import com.varcal.cheermanager.Models.Org_dep.Inscripcion;
 import com.varcal.cheermanager.Models.Personas.Deportista;
-import com.varcal.cheermanager.repository.Financiero.PlanMensualidadRepository;
+import com.varcal.cheermanager.repository.Financiero.PlanPagoRepository;
 import com.varcal.cheermanager.repository.Org_dep.InscripcionRepository;
 import com.varcal.cheermanager.repository.Personas.DeportistaRepository;
 
@@ -25,7 +25,7 @@ public class InscripcionService {
     private DeportistaRepository deportistaRepository;
 
     @Autowired
-    private PlanMensualidadRepository planPagoRepository;
+    private PlanPagoRepository planPagoRepository;
 
     public List<Object[]> obtenerDetalleInscripciones() {
         return inscripcionRepository.obtenerVistaInscripcionesDetalle();
@@ -44,12 +44,12 @@ public class InscripcionService {
                 .orElseThrow(() -> new RuntimeException("Deportista no encontrado"));
 
         // Buscar el plan de pago por ID
-        PlanMensualidad planPago = planPagoRepository.findById(dto.getPlanPagoId())
+        PlanPago planPago = planPagoRepository.findById(dto.getPlanPagoId())
                 .orElseThrow(() -> new RuntimeException("Plan de pago no encontrado"));
 
         // Setear las relaciones
         inscripcion.setDeportista(deportista);
-        inscripcion.setPlanPago(planPago);  
+        inscripcion.setPlanPago(planPago);
         inscripcion.setFechaInscripcion(dto.getFechaInscripcion());
         inscripcion.setFechaVencimiento(dto.getFechaVencimiento());
         inscripcion.setEstado(Inscripcion.EstadoInscripcion.valueOf(dto.getEstado()));
@@ -65,7 +65,7 @@ public class InscripcionService {
         existente.setEstado(nuevaInscripcion.getEstado());
 
         if (nuevaInscripcion.getPlanPago() != null) {
-            PlanMensualidad plan = planPagoRepository.findById(
+            PlanPago plan = planPagoRepository.findById(
                     nuevaInscripcion.getPlanPago().getId())
                     .orElseThrow(() -> new RuntimeException("Plan no encontrado"));
             existente.setPlanPago(plan);
