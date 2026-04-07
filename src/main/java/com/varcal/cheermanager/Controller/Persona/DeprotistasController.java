@@ -22,15 +22,11 @@ import com.varcal.cheermanager.DTO.Persona.DeportistaDTO;
 import com.varcal.cheermanager.DTO.Persona.DeportistaVistaDTO;
 import com.varcal.cheermanager.DTO.Persona.DeportistaPerfilCompletoDTO;
 import com.varcal.cheermanager.DTO.Persona.VincularDeportistaUsuarioDTO;
-import com.varcal.cheermanager.DTO.Persona.ValidarDocumentoDTO;
-import com.varcal.cheermanager.DTO.Persona.HistorialDeportistaEstadoDTO;
-import com.varcal.cheermanager.Models.Financiero.Convenio;
-import com.varcal.cheermanager.Models.Personas.Deportista;
-import com.varcal.cheermanager.Models.Auth.Usuario;
-import com.varcal.cheermanager.Service.Persona.PersonaService;
-import com.varcal.cheermanager.Utils.RequiresPermission;
-import com.varcal.cheermanager.repository.Financiero.ConvenioRepository;
-import com.varcal.cheermanager.repository.Personas.DeportistaRepository;
+import com.varcal.cheermanager.Service.Persona.HistorialMedicoService;
+import com.varcal.cheermanager.DTO.Persona.HistorialMedicoDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 @RestController
 @RequestMapping("/api/deportistas")
@@ -39,10 +35,10 @@ public class DeprotistasController {
     private PersonaService personaService;
 
     @Autowired
-    private DeportistaRepository deportistaRepository;
+    private ConvenioRepository convenioRepository;
 
     @Autowired
-    private ConvenioRepository convenioRepository;
+    private HistorialMedicoService historialMedicoService;
 
     // Método para registrar un deportista
     @PostMapping()
@@ -253,6 +249,35 @@ public class DeprotistasController {
             return ResponseEntity.status(404).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error al eliminar la foto: " + e.getMessage());
+        }
+    }
+
+    // Endpoints para historial médico
+    @PostMapping("/{id}/historial-medico")
+    @RequiresPermission("crear_historial_medico")
+    public ResponseEntity<?> crearHistorialMedico(@PathVariable Integer id, @RequestBody HistorialMedicoDTO dto) {
+        try {
+            dto.setPersonaId(id);
+            HistorialMedicoDTO result = historialMedicoService.crearHistorialMedico(dto);
+            return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(400).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error al crear historial médico: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/{id}/historial-medico")
+    @RequiresPermission("ver_historial_medico")
+    public ResponseEntity<?> obtenerHistorialMedico(@PathVariable Integer id,
+                                                    @RequestParam(defaultValue = "0") int page,
+                                                    @RequestParam(defaultValue = "10") int size) {
+        try {
+            Pageable pageable = PageRequest.of(page, size);
+            Page<HistorialMedicoDTO> result = historialMedicoService.obtenerHistorialMedicoPorPersona(id, pageable);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error al obtener historial médico: " + e.getMessage());
         }
     }
 

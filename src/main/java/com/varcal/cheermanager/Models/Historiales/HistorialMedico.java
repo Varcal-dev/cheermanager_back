@@ -33,5 +33,14 @@ public class HistorialMedico {
     @Column(nullable = false)
     private LocalDate fechaRegistro;
 
+    @Column(name = "tipo_registro")
+    private String tipoRegistro;
+
+    @Column
+    private String gravedad;
+
+    @Column(name = "medico_tratante")
+    private String medicoTratante;
+
 }
 

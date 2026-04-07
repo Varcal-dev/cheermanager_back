@@ -27,4 +27,5 @@ public class DeportistaVistaDTO {
     private String nivelNombre;
     private Integer convenioId;
     private String convenioNombre;
+    private Boolean tieneCondicionActiva;
 }

@@ -1,9 +1,9 @@
 package com.varcal.cheermanager.repository.Historiales;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-
-import com.varcal.cheermanager.Models.Historiales.HistorialMedico;
+import java.time.LocalDate;
+import java.util.List;
 
 public interface HistorialMedicoRepository extends JpaRepository<HistorialMedico, Integer> {
-    // Métodos personalizados, si es necesario
+    Page<HistorialMedico> findByPersonaId(Integer personaId, Pageable pageable);
+    List<HistorialMedico> findByPersonaIdAndFechaRegistroAfterAndGravedadIsNotNull(Integer personaId, LocalDate fecha);
 }
