@@ -6,10 +6,8 @@ import com.varcal.cheermanager.Models.Personas.Persona;
 import com.varcal.cheermanager.repository.Historiales.HistorialMedicoRepository;
 import com.varcal.cheermanager.repository.Personas.PersonaRepository;
 
-import org.apache.el.stream.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -42,7 +40,7 @@ public class HistorialMedicoService {
         return convertToDTO(saved);
     }
 
-    public Page<HistorialMedicoDTO> obtenerHistorialMedicoPorPersona(Integer personaId, Pageable pageable) {
+    public Page<HistorialMedicoDTO> obtenerHistorialMedicoPorPersona(Integer personaId, org.springframework.data.domain.Pageable pageable) {
         Page<HistorialMedico> page = historialMedicoRepository.findByPersonaId(personaId, pageable);
         return page.map(this::convertToDTO);
     }

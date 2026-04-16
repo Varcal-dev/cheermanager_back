@@ -29,4 +29,6 @@ public class DeportistaPerteneceGrupo {
     @ManyToOne
     @JoinColumn(name = "deportista_id")
     private Deportista deportista;
+
+    private LocalDate fechaFin; 
 }

@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
 import com.varcal.cheermanager.DTO.Ath.RolConConteoDTO;
@@ -14,6 +15,7 @@ import com.varcal.cheermanager.Models.Auth.Rol;
 public interface RolRepository extends JpaRepository<Rol, Integer> {
 
     //Optional<Rol> findById(Rol rol2);
+    @NonNull
     Optional<Rol> findById(Integer id);
 
 

@@ -20,10 +20,20 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.varcal.cheermanager.DTO.Persona.DeportistaDTO;
 import com.varcal.cheermanager.DTO.Persona.DeportistaVistaDTO;
+import com.varcal.cheermanager.DTO.Persona.HistorialDeportistaEstadoDTO;
 import com.varcal.cheermanager.DTO.Persona.DeportistaPerfilCompletoDTO;
 import com.varcal.cheermanager.DTO.Persona.VincularDeportistaUsuarioDTO;
+import com.varcal.cheermanager.Models.Auth.Usuario;
+import com.varcal.cheermanager.Models.Financiero.Convenio;
+import com.varcal.cheermanager.Models.Personas.Deportista;
 import com.varcal.cheermanager.Service.Persona.HistorialMedicoService;
+import com.varcal.cheermanager.Service.Persona.PersonaService;
+import com.varcal.cheermanager.Utils.RequiresPermission;
+import com.varcal.cheermanager.repository.Financiero.ConvenioRepository;
+import com.varcal.cheermanager.repository.Personas.DeportistaRepository;
 import com.varcal.cheermanager.DTO.Persona.HistorialMedicoDTO;
+import com.varcal.cheermanager.DTO.Persona.ValidarDocumentoDTO;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -36,6 +46,9 @@ public class DeprotistasController {
 
     @Autowired
     private ConvenioRepository convenioRepository;
+
+    @Autowired
+    private DeportistaRepository deportistaRepository;
 
     @Autowired
     private HistorialMedicoService historialMedicoService;

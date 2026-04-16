@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.lang.NonNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import com.varcal.cheermanager.Models.Personas.Deportista;
@@ -23,7 +24,7 @@ public interface DeportistaRepository extends JpaRepository<Deportista, Integer>
             nativeQuery = true)
     List<Deportista> findByFiltros(Integer estadoId, Integer nivelId, Integer grupoId);
 
-    @SuppressWarnings("null")
+    @NonNull
     Optional<Deportista> findById(Integer id);
 
 }

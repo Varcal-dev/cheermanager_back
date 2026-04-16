@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 import com.varcal.cheermanager.Models.Personas.Persona;
 
@@ -14,6 +15,6 @@ public interface PersonaRepository extends JpaRepository<Persona, Integer> {
 
      Optional<Persona> findByNumeroDocumento(String numeroDocumento);
 
-     @SuppressWarnings("null")
+     @NonNull
      Optional<Persona> findById(Integer personaId);
 }
