@@ -4,6 +4,12 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+### Secrets / configuración local (NUNCA versionar) ###
+src/main/resources/application-local.properties
+src/main/resources/application-prod.properties
+.env
+.env.local
+
 ### STS ###
 .apt_generated
 .classpath

@@ -1,8 +1,12 @@
 package com.varcal.cheermanager.Controller.Auth;
 
+import com.varcal.cheermanager.Models.Auth.Usuario;
 import com.varcal.cheermanager.Service.Auth.AuthService;
+import com.varcal.cheermanager.Service.Funcionalidad.LogAccesoService;
+import com.varcal.cheermanager.repository.Auth.UserRepository;
 import com.varcal.cheermanager.security.JwtUtil;
 import com.varcal.cheermanager.security.TokenBlacklistService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,12 +27,28 @@ public class AuthController {
     @Autowired
     private TokenBlacklistService tokenBlacklistService;
 
+    @Autowired
+    private LogAccesoService logAccesoService;
+
+    @Autowired
+    private UserRepository userRepository;
+
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
+        String ip = obtenerIp(request);
         AuthService.LoginResult result = authService.authenticate(loginRequest.getEmail(), loginRequest.getPassword());
 
         if (!result.isSuccess()) {
             String code = result.getErrorCode();
+
+            // Registrar el intento fallido. Si el email existe en el sistema,
+            // lo enlazamos al Usuario para poder auditar accesos por persona;
+            // si no existe (ej. alguien probando emails al azar), igual se
+            // registra el intento con el email tal cual fue escrito.
+            Usuario usuarioAsociado = userRepository.findByEmail(loginRequest.getEmail()).orElse(null);
+            String accionLog = "account_locked".equals(code) ? "CUENTA_BLOQUEADA" : "LOGIN_FALLIDO";
+            logAccesoService.registrarAcceso(usuarioAsociado, loginRequest.getEmail(), accionLog, ip, code);
+
             switch (code) {
                 case "account_locked":
                     return ResponseEntity.status(423).body(Map.of("success", false, "message", "Cuenta bloqueada por múltiples intentos fallidos"));
@@ -43,11 +63,24 @@ public class AuthController {
             }
         }
 
-        return ResponseEntity.ok(Map.of("success", true, "token", result.getToken()));
+        // Login exitoso: registrar el acceso.
+        Usuario usuario = userRepository.findByEmail(loginRequest.getEmail()).orElse(null);
+        logAccesoService.registrarAcceso(usuario, loginRequest.getEmail(), "LOGIN_EXITOSO", ip, null);
+
+        // El frontend debe revisar "requiereCambioPassword": si viene en true, debe
+        // redirigir directo a la pantalla de cambio de contraseña antes de dejar
+        // entrar al resto del sistema (típico en deportistas/entrenadores creados
+        // automáticamente con la contraseña por defecto "0000").
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "token", result.getToken(),
+                "requiereCambioPassword", result.isRequiereCambioPassword()
+        ));
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
+    public ResponseEntity<?> logout(@RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+                                     HttpServletRequest request) {
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Token no proporcionado"));
         }
@@ -65,6 +98,16 @@ public class AuthController {
             return ResponseEntity.status(400).body(Map.of("success", false, "message", "No se pudo obtener expiración del token"));
         }
         tokenBlacklistService.blacklistToken(token, expiration);
+
+        try {
+            Long userId = jwtUtil.getUserId(token);
+            Usuario usuario = userRepository.findById(userId).orElse(null);
+            String email = usuario != null ? usuario.getEmail() : jwtUtil.getUserEmail(token);
+            logAccesoService.registrarAcceso(usuario, email, "LOGOUT", obtenerIp(request), null);
+        } catch (Exception e) {
+            // No bloqueamos el logout si por alguna razón el log falla; el
+            // logout (invalidar el token) ya ocurrió arriba y es lo importante.
+        }
 
         return ResponseEntity.ok(Map.of("success", true, "message", "Logout exitoso"));
     }
@@ -181,6 +224,16 @@ public class AuthController {
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("success", false, "message", "Error procesando cambio de contraseña"));
         }
+    }
+
+    // Prioriza X-Forwarded-For (el real cuando hay proxy/load balancer delante,
+    // ej. Railway, Nginx) antes de caer a la IP directa de la conexión.
+    private String obtenerIp(HttpServletRequest request) {
+        String forwarded = request.getHeader("X-Forwarded-For");
+        if (forwarded != null && !forwarded.isBlank()) {
+            return forwarded.split(",")[0].trim();
+        }
+        return request.getRemoteAddr();
     }
 
     // Request/Response classes

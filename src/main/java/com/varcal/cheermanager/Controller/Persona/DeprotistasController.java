@@ -61,7 +61,9 @@ public class DeprotistasController {
             Deportista deportista = personaService.registrarDeportista(deportistaDTO);
             return ResponseEntity.ok(deportista);
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al registrar el deportista: " + e.getMessage());
+            e.printStackTrace(); // 🔥 CLAVE
+            return ResponseEntity.status(500)
+                    .body("Error al registrar el deportista: " + e.getMessage());
         }
     }
 
@@ -283,8 +285,8 @@ public class DeprotistasController {
     @GetMapping("/{id}/historial-medico")
     @RequiresPermission("ver_historial_medico")
     public ResponseEntity<?> obtenerHistorialMedico(@PathVariable Integer id,
-                                                    @RequestParam(defaultValue = "0") int page,
-                                                    @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
         try {
             Pageable pageable = PageRequest.of(page, size);
             Page<HistorialMedicoDTO> result = historialMedicoService.obtenerHistorialMedicoPorPersona(id, pageable);

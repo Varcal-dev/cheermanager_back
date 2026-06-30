@@ -12,7 +12,7 @@ import com.varcal.cheermanager.Models.Personas.Deportista;
 @Repository
 public interface DeportistaRepository extends JpaRepository<Deportista, Integer> {
 
-    @Query(value = "SELECT * FROM vista_info_deportistas", nativeQuery = true)
+    @Query(value = "SELECT * FROM deportistas", nativeQuery = true)
     List<Object[]> obtenerDeportistasConDetalles();
 
     @Query(value = "SELECT DISTINCT d.* FROM deportistas d " +

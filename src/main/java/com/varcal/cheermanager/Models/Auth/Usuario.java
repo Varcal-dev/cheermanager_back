@@ -36,7 +36,7 @@ public class Usuario {
     private LocalDateTime ultimoAcceso;
 
     @Column(name = "activo", nullable = false)
-    private Boolean activo;
+    private Boolean activo = true;
 
     @Column(name = "bloqueado", nullable = false)
     private Boolean bloqueado = false;
@@ -49,6 +49,13 @@ public class Usuario {
 
     @Column(name = "token_reset_password_expiracion")
     private LocalDateTime tokenResetPasswordExpiracion;
+
+    // Se activa cuando el usuario fue creado con una contraseña por defecto
+    // (ej. "0000" al registrar deportistas/entrenadores automáticamente) o tras
+    // un reset de contraseña administrativo. Se limpia en el primer cambio de
+    // contraseña exitoso (ver AuthService.changePassword).
+    @Column(name = "requiere_cambio_password", nullable = false)
+    private Boolean requiereCambioPassword = false;
 
     @ManyToOne
     @JoinColumn(name = "rol_id")
@@ -65,4 +72,6 @@ public class Usuario {
     @ManyToOne
     @JoinColumn(name = "persona_id")
     private Persona persona;
+
+    
 }

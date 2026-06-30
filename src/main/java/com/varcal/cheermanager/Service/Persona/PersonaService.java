@@ -3,6 +3,7 @@ package com.varcal.cheermanager.Service.Persona;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.varcal.cheermanager.DTO.Persona.DeportistaDTO;
@@ -77,6 +78,9 @@ public class PersonaService {
     }
 
     // Método para registrar un nuevo usuario ======================================
+    // @Transactional: si existsByUsername/existsByEmail o el save fallan luego de
+    // que otra parte del flujo ya guardó datos relacionados, todo debe revertirse junto.
+    @Transactional
     public Usuario registrarUsuario(Persona persona, String username, String email, String password, Integer rolId) {
         // Verificar si el username o email ya existen
         if (userRepository.existsByUsername(username)) {
@@ -99,6 +103,9 @@ public class PersonaService {
         usuario.setActivo(true);
         usuario.setPersona(persona);
         usuario.setUltimoAcceso(null); // Inicialmente no hay acceso
+        // Forzamos cambio de contraseña cuando se crea con la contraseña por defecto "0000".
+        // Si en el futuro se permite definir una contraseña real al registrar, ajustar esta bandera.
+        usuario.setRequiereCambioPassword("0000".equals(password));
         return userRepository.save(usuario);
     }
 
@@ -148,6 +155,10 @@ public class PersonaService {
     // ==========================================
     // Este método recibe un DTO de Deportista y lo convierte a una entidad
     // Deportista
+    // @Transactional: guarda Persona + Deportista + Usuario en tres pasos. Si el
+    // tercero falla (ej. username/email duplicado), los dos primeros deben revertirse
+    // para no dejar una Persona/Deportista huérfanos sin Usuario asociado.
+    @Transactional
     public Deportista registrarDeportista(DeportistaDTO deportistaDTO) {
         // Validar documento único
         validarDocumentoEnRegistro(deportistaDTO.getNumeroDocumento());
@@ -191,6 +202,9 @@ public class PersonaService {
     }
 
     // Método para modificar un deportista
+    // @Transactional: actualiza Persona, registra cambio de estado en el historial
+    // y actualiza Deportista. Las tres operaciones deben aplicarse juntas o no aplicarse.
+    @Transactional
     public Deportista modificarDeportista(Integer id, DeportistaDTO deportistaDTO) {
         return deportistaRepository.findById(id).map(deportista -> {
             Persona persona = deportista.getPersona();
@@ -368,6 +382,7 @@ public class PersonaService {
     }
 
     // Método para vincular un deportista con un usuario existente
+    @Transactional
     public void vincularDeportistaConUsuario(Integer deportistaId, Integer usuarioId) {
         Deportista deportista = deportistaRepository.findById(deportistaId)
                 .orElseThrow(() -> new RuntimeException("Deportista no encontrado con ID: " + deportistaId));
@@ -392,6 +407,9 @@ public class PersonaService {
     }
 
     // Método para desvinculcar un deportista de su usuario
+    // @Transactional: no es estrictamente necesario aquí (un solo save), pero se
+    // deja para mantener consistencia y dejar espacio a futuras validaciones.
+    @Transactional
     public void desvinculcarDeportistaDeUsuario(Integer deportistaId) {
         Deportista deportista = deportistaRepository.findById(deportistaId)
                 .orElseThrow(() -> new RuntimeException("Deportista no encontrado con ID: " + deportistaId));
@@ -598,6 +616,10 @@ public class PersonaService {
     }
 
     // Método para eliminar un deportista
+    // @Transactional: cambia estado + escribe historial + desactiva usuario.
+    // Si falla el último paso, no queremos que el deportista quede marcado como
+    // "Retirado" con su usuario todavía activo.
+    @Transactional
     public void eliminarDeportista(Integer deportistaId) {
 
         Deportista deportista = deportistaRepository.findById(deportistaId)
@@ -625,6 +647,9 @@ public class PersonaService {
     // ==========================================
     // Este método recibe un DTO de Entrenador y lo convierte a una entidad
     // Entrenador
+    // @Transactional: igual que registrarDeportista, son tres guardados ligados
+    // (Persona + Entrenador + Usuario) que deben ser atómicos.
+    @Transactional
     public Entrenador registrarEntrenador(EntrenadorDTO entrenadorDTO) {
         // Registrar la persona
         Persona persona = new Persona();
@@ -662,6 +687,8 @@ public class PersonaService {
     }
 
     // Método para modificar un entrenador
+    // @Transactional: actualiza Persona y Entrenador en el mismo flujo.
+    @Transactional
     public Entrenador modificarEntrenador(Integer id, EntrenadorDTO dto) {
 
         return entrenadorRepository.findById(id).map(entrenador -> {
@@ -714,6 +741,8 @@ public class PersonaService {
     }
 
     // Método para eliminar un entrenador
+    // @Transactional: cambia estado de Entrenador + desactiva su Usuario.
+    @Transactional
     public void eliminarEntrenador(Integer id) {
         Entrenador entrenador = entrenadorRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Entrenador no encontrado"));

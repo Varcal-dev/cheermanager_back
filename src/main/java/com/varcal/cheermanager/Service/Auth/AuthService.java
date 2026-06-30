@@ -41,7 +41,7 @@ public class AuthService {
         return userRepository.findByEmail(email).map(user -> {
             // Verificar si la cuenta está bloqueada
             if (user.getBloqueado()) {
-                return new LoginResult(false, null, "account_locked");
+                return new LoginResult(false, null, "account_locked", false);
             }
 
             try {
@@ -69,7 +69,12 @@ public class AuthService {
                     String token = jwtUtil.generateToken(user.getId().longValue(), user.getEmail(),
                             rolNombre, permisosList);
 
-                    return new LoginResult(true, token, null);
+                    // El frontend debe usar este flag para forzar el flujo de cambio de
+                    // contraseña antes de dejar usar el resto del sistema (ej. usuarios
+                    // creados automáticamente con la contraseña por defecto "0000").
+                    boolean requiereCambioPassword = Boolean.TRUE.equals(user.getRequiereCambioPassword());
+
+                    return new LoginResult(true, token, null, requiereCambioPassword);
                 } else {
                     // Incrementar intentos fallidos
                     user.setIntentosFallidos(user.getIntentosFallidos() + 1);
@@ -78,16 +83,16 @@ public class AuthService {
                     if (user.getIntentosFallidos() >= maxLoginAttempts) {
                         user.setBloqueado(true);
                         userRepository.save(user);
-                        return new LoginResult(false, null, "account_locked");
+                        return new LoginResult(false, null, "account_locked", false);
                     }
 
                     userRepository.save(user);
-                    return new LoginResult(false, null, "invalid_password");
+                    return new LoginResult(false, null, "invalid_password", false);
                 }
             } catch (IllegalArgumentException e) {
-                return new LoginResult(false, null, "invalid_hash");
+                return new LoginResult(false, null, "invalid_hash", false);
             }
-        }).orElse(new LoginResult(false, null, "email_not_found"));
+        }).orElse(new LoginResult(false, null, "email_not_found", false));
     }
 
     public PasswordResetResult forgotPassword(String email) {
@@ -117,6 +122,8 @@ public class AuthService {
             user.setTokenResetPasswordExpiracion(null);
             user.setBloqueado(false);  // Desbloquear la cuenta
             user.setIntentosFallidos(0);
+            // El usuario acaba de elegir su propia contraseña: ya no necesita cambiarla.
+            user.setRequiereCambioPassword(false);
             userRepository.save(user);
 
             return new PasswordResetResult(true, null, null);
@@ -133,6 +140,8 @@ public class AuthService {
 
                 String hashedPassword = BCrypt.hashpw(newPassword, BCrypt.gensalt());
                 user.setPasswordHash(hashedPassword);
+                // El usuario acaba de elegir su propia contraseña: ya no necesita cambiarla.
+                user.setRequiereCambioPassword(false);
                 userRepository.save(user);
 
                 return new PasswordChangeResult(true, null);
@@ -155,11 +164,13 @@ public class AuthService {
         private final boolean success;
         private final String token;
         private final String errorCode;
+        private final boolean requiereCambioPassword;
 
-        public LoginResult(boolean success, String token, String errorCode) {
+        public LoginResult(boolean success, String token, String errorCode, boolean requiereCambioPassword) {
             this.success = success;
             this.token = token;
             this.errorCode = errorCode;
+            this.requiereCambioPassword = requiereCambioPassword;
         }
 
         public boolean isSuccess() {
@@ -172,6 +183,10 @@ public class AuthService {
 
         public String getErrorCode() {
             return errorCode;
+        }
+
+        public boolean isRequiereCambioPassword() {
+            return requiereCambioPassword;
         }
     }
 

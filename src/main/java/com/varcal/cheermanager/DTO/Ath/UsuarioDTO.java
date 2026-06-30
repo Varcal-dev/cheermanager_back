@@ -22,6 +22,7 @@ public class UsuarioDTO {
     private String rolNombre;
     private LocalDateTime ultimoAcceso;
     private Boolean activo;
+    private Boolean requiereCambioPassword;
     private Integer personaId;
 
     // Datos de la persona
@@ -41,6 +42,7 @@ public class UsuarioDTO {
         this.rolNombre = usuario.getRol() != null ? usuario.getRol().getNombre() : null; // Asignar el nombre del rol
         this.ultimoAcceso = usuario.getUltimoAcceso();
         this.activo = usuario.getActivo();
+        this.requiereCambioPassword = usuario.getRequiereCambioPassword();
         // Mapear los datos de la persona asociada
         Persona persona = usuario.getPersona();
         if (persona != null) {
