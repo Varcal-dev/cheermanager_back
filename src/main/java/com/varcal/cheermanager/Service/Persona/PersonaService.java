@@ -31,6 +31,7 @@ import com.varcal.cheermanager.repository.Personas.EntrenadorRepository;
 import com.varcal.cheermanager.repository.Personas.EstadoPersonaRepository;
 import com.varcal.cheermanager.repository.Personas.HistorialDeportistaEstadoRepository;
 import com.varcal.cheermanager.Service.File.FileStorageService;
+import com.varcal.cheermanager.Service.Historiales.HistorialNivelDeportistaService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -63,6 +64,9 @@ public class PersonaService {
 
     @Autowired
     private FileStorageService fileStorageService;
+
+    @Autowired
+    private HistorialNivelDeportistaService historialNivelDeportistaService;
 
     public String generarUsername(String nombre, String apellidos) {
 
@@ -189,6 +193,16 @@ public class PersonaService {
         deportista.setConvenioId(deportistaDTO.getConvenioId());
         Deportista deportistaGuardado = deportistaRepository.save(deportista);
 
+        // Dejar constancia del nivel inicial en el historial, para que la línea de
+        // tiempo del deportista arranque desde el día 0 y no desde el primer cambio.
+        if (deportistaGuardado.getNivelActualId() != null) {
+            historialNivelDeportistaService.registrarCambio(
+                    deportistaGuardado.getId(),
+                    deportistaGuardado.getNivelActualId(),
+                    deportistaGuardado.getFechaRegistro(),
+                    "Nivel inicial al registrar el deportista");
+        }
+
         // Registrar al deportista como usuario
         String username = generarUsername(
                 deportistaDTO.getNombre(),
@@ -233,14 +247,32 @@ public class PersonaService {
                 registrarCambioEstado(deportista, estadoAnterior, estado, null, null);
             }
 
+            // Registrar cambio de nivel si es que hay, siguiendo el mismo patrón que
+            // el cambio de estado de arriba. Se compara contra el nivel que tenía el
+            // deportista ANTES de tocar el campo (nivelAnteriorId), y solo se deja
+            // constancia en el historial si de verdad hubo un cambio.
+            Integer nivelAnteriorId = deportista.getNivelActualId();
+            Integer nivelNuevoId = deportistaDTO.getNivelActualId();
+            boolean huboCambioDeNivel = nivelNuevoId != null && !nivelNuevoId.equals(nivelAnteriorId);
+
             deportista.setEstado(estado);
             deportista.setAltura(deportistaDTO.getAltura());
             deportista.setPeso(deportistaDTO.getPeso());
-            deportista.setNivelActualId(deportistaDTO.getNivelActualId());
+            deportista.setNivelActualId(nivelNuevoId);
             deportista.setFechaRegistro(deportistaDTO.getFechaRegistro());
             deportista.setContactoEmergencia(deportistaDTO.getContactoEmergencia());
             deportista.setConvenioId(deportistaDTO.getConvenioId());
-            return deportistaRepository.save(deportista);
+            Deportista deportistaActualizado = deportistaRepository.save(deportista);
+
+            if (huboCambioDeNivel) {
+                historialNivelDeportistaService.registrarCambio(
+                        deportistaActualizado.getId(),
+                        nivelNuevoId,
+                        null, // fechaCambio null -> el service usa LocalDate.now()
+                        "Cambio de nivel vía modificación de deportista");
+            }
+
+            return deportistaActualizado;
         }).orElseThrow(() -> new RuntimeException("Deportista no encontrado con el ID: " + id));
     }
 
