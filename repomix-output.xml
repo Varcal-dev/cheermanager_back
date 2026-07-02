@@ -43,6 +43,8 @@ The content is organized as follows:
 .gitattributes
 .gitignore
 .mvn/wrapper/maven-wrapper.properties
+ajustes_claudia/AUTH_API_v3_COMPLETE.md
+ajustes_claudia/AUTH_IMPLEMENTATION_V3.md
 ajustes_claudia/RESUMEN_CABOS_SUELTOS.md
 ajustes_claudia/RESUMEN_CAMBIOS.md
 ajustes_claudia/RESUMEN_EVALUACION_RUTINA.md
@@ -67,6 +69,8 @@ src/main/java/com/varcal/cheermanager/Controller/Evaluaciones/EvaluacionControll
 src/main/java/com/varcal/cheermanager/Controller/Evaluaciones/ObjetivoController.java
 src/main/java/com/varcal/cheermanager/Controller/Evaluaciones/Rutina/EvaluacionRutinaController.java
 src/main/java/com/varcal/cheermanager/Controller/Evaluaciones/Rutina/RubricaConfigController.java
+src/main/java/com/varcal/cheermanager/Controller/Eventos/PremioEventoController.java
+src/main/java/com/varcal/cheermanager/Controller/Eventos/TipoEventoController.java
 src/main/java/com/varcal/cheermanager/Controller/Financiero/ConvenioController.java
 src/main/java/com/varcal/cheermanager/Controller/Financiero/DescuentoController.java
 src/main/java/com/varcal/cheermanager/Controller/Financiero/DivisionController.java
@@ -101,6 +105,15 @@ src/main/java/com/varcal/cheermanager/DTO/Evaluaciones/ObjetivoResponseDTO.java
 src/main/java/com/varcal/cheermanager/DTO/Evaluaciones/RegistroEvaluacionMasivoDTO.java
 src/main/java/com/varcal/cheermanager/DTO/Evaluaciones/Rutina/EvaluacionRutinaDTO.java
 src/main/java/com/varcal/cheermanager/DTO/Evaluaciones/Rutina/EvaluacionRutinaResponseDTO.java
+src/main/java/com/varcal/cheermanager/DTO/Eventos/EventoDTO.java
+src/main/java/com/varcal/cheermanager/DTO/Eventos/EventoResponseDTO.java
+src/main/java/com/varcal/cheermanager/DTO/Eventos/GrupoEventoDTO.java
+src/main/java/com/varcal/cheermanager/DTO/Eventos/GrupoEventoResponseDTO.java
+src/main/java/com/varcal/cheermanager/DTO/Eventos/PremioEventoDTO.java
+src/main/java/com/varcal/cheermanager/DTO/Eventos/PremioEventoResponseDTO.java
+src/main/java/com/varcal/cheermanager/DTO/Eventos/ResultadoCompetenciaDTO.java
+src/main/java/com/varcal/cheermanager/DTO/Eventos/ResultadoCompetenciaResponseDTO.java
+src/main/java/com/varcal/cheermanager/DTO/Eventos/TipoEventoDTO.java
 src/main/java/com/varcal/cheermanager/DTO/Financiero/ConvenioDto.java
 src/main/java/com/varcal/cheermanager/DTO/Financiero/FacturaDTO.java
 src/main/java/com/varcal/cheermanager/DTO/Financiero/PagoDTO.java
@@ -224,6 +237,11 @@ src/main/java/com/varcal/cheermanager/repository/Evaluaciones/Rutina/TablaCantid
 src/main/java/com/varcal/cheermanager/repository/Evaluaciones/Rutina/TopeDriverNivelRepository.java
 src/main/java/com/varcal/cheermanager/repository/Evaluaciones/Rutina/TopeSeccionNivelRepository.java
 src/main/java/com/varcal/cheermanager/repository/Evaluaciones/TipoCategoriaRepository.java
+src/main/java/com/varcal/cheermanager/repository/Eventos/EventoRepository.java
+src/main/java/com/varcal/cheermanager/repository/Eventos/GrupoEventoRepository.java
+src/main/java/com/varcal/cheermanager/repository/Eventos/PremioEventoRepository.java
+src/main/java/com/varcal/cheermanager/repository/Eventos/ResultadoCompetenciaRepository.java
+src/main/java/com/varcal/cheermanager/repository/Eventos/TipoEventoRepository.java
 src/main/java/com/varcal/cheermanager/repository/Financiero/ConvenioRepository.java
 src/main/java/com/varcal/cheermanager/repository/Financiero/DescuentoRepository.java
 src/main/java/com/varcal/cheermanager/repository/Financiero/FacturaRepository.java
@@ -275,6 +293,11 @@ src/main/java/com/varcal/cheermanager/Service/Evaluaciones/Rutina/Calculadoras/C
 src/main/java/com/varcal/cheermanager/Service/Evaluaciones/Rutina/Calculadoras/CalculadoraValorInicialMenosDrivers.java
 src/main/java/com/varcal/cheermanager/Service/Evaluaciones/Rutina/EvaluacionRutinaService.java
 src/main/java/com/varcal/cheermanager/Service/Evaluaciones/Rutina/RubricaConfigService.java
+src/main/java/com/varcal/cheermanager/Service/Eventos/EventoService.java
+src/main/java/com/varcal/cheermanager/Service/Eventos/GrupoEventoService.java
+src/main/java/com/varcal/cheermanager/Service/Eventos/PremioEventoService.java
+src/main/java/com/varcal/cheermanager/Service/Eventos/ResultadoCompetenciaService.java
+src/main/java/com/varcal/cheermanager/Service/Eventos/TipoEventoService.java
 src/main/java/com/varcal/cheermanager/Service/File/FileStorageService.java
 src/main/java/com/varcal/cheermanager/Service/Financiero/ConvenioService.java
 src/main/java/com/varcal/cheermanager/Service/Financiero/DescuentoService.java
@@ -304,6 +327,1631 @@ src/test/java/com/varcal/cheermanager/CheermanagerApplicationTests.java
 
 <files>
 This section contains the contents of the repository's files.
+
+<file path="src/main/java/com/varcal/cheermanager/Controller/Eventos/PremioEventoController.java">
+package com.varcal.cheermanager.Controller.Eventos;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import com.varcal.cheermanager.DTO.Eventos.PremioEventoDTO;
+import com.varcal.cheermanager.Service.Eventos.PremioEventoService;
+import com.varcal.cheermanager.Utils.RequiresPermission;
+
+@RestController
+@RequestMapping("/api/premios-evento")
+public class PremioEventoController {
+
+    @Autowired
+    private PremioEventoService premioEventoService;
+
+    @PostMapping
+    @RequiresPermission("modificar_evento")
+    public ResponseEntity<?> crear(@RequestBody PremioEventoDTO dto) {
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED).body(premioEventoService.crear(dto));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/evento/{eventoId}")
+    @RequiresPermission("ver_evento")
+    public ResponseEntity<?> listarPorEvento(@PathVariable Integer eventoId) {
+        try {
+            return ResponseEntity.ok(premioEventoService.listarPorEvento(eventoId));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PutMapping("/{id}")
+    @RequiresPermission("modificar_evento")
+    public ResponseEntity<?> actualizar(@PathVariable Integer id, @RequestBody PremioEventoDTO dto) {
+        try {
+            return ResponseEntity.ok(premioEventoService.actualizar(id, dto));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    @RequiresPermission("modificar_evento")
+    public ResponseEntity<?> eliminar(@PathVariable Integer id) {
+        try {
+            premioEventoService.eliminar(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Controller/Eventos/TipoEventoController.java">
+package com.varcal.cheermanager.Controller.Eventos;
+
+import java.util.List;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.varcal.cheermanager.Models.Eventos.TipoEvento;
+import com.varcal.cheermanager.repository.Eventos.TipoEventoRepository;
+
+@RestController
+@RequestMapping("/api/tipos-evento")
+public class TipoEventoController {
+
+    private final TipoEventoRepository tipoEventoRepo;
+
+    public TipoEventoController(TipoEventoRepository tipoEventoRepo) {
+        this.tipoEventoRepo = tipoEventoRepo;
+    }
+
+    @GetMapping
+    public List<TipoEvento> listarTodos() {
+        return tipoEventoRepo.findAll();
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/DTO/Eventos/EventoDTO.java">
+package com.varcal.cheermanager.DTO.Eventos;
+
+import java.time.LocalDate;
+
+import lombok.Data;
+
+@Data
+public class EventoDTO {
+    private String nombre;
+    private LocalDate fecha;
+    private Integer tipoEventoId;
+    private String ubicacion;
+    private Boolean tieneResultados; // si el productor del evento publica resultados oficiales
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/DTO/Eventos/EventoResponseDTO.java">
+package com.varcal.cheermanager.DTO.Eventos;
+
+import java.time.LocalDate;
+
+import lombok.Data;
+
+@Data
+public class EventoResponseDTO {
+    private Integer id;
+    private String nombre;
+    private LocalDate fecha;
+    private Integer tipoEventoId;
+    private String tipoEvento;
+    private String ubicacion;
+    private Boolean tieneResultados;
+    private Integer cantidadGruposInscritos;
+    private Integer cantidadPremios;
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/DTO/Eventos/GrupoEventoDTO.java">
+package com.varcal.cheermanager.DTO.Eventos;
+
+import lombok.Data;
+
+@Data
+public class GrupoEventoDTO {
+    private Integer grupoEntrenamientoId;
+    private Integer eventoId;
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/DTO/Eventos/GrupoEventoResponseDTO.java">
+package com.varcal.cheermanager.DTO.Eventos;
+
+import java.time.LocalDate;
+
+import lombok.Data;
+
+@Data
+public class GrupoEventoResponseDTO {
+    private Integer id;
+    private Integer grupoEntrenamientoId;
+    private String nombreGrupo;
+    private Integer eventoId;
+    private String nombreEvento;
+    private LocalDate fechaEvento;
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/DTO/Eventos/PremioEventoDTO.java">
+package com.varcal.cheermanager.DTO.Eventos;
+
+import lombok.Data;
+
+@Data
+public class PremioEventoDTO {
+    private Integer eventoId;
+    private String descripcion; // ej. "1er lugar Nivel 3 Youth"
+    private String premio;      // ej. "Trofeo + beca 20% próxima temporada"
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/DTO/Eventos/PremioEventoResponseDTO.java">
+package com.varcal.cheermanager.DTO.Eventos;
+
+import lombok.Data;
+
+@Data
+public class PremioEventoResponseDTO {
+    private Integer id;
+    private Integer eventoId;
+    private String nombreEvento;
+    private String descripcion;
+    private String premio;
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/DTO/Eventos/ResultadoCompetenciaDTO.java">
+package com.varcal.cheermanager.DTO.Eventos;
+
+import java.math.BigDecimal;
+
+import lombok.Data;
+
+@Data
+public class ResultadoCompetenciaDTO {
+    private Integer eventoId;
+    private Integer grupoEntrenamientoId;
+    private Integer posicion;
+    private BigDecimal puntaje;
+    private Integer premioId;           // opcional
+    private Integer evaluacionRutinaId; // opcional, si el evento se evaluó dentro del sistema
+    private String observaciones;
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/DTO/Eventos/ResultadoCompetenciaResponseDTO.java">
+package com.varcal.cheermanager.DTO.Eventos;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
+import lombok.Data;
+
+@Data
+public class ResultadoCompetenciaResponseDTO {
+    private Integer id;
+    private Integer eventoId;
+    private String nombreEvento;
+    private LocalDate fechaEvento;
+    private Integer grupoEntrenamientoId;
+    private String nombreGrupo;
+    private Integer posicion;
+    private BigDecimal puntaje;
+    private Integer premioId;
+    private String descripcionPremio;
+    private Integer evaluacionRutinaId;
+    private String observaciones;
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/DTO/Eventos/TipoEventoDTO.java">
+package com.varcal.cheermanager.DTO.Eventos;
+
+import lombok.Data;
+
+@Data
+public class TipoEventoDTO {
+    private String evento; // nombre del tipo, ej. "Competencia federada", "Simulacro", "Clínica"
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/repository/Eventos/EventoRepository.java">
+package com.varcal.cheermanager.repository.Eventos;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.varcal.cheermanager.Models.Eventos.Evento;
+
+public interface EventoRepository extends JpaRepository<Evento, Integer> {
+
+    // Calendario: próximos eventos desde hoy en adelante, ordenados.
+    List<Evento> findByFechaGreaterThanEqualOrderByFechaAsc(LocalDate desde);
+
+    // Historial: eventos ya pasados, más recientes primero.
+    List<Evento> findByFechaLessThanOrderByFechaDesc(LocalDate hasta);
+
+    List<Evento> findByTipoEventoIdOrderByFechaDesc(Integer tipoEventoId);
+
+    List<Evento> findByFechaBetweenOrderByFechaAsc(LocalDate desde, LocalDate hasta);
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/repository/Eventos/GrupoEventoRepository.java">
+package com.varcal.cheermanager.repository.Eventos;
+
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.varcal.cheermanager.Models.Eventos.GrupoEvento;
+
+public interface GrupoEventoRepository extends JpaRepository<GrupoEvento, Integer> {
+
+    List<GrupoEvento> findByEventoId(Integer eventoId);
+
+    // Historial de competencias de un grupo, para armar su línea de tiempo.
+    List<GrupoEvento> findByGrupoEntrenamientoId(Integer grupoEntrenamientoId);
+
+    boolean existsByEventoIdAndGrupoEntrenamientoId(Integer eventoId, Integer grupoEntrenamientoId);
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/repository/Eventos/PremioEventoRepository.java">
+package com.varcal.cheermanager.repository.Eventos;
+
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.varcal.cheermanager.Models.Eventos.PremioEvento;
+
+public interface PremioEventoRepository extends JpaRepository<PremioEvento, Integer> {
+    List<PremioEvento> findByEventoId(Integer eventoId);
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/repository/Eventos/ResultadoCompetenciaRepository.java">
+package com.varcal.cheermanager.repository.Eventos;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import com.varcal.cheermanager.Models.Eventos.ResultadoCompetencia;
+
+public interface ResultadoCompetenciaRepository extends JpaRepository<ResultadoCompetencia, Integer> {
+
+    List<ResultadoCompetencia> findByEventoIdOrderByPosicionAsc(Integer eventoId);
+
+    // Línea de tiempo de un grupo evento-a-evento, más antiguo primero — es
+    // la fuente para el KPI de "progresión de puntaje" que se propuso.
+    @Query("SELECT r FROM ResultadoCompetencia r WHERE r.grupoEntrenamiento.id = :grupoId " +
+           "ORDER BY r.evento.fecha ASC")
+    List<ResultadoCompetencia> findProgresionPorGrupo(@Param("grupoId") Integer grupoId);
+
+    Optional<ResultadoCompetencia> findByEventoIdAndGrupoEntrenamientoId(Integer eventoId, Integer grupoEntrenamientoId);
+
+    boolean existsByPremioId(Integer premioId);
+
+    List<ResultadoCompetencia> findByGrupoEntrenamientoId(Integer grupoEntrenamientoId);
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/repository/Eventos/TipoEventoRepository.java">
+package com.varcal.cheermanager.repository.Eventos;
+
+import java.util.Optional;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.varcal.cheermanager.Models.Eventos.TipoEvento;
+
+public interface TipoEventoRepository extends JpaRepository<TipoEvento, Integer> {
+    Optional<TipoEvento> findByEvento(String evento);
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Service/Eventos/EventoService.java">
+package com.varcal.cheermanager.Service.Eventos;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.varcal.cheermanager.DTO.Eventos.EventoDTO;
+import com.varcal.cheermanager.DTO.Eventos.EventoResponseDTO;
+import com.varcal.cheermanager.Models.Eventos.Evento;
+import com.varcal.cheermanager.Models.Eventos.TipoEvento;
+import com.varcal.cheermanager.repository.Eventos.EventoRepository;
+import com.varcal.cheermanager.repository.Eventos.GrupoEventoRepository;
+import com.varcal.cheermanager.repository.Eventos.PremioEventoRepository;
+import com.varcal.cheermanager.repository.Eventos.ResultadoCompetenciaRepository;
+import com.varcal.cheermanager.repository.Eventos.TipoEventoRepository;
+
+@Service
+public class EventoService {
+
+    @Autowired
+    private EventoRepository eventoRepository;
+
+    @Autowired
+    private TipoEventoRepository tipoEventoRepository;
+
+    @Autowired
+    private GrupoEventoRepository grupoEventoRepository;
+
+    @Autowired
+    private PremioEventoRepository premioEventoRepository;
+
+    @Autowired
+    private ResultadoCompetenciaRepository resultadoCompetenciaRepository;
+
+    public List<EventoResponseDTO> listarTodos() {
+        return eventoRepository.findAll().stream().map(this::toResponseDTO).collect(Collectors.toList());
+    }
+
+    public EventoResponseDTO obtenerPorId(Integer id) {
+        return toResponseDTO(buscarOFallar(id));
+    }
+
+    // Calendario: próximos eventos, para mostrar en un dashboard o notificar
+    // a entrenadores/deportistas de lo que se viene.
+    public List<EventoResponseDTO> proximos() {
+        return eventoRepository.findByFechaGreaterThanEqualOrderByFechaAsc(LocalDate.now()).stream()
+                .map(this::toResponseDTO).collect(Collectors.toList());
+    }
+
+    public List<EventoResponseDTO> historial() {
+        return eventoRepository.findByFechaLessThanOrderByFechaDesc(LocalDate.now()).stream()
+                .map(this::toResponseDTO).collect(Collectors.toList());
+    }
+
+    public Evento crear(EventoDTO dto) {
+        Evento evento = new Evento();
+        aplicarDatos(evento, dto);
+        return eventoRepository.save(evento);
+    }
+
+    public Evento actualizar(Integer id, EventoDTO dto) {
+        Evento evento = buscarOFallar(id);
+        aplicarDatos(evento, dto);
+        return eventoRepository.save(evento);
+    }
+
+    // Se protege contra el borrado accidental de un evento que ya tiene
+    // resultados oficiales registrados — perder esa trazabilidad afecta el
+    // historial competitivo del club, no es un simple registro de calendario.
+    @Transactional
+    public void eliminar(Integer id) {
+        Evento evento = buscarOFallar(id);
+        boolean tieneResultados = !resultadoCompetenciaRepository.findByEventoIdOrderByPosicionAsc(id).isEmpty();
+        if (tieneResultados) {
+            throw new RuntimeException(
+                    "No se puede eliminar el evento '" + evento.getNombre() +
+                    "': ya tiene resultados de competencia registrados. Elimínalos primero si de verdad quieres borrar el evento.");
+        }
+        eventoRepository.delete(evento);
+    }
+
+    private void aplicarDatos(Evento evento, EventoDTO dto) {
+        evento.setNombre(dto.getNombre());
+        evento.setFecha(dto.getFecha());
+        evento.setUbicacion(dto.getUbicacion());
+        evento.setTieneResultados(dto.getTieneResultados() != null ? dto.getTieneResultados() : Boolean.FALSE);
+
+        if (dto.getTipoEventoId() != null) {
+            TipoEvento tipo = tipoEventoRepository.findById(dto.getTipoEventoId())
+                    .orElseThrow(() -> new RuntimeException("Tipo de evento no encontrado con ID: " + dto.getTipoEventoId()));
+            evento.setTipoEvento(tipo);
+        } else {
+            evento.setTipoEvento(null);
+        }
+    }
+
+    private Evento buscarOFallar(Integer id) {
+        return eventoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Evento no encontrado con ID: " + id));
+    }
+
+    private EventoResponseDTO toResponseDTO(Evento e) {
+        EventoResponseDTO dto = new EventoResponseDTO();
+        dto.setId(e.getId());
+        dto.setNombre(e.getNombre());
+        dto.setFecha(e.getFecha());
+        dto.setTipoEventoId(e.getTipoEvento() != null ? e.getTipoEvento().getId() : null);
+        dto.setTipoEvento(e.getTipoEvento() != null ? e.getTipoEvento().getEvento() : null);
+        dto.setUbicacion(e.getUbicacion());
+        dto.setTieneResultados(e.getTieneResultados());
+        dto.setCantidadGruposInscritos(grupoEventoRepository.findByEventoId(e.getId()).size());
+        dto.setCantidadPremios(premioEventoRepository.findByEventoId(e.getId()).size());
+        return dto;
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Service/Eventos/GrupoEventoService.java">
+package com.varcal.cheermanager.Service.Eventos;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.varcal.cheermanager.DTO.Eventos.GrupoEventoDTO;
+import com.varcal.cheermanager.DTO.Eventos.GrupoEventoResponseDTO;
+import com.varcal.cheermanager.Models.Eventos.Evento;
+import com.varcal.cheermanager.Models.Eventos.GrupoEvento;
+import com.varcal.cheermanager.Models.Org_dep.GrupoEntrenamiento;
+import com.varcal.cheermanager.repository.Eventos.EventoRepository;
+import com.varcal.cheermanager.repository.Eventos.GrupoEventoRepository;
+import com.varcal.cheermanager.repository.Org_dep.GrupoEntrenamientoRepository;
+
+@Service
+public class GrupoEventoService {
+
+    @Autowired
+    private GrupoEventoRepository grupoEventoRepository;
+
+    @Autowired
+    private EventoRepository eventoRepository;
+
+    @Autowired
+    private GrupoEntrenamientoRepository grupoEntrenamientoRepository;
+
+    public GrupoEvento inscribir(GrupoEventoDTO dto) {
+        Evento evento = eventoRepository.findById(dto.getEventoId())
+                .orElseThrow(() -> new RuntimeException("Evento no encontrado con ID: " + dto.getEventoId()));
+
+        GrupoEntrenamiento grupo = grupoEntrenamientoRepository.findById(dto.getGrupoEntrenamientoId())
+                .orElseThrow(() -> new RuntimeException("Grupo no encontrado con ID: " + dto.getGrupoEntrenamientoId()));
+
+        if (grupoEventoRepository.existsByEventoIdAndGrupoEntrenamientoId(evento.getId(), grupo.getId())) {
+            throw new RuntimeException(
+                    "El grupo '" + grupo.getNombre() + "' ya está inscrito en el evento '" + evento.getNombre() + "'");
+        }
+
+        GrupoEvento ge = new GrupoEvento();
+        ge.setEvento(evento);
+        ge.setGrupoEntrenamiento(grupo);
+        return grupoEventoRepository.save(ge);
+    }
+
+    public List<GrupoEventoResponseDTO> listarPorEvento(Integer eventoId) {
+        return grupoEventoRepository.findByEventoId(eventoId).stream().map(this::toDTO).collect(Collectors.toList());
+    }
+
+    // Historial de competencias en las que ha participado un grupo — la base
+    // para la línea de tiempo/progresión de un equipo.
+    public List<GrupoEventoResponseDTO> listarPorGrupo(Integer grupoEntrenamientoId) {
+        return grupoEventoRepository.findByGrupoEntrenamientoId(grupoEntrenamientoId).stream()
+                .map(this::toDTO).collect(Collectors.toList());
+    }
+
+    public void desinscribir(Integer id) {
+        if (!grupoEventoRepository.existsById(id)) {
+            throw new RuntimeException("Inscripción de grupo a evento no encontrada con ID: " + id);
+        }
+        grupoEventoRepository.deleteById(id);
+    }
+
+    private GrupoEventoResponseDTO toDTO(GrupoEvento ge) {
+        GrupoEventoResponseDTO dto = new GrupoEventoResponseDTO();
+        dto.setId(ge.getId());
+        dto.setGrupoEntrenamientoId(ge.getGrupoEntrenamiento().getId());
+        dto.setNombreGrupo(ge.getGrupoEntrenamiento().getNombre());
+        dto.setEventoId(ge.getEvento().getId());
+        dto.setNombreEvento(ge.getEvento().getNombre());
+        dto.setFechaEvento(ge.getEvento().getFecha());
+        return dto;
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Service/Eventos/PremioEventoService.java">
+package com.varcal.cheermanager.Service.Eventos;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.varcal.cheermanager.DTO.Eventos.PremioEventoDTO;
+import com.varcal.cheermanager.DTO.Eventos.PremioEventoResponseDTO;
+import com.varcal.cheermanager.Models.Eventos.Evento;
+import com.varcal.cheermanager.Models.Eventos.PremioEvento;
+import com.varcal.cheermanager.repository.Eventos.EventoRepository;
+import com.varcal.cheermanager.repository.Eventos.PremioEventoRepository;
+
+@Service
+public class PremioEventoService {
+
+    @Autowired
+    private PremioEventoRepository premioEventoRepository;
+
+    @Autowired
+    private EventoRepository eventoRepository;
+
+    public PremioEventoResponseDTO crear(PremioEventoDTO dto) {
+        Evento evento = eventoRepository.findById(dto.getEventoId())
+                .orElseThrow(() -> new RuntimeException("Evento no encontrado con ID: " + dto.getEventoId()));
+
+        PremioEvento premio = new PremioEvento();
+        premio.setEvento(evento);
+        premio.setDescripcion(dto.getDescripcion());
+        premio.setPremio(dto.getPremio());
+
+        return toDTO(premioEventoRepository.save(premio));
+    }
+
+    public List<PremioEventoResponseDTO> listarPorEvento(Integer eventoId) {
+        if (!eventoRepository.existsById(eventoId)) {
+            throw new RuntimeException("Evento no encontrado con ID: " + eventoId);
+        }
+        return premioEventoRepository.findByEventoId(eventoId).stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public PremioEventoResponseDTO actualizar(Integer id, PremioEventoDTO dto) {
+        PremioEvento premio = premioEventoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Premio no encontrado con ID: " + id));
+
+        premio.setDescripcion(dto.getDescripcion());
+        premio.setPremio(dto.getPremio());
+
+        return toDTO(premioEventoRepository.save(premio));
+    }
+
+    public void eliminar(Integer id) {
+        if (!premioEventoRepository.existsById(id)) {
+            throw new RuntimeException("Premio no encontrado con ID: " + id);
+        }
+        premioEventoRepository.deleteById(id);
+    }
+
+    private PremioEventoResponseDTO toDTO(PremioEvento p) {
+        PremioEventoResponseDTO dto = new PremioEventoResponseDTO();
+        dto.setId(p.getId());
+        dto.setEventoId(p.getEvento().getId());
+        dto.setNombreEvento(p.getEvento().getNombre());
+        dto.setDescripcion(p.getDescripcion());
+        dto.setPremio(p.getPremio());
+        return dto;
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Service/Eventos/ResultadoCompetenciaService.java">
+package com.varcal.cheermanager.Service.Eventos;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.varcal.cheermanager.DTO.Eventos.ResultadoCompetenciaDTO;
+import com.varcal.cheermanager.DTO.Eventos.ResultadoCompetenciaResponseDTO;
+import com.varcal.cheermanager.Models.Eventos.Evento;
+import com.varcal.cheermanager.Models.Eventos.PremioEvento;
+import com.varcal.cheermanager.Models.Eventos.ResultadoCompetencia;
+import com.varcal.cheermanager.Models.Evaluaciones.Rutina.EvaluacionRutina;
+import com.varcal.cheermanager.Models.Org_dep.GrupoEntrenamiento;
+import com.varcal.cheermanager.repository.Eventos.EventoRepository;
+import com.varcal.cheermanager.repository.Eventos.PremioEventoRepository;
+import com.varcal.cheermanager.repository.Eventos.ResultadoCompetenciaRepository;
+import com.varcal.cheermanager.repository.Evaluaciones.Rutina.EvaluacionRutinaRepository;
+import com.varcal.cheermanager.repository.Org_dep.GrupoEntrenamientoRepository;
+
+@Service
+public class ResultadoCompetenciaService {
+
+    @Autowired
+    private ResultadoCompetenciaRepository resultadoCompetenciaRepository;
+
+    @Autowired
+    private EventoRepository eventoRepository;
+
+    @Autowired
+    private GrupoEntrenamientoRepository grupoEntrenamientoRepository;
+
+    @Autowired
+    private PremioEventoRepository premioEventoRepository;
+
+    @Autowired
+    private EvaluacionRutinaRepository evaluacionRutinaRepository;
+
+    public ResultadoCompetenciaResponseDTO registrar(ResultadoCompetenciaDTO dto) {
+        Evento evento = eventoRepository.findById(dto.getEventoId())
+                .orElseThrow(() -> new RuntimeException("Evento no encontrado con ID: " + dto.getEventoId()));
+
+        GrupoEntrenamiento grupo = null;
+        if (dto.getGrupoEntrenamientoId() != null) {
+            grupo = grupoEntrenamientoRepository.findById(dto.getGrupoEntrenamientoId())
+                    .orElseThrow(() -> new RuntimeException(
+                            "Grupo de entrenamiento no encontrado con ID: " + dto.getGrupoEntrenamientoId()));
+        }
+
+        PremioEvento premio = resolverPremio(dto.getPremioId(), evento);
+
+        EvaluacionRutina evaluacionRutina = null;
+        if (dto.getEvaluacionRutinaId() != null) {
+            evaluacionRutina = evaluacionRutinaRepository.findById(dto.getEvaluacionRutinaId())
+                    .orElseThrow(() -> new RuntimeException(
+                            "Evaluación de rutina no encontrada con ID: " + dto.getEvaluacionRutinaId()));
+        }
+
+        ResultadoCompetencia resultado = new ResultadoCompetencia();
+        resultado.setEvento(evento);
+        resultado.setGrupoEntrenamiento(grupo);
+        resultado.setPosicion(dto.getPosicion());
+        resultado.setPuntaje(dto.getPuntaje());
+        resultado.setPremio(premio);
+        resultado.setEvaluacionRutina(evaluacionRutina);
+        resultado.setObservaciones(dto.getObservaciones());
+
+        return toDTO(resultadoCompetenciaRepository.save(resultado));
+    }
+
+    public List<ResultadoCompetenciaResponseDTO> listarPorEvento(Integer eventoId) {
+        if (!eventoRepository.existsById(eventoId)) {
+            throw new RuntimeException("Evento no encontrado con ID: " + eventoId);
+        }
+        return resultadoCompetenciaRepository.findByEventoIdOrderByPosicionAsc(eventoId).stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<ResultadoCompetenciaResponseDTO> listarPorGrupo(Integer grupoId) {
+        if (!grupoEntrenamientoRepository.existsById(grupoId)) {
+            throw new RuntimeException("Grupo de entrenamiento no encontrado con ID: " + grupoId);
+        }
+        return resultadoCompetenciaRepository.findByGrupoEntrenamientoId(grupoId).stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public ResultadoCompetenciaResponseDTO actualizar(Integer id, ResultadoCompetenciaDTO dto) {
+        ResultadoCompetencia resultado = resultadoCompetenciaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Resultado no encontrado con ID: " + id));
+
+        if (dto.getGrupoEntrenamientoId() != null) {
+            GrupoEntrenamiento grupo = grupoEntrenamientoRepository.findById(dto.getGrupoEntrenamientoId())
+                    .orElseThrow(() -> new RuntimeException(
+                            "Grupo de entrenamiento no encontrado con ID: " + dto.getGrupoEntrenamientoId()));
+            resultado.setGrupoEntrenamiento(grupo);
+        }
+
+        PremioEvento premio = resolverPremio(dto.getPremioId(), resultado.getEvento());
+        resultado.setPremio(premio);
+
+        if (dto.getEvaluacionRutinaId() != null) {
+            EvaluacionRutina evaluacionRutina = evaluacionRutinaRepository.findById(dto.getEvaluacionRutinaId())
+                    .orElseThrow(() -> new RuntimeException(
+                            "Evaluación de rutina no encontrada con ID: " + dto.getEvaluacionRutinaId()));
+            resultado.setEvaluacionRutina(evaluacionRutina);
+        } else {
+            resultado.setEvaluacionRutina(null);
+        }
+
+        resultado.setPosicion(dto.getPosicion());
+        resultado.setPuntaje(dto.getPuntaje());
+        resultado.setObservaciones(dto.getObservaciones());
+
+        return toDTO(resultadoCompetenciaRepository.save(resultado));
+    }
+
+    public void eliminar(Integer id) {
+        if (!resultadoCompetenciaRepository.existsById(id)) {
+            throw new RuntimeException("Resultado no encontrado con ID: " + id);
+        }
+        resultadoCompetenciaRepository.deleteById(id);
+    }
+
+    // Centraliza la búsqueda + validación de pertenencia del premio al evento,
+    // usada tanto en registrar() como en actualizar() para evitar duplicar
+    // la regla de negocio (y el bug de que actualizar() no la aplicaba).
+    private PremioEvento resolverPremio(Integer premioId, Evento evento) {
+        if (premioId == null) {
+            return null;
+        }
+        return premioEventoRepository.findById(premioId)
+                .filter(p -> p.getEvento().getId().equals(evento.getId()))
+                .orElseThrow(() -> new RuntimeException(
+                        "El premio con ID " + premioId + " no existe o no pertenece a este evento"));
+    }
+
+    private ResultadoCompetenciaResponseDTO toDTO(ResultadoCompetencia r) {
+        ResultadoCompetenciaResponseDTO dto = new ResultadoCompetenciaResponseDTO();
+        dto.setId(r.getId());
+        dto.setEventoId(r.getEvento().getId());
+        dto.setNombreEvento(r.getEvento().getNombre());
+        dto.setFechaEvento(r.getEvento().getFecha());
+        dto.setGrupoEntrenamientoId(r.getGrupoEntrenamiento() != null ? r.getGrupoEntrenamiento().getId() : null);
+        dto.setNombreGrupo(r.getGrupoEntrenamiento() != null ? r.getGrupoEntrenamiento().getNombre() : null);
+        dto.setPosicion(r.getPosicion());
+        dto.setPuntaje(r.getPuntaje());
+        dto.setPremioId(r.getPremio() != null ? r.getPremio().getId() : null);
+        dto.setDescripcionPremio(r.getPremio() != null ? r.getPremio().getDescripcion() : null);
+        dto.setEvaluacionRutinaId(r.getEvaluacionRutina() != null ? r.getEvaluacionRutina().getId() : null);
+        dto.setObservaciones(r.getObservaciones());
+        return dto;
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Service/Eventos/TipoEventoService.java">
+package com.varcal.cheermanager.Service.Eventos;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.varcal.cheermanager.Models.Eventos.TipoEvento;
+import com.varcal.cheermanager.repository.Eventos.TipoEventoRepository;
+
+@Service
+public class TipoEventoService {
+
+    @Autowired
+    private TipoEventoRepository tipoEventoRepository;
+
+    public List<TipoEvento> listarTodos() {
+        return tipoEventoRepository.findAll();
+    }
+
+    public TipoEvento obtenerPorId(Integer id) {
+        return tipoEventoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Tipo de evento no encontrado con ID: " + id));
+    }
+
+    public TipoEvento crear(String nombre) {
+        tipoEventoRepository.findByEvento(nombre).ifPresent(t -> {
+            throw new RuntimeException("Ya existe un tipo de evento llamado '" + nombre + "'");
+        });
+        TipoEvento tipo = new TipoEvento();
+        tipo.setEvento(nombre);
+        return tipoEventoRepository.save(tipo);
+    }
+
+    public void eliminar(Integer id) {
+        if (!tipoEventoRepository.existsById(id)) {
+            throw new RuntimeException("Tipo de evento no encontrado con ID: " + id);
+        }
+        tipoEventoRepository.deleteById(id);
+    }
+}
+</file>
+
+<file path=".gitattributes">
+/mvnw text eol=lf
+*.cmd text eol=crlf
+</file>
+
+<file path=".mvn/wrapper/maven-wrapper.properties">
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+wrapperVersion=3.3.2
+distributionType=only-script
+distributionUrl=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.zip
+</file>
+
+<file path="ajustes_claudia/AUTH_API_v3_COMPLETE.md">
+# Authentication API v3.0 - Complete Implementation Guide
+
+## Overview
+CheerManager now includes a complete authentication system with:
+- Secure password hashing (BCrypt)
+- Account locking after failed attempts
+- JWT token management (issue, refresh, invalidate)
+- Password reset with expiring tokens
+- Password change functionality
+- Automatic last access tracking
+
+---
+
+## 1. Login Endpoint
+**POST** `/api/login`
+
+### Request
+```json
+{
+  "email": "user@example.com",
+  "password": "password123"
+}
+```
+
+### Success Response (200 OK)
+```json
+{
+  "success": true,
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+### Error Responses
+| Status | Error Code | Message |
+|--------|-----------|---------|
+| 401 | invalid_password | Contraseña incorrecta |
+| 404 | email_not_found | El correo proporcionado no está registrado |
+| 423 | account_locked | Cuenta bloqueada por múltiples intentos fallidos |
+| 500 | invalid_hash | Error en el formato del hash de la contraseña |
+
+### Features
+- ✅ Increments failed attempts counter on wrong password
+- ✅ Locks account after 5 failed attempts (configurable)
+- ✅ Updates `ultimo_acceso` on successful login
+- ✅ Resets failed attempts counter on successful login
+- ✅ Generates JWT token with user ID, email, role, and permissions
+
+### Configuration
+```properties
+auth.max-login-attempts=5              # Number of attempts before lock
+auth.lock-duration-minutes=30           # Auto-unlock duration (future feature)
+jwt.expiration-ms=86400000             # Token validity: 24 hours
+```
+
+---
+
+## 2. Logout Endpoint
+**POST** `/api/logout`
+
+### Request
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+### Success Response (200 OK)
+```json
+{
+  "success": true,
+  "message": "Logout exitoso"
+}
+```
+
+### Error Responses
+| Status | Message |
+|--------|---------|
+| 400 | Token no proporcionado |
+| 400 | Token inválido o expirado |
+
+### Features
+- ✅ Blacklists token immediately
+- ✅ Token cannot be used after logout
+- ✅ Stores blacklist until token expiration
+
+---
+
+## 3. Refresh Token Endpoint
+**POST** `/api/refresh-token`
+
+### Request
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+### Success Response (200 OK)
+```json
+{
+  "success": true,
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... (new token)"
+}
+```
+
+### Error Responses
+| Status | Message |
+|--------|---------|
+| 400 | Token no proporcionado |
+| 401 | Token inválido o expirado |
+| 500 | Error al generar nuevo token |
+
+### Features
+- ✅ Validates existing token
+- ✅ Issues new token without session interruption
+- ✅ Preserves user role and permissions
+
+---
+
+## 4. Forgot Password Endpoint
+**POST** `/api/forgot-password`
+
+### Request
+```json
+{
+  "email": "user@example.com"
+}
+```
+
+### Success Response (200 OK)
+```json
+{
+  "success": true,
+  "message": "Token de recuperación enviado",
+  "resetToken": "550e8400-e29b-41d4-a716-446655440000"
+}
+```
+
+### Error Responses
+| Status | Message |
+|--------|---------|
+| 400 | Email es requerido |
+| 404 | El email proporcionado no está registrado |
+| 500 | Error al procesar la solicitud |
+
+### Features
+- ✅ Generates unique UUID token
+- ✅ Sets token expiration (15 minutes by default)
+- ✅ No session creation needed
+- ✅ Stores token in `token_reset_password` column
+
+### Configuration
+```properties
+auth.reset-password-token-expiration-minutes=15  # Token validity
+```
+
+---
+
+## 5. Reset Password Endpoint
+**POST** `/api/reset-password`
+
+### Request
+```json
+{
+  "token": "550e8400-e29b-41d4-a716-446655440000",
+  "newPassword": "newpassword123"
+}
+```
+
+### Success Response (200 OK)
+```json
+{
+  "success": true,
+  "message": "Contraseña resetada correctamente"
+}
+```
+
+### Error Responses
+| Status | Error Code | Message |
+|--------|-----------|---------|
+| 400 | - | Token es requerido |
+| 400 | - | Nueva contraseña es requerida |
+| 401 | token_expired | Token de recuperación expirado |
+| 404 | token_not_found | Token de recuperación inválido |
+| 500 | - | Error al resetear contraseña |
+
+### Features
+- ✅ Validates token expiration
+- ✅ Hashes new password with BCrypt
+- ✅ Clears token after use
+- ✅ Unlocks account automatically
+- ✅ Resets failed attempts counter
+
+---
+
+## 6. Change Password Endpoint
+**POST** `/api/change-password`
+
+### Request
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Content-Type: application/json
+```
+
+```json
+{
+  "currentPassword": "oldpassword123",
+  "newPassword": "newpassword456"
+}
+```
+
+### Success Response (200 OK)
+```json
+{
+  "success": true,
+  "message": "Contraseña cambiada correctamente"
+}
+```
+
+### Error Responses
+| Status | Message |
+|--------|---------|
+| 400 | Token no proporcionado |
+| 400 | Contraseña actual es requerida |
+| 400 | Nueva contraseña es requerida |
+| 401 | Token inválido o expirado |
+| 401 | Contraseña actual incorrecta |
+| 404 | Usuario no encontrado |
+| 500 | Error procesando cambio de contraseña |
+
+### Features
+- ✅ Requires valid JWT token
+- ✅ Validates current password
+- ✅ Hashes new password with BCrypt
+
+---
+
+## Complete User Flow Examples
+
+### Example 1: Normal Login Flow
+```bash
+# 1. Login
+curl -X POST http://localhost:8081/api/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "password": "password123"
+  }'
+
+# Response: {"success": true, "token": "eyJ..."}
+
+# 2. Use token for API calls
+curl -X GET http://localhost:8081/api/profile \
+  -H "Authorization: Bearer eyJ..."
+
+# 3. Logout when done
+curl -X POST http://localhost:8081/api/logout \
+  -H "Authorization: Bearer eyJ..."
+```
+
+### Example 2: Forgot Password Flow
+```bash
+# 1. Request password reset
+curl -X POST http://localhost:8081/api/forgot-password \
+  -H "Content-Type: application/json" \
+  -d '{"email": "user@example.com"}'
+
+# Response: {"success": true, "resetToken": "uuid..."}
+
+# 2. User receives email with token (TODO: email service)
+
+# 3. Reset password with token
+curl -X POST http://localhost:8081/api/reset-password \
+  -H "Content-Type: application/json" \
+  -d '{
+    "token": "uuid-from-email",
+    "newPassword": "newpassword123"
+  }'
+
+# 4. Login with new password
+curl -X POST http://localhost:8081/api/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "password": "newpassword123"
+  }'
+```
+
+### Example 3: Account Lock and Unlock
+```bash
+# 1. Try login 5 times with wrong password
+for i in {1..5}; do
+  curl -X POST http://localhost:8081/api/login \
+    -H "Content-Type: application/json" \
+    -d '{"email": "user@example.com", "password": "wrongpassword"}'
+done
+
+# Response on 5th attempt: 423 Account Locked
+
+# 2. User can't login even with correct password
+curl -X POST http://localhost:8081/api/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "user@example.com", "password": "password123"}'
+# Still returns: 423 Account Locked
+
+# 3. Reset password to unlock
+curl -X POST http://localhost:8081/api/forgot-password \
+  -H "Content-Type: application/json" \
+  -d '{"email": "user@example.com"}'
+# Then follow forgot password flow above
+# Account is unlocked after reset
+
+# 4. Now can login again
+curl -X POST http://localhost:8081/api/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "user@example.com", "password": "newpassword"}'
+```
+
+### Example 4: Change Password While Logged In
+```bash
+# Must have valid token
+curl -X POST http://localhost:8081/api/change-password \
+  -H "Authorization: Bearer eyJ..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "currentPassword": "oldpassword",
+    "newPassword": "newpassword"
+  }'
+```
+
+---
+
+## Database Schema
+
+### Column Changes
+```sql
+ALTER TABLE usuarios ADD COLUMN bloqueado BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE usuarios ADD COLUMN intentos_fallidos INT NOT NULL DEFAULT 0;
+ALTER TABLE usuarios ADD COLUMN token_reset_password VARCHAR(255) NULL;
+ALTER TABLE usuarios ADD COLUMN token_reset_password_expiracion DATETIME NULL;
+```
+
+### Indexes Created
+```sql
+CREATE INDEX idx_usuarios_bloqueado ON usuarios(bloqueado);
+CREATE INDEX idx_usuarios_intentos_fallidos ON usuarios(intentos_fallidos);
+CREATE INDEX idx_usuarios_token_reset ON usuarios(token_reset_password);
+```
+
+---
+
+## Security Features
+
+1. **BCrypt Password Hashing**
+   - Salt is generated for each password (gensalt())
+   - Work factor of 10+ (default)
+
+2. **Account Locking**
+   - After 5 failed login attempts (configurable)
+   - Requires password reset to unlock
+
+3. **JWT Token Blacklist**
+   - Tokens are blacklisted on logout
+   - Blacklist checked on every authenticated request
+
+4. **Reset Token Expiration**
+   - Tokens expire after 15 minutes (configurable)
+   - Cannot be reused
+
+5. **Password Validation**
+   - Current password must match for reset
+   - BCrypt comparison prevents timing attacks
+
+---
+
+## Configuration Reference
+
+### application.properties
+```properties
+# JWT Configuration
+jwt.secret=691f7a33edc25a5b7b9d08d64f7db87fc873f787f6cae7fe1a702d2e155d8316
+jwt.expiration-ms=86400000
+
+# Authentication Configuration
+auth.max-login-attempts=5
+auth.lock-duration-minutes=30
+auth.reset-password-token-expiration-minutes=15
+```
+
+---
+
+## HTTP Status Codes Used
+
+| Code | Meaning | Use Case |
+|------|---------|----------|
+| 200 | OK | Successful request |
+| 400 | Bad Request | Invalid input (missing fields, etc.) |
+| 401 | Unauthorized | Invalid token, expired token, wrong password |
+| 404 | Not Found | User/email/token not found |
+| 423 | Locked | Account locked due to too many failed attempts |
+| 500 | Server Error | Internal errors |
+
+---
+
+## Remaining TODOs
+
+1. **Email Service** (Optional)
+   - Send reset token via email instead of returning it in response
+   - Use Spring Boot Mail starter
+   - Create email templates
+
+2. **Login Attempt Auditing** (Optional)
+   - Create `audit_login_attempts` table
+   - Log IP addresses, timestamps, user agents
+   - Alert on suspicious patterns
+
+3. **Token Refresh Strategy** (Future)
+   - Current: Manual refresh endpoint
+   - Future: Automatic refresh via cookie/refresh token
+
+4. **Two-Factor Authentication** (Future)
+   - SMS/Email OTP
+   - TOTP apps (Google Authenticator)
+
+---
+
+## Testing Checklist
+
+- [ ] Login with correct credentials (200)
+- [ ] Login with wrong password (401, account locks after N attempts)
+- [ ] Login with non-existent email (404)
+- [ ] Logout with valid token (200)
+- [ ] Logout without token (400)
+- [ ] Refresh token with valid JWT (200)
+- [ ] Refresh token with expired JWT (401)
+- [ ] Forgot password with valid email (200)
+- [ ] Forgot password with invalid email (404)
+- [ ] Reset password with valid token (200)
+- [ ] Reset password with expired token (401)
+- [ ] Reset password with invalid token (404)
+- [ ] Change password while logged in (200)
+- [ ] Change password with invalid current password (401)
+- [ ] Change password without token (400)
+</file>
+
+<file path="ajustes_claudia/AUTH_IMPLEMENTATION_V3.md">
+# Autenticación Avanzada v3.0 - COMPLETADO ✅
+
+## ✅ Endpoints Implementados (6/6)
+
+### 1. POST /api/refresh-token
+**Descripción:** Genera nuevo JWT a partir de uno válido (sin expiración)
+
+**Estado:** ✅ Implementado
+
+**Request:**
+```http
+Authorization: Bearer <JWT_TOKEN>
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+**Features:**
+- ✅ Valida JWT con expiración
+- ✅ Generapara nuevo token si el actual es válido
+- ✅ Usuario debe estar activo (no bloqueado)
+- ✅ Mantiene permisos originales
+
+---
+
+### 2. POST /api/forgot-password
+**Descripción:** Inicia proceso de recuperación de contraseña
+
+**Estado:** ✅ Implementado
+
+**Request:**
+```json
+{
+  "email": "usuario@example.com"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Si el correo existe, recibirá un enlace de recuperación",
+  "resetToken": "550e8400-e29b-41d4-a716-446655440000"
+}
+```
+
+**Features:**
+- ✅ Genera token UUID único
+- ✅ Expiracion configurable: 15 minutos (por defecto)
+- ✅ Token almacenado en BD: `token_reset_password`
+- ✅ Expiración almacenada: `token_reset_password_expiracion`
+- ✅ Mensaje genérico por seguridad (no expone si email existe)
+- ✅ Status 404 si email no existe
+- ✅ Status 403 si usuario inactivo
+
+---
+
+### 3. POST /api/reset-password
+**Descripción:** Restablece contraseña usando token de reset
+
+**Estado:** ✅ Implementado
+
+**Request:**
+```json
+{
+  "resetToken": "550e8400-e29b-41d4-a716-446655440000",
+  "newPassword": "newPassword123"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Contraseña restablecida exitosamente"
+}
+```
+
+**Features:**
+- ✅ Valida existencia del token
+- ✅ Valida no haya expirado
+- ✅ Hash nueva contraseña con BCrypt
+- ✅ Limpia token después de uso
+- ✅ Resetea `intentosFallidos` a 0
+- ✅ Desbloquea usuario si estaba bloqueado
+- ✅ Status 400 si token inválido o expirado
+
+---
+
+### 4. POST /api/change-password
+**Descripción:** Cambia contraseña de usuario autenticado
+
+**Estado:** ✅ Implementado
+
+**Request:**
+```http
+Authorization: Bearer <JWT_TOKEN>
+Content-Type: application/json
+
+{
+  "currentPassword": "password123",
+  "newPassword": "newPassword456"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Contraseña cambiada exitosamente"
+}
+```
+
+**Features:**
+- ✅ Valida token JWT (requiere autenticación)
+- ✅ Extrae `userId` del token
+- ✅ Verifica contraseña actual con BCrypt
+- ✅ Hash nueva contraseña
+- ✅ Token sigue siendo válido
+
+---
+
+### 5. Feature: Bloqueo tras N intentos fallidos
+**Descripción:** Bloquea cuenta automáticamente después de N intentos fallidos
+
+**Estado:** ✅ Implementado
+
+**Configuración:**
+```properties
+auth.max-login-attempts=5                    # Intentos antes de bloqueo
+auth.lock-duration-minutes=30                # Referencia (desbloquea en reset)
+```
+
+**Features:**
+- ✅ Incrementa `intentosFallidos` en cada fallo de contraseña
+- ✅ Bloquea automáticamente cuando `intentosFallidos >= maxAttempts`
+- ✅ Devuelve status 423 cuando usuario bloqueado
+- ✅ Se desbloquea automáticamente al reset de password
+- ✅ Se resetea count de intentos en login exitoso
+
+---
+
+### 6. Feature: Actualizar último_acceso al login
+**Descripción:** Registra timestamp de último acceso exitoso
+
+**Estado:** ✅ Implementado
+
+**Detalles:**
+- ✅ Se actualiza automáticamente en login exitoso
+- ✅ Campo: `usuario.ultimoAcceso` (java.time.LocalDateTime)
+- ✅ Se guarda en BD al momento del login
+- ✅ Accessible para auditoría y análisis
+
+## 🗂️ Archivos Modificados
+
+### Entity - JPA
+- **Usuario.java**: Agregados 4 campos nuevos
+  - `bloqueado: Boolean`
+  - `intentosFallidos: Integer`
+  - `tokenResetPassword: String`
+  - `tokenResetPasswordExpiracion: LocalDateTime`
+
+### Service
+- **AuthService.java**: Implementados 5 métodos
+  - `refreshToken(token): String`
+  - `forgotPassword(email): PasswordResetResult`
+  - `resetPassword(token, newPassword): PasswordResetResult`
+  - `changePassword(userId, currentPwd, newPwd): PasswordChangeResult`
+  - Manejo de intentos fallidos en `authenticate()`
+
+- Nuevas clases internas:
+  - `PasswordResetResult`
+  - `PasswordChangeResult`
+
+### Controller
+- **AuthController.java**: 4 endpoints nuevos
+  - `POST /auth/refresh-token`
+  - `POST /auth/forgot-password`
+  - `POST /auth/reset-password`
+  - `POST /auth/change-password`
+
+- Manejo de error code `user_locked` (status 423)
+
+### Repository
+- **UserRepository.java**: Método nuevo
+  - `Optional<Usuario> findByTokenResetPassword(String)`
+
+## 🗄️ Schema - SQL
+
+### Migración
+- Archivo: `migrations/V3_add_auth_features.sql`
+- Columnas agregadas a tabla `usuarios`:
+  - `bloqueado BOOLEAN DEFAULT FALSE`
+  - `intentos_fallidos INT DEFAULT 0`
+  - `token_reset_password VARCHAR(255) NULL`
+  - `token_reset_password_expiracion DATETIME NULL`
+
+- Índices agregados:
+  - `idx_usuarios_token_reset` en `token_reset_password`
+  - `idx_usuarios_bloqueado` en `bloqueado`
+  - `idx_usuarios_email` en `email`
+
+### Script Actualizado
+- Pendiente: Ejecutar migración V3 o actualizar `TF_Cheermanager_V2_optimized.sql`
+
+## ⚙️ Configuración
+
+Agregar a `application.properties` o `application.yml`:
+
+```properties
+# Authentication settings
+auth.max-login-attempts=5
+auth.lock-duration-minutes=30
+auth.reset-password-token-expiration-minutes=15
+
+# JWT settings (existente)
+jwt.secret=YOUR_BASE64_SECRET
+jwt.expiration-ms=3600000
+
+# Email (recomendado para forgot-password)
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=${MAIL_USERNAME}
+spring.mail.password=${MAIL_PASSWORD}
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+spring.mail.properties.mail.smtp.starttls.required=true
+```
+
+## 🔄 Flujos de Autenticación
+
+### Login Standard
+```
+POST /auth/login
+  { email, password }
+① Verificar si usuario bloqueado → 423 Locked
+② BCrypt checkpw(password)
+③ Si correcto: reset intentosFallidos, actualizar ultimoAcceso, generar token
+④ Si incorrecto: incrementar intentosFallidos, bloquear si ≥ maxAttempts
+```
+
+### Refresh Token
+```
+POST /auth/refresh-token
+① Validar JWT existente
+② Verificar usuario no bloqueado ni inactivo
+③ Generar nuevo token
+```
+
+### Forgot Password
+```
+POST /auth/forgot-password
+① Buscar usuario por email
+② Generar UUID resetToken
+③ Guardar token + expiración (15 min default)
+④ Responder con token (enviar por email en producción)
+```
+
+### Reset Password
+```
+POST /auth/reset-password
+① Validar token existe y no expirado
+② Hashear nueva contraseña
+③ Limpiar token
+④ Desbloquear usuario
+⑤ Reset intentosFallidos
+```
+
+### Change Password
+```
+POST /auth/change-password
+① Validar JWT en header
+② Extraer userId del token
+③ Verificar contraseña actual
+④ Hashear nueva contraseña
+⑤ Guardar en BD
+```
+
+## 📝 HTTP Status Codes
+
+| Endpoint | Caso | Status | Message |
+|----------|------|--------|---------|
+| /login | Password incorrecta | 401 | "Contraseña incorrecta" |
+| /login | Usuario bloqueado | 423 | "Usuario bloqueado por múltiples intentos fallidos" |
+| /login | Email no existe | 404 | "El correo no está registrado" |
+| /refresh-token | Token inválido | 401 | "Token inválido o expirado" |
+| /forgot-password | Email no existe | 404 | Email no registrado |
+| /reset-password | Token inválido | 400 | "Token inválido" |
+| /reset-password | Token expirado | 400 | "Token expirado" |
+| /change-password | Pwd actual incorrecta | 401 | "Contraseña actual es incorrecta" |
+
+## ✨ Características de Seguridad
+
+✅ BCrypt para hash de contraseñas
+✅ JWT con expiración configurable
+✅ Rate limiting por intentos fallidos
+✅ Bloqueo automático tras N intentos
+✅ Token de reset con UUID único
+✅ Expiración de token de reset
+✅ Blacklist de tokens en logout
+✅ Validación de usuario activo
+
+## 🚀 Pasos Siguientes (Recomendado)
+
+1. **Ejecutar migración SQL**
+   ```bash
+   mysql -u root -p cheermanager < migrations/V3_add_auth_features.sql
+   ```
+
+2. **Agregar servicio de Email** (opcional pero recomendado)
+   - Crear `EmailService` para enviar enlaces de reset
+   - Integrarlo en `forgotPassword()`
+
+3. **Agregar auditoría de intentos de login**
+   - Crear tabla `audit_login_attempts`
+   - Registrar intentos fallidos para análisis
+
+4. **Implementar CAPTCHA** (opcional)
+   - Agregar en login tras N intentos
+
+5. **Tests unitarios**
+   - MockMvc para endpoints
+   - Test de bloqueo y reset
+</file>
 
 <file path="ajustes_claudia/RESUMEN_CABOS_SUELTOS.md">
 # Los 3 cabos sueltos — resueltos
@@ -1270,367 +2918,6 @@ necesitas crear es `ver_logs_acceso`, mencionado arriba.
    con la fecha de cierre del plan anterior correcta.
 </file>
 
-<file path="src/main/java/com/varcal/cheermanager/Controller/Evaluaciones/Rutina/RubricaConfigController.java">
-package com.varcal.cheermanager.Controller.Evaluaciones.Rutina;
-
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.varcal.cheermanager.Models.Evaluaciones.Rutina.DriverSubCriterio;
-import com.varcal.cheermanager.Models.Evaluaciones.Rutina.EscalonDriverNivel;
-import com.varcal.cheermanager.Models.Evaluaciones.Rutina.NivelCompetencia;
-import com.varcal.cheermanager.Models.Evaluaciones.Rutina.SubCriterioRubrica;
-import com.varcal.cheermanager.Models.Evaluaciones.Rutina.TablaCantidadNivel;
-import com.varcal.cheermanager.Models.Evaluaciones.Rutina.TopeDriverNivel;
-import com.varcal.cheermanager.Models.Evaluaciones.Rutina.TopeSeccionNivel;
-import com.varcal.cheermanager.Service.Evaluaciones.Rutina.RubricaConfigService;
-import com.varcal.cheermanager.Utils.RequiresPermission;
-
-@RestController
-@RequestMapping("/api/rubrica-config")
-public class RubricaConfigController {
-
-    @Autowired
-    private RubricaConfigService configService;
-
-    // ── Niveles ──────────────────────────────────────────────────────────────
-    @GetMapping("/niveles")
-    @RequiresPermission("ver_evaluaciones")
-    public ResponseEntity<List<NivelCompetencia>> listarNiveles() {
-        return ResponseEntity.ok(configService.listarNiveles());
-    }
-
-    @PostMapping("/niveles")
-    @RequiresPermission("configurar_rubrica")
-    public ResponseEntity<?> crearNivel(@RequestBody NivelCompetencia nivel) {
-        return ResponseEntity.status(201).body(configService.guardarNivel(nivel));
-    }
-
-    @PutMapping("/niveles/{id}")
-    @RequiresPermission("configurar_rubrica")
-    public ResponseEntity<?> actualizarNivel(@PathVariable Integer id, @RequestBody NivelCompetencia nivel) {
-        nivel.setId(id);
-        return ResponseEntity.ok(configService.guardarNivel(nivel));
-    }
-
-    @DeleteMapping("/niveles/{id}")
-    @RequiresPermission("configurar_rubrica")
-    public ResponseEntity<?> eliminarNivel(@PathVariable Integer id) {
-        configService.eliminarNivel(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    // ── Sub-criterios ────────────────────────────────────────────────────────
-    @GetMapping("/sub-criterios")
-    @RequiresPermission("ver_evaluaciones")
-    public ResponseEntity<List<SubCriterioRubrica>> listarSubCriterios() {
-        return ResponseEntity.ok(configService.listarSubCriterios());
-    }
-
-    @PostMapping("/sub-criterios")
-    @RequiresPermission("configurar_rubrica")
-    public ResponseEntity<?> crearSubCriterio(@RequestBody SubCriterioRubrica sc) {
-        return ResponseEntity.status(201).body(configService.guardarSubCriterio(sc));
-    }
-
-    // ── Tablas de cantidad ───────────────────────────────────────────────────
-    @GetMapping("/tabla-cantidad/{nivelId}")
-    @RequiresPermission("ver_evaluaciones")
-    public ResponseEntity<List<TablaCantidadNivel>> listarTablaCantidad(@PathVariable Integer nivelId) {
-        return ResponseEntity.ok(configService.listarTablaCantidad(nivelId));
-    }
-
-    @PostMapping("/tabla-cantidad")
-    @RequiresPermission("configurar_rubrica")
-    public ResponseEntity<?> crearFilaTablaCantidad(@RequestBody TablaCantidadNivel fila) {
-        try {
-            return ResponseEntity.status(201).body(configService.guardarTablaCantidad(fila));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(400).body(e.getMessage());
-        }
-    }
-
-    @PutMapping("/tabla-cantidad/{id}")
-    @RequiresPermission("configurar_rubrica")
-    public ResponseEntity<?> actualizarFilaTablaCantidad(@PathVariable Integer id, @RequestBody TablaCantidadNivel fila) {
-        fila.setId(id);
-        try {
-            return ResponseEntity.ok(configService.guardarTablaCantidad(fila));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(400).body(e.getMessage());
-        }
-    }
-
-    @DeleteMapping("/tabla-cantidad/{id}")
-    @RequiresPermission("configurar_rubrica")
-    public ResponseEntity<?> eliminarFilaTablaCantidad(@PathVariable Integer id) {
-        configService.eliminarTablaCantidad(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    // ── Topes de sección ─────────────────────────────────────────────────────
-    @GetMapping("/topes-seccion")
-    @RequiresPermission("ver_evaluaciones")
-    public ResponseEntity<List<TopeSeccionNivel>> listarTopesSeccion(
-            @RequestParam Integer nivelId, @RequestParam Integer subCriterioId) {
-        return ResponseEntity.ok(configService.listarTopesSeccion(nivelId, subCriterioId));
-    }
-
-    @PostMapping("/topes-seccion")
-    @RequiresPermission("configurar_rubrica")
-    public ResponseEntity<?> crearTopeSeccion(@RequestBody TopeSeccionNivel tope) {
-        try {
-            return ResponseEntity.status(201).body(configService.guardarTopeSeccion(tope));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(400).body(e.getMessage());
-        }
-    }
-
-    @PutMapping("/topes-seccion/{id}")
-    @RequiresPermission("configurar_rubrica")
-    public ResponseEntity<?> actualizarTopeSeccion(@PathVariable Integer id, @RequestBody TopeSeccionNivel tope) {
-        tope.setId(id);
-        try {
-            return ResponseEntity.ok(configService.guardarTopeSeccion(tope));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(400).body(e.getMessage());
-        }
-    }
-
-    @DeleteMapping("/topes-seccion/{id}")
-    @RequiresPermission("configurar_rubrica")
-    public ResponseEntity<?> eliminarTopeSeccion(@PathVariable Integer id) {
-        configService.eliminarTopeSeccion(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    // ── Drivers ──────────────────────────────────────────────────────────────
-    @GetMapping("/drivers/{subCriterioId}")
-    @RequiresPermission("ver_evaluaciones")
-    public ResponseEntity<List<DriverSubCriterio>> listarDrivers(@PathVariable Integer subCriterioId) {
-        return ResponseEntity.ok(configService.listarDrivers(subCriterioId));
-    }
-
-    @PostMapping("/drivers")
-    @RequiresPermission("configurar_rubrica")
-    public ResponseEntity<?> crearDriver(@RequestBody DriverSubCriterio driver) {
-        return ResponseEntity.status(201).body(configService.guardarDriver(driver));
-    }
-
-    @PostMapping("/topes-driver")
-    @RequiresPermission("configurar_rubrica")
-    public ResponseEntity<?> crearTopeDriver(@RequestBody TopeDriverNivel tope) {
-        return ResponseEntity.status(201).body(configService.guardarTopeDriver(tope));
-    }
-
-    @PutMapping("/topes-driver/{id}")
-    @RequiresPermission("configurar_rubrica")
-    public ResponseEntity<?> actualizarTopeDriver(@PathVariable Integer id, @RequestBody TopeDriverNivel tope) {
-        tope.setId(id);
-        return ResponseEntity.ok(configService.guardarTopeDriver(tope));
-    }
-
-    @GetMapping("/escalones-driver")
-    @RequiresPermission("ver_evaluaciones")
-    public ResponseEntity<List<EscalonDriverNivel>> listarEscalonesDriver(
-            @RequestParam Integer driverId, @RequestParam Integer nivelId) {
-        return ResponseEntity.ok(configService.listarEscalonesDriver(driverId, nivelId));
-    }
-
-    @PostMapping("/escalones-driver")
-    @RequiresPermission("configurar_rubrica")
-    public ResponseEntity<?> crearEscalonDriver(@RequestBody EscalonDriverNivel escalon) {
-        return ResponseEntity.status(201).body(configService.guardarEscalonDriver(escalon));
-    }
-
-    @DeleteMapping("/escalones-driver/{id}")
-    @RequiresPermission("configurar_rubrica")
-    public ResponseEntity<?> eliminarEscalonDriver(@PathVariable Integer id) {
-        configService.eliminarEscalonDriver(id);
-        return ResponseEntity.noContent().build();
-    }
-}
-</file>
-
-<file path="src/main/java/com/varcal/cheermanager/Service/Evaluaciones/Rutina/RubricaConfigService.java">
-package com.varcal.cheermanager.Service.Evaluaciones.Rutina;
-
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.varcal.cheermanager.Models.Evaluaciones.Rutina.DriverSubCriterio;
-import com.varcal.cheermanager.Models.Evaluaciones.Rutina.EscalonDriverNivel;
-import com.varcal.cheermanager.Models.Evaluaciones.Rutina.NivelCompetencia;
-import com.varcal.cheermanager.Models.Evaluaciones.Rutina.SubCriterioRubrica;
-import com.varcal.cheermanager.Models.Evaluaciones.Rutina.TablaCantidadNivel;
-import com.varcal.cheermanager.Models.Evaluaciones.Rutina.TopeDriverNivel;
-import com.varcal.cheermanager.Models.Evaluaciones.Rutina.TopeSeccionNivel;
-import com.varcal.cheermanager.repository.Evaluaciones.Rutina.DriverSubCriterioRepository;
-import com.varcal.cheermanager.repository.Evaluaciones.Rutina.EscalonDriverNivelRepository;
-import com.varcal.cheermanager.repository.Evaluaciones.Rutina.NivelCompetenciaRepository;
-import com.varcal.cheermanager.repository.Evaluaciones.Rutina.SubCriterioRubricaRepository;
-import com.varcal.cheermanager.repository.Evaluaciones.Rutina.TablaCantidadNivelRepository;
-import com.varcal.cheermanager.repository.Evaluaciones.Rutina.TopeDriverNivelRepository;
-import com.varcal.cheermanager.repository.Evaluaciones.Rutina.TopeSeccionNivelRepository;
-
-@Service
-public class RubricaConfigService {
-
-    @Autowired private NivelCompetenciaRepository nivelRepo;
-    @Autowired private SubCriterioRubricaRepository subCriterioRepo;
-    @Autowired private TablaCantidadNivelRepository tablaCantidadRepo;
-    @Autowired private TopeSeccionNivelRepository topeSeccionRepo;
-    @Autowired private DriverSubCriterioRepository driverRepo;
-    @Autowired private TopeDriverNivelRepository topeDriverRepo;
-    @Autowired private EscalonDriverNivelRepository escalonDriverRepo;
-
-    // ── Niveles ──────────────────────────────────────────────────────────────
-    public List<NivelCompetencia> listarNiveles() {
-        return nivelRepo.findAll();
-    }
-
-    public NivelCompetencia guardarNivel(NivelCompetencia nivel) {
-        return nivelRepo.save(nivel);
-    }
-
-    public void eliminarNivel(Integer id) {
-        if (!nivelRepo.existsById(id)) {
-            throw new RuntimeException("Nivel no encontrado con ID: " + id);
-        }
-        nivelRepo.deleteById(id);
-    }
-
-    // ── Sub-criterios ────────────────────────────────────────────────────────
-    public List<SubCriterioRubrica> listarSubCriterios() {
-        return subCriterioRepo.findAll();
-    }
-
-    public SubCriterioRubrica guardarSubCriterio(SubCriterioRubrica sc) {
-        return subCriterioRepo.save(sc);
-    }
-
-    // ── Tabla de cantidad ────────────────────────────────────────────────────
-    public List<TablaCantidadNivel> listarTablaCantidad(Integer nivelId) {
-        return tablaCantidadRepo.findByNivelId(nivelId);
-    }
-
-    @Transactional
-    public TablaCantidadNivel guardarTablaCantidad(TablaCantidadNivel fila) {
-        if (fila.getNivel() == null || fila.getNivel().getId() == null) {
-            throw new RuntimeException("La fila de tabla de cantidad debe tener un nivel asociado.");
-        }
-        nivelRepo.findById(fila.getNivel().getId())
-                .orElseThrow(() -> new RuntimeException(
-                        "Nivel no encontrado con ID: " + fila.getNivel().getId()));
-        return tablaCantidadRepo.save(fila);
-    }
-
-    public void eliminarTablaCantidad(Integer id) {
-        if (!tablaCantidadRepo.existsById(id)) {
-            throw new RuntimeException("Fila de tabla de cantidad no encontrada con ID: " + id);
-        }
-        tablaCantidadRepo.deleteById(id);
-    }
-
-    // ── Topes de sección ─────────────────────────────────────────────────────
-    public List<TopeSeccionNivel> listarTopesSeccion(Integer nivelId, Integer subCriterioId) {
-        return topeSeccionRepo.findByNivelIdAndSubCriterioIdOrderByOrdenDesc(nivelId, subCriterioId);
-    }
-
-    @Transactional
-    public TopeSeccionNivel guardarTopeSeccion(TopeSeccionNivel tope) {
-        if (tope.getNivel() == null || tope.getNivel().getId() == null) {
-            throw new RuntimeException("El tope de sección debe tener nivel y sub-criterio asociados.");
-        }
-        nivelRepo.findById(tope.getNivel().getId())
-                .orElseThrow(() -> new RuntimeException(
-                        "Nivel no encontrado con ID: " + tope.getNivel().getId()));
-        subCriterioRepo.findById(tope.getSubCriterio().getId())
-                .orElseThrow(() -> new RuntimeException(
-                        "Sub-criterio no encontrado con ID: " + tope.getSubCriterio().getId()));
-        return topeSeccionRepo.save(tope);
-    }
-
-    public void eliminarTopeSeccion(Integer id) {
-        if (!topeSeccionRepo.existsById(id)) {
-            throw new RuntimeException("Tope de sección no encontrado con ID: " + id);
-        }
-        topeSeccionRepo.deleteById(id);
-    }
-
-    // ── Drivers ──────────────────────────────────────────────────────────────
-    public List<DriverSubCriterio> listarDrivers(Integer subCriterioId) {
-        return driverRepo.findBySubCriterioId(subCriterioId);
-    }
-
-    public DriverSubCriterio guardarDriver(DriverSubCriterio driver) {
-        return driverRepo.save(driver);
-    }
-
-    @Transactional
-    public TopeDriverNivel guardarTopeDriver(TopeDriverNivel tope) {
-        return topeDriverRepo.save(tope);
-    }
-
-    @Transactional
-    public EscalonDriverNivel guardarEscalonDriver(EscalonDriverNivel escalon) {
-        return escalonDriverRepo.save(escalon);
-    }
-
-    public List<EscalonDriverNivel> listarEscalonesDriver(Integer driverId, Integer nivelId) {
-        return escalonDriverRepo.findByDriverIdAndNivelIdOrderByOrden(driverId, nivelId);
-    }
-
-    public void eliminarEscalonDriver(Integer id) {
-        if (!escalonDriverRepo.existsById(id)) {
-            throw new RuntimeException("Escalón de driver no encontrado con ID: " + id);
-        }
-        escalonDriverRepo.deleteById(id);
-    }
-}
-</file>
-
-<file path=".gitattributes">
-/mvnw text eol=lf
-*.cmd text eol=crlf
-</file>
-
-<file path=".mvn/wrapper/maven-wrapper.properties">
-# Licensed to the Apache Software Foundation (ASF) under one
-# or more contributor license agreements.  See the NOTICE file
-# distributed with this work for additional information
-# regarding copyright ownership.  The ASF licenses this file
-# to you under the Apache License, Version 2.0 (the
-# "License"); you may not use this file except in compliance
-# with the License.  You may obtain a copy of the License at
-#
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing,
-# software distributed under the License is distributed on an
-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied.  See the License for the
-# specific language governing permissions and limitations
-# under the License.
-wrapperVersion=3.3.2
-distributionType=only-script
-distributionUrl=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.zip
-</file>
-
 <file path="mvnw">
 #!/bin/sh
 # ----------------------------------------------------------------------------
@@ -2374,6 +3661,199 @@ public class EvaluacionRutinaController {
         } catch (RuntimeException e) {
             return ResponseEntity.status(404).body(e.getMessage());
         }
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Controller/Evaluaciones/Rutina/RubricaConfigController.java">
+package com.varcal.cheermanager.Controller.Evaluaciones.Rutina;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.varcal.cheermanager.Models.Evaluaciones.Rutina.DriverSubCriterio;
+import com.varcal.cheermanager.Models.Evaluaciones.Rutina.EscalonDriverNivel;
+import com.varcal.cheermanager.Models.Evaluaciones.Rutina.NivelCompetencia;
+import com.varcal.cheermanager.Models.Evaluaciones.Rutina.SubCriterioRubrica;
+import com.varcal.cheermanager.Models.Evaluaciones.Rutina.TablaCantidadNivel;
+import com.varcal.cheermanager.Models.Evaluaciones.Rutina.TopeDriverNivel;
+import com.varcal.cheermanager.Models.Evaluaciones.Rutina.TopeSeccionNivel;
+import com.varcal.cheermanager.Service.Evaluaciones.Rutina.RubricaConfigService;
+import com.varcal.cheermanager.Utils.RequiresPermission;
+
+@RestController
+@RequestMapping("/api/rubrica-config")
+public class RubricaConfigController {
+
+    @Autowired
+    private RubricaConfigService configService;
+
+    // ── Niveles ──────────────────────────────────────────────────────────────
+    @GetMapping("/niveles")
+    @RequiresPermission("ver_evaluaciones")
+    public ResponseEntity<List<NivelCompetencia>> listarNiveles() {
+        return ResponseEntity.ok(configService.listarNiveles());
+    }
+
+    @PostMapping("/niveles")
+    @RequiresPermission("configurar_rubrica")
+    public ResponseEntity<?> crearNivel(@RequestBody NivelCompetencia nivel) {
+        return ResponseEntity.status(201).body(configService.guardarNivel(nivel));
+    }
+
+    @PutMapping("/niveles/{id}")
+    @RequiresPermission("configurar_rubrica")
+    public ResponseEntity<?> actualizarNivel(@PathVariable Integer id, @RequestBody NivelCompetencia nivel) {
+        nivel.setId(id);
+        return ResponseEntity.ok(configService.guardarNivel(nivel));
+    }
+
+    @DeleteMapping("/niveles/{id}")
+    @RequiresPermission("configurar_rubrica")
+    public ResponseEntity<?> eliminarNivel(@PathVariable Integer id) {
+        configService.eliminarNivel(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // ── Sub-criterios ────────────────────────────────────────────────────────
+    @GetMapping("/sub-criterios")
+    @RequiresPermission("ver_evaluaciones")
+    public ResponseEntity<List<SubCriterioRubrica>> listarSubCriterios() {
+        return ResponseEntity.ok(configService.listarSubCriterios());
+    }
+
+    @PostMapping("/sub-criterios")
+    @RequiresPermission("configurar_rubrica")
+    public ResponseEntity<?> crearSubCriterio(@RequestBody SubCriterioRubrica sc) {
+        return ResponseEntity.status(201).body(configService.guardarSubCriterio(sc));
+    }
+
+    // ── Tablas de cantidad ───────────────────────────────────────────────────
+    @GetMapping("/tabla-cantidad/{nivelId}")
+    @RequiresPermission("ver_evaluaciones")
+    public ResponseEntity<List<TablaCantidadNivel>> listarTablaCantidad(@PathVariable Integer nivelId) {
+        return ResponseEntity.ok(configService.listarTablaCantidad(nivelId));
+    }
+
+    @PostMapping("/tabla-cantidad")
+    @RequiresPermission("configurar_rubrica")
+    public ResponseEntity<?> crearFilaTablaCantidad(@RequestBody TablaCantidadNivel fila) {
+        try {
+            return ResponseEntity.status(201).body(configService.guardarTablaCantidad(fila));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(400).body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/tabla-cantidad/{id}")
+    @RequiresPermission("configurar_rubrica")
+    public ResponseEntity<?> actualizarFilaTablaCantidad(@PathVariable Integer id, @RequestBody TablaCantidadNivel fila) {
+        fila.setId(id);
+        try {
+            return ResponseEntity.ok(configService.guardarTablaCantidad(fila));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(400).body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/tabla-cantidad/{id}")
+    @RequiresPermission("configurar_rubrica")
+    public ResponseEntity<?> eliminarFilaTablaCantidad(@PathVariable Integer id) {
+        configService.eliminarTablaCantidad(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // ── Topes de sección ─────────────────────────────────────────────────────
+    @GetMapping("/topes-seccion")
+    @RequiresPermission("ver_evaluaciones")
+    public ResponseEntity<List<TopeSeccionNivel>> listarTopesSeccion(
+            @RequestParam Integer nivelId, @RequestParam Integer subCriterioId) {
+        return ResponseEntity.ok(configService.listarTopesSeccion(nivelId, subCriterioId));
+    }
+
+    @PostMapping("/topes-seccion")
+    @RequiresPermission("configurar_rubrica")
+    public ResponseEntity<?> crearTopeSeccion(@RequestBody TopeSeccionNivel tope) {
+        try {
+            return ResponseEntity.status(201).body(configService.guardarTopeSeccion(tope));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(400).body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/topes-seccion/{id}")
+    @RequiresPermission("configurar_rubrica")
+    public ResponseEntity<?> actualizarTopeSeccion(@PathVariable Integer id, @RequestBody TopeSeccionNivel tope) {
+        tope.setId(id);
+        try {
+            return ResponseEntity.ok(configService.guardarTopeSeccion(tope));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(400).body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/topes-seccion/{id}")
+    @RequiresPermission("configurar_rubrica")
+    public ResponseEntity<?> eliminarTopeSeccion(@PathVariable Integer id) {
+        configService.eliminarTopeSeccion(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // ── Drivers ──────────────────────────────────────────────────────────────
+    @GetMapping("/drivers/{subCriterioId}")
+    @RequiresPermission("ver_evaluaciones")
+    public ResponseEntity<List<DriverSubCriterio>> listarDrivers(@PathVariable Integer subCriterioId) {
+        return ResponseEntity.ok(configService.listarDrivers(subCriterioId));
+    }
+
+    @PostMapping("/drivers")
+    @RequiresPermission("configurar_rubrica")
+    public ResponseEntity<?> crearDriver(@RequestBody DriverSubCriterio driver) {
+        return ResponseEntity.status(201).body(configService.guardarDriver(driver));
+    }
+
+    @PostMapping("/topes-driver")
+    @RequiresPermission("configurar_rubrica")
+    public ResponseEntity<?> crearTopeDriver(@RequestBody TopeDriverNivel tope) {
+        return ResponseEntity.status(201).body(configService.guardarTopeDriver(tope));
+    }
+
+    @PutMapping("/topes-driver/{id}")
+    @RequiresPermission("configurar_rubrica")
+    public ResponseEntity<?> actualizarTopeDriver(@PathVariable Integer id, @RequestBody TopeDriverNivel tope) {
+        tope.setId(id);
+        return ResponseEntity.ok(configService.guardarTopeDriver(tope));
+    }
+
+    @GetMapping("/escalones-driver")
+    @RequiresPermission("ver_evaluaciones")
+    public ResponseEntity<List<EscalonDriverNivel>> listarEscalonesDriver(
+            @RequestParam Integer driverId, @RequestParam Integer nivelId) {
+        return ResponseEntity.ok(configService.listarEscalonesDriver(driverId, nivelId));
+    }
+
+    @PostMapping("/escalones-driver")
+    @RequiresPermission("configurar_rubrica")
+    public ResponseEntity<?> crearEscalonDriver(@RequestBody EscalonDriverNivel escalon) {
+        return ResponseEntity.status(201).body(configService.guardarEscalonDriver(escalon));
+    }
+
+    @DeleteMapping("/escalones-driver/{id}")
+    @RequiresPermission("configurar_rubrica")
+    public ResponseEntity<?> eliminarEscalonDriver(@PathVariable Integer id) {
+        configService.eliminarEscalonDriver(id);
+        return ResponseEntity.noContent().build();
     }
 }
 </file>
@@ -4356,6 +5836,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.varcal.cheermanager.Models.Eventos.Evento;
 import com.varcal.cheermanager.Models.Org_dep.GrupoEntrenamiento;
 
 import jakarta.persistence.CascadeType;
@@ -4395,10 +5876,23 @@ public class EvaluacionRutina {
     @Column(name = "fecha", nullable = false)
     private LocalDate fecha;
 
-    // Nombre del evento o "Práctica interna" / "Simulacro" si no es una
-    // competencia oficial — el sistema sirve igual para preparación.
+    // Nombre libre del evento o "Práctica interna" / "Simulacro" si no es una
+    // competencia oficial — el sistema sirve igual para preparación. Se
+    // conserva para no romper evaluaciones ya cargadas y para el caso de
+    // simulacros que nunca deberían crear un registro en `eventos`.
     @Column(name = "evento", length = 200)
     private String evento;
+
+    // FK opcional al Evento real del módulo Eventos, cuando esta evaluación
+    // corresponde a una competencia oficial ya registrada en el sistema (no
+    // a un simulacro/práctica interna). Permite construir la progresión de
+    // puntaje de un grupo evento-a-evento sin depender de que el texto libre
+    // de arriba coincida exactamente. Se deja nullable y separado del campo
+    // `evento` (String) a propósito, para no forzar una migración de datos
+    // sobre evaluaciones ya existentes.
+    @ManyToOne
+    @JoinColumn(name = "evento_oficial_id")
+    private Evento eventoOficial;
 
     // Cantidad de atletas que participaron en ESTA presentación específica
     // (puede no coincidir con el total de DeportistaPerteneceGrupo si alguien
@@ -5014,13 +6508,14 @@ public class PremioEvento {
 <file path="src/main/java/com/varcal/cheermanager/Models/Eventos/ResultadoCompetencia.java">
 package com.varcal.cheermanager.Models.Eventos;
 
+import java.math.BigDecimal;
+
+import com.varcal.cheermanager.Models.Evaluaciones.Rutina.EvaluacionRutina;
+import com.varcal.cheermanager.Models.Org_dep.GrupoEntrenamiento;
+
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.math.BigDecimal;
-
-import com.varcal.cheermanager.Models.Org_dep.GrupoEntrenamiento;
 
 @Data
 @NoArgsConstructor
@@ -5045,8 +6540,23 @@ public class ResultadoCompetencia {
     @Column(name = "puntaje", precision = 10, scale = 2)
     private BigDecimal puntaje;
 
-    @Column(name = "premio_id")
-    private Integer premioId;
+    // Antes era un Integer suelto sin relación real (premioId). Se corrige a
+    // FK propiamente dicha para poder navegar el objeto Premio completo y que
+    // JPA valide la integridad referencial. Nullable porque no todo resultado
+    // implica premio (ej. un grupo que queda en posición 12 de 20).
+    @ManyToOne
+    @JoinColumn(name = "premio_id")
+    private PremioEvento premio;
+
+    // Enlaza el resultado (posición + puntaje oficial del evento) con el
+    // desglose técnico completo que ya calculó el motor de EvaluacionRutina,
+    // si es que esa competencia se evaluó dentro del sistema (no todas lo
+    // estarán, ej. eventos de otros productores donde solo se registra el
+    // resultado final). Nullable a propósito: permite cargar resultados
+    // históricos/externos sin exigir que exista una EvaluacionRutina.
+    @ManyToOne
+    @JoinColumn(name = "evaluacion_rutina_id")
+    private EvaluacionRutina evaluacionRutina;
 
     @Column(name = "observaciones")
     private String observaciones;
@@ -7734,6 +9244,147 @@ public class EvaluacionRutinaService {
             }).collect(Collectors.toList()));
         }
         return dto;
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Service/Evaluaciones/Rutina/RubricaConfigService.java">
+package com.varcal.cheermanager.Service.Evaluaciones.Rutina;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.varcal.cheermanager.Models.Evaluaciones.Rutina.DriverSubCriterio;
+import com.varcal.cheermanager.Models.Evaluaciones.Rutina.EscalonDriverNivel;
+import com.varcal.cheermanager.Models.Evaluaciones.Rutina.NivelCompetencia;
+import com.varcal.cheermanager.Models.Evaluaciones.Rutina.SubCriterioRubrica;
+import com.varcal.cheermanager.Models.Evaluaciones.Rutina.TablaCantidadNivel;
+import com.varcal.cheermanager.Models.Evaluaciones.Rutina.TopeDriverNivel;
+import com.varcal.cheermanager.Models.Evaluaciones.Rutina.TopeSeccionNivel;
+import com.varcal.cheermanager.repository.Evaluaciones.Rutina.DriverSubCriterioRepository;
+import com.varcal.cheermanager.repository.Evaluaciones.Rutina.EscalonDriverNivelRepository;
+import com.varcal.cheermanager.repository.Evaluaciones.Rutina.NivelCompetenciaRepository;
+import com.varcal.cheermanager.repository.Evaluaciones.Rutina.SubCriterioRubricaRepository;
+import com.varcal.cheermanager.repository.Evaluaciones.Rutina.TablaCantidadNivelRepository;
+import com.varcal.cheermanager.repository.Evaluaciones.Rutina.TopeDriverNivelRepository;
+import com.varcal.cheermanager.repository.Evaluaciones.Rutina.TopeSeccionNivelRepository;
+
+@Service
+public class RubricaConfigService {
+
+    @Autowired private NivelCompetenciaRepository nivelRepo;
+    @Autowired private SubCriterioRubricaRepository subCriterioRepo;
+    @Autowired private TablaCantidadNivelRepository tablaCantidadRepo;
+    @Autowired private TopeSeccionNivelRepository topeSeccionRepo;
+    @Autowired private DriverSubCriterioRepository driverRepo;
+    @Autowired private TopeDriverNivelRepository topeDriverRepo;
+    @Autowired private EscalonDriverNivelRepository escalonDriverRepo;
+
+    // ── Niveles ──────────────────────────────────────────────────────────────
+    public List<NivelCompetencia> listarNiveles() {
+        return nivelRepo.findAll();
+    }
+
+    public NivelCompetencia guardarNivel(NivelCompetencia nivel) {
+        return nivelRepo.save(nivel);
+    }
+
+    public void eliminarNivel(Integer id) {
+        if (!nivelRepo.existsById(id)) {
+            throw new RuntimeException("Nivel no encontrado con ID: " + id);
+        }
+        nivelRepo.deleteById(id);
+    }
+
+    // ── Sub-criterios ────────────────────────────────────────────────────────
+    public List<SubCriterioRubrica> listarSubCriterios() {
+        return subCriterioRepo.findAll();
+    }
+
+    public SubCriterioRubrica guardarSubCriterio(SubCriterioRubrica sc) {
+        return subCriterioRepo.save(sc);
+    }
+
+    // ── Tabla de cantidad ────────────────────────────────────────────────────
+    public List<TablaCantidadNivel> listarTablaCantidad(Integer nivelId) {
+        return tablaCantidadRepo.findByNivelId(nivelId);
+    }
+
+    @Transactional
+    public TablaCantidadNivel guardarTablaCantidad(TablaCantidadNivel fila) {
+        if (fila.getNivel() == null || fila.getNivel().getId() == null) {
+            throw new RuntimeException("La fila de tabla de cantidad debe tener un nivel asociado.");
+        }
+        nivelRepo.findById(fila.getNivel().getId())
+                .orElseThrow(() -> new RuntimeException(
+                        "Nivel no encontrado con ID: " + fila.getNivel().getId()));
+        return tablaCantidadRepo.save(fila);
+    }
+
+    public void eliminarTablaCantidad(Integer id) {
+        if (!tablaCantidadRepo.existsById(id)) {
+            throw new RuntimeException("Fila de tabla de cantidad no encontrada con ID: " + id);
+        }
+        tablaCantidadRepo.deleteById(id);
+    }
+
+    // ── Topes de sección ─────────────────────────────────────────────────────
+    public List<TopeSeccionNivel> listarTopesSeccion(Integer nivelId, Integer subCriterioId) {
+        return topeSeccionRepo.findByNivelIdAndSubCriterioIdOrderByOrdenDesc(nivelId, subCriterioId);
+    }
+
+    @Transactional
+    public TopeSeccionNivel guardarTopeSeccion(TopeSeccionNivel tope) {
+        if (tope.getNivel() == null || tope.getNivel().getId() == null) {
+            throw new RuntimeException("El tope de sección debe tener nivel y sub-criterio asociados.");
+        }
+        nivelRepo.findById(tope.getNivel().getId())
+                .orElseThrow(() -> new RuntimeException(
+                        "Nivel no encontrado con ID: " + tope.getNivel().getId()));
+        subCriterioRepo.findById(tope.getSubCriterio().getId())
+                .orElseThrow(() -> new RuntimeException(
+                        "Sub-criterio no encontrado con ID: " + tope.getSubCriterio().getId()));
+        return topeSeccionRepo.save(tope);
+    }
+
+    public void eliminarTopeSeccion(Integer id) {
+        if (!topeSeccionRepo.existsById(id)) {
+            throw new RuntimeException("Tope de sección no encontrado con ID: " + id);
+        }
+        topeSeccionRepo.deleteById(id);
+    }
+
+    // ── Drivers ──────────────────────────────────────────────────────────────
+    public List<DriverSubCriterio> listarDrivers(Integer subCriterioId) {
+        return driverRepo.findBySubCriterioId(subCriterioId);
+    }
+
+    public DriverSubCriterio guardarDriver(DriverSubCriterio driver) {
+        return driverRepo.save(driver);
+    }
+
+    @Transactional
+    public TopeDriverNivel guardarTopeDriver(TopeDriverNivel tope) {
+        return topeDriverRepo.save(tope);
+    }
+
+    @Transactional
+    public EscalonDriverNivel guardarEscalonDriver(EscalonDriverNivel escalon) {
+        return escalonDriverRepo.save(escalon);
+    }
+
+    public List<EscalonDriverNivel> listarEscalonesDriver(Integer driverId, Integer nivelId) {
+        return escalonDriverRepo.findByDriverIdAndNivelIdOrderByOrden(driverId, nivelId);
+    }
+
+    public void eliminarEscalonDriver(Integer id) {
+        if (!escalonDriverRepo.existsById(id)) {
+            throw new RuntimeException("Escalón de driver no encontrado con ID: " + id);
+        }
+        escalonDriverRepo.deleteById(id);
     }
 }
 </file>
@@ -12415,774 +14066,6 @@ public class InscripcionService {
 }
 </file>
 
-<file path="src/main/java/com/varcal/cheermanager/Service/Persona/PersonaService.java">
-package com.varcal.cheermanager.Service.Persona;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCrypt;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-
-import com.varcal.cheermanager.DTO.Persona.DeportistaDTO;
-import com.varcal.cheermanager.DTO.Persona.EntrenadorDTO;
-import com.varcal.cheermanager.DTO.Persona.PersonaDTO;
-import com.varcal.cheermanager.DTO.Persona.DeportistaVistaDTO;
-import com.varcal.cheermanager.DTO.Persona.DeportistaPerfilCompletoDTO;
-import com.varcal.cheermanager.DTO.Persona.VincularDeportistaUsuarioDTO;
-import com.varcal.cheermanager.DTO.Persona.ValidarDocumentoDTO;
-import com.varcal.cheermanager.DTO.Persona.HistorialDeportistaEstadoDTO;
-import com.varcal.cheermanager.DTO.Persona.UploadFotoDTO;
-import com.varcal.cheermanager.Models.Auth.Rol;
-import com.varcal.cheermanager.Models.Auth.Usuario;
-import com.varcal.cheermanager.Models.Personas.Deportista;
-import com.varcal.cheermanager.Models.Personas.Persona;
-import com.varcal.cheermanager.Models.Personas.HistorialDeportistaEstado;
-import com.varcal.cheermanager.Utils.UsernameUtils;
-import com.varcal.cheermanager.Models.Personas.Entrenador;
-import com.varcal.cheermanager.Models.Personas.EstadoPersona;
-import com.varcal.cheermanager.repository.Auth.RolRepository;
-import com.varcal.cheermanager.repository.Auth.UserRepository;
-import com.varcal.cheermanager.repository.Personas.DeportistaRepository;
-import com.varcal.cheermanager.repository.Personas.PersonaRepository;
-import com.varcal.cheermanager.repository.Personas.EntrenadorRepository;
-import com.varcal.cheermanager.repository.Personas.EstadoPersonaRepository;
-import com.varcal.cheermanager.repository.Personas.HistorialDeportistaEstadoRepository;
-import com.varcal.cheermanager.Service.File.FileStorageService;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
-
-@Service
-public class PersonaService {
-
-    @Autowired
-    private RolRepository rolRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PersonaRepository personaRepository;
-
-    @Autowired
-    private DeportistaRepository deportistaRepository;
-
-    @Autowired
-    private EntrenadorRepository entrenadorRepository;
-
-    @Autowired
-    private EstadoPersonaRepository estadoPersonaRepository;
-
-    @Autowired
-    private HistorialDeportistaEstadoRepository historialDeportistaEstadoRepository;
-
-    @Autowired
-    private FileStorageService fileStorageService;
-
-    public String generarUsername(String nombre, String apellidos) {
-
-        String primerNombre = UsernameUtils.primerToken(nombre);
-        String primerApellido = UsernameUtils.primerToken(apellidos);
-
-        String base = UsernameUtils.normalizar(primerNombre)
-                + "." + UsernameUtils.normalizar(primerApellido);
-
-        long count = userRepository.countByUsernameStartingWith(base);
-        String username = base + "_" + (count + 1);
-        return username;
-    }
-
-    // Método para registrar un nuevo usuario ======================================
-    // @Transactional: si existsByUsername/existsByEmail o el save fallan luego de
-    // que otra parte del flujo ya guardó datos relacionados, todo debe revertirse junto.
-    @Transactional
-    public Usuario registrarUsuario(Persona persona, String username, String email, String password, Integer rolId) {
-        // Verificar si el username o email ya existen
-        if (userRepository.existsByUsername(username)) {
-            throw new RuntimeException("El nombre de usuario ya está en uso");
-        }
-        if (userRepository.existsByEmail(email)) {
-            throw new RuntimeException("El correo electrónico ya está en uso");
-        }
-
-        // Obtener el rol correspondiente
-        Rol rol = rolRepository.findById(rolId)
-                .orElseThrow(() -> new RuntimeException("El rol con ID '" + rolId + "' no existe en la base de datos"));
-
-        // Crear el usuario
-        Usuario usuario = new Usuario();
-        usuario.setUsername(username);
-        usuario.setPasswordHash(BCrypt.hashpw(password, BCrypt.gensalt())); // Hashear la contraseña
-        usuario.setEmail(email);
-        usuario.setRol(rol);
-        usuario.setActivo(true);
-        usuario.setPersona(persona);
-        usuario.setUltimoAcceso(null); // Inicialmente no hay acceso
-        // Forzamos cambio de contraseña cuando se crea con la contraseña por defecto "0000".
-        // Si en el futuro se permite definir una contraseña real al registrar, ajustar esta bandera.
-        usuario.setRequiereCambioPassword("0000".equals(password));
-        return userRepository.save(usuario);
-    }
-
-    // Método para registrar una nueva persona
-    // ======================================
-    // Este método recibe un DTO de Persona y lo convierte a una entidad Persona
-    public Persona registrarPersona(PersonaDTO personaDTO) {
-        // Mapear el DTO a la entidad Persona
-        Persona persona = new Persona();
-        persona.setNombre(personaDTO.getNombre());
-        persona.setDireccion(personaDTO.getDireccion());
-        persona.setTelefono(personaDTO.getTelefono());
-        persona.setFechaNacimiento(personaDTO.getFechaNacimiento());
-        persona.setGeneroId(personaDTO.getGeneroId());
-
-        // Guardar la persona en la base de datos
-        return personaRepository.save(persona);
-    }
-
-    public Persona modificarPersona(Integer id, PersonaDTO personaDTO) {
-        return personaRepository.findById(id).map(persona -> {
-            persona.setNombre(personaDTO.getNombre());
-            persona.setDireccion(personaDTO.getDireccion());
-            persona.setTelefono(personaDTO.getTelefono());
-            persona.setFechaNacimiento(personaDTO.getFechaNacimiento());
-            persona.setGeneroId(personaDTO.getGeneroId());
-            return personaRepository.save(persona);
-        }).orElseThrow(() -> new RuntimeException("Persona no encontrada con el ID: " + id));
-    }
-
-    public List<Persona> listarPersonas() {
-        return personaRepository.findAll();
-    }
-
-    public List<Persona> buscarPersonasByNombre(String nombre) {
-        return personaRepository.findByNombre(nombre); // Assuming you have this method in your repository
-    }
-
-    public void eliminarPersona(Integer id) {
-        if (!personaRepository.existsById(id)) {
-            throw new RuntimeException("Persona no encontrada con el ID: " + id);
-        }
-        personaRepository.deleteById(id);
-    }
-
-    // Método para registrar un deportista
-    // ==========================================
-    // Este método recibe un DTO de Deportista y lo convierte a una entidad
-    // Deportista
-    // @Transactional: guarda Persona + Deportista + Usuario en tres pasos. Si el
-    // tercero falla (ej. username/email duplicado), los dos primeros deben revertirse
-    // para no dejar una Persona/Deportista huérfanos sin Usuario asociado.
-    @Transactional
-    public Deportista registrarDeportista(DeportistaDTO deportistaDTO) {
-        // Validar documento único
-        validarDocumentoEnRegistro(deportistaDTO.getNumeroDocumento());
-
-        // Registrar la persona
-        Persona persona = new Persona();
-        persona.setNombre(deportistaDTO.getNombre());
-        persona.setApellidos(deportistaDTO.getApellidos());
-        persona.setNumeroDocumento(deportistaDTO.getNumeroDocumento());
-        persona.setTipoDocumento(deportistaDTO.getTipoDocumento());
-        persona.setDireccion(deportistaDTO.getDireccion());
-        persona.setTelefono(deportistaDTO.getTelefono());
-        persona.setFechaNacimiento(deportistaDTO.getFechaNacimiento());
-        persona.setGeneroId(deportistaDTO.getGeneroId());
-        Persona personaGuardada = personaRepository.save(persona);
-
-        // Registrar el deportista
-        Deportista deportista = new Deportista();
-        deportista.setPersona(personaGuardada);
-        EstadoPersona estado = estadoPersonaRepository.findById(deportistaDTO.getEstadoId())
-                .orElseThrow(() -> new RuntimeException("Estado no encontrado"));
-        deportista.setEstado(estado);
-        deportista.setAltura(deportistaDTO.getAltura());
-        deportista.setPeso(deportistaDTO.getPeso());
-        deportista.setNivelActualId(deportistaDTO.getNivelActualId());
-        deportista.setFechaRegistro(LocalDate.now());
-        deportista.setContactoEmergencia(deportistaDTO.getContactoEmergencia());
-        deportista.setConvenioId(deportistaDTO.getConvenioId());
-        Deportista deportistaGuardado = deportistaRepository.save(deportista);
-
-        // Registrar al deportista como usuario
-        String username = generarUsername(
-                deportistaDTO.getNombre(),
-                deportistaDTO.getApellidos());
-        String email = username + "@cheermanager.com"; // Generar un email ficticio o usar uno proporcionado
-        String password = "0000"; // Generar una contraseña por defecto o usar una proporcionada
-        // Integer rolId = 9; // ID del rol para deportista
-        registrarUsuario(personaGuardada, username, email, password, 9);
-
-        return deportistaGuardado;
-    }
-
-    // Método para modificar un deportista
-    // @Transactional: actualiza Persona, registra cambio de estado en el historial
-    // y actualiza Deportista. Las tres operaciones deben aplicarse juntas o no aplicarse.
-    @Transactional
-    public Deportista modificarDeportista(Integer id, DeportistaDTO deportistaDTO) {
-        return deportistaRepository.findById(id).map(deportista -> {
-            Persona persona = deportista.getPersona();
-
-            // Validar documento único si está siendo modificado
-            if (deportistaDTO.getNumeroDocumento() != null && !deportistaDTO.getNumeroDocumento().isEmpty()) {
-                validarDocumentoEnModificacion(persona.getId(), deportistaDTO.getNumeroDocumento());
-            }
-
-            persona.setNombre(deportistaDTO.getNombre());
-            persona.setApellidos(deportistaDTO.getApellidos());
-            persona.setNumeroDocumento(deportistaDTO.getNumeroDocumento());
-            persona.setTipoDocumento(deportistaDTO.getTipoDocumento());
-            persona.setDireccion(deportistaDTO.getDireccion());
-            persona.setTelefono(deportistaDTO.getTelefono());
-            persona.setFechaNacimiento(deportistaDTO.getFechaNacimiento());
-            persona.setGeneroId(deportistaDTO.getGeneroId());
-            personaRepository.save(persona);
-
-            // Registrar cambio de estado si es que hay
-            EstadoPersona estadoAnterior = deportista.getEstado();
-            EstadoPersona estado = estadoPersonaRepository.findById(deportistaDTO.getEstadoId())
-                    .orElseThrow(() -> new RuntimeException("Estado no encontrado"));
-
-            if (!estado.getId().equals(estadoAnterior.getId())) {
-                registrarCambioEstado(deportista, estadoAnterior, estado, null, null);
-            }
-
-            deportista.setEstado(estado);
-            deportista.setAltura(deportistaDTO.getAltura());
-            deportista.setPeso(deportistaDTO.getPeso());
-            deportista.setNivelActualId(deportistaDTO.getNivelActualId());
-            deportista.setFechaRegistro(deportistaDTO.getFechaRegistro());
-            deportista.setContactoEmergencia(deportistaDTO.getContactoEmergencia());
-            deportista.setConvenioId(deportistaDTO.getConvenioId());
-            return deportistaRepository.save(deportista);
-        }).orElseThrow(() -> new RuntimeException("Deportista no encontrado con el ID: " + id));
-    }
-
-    // Método para listar todos los deportistas
-    public List<Deportista> listarDeportistas() {
-        return deportistaRepository.findAll();
-    }
-
-    // Método para listar deportistas con detalles
-    public List<DeportistaVistaDTO> listarDeportistasConDetalles() {
-        List<Object[]> resultados = deportistaRepository.obtenerDeportistasConDetalles();
-
-        // Mapear los resultados al DTO
-        return resultados.stream().map(obj -> {
-            DeportistaVistaDTO dto = new DeportistaVistaDTO();
-            dto.setDeportistaId((Integer) obj[0]);
-            dto.setPersonaId((Integer) obj[1]);
-            dto.setNombre((String) obj[2]);
-            dto.setApellidos((String) obj[3]);
-            dto.setDireccion((String) obj[4]);
-            dto.setTelefono((String) obj[5]);
-
-            // Convertir java.sql.Date a java.time.LocalDate
-            dto.setFechaNacimiento(obj[6] != null ? ((java.sql.Date) obj[6]).toLocalDate() : null);
-            dto.setGeneroId((Integer) obj[7]);
-            dto.setGenero((String) obj[8]);
-
-            // Nuevos campos: altura y peso
-            dto.setAltura(obj[9] != null ? ((Number) obj[9]).floatValue() : null);
-            dto.setPeso(obj[10] != null ? ((Number) obj[10]).floatValue() : null);
-
-            dto.setFechaRegistro(obj[11] != null ? ((java.sql.Date) obj[11]).toLocalDate() : null);
-            dto.setContactoEmergencia((String) obj[12]);
-            dto.setEstadoId((Integer) obj[13]);
-            dto.setEstadoNombre((String) obj[14]);
-            dto.setNivelActualId((Integer) obj[15]);
-            dto.setNivelNombre((String) obj[16]);
-            dto.setConvenioId((Integer) obj[17]);
-            dto.setConvenioNombre((String) obj[18]);
-            return dto;
-        }).collect(Collectors.toList());
-    }
-
-    // Método para listar deportistas con filtros (estado, nivel, grupo)
-    public List<DeportistaVistaDTO> listarDeportistasConFiltros(Integer estadoId, Integer nivelId, Integer grupoId) {
-        List<Deportista> deportistas = deportistaRepository.findByFiltros(estadoId, nivelId, grupoId);
-
-        if (deportistas.isEmpty()) {
-            return List.of();
-        }
-
-        // Mapear entidades a DTOs
-        return deportistas.stream().map(deportista -> {
-            DeportistaVistaDTO dto = new DeportistaVistaDTO();
-            Persona persona = deportista.getPersona();
-
-            dto.setDeportistaId(deportista.getId());
-            dto.setPersonaId(persona.getId());
-            dto.setNombre(persona.getNombre());
-            dto.setApellidos(persona.getApellidos());
-            dto.setDireccion(persona.getDireccion());
-            dto.setTelefono(persona.getTelefono());
-            dto.setFechaNacimiento(persona.getFechaNacimiento());
-            dto.setGeneroId(persona.getGeneroId());
-            dto.setAltura(deportista.getAltura() != null ? deportista.getAltura().floatValue() : null);
-            dto.setPeso(deportista.getPeso() != null ? deportista.getPeso().floatValue() : null);
-            dto.setFechaRegistro(deportista.getFechaRegistro());
-            dto.setContactoEmergencia(deportista.getContactoEmergencia());
-
-            if (deportista.getEstado() != null) {
-                dto.setEstadoId(deportista.getEstado().getId());
-                dto.setEstadoNombre(deportista.getEstado().getEstado());
-            }
-
-            dto.setNivelActualId(deportista.getNivelActualId());
-            dto.setConvenioId(deportista.getConvenioId());
-
-            return dto;
-        }).collect(Collectors.toList());
-    }
-
-    // Método para obtener el perfil completo del deportista
-    public DeportistaPerfilCompletoDTO obtenerPerfilCompleto(Integer deportistaId) {
-        Deportista deportista = deportistaRepository.findById(deportistaId)
-                .orElseThrow(() -> new RuntimeException("Deportista no encontrado con ID: " + deportistaId));
-
-        DeportistaPerfilCompletoDTO perfil = new DeportistaPerfilCompletoDTO();
-        Persona persona = deportista.getPersona();
-
-        // Datos personales
-        perfil.setDeportistaId(deportista.getId());
-        perfil.setPersonaId(persona.getId());
-        perfil.setNombre(persona.getNombre());
-        perfil.setApellidos(persona.getApellidos());
-        perfil.setDireccion(persona.getDireccion());
-        perfil.setTelefono(persona.getTelefono());
-        perfil.setFechaNacimiento(persona.getFechaNacimiento());
-        perfil.setGeneroId(persona.getGeneroId());
-
-        // Datos deportivos
-        perfil.setAltura(deportista.getAltura() != null ? deportista.getAltura().floatValue() : null);
-        perfil.setPeso(deportista.getPeso() != null ? deportista.getPeso().floatValue() : null);
-        perfil.setFechaRegistro(deportista.getFechaRegistro());
-        perfil.setContactoEmergencia(deportista.getContactoEmergencia());
-
-        if (deportista.getEstado() != null) {
-            perfil.setEstadoId(deportista.getEstado().getId());
-            perfil.setEstadoNombre(deportista.getEstado().getEstado());
-        }
-
-        perfil.setNivelActualId(deportista.getNivelActualId());
-        perfil.setConvenioId(deportista.getConvenioId());
-
-        // Información del usuario vinculado
-        Usuario usuario = userRepository.findByPersona(persona).orElse(null);
-        if (usuario != null) {
-            perfil.setUsuarioId(usuario.getId());
-            perfil.setUsername(usuario.getUsername());
-            perfil.setEmail(usuario.getEmail());
-            perfil.setUsuarioActivo(usuario.getActivo());
-            perfil.setUltimoAcceso(usuario.getUltimoAcceso());
-
-            // Roles del usuario
-            List<String> roleNames = usuario.getRoles() != null ? usuario.getRoles().stream()
-                    .map(Rol::getNombre)
-                    .collect(Collectors.toList()) : List.of();
-            perfil.setRoles(roleNames);
-
-            // Permisos del usuario
-            List<String> permisos = usuario.getRoles() != null ? usuario.getRoles().stream()
-                    .flatMap(rol -> rol.getPermisos() != null ? rol.getPermisos().stream() : java.util.stream.Stream.empty())
-                    .map(p -> p.getNombre())
-                    .distinct()
-                    .collect(Collectors.toList()) : List.of();
-            perfil.setPermisos(permisos);
-        }
-
-        return perfil;
-    }
-
-    // Método para vincular un deportista con un usuario existente
-    @Transactional
-    public void vincularDeportistaConUsuario(Integer deportistaId, Integer usuarioId) {
-        Deportista deportista = deportistaRepository.findById(deportistaId)
-                .orElseThrow(() -> new RuntimeException("Deportista no encontrado con ID: " + deportistaId));
-
-        Usuario usuario = userRepository.findById(usuarioId.longValue())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + usuarioId));
-
-        // Validar que el usuario no esté ya vinculado a otra persona
-        if (usuario.getPersona() != null) {
-            throw new RuntimeException("El usuario " + usuario.getUsername() + " ya está vinculado a otra persona");
-        }
-
-        // Validar que el deportista no esté ya vinculado a otro usuario
-        Usuario usuarioExistente = userRepository.findByPersona(deportista.getPersona()).orElse(null);
-        if (usuarioExistente != null && !usuarioExistente.getId().equals(usuarioId)) {
-            throw new RuntimeException("El deportista ya está vinculado al usuario " + usuarioExistente.getUsername());
-        }
-
-        // Vincular
-        usuario.setPersona(deportista.getPersona());
-        userRepository.save(usuario);
-    }
-
-    // Método para desvinculcar un deportista de su usuario
-    // @Transactional: no es estrictamente necesario aquí (un solo save), pero se
-    // deja para mantener consistencia y dejar espacio a futuras validaciones.
-    @Transactional
-    public void desvinculcarDeportistaDeUsuario(Integer deportistaId) {
-        Deportista deportista = deportistaRepository.findById(deportistaId)
-                .orElseThrow(() -> new RuntimeException("Deportista no encontrado con ID: " + deportistaId));
-
-        Usuario usuario = userRepository.findByPersona(deportista.getPersona())
-                .orElseThrow(() -> new RuntimeException("El deportista no tiene un usuario vinculado"));
-
-        // Desvinculcar
-        usuario.setPersona(null);
-        userRepository.save(usuario);
-    }
-
-    // Método para obtener el usuario vinculado a un deportista
-    public Usuario obtenerUsuarioDeDeportista(Integer deportistaId) {
-        Deportista deportista = deportistaRepository.findById(deportistaId)
-                .orElseThrow(() -> new RuntimeException("Deportista no encontrado con ID: " + deportistaId));
-
-        return userRepository.findByPersona(deportista.getPersona())
-                .orElseThrow(() -> new RuntimeException("El deportista no tiene un usuario vinculado"));
-    }
-
-    // Método para validar si un documento de identidad está disponible (único)
-    public ValidarDocumentoDTO validarDocumentoUnico(String numeroDocumento) {
-        if (numeroDocumento == null || numeroDocumento.trim().isEmpty()) {
-            return new ValidarDocumentoDTO(false, "El número de documento no puede estar vacío");
-        }
-
-        java.util.Optional<Persona> persona = personaRepository.findByNumeroDocumento(numeroDocumento);
-        if (persona.isPresent()) {
-            return new ValidarDocumentoDTO(false, "El documento " + numeroDocumento + " ya está registrado");
-        }
-
-        return new ValidarDocumentoDTO(true, "El documento " + numeroDocumento + " está disponible");
-    }
-
-    // Validación en el registro de deportista
-    private void validarDocumentoEnRegistro(String numeroDocumento) {
-        if (numeroDocumento != null && !numeroDocumento.trim().isEmpty()) {
-            java.util.Optional<Persona> persona = personaRepository.findByNumeroDocumento(numeroDocumento);
-            if (persona.isPresent()) {
-                throw new RuntimeException("El documento " + numeroDocumento + " ya está registrado en el sistema");
-            }
-        }
-    }
-
-    // Validación en la modificación de deportista
-    private void validarDocumentoEnModificacion(Integer personaId, String numeroDocumento) {
-        if (numeroDocumento != null && !numeroDocumento.trim().isEmpty()) {
-            java.util.Optional<Persona> persona = personaRepository.findByNumeroDocumento(numeroDocumento);
-            if (persona.isPresent() && !persona.get().getId().equals(personaId)) {
-                throw new RuntimeException("El documento " + numeroDocumento + " ya está registrado en otro deportista");
-            }
-        }
-    }
-
-    // Método para registrar cambios de estado en el historial
-    private void registrarCambioEstado(Deportista deportista, EstadoPersona estadoAnterior,
-                                       EstadoPersona estadoNuevo, Integer usuarioId, String motivo) {
-        // No registrar si el estado no cambió
-        if (estadoAnterior != null && estadoAnterior.getId().equals(estadoNuevo.getId())) {
-            return;
-        }
-
-        HistorialDeportistaEstado historial = new HistorialDeportistaEstado();
-        historial.setDeportista(deportista);
-        historial.setEstadoAnterior(estadoAnterior);
-        historial.setEstadoNuevo(estadoNuevo);
-        historial.setFechaCambio(LocalDateTime.now());
-        historial.setUsuarioId(usuarioId);
-        historial.setMotivoCambio(motivo);
-        historialDeportistaEstadoRepository.save(historial);
-    }
-
-    // Método para obtener el historial de cambios de estado de un deportista
-    public List<HistorialDeportistaEstadoDTO> obtenerHistorialEstadoDeportista(Integer deportistaId) {
-        Deportista deportista = deportistaRepository.findById(deportistaId)
-                .orElseThrow(() -> new RuntimeException("Deportista no encontrado con ID: " + deportistaId));
-
-        List<HistorialDeportistaEstado> historial = historialDeportistaEstadoRepository
-                .findByDeportistaIdOrderByFechaCambioDesc(deportistaId);
-
-        return historial.stream().map(h -> {
-            HistorialDeportistaEstadoDTO dto = new HistorialDeportistaEstadoDTO();
-            dto.setId(h.getId());
-            dto.setDeportistaId(h.getDeportista().getId());
-            dto.setNombreDeportista(h.getDeportista().getPersona().getNombre());
-            dto.setApellidosDeportista(h.getDeportista().getPersona().getApellidos());
-
-            if (h.getEstadoAnterior() != null) {
-                dto.setEstadoAnteriorId(h.getEstadoAnterior().getId());
-                dto.setEstadoAnteriorNombre(h.getEstadoAnterior().getEstado());
-            }
-
-            dto.setEstadoNuevoId(h.getEstadoNuevo().getId());
-            dto.setEstadoNuevoNombre(h.getEstadoNuevo().getEstado());
-            dto.setFechaCambio(h.getFechaCambio());
-            dto.setUsuarioId(h.getUsuarioId());
-
-            if (h.getUsuarioId() != null) {
-                java.util.Optional<Usuario> usuario = userRepository.findById(h.getUsuarioId().longValue());
-                if (usuario.isPresent()) {
-                    dto.setUsuarioUsername(usuario.get().getUsername());
-                }
-            }
-
-            dto.setMotivoCambio(h.getMotivoCambio());
-            return dto;
-        }).collect(Collectors.toList());
-    }
-
-    // Método para obtener todo el historial de cambios de estado
-    public List<HistorialDeportistaEstadoDTO> obtenerHistorialEstadoGlobal() {
-        List<HistorialDeportistaEstado> historial = historialDeportistaEstadoRepository.findAllByOrderByFechaCambioDesc();
-
-        return historial.stream().map(h -> {
-            HistorialDeportistaEstadoDTO dto = new HistorialDeportistaEstadoDTO();
-            dto.setId(h.getId());
-            dto.setDeportistaId(h.getDeportista().getId());
-            dto.setNombreDeportista(h.getDeportista().getPersona().getNombre());
-            dto.setApellidosDeportista(h.getDeportista().getPersona().getApellidos());
-
-            if (h.getEstadoAnterior() != null) {
-                dto.setEstadoAnteriorId(h.getEstadoAnterior().getId());
-                dto.setEstadoAnteriorNombre(h.getEstadoAnterior().getEstado());
-            }
-
-            dto.setEstadoNuevoId(h.getEstadoNuevo().getId());
-            dto.setEstadoNuevoNombre(h.getEstadoNuevo().getEstado());
-            dto.setFechaCambio(h.getFechaCambio());
-            dto.setUsuarioId(h.getUsuarioId());
-
-            if (h.getUsuarioId() != null) {
-                java.util.Optional<Usuario> usuario = userRepository.findById(h.getUsuarioId().longValue());
-                if (usuario.isPresent()) {
-                    dto.setUsuarioUsername(usuario.get().getUsername());
-                }
-            }
-
-            dto.setMotivoCambio(h.getMotivoCambio());
-            return dto;
-        }).collect(Collectors.toList());
-    }
-
-    // Método para guardar foto de perfil del deportista
-    public UploadFotoDTO guardarFotoDeportista(Integer deportistaId, MultipartFile archivo) {
-        try {
-            Deportista deportista = deportistaRepository.findById(deportistaId)
-                    .orElseThrow(() -> new RuntimeException("Deportista no encontrado con ID: " + deportistaId));
-
-            // Eliminar foto anterior si existe
-            if (deportista.getFotoPerfil() != null && !deportista.getFotoPerfil().isEmpty()) {
-                try {
-                    fileStorageService.eliminarFoto(deportista.getFotoPerfil());
-                } catch (Exception e) {
-                    // Log del error pero continuar
-                }
-            }
-
-            // Guardar nueva foto
-            String rutaFoto = fileStorageService.guardarFoto(archivo, "deportistas");
-
-            // Actualizar deportista con la ruta de la foto
-            deportista.setFotoPerfil(rutaFoto);
-            deportistaRepository.save(deportista);
-
-            return new UploadFotoDTO(
-                    true,
-                    "Foto guardada exitosamente",
-                    archivo.getOriginalFilename(),
-                    "/api/deportistas/" + deportistaId + "/foto"
-            );
-        } catch (Exception e) {
-            return new UploadFotoDTO(
-                    false,
-                    "Error al guardar la foto: " + e.getMessage(),
-                    null,
-                    null
-            );
-        }
-    }
-
-    // Método para obtener la foto del deportista
-    public byte[] obtenerFotoDeportista(Integer deportistaId) throws Exception {
-        Deportista deportista = deportistaRepository.findById(deportistaId)
-                .orElseThrow(() -> new RuntimeException("Deportista no encontrado con ID: " + deportistaId));
-
-        if (deportista.getFotoPerfil() == null || deportista.getFotoPerfil().isEmpty()) {
-            throw new RuntimeException("El deportista no tiene foto de perfil");
-        }
-
-        return fileStorageService.descargarFoto(deportista.getFotoPerfil());
-    }
-
-    // Método para eliminar foto del deportista
-    public void eliminarFotoDeportista(Integer deportistaId) throws Exception {
-        Deportista deportista = deportistaRepository.findById(deportistaId)
-                .orElseThrow(() -> new RuntimeException("Deportista no encontrado con ID: " + deportistaId));
-
-        if (deportista.getFotoPerfil() != null && !deportista.getFotoPerfil().isEmpty()) {
-            fileStorageService.eliminarFoto(deportista.getFotoPerfil());
-            deportista.setFotoPerfil(null);
-            deportistaRepository.save(deportista);
-        }
-    }
-
-    // Método para eliminar un deportista
-    // @Transactional: cambia estado + escribe historial + desactiva usuario.
-    // Si falla el último paso, no queremos que el deportista quede marcado como
-    // "Retirado" con su usuario todavía activo.
-    @Transactional
-    public void eliminarDeportista(Integer deportistaId) {
-
-        Deportista deportista = deportistaRepository.findById(deportistaId)
-                .orElseThrow(() -> new RuntimeException("Deportista no encontrado"));
-
-        // Cambiar estado: obtener la entidad EstadoPersona con ID 2 (Retirado) y setearla
-        EstadoPersona estadoRetirado = estadoPersonaRepository.findById(2)
-                .orElseThrow(() -> new RuntimeException("Estado 'Retirado' no encontrado"));
-
-        // Registrar el cambio de estado en el historial
-        registrarCambioEstado(deportista, deportista.getEstado(), estadoRetirado, null, "Deportista eliminado del sistema");
-
-        deportista.setEstado(estadoRetirado);
-        deportistaRepository.save(deportista);
-
-        // Desactivar usuario
-        Usuario usuario = userRepository.findByPersona(deportista.getPersona())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
-        usuario.setActivo(false);
-        userRepository.save(usuario);
-    }
-
-    // Método para registrar un entrenador
-    // ==========================================
-    // Este método recibe un DTO de Entrenador y lo convierte a una entidad
-    // Entrenador
-    // @Transactional: igual que registrarDeportista, son tres guardados ligados
-    // (Persona + Entrenador + Usuario) que deben ser atómicos.
-    @Transactional
-    public Entrenador registrarEntrenador(EntrenadorDTO entrenadorDTO) {
-        // Registrar la persona
-        Persona persona = new Persona();
-        persona.setNombre(entrenadorDTO.getNombre());
-        persona.setApellidos(entrenadorDTO.getApellidos());
-        persona.setDireccion(entrenadorDTO.getDireccion());
-        persona.setTelefono(entrenadorDTO.getTelefono());
-        persona.setFechaNacimiento(entrenadorDTO.getFechaNacimiento());
-        persona.setGeneroId(entrenadorDTO.getGeneroId());
-        Persona personaGuardada = personaRepository.save(persona);
-
-        // Registrar el entrenador
-        Entrenador entrenador = new Entrenador();
-        entrenador.setPersona(personaGuardada);
-        entrenador.setFechaContratacion(entrenadorDTO.getFechaContratacion());
-        entrenador.setFechaContratacion(entrenadorDTO.getFechaContratacion());
-        entrenador.setEspecializacion(entrenadorDTO.getEspecializacion());
-        // entrenador.setEstadoId(entrenadorDTO.getEstadoId());
-        // Setear el estado usando la relación
-        EstadoPersona estado = estadoPersonaRepository.findById(entrenadorDTO.getEstadoId())
-                .orElseThrow(() -> new RuntimeException("Estado no encontrado"));
-        entrenador.setEstado(estado);
-        Entrenador entrenadorGuardado = entrenadorRepository.save(entrenador);
-
-        // Registrar al entrenador como usuario
-        String username = generarUsername(
-                entrenadorDTO.getNombre(),
-                entrenadorDTO.getApellidos());
-        String email = username + "@cheermanager.com"; // Generar un email ficticio o usar uno proporcionado
-        String password = "0000"; // Generar una contraseña por defecto o usar una proporcionada
-        Integer rolId = entrenadorDTO.getRolIdE(); // ID del rol para entrenador
-        registrarUsuario(personaGuardada, username, email, password, rolId);
-
-        return entrenadorGuardado;
-    }
-
-    // Método para modificar un entrenador
-    // @Transactional: actualiza Persona y Entrenador en el mismo flujo.
-    @Transactional
-    public Entrenador modificarEntrenador(Integer id, EntrenadorDTO dto) {
-
-        return entrenadorRepository.findById(id).map(entrenador -> {
-
-            Persona persona = entrenador.getPersona();
-
-            if (dto.getNombre() != null && !dto.getNombre().isBlank()) {
-                persona.setNombre(dto.getNombre());
-            }
-
-            if (dto.getApellidos() != null && !dto.getApellidos().isBlank()) {
-                persona.setApellidos(dto.getApellidos());
-            }
-
-            if (dto.getDireccion() != null) {
-                persona.setDireccion(dto.getDireccion());
-            }
-
-            if (dto.getTelefono() != null) {
-                persona.setTelefono(dto.getTelefono());
-            }
-
-            if (dto.getFechaNacimiento() != null) {
-                persona.setFechaNacimiento(dto.getFechaNacimiento());
-            }
-
-            if (dto.getGeneroId() != null) {
-                persona.setGeneroId(dto.getGeneroId());
-            }
-
-            personaRepository.save(persona);
-
-            if (dto.getFechaContratacion() != null) {
-                entrenador.setFechaContratacion(dto.getFechaContratacion());
-            }
-
-            if (dto.getEstadoId() != null) {
-                EstadoPersona estado = estadoPersonaRepository.findById(dto.getEstadoId())
-                        .orElseThrow(() -> new RuntimeException("Estado no encontrado"));
-                entrenador.setEstado(estado);
-            }
-
-            return entrenadorRepository.save(entrenador);
-        }).orElseThrow(() -> new RuntimeException("Entrenador no encontrado"));
-    }
-
-    // Método para listar todos los entrenadores
-    public List<Entrenador> listarEntrenadores() {
-        return entrenadorRepository.findAll();
-    }
-
-    // Método para eliminar un entrenador
-    // @Transactional: cambia estado de Entrenador + desactiva su Usuario.
-    @Transactional
-    public void eliminarEntrenador(Integer id) {
-        Entrenador entrenador = entrenadorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Entrenador no encontrado"));
-
-        // Cambiar estado: obtener la entidad EstadoPersona con ID 2 (Retirado) y
-        // setearla
-        EstadoPersona estadoRetirado = estadoPersonaRepository.findById(2)
-                .orElseThrow(() -> new RuntimeException("Estado 'Retirado' no encontrado"));
-        entrenador.setEstado(estadoRetirado);
-        entrenadorRepository.save(entrenador);
-
-        // Desactivar usuario
-        Usuario usuario = userRepository.findByPersona(entrenador.getPersona())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
-        usuario.setActivo(false);
-        userRepository.save(usuario);
-    }
-
-}
-</file>
-
 <file path="src/main/java/com/varcal/cheermanager/Controller/Org_dep/GrupoEntrenamientoController.java">
 package com.varcal.cheermanager.Controller.Org_dep;
 
@@ -13715,6 +14598,806 @@ public class AuthService {
             return errorCode;
         }
     }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Service/Persona/PersonaService.java">
+package com.varcal.cheermanager.Service.Persona;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCrypt;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.varcal.cheermanager.DTO.Persona.DeportistaDTO;
+import com.varcal.cheermanager.DTO.Persona.EntrenadorDTO;
+import com.varcal.cheermanager.DTO.Persona.PersonaDTO;
+import com.varcal.cheermanager.DTO.Persona.DeportistaVistaDTO;
+import com.varcal.cheermanager.DTO.Persona.DeportistaPerfilCompletoDTO;
+import com.varcal.cheermanager.DTO.Persona.VincularDeportistaUsuarioDTO;
+import com.varcal.cheermanager.DTO.Persona.ValidarDocumentoDTO;
+import com.varcal.cheermanager.DTO.Persona.HistorialDeportistaEstadoDTO;
+import com.varcal.cheermanager.DTO.Persona.UploadFotoDTO;
+import com.varcal.cheermanager.Models.Auth.Rol;
+import com.varcal.cheermanager.Models.Auth.Usuario;
+import com.varcal.cheermanager.Models.Personas.Deportista;
+import com.varcal.cheermanager.Models.Personas.Persona;
+import com.varcal.cheermanager.Models.Personas.HistorialDeportistaEstado;
+import com.varcal.cheermanager.Utils.UsernameUtils;
+import com.varcal.cheermanager.Models.Personas.Entrenador;
+import com.varcal.cheermanager.Models.Personas.EstadoPersona;
+import com.varcal.cheermanager.repository.Auth.RolRepository;
+import com.varcal.cheermanager.repository.Auth.UserRepository;
+import com.varcal.cheermanager.repository.Personas.DeportistaRepository;
+import com.varcal.cheermanager.repository.Personas.PersonaRepository;
+import com.varcal.cheermanager.repository.Personas.EntrenadorRepository;
+import com.varcal.cheermanager.repository.Personas.EstadoPersonaRepository;
+import com.varcal.cheermanager.repository.Personas.HistorialDeportistaEstadoRepository;
+import com.varcal.cheermanager.Service.File.FileStorageService;
+import com.varcal.cheermanager.Service.Historiales.HistorialNivelDeportistaService;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+public class PersonaService {
+
+    @Autowired
+    private RolRepository rolRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PersonaRepository personaRepository;
+
+    @Autowired
+    private DeportistaRepository deportistaRepository;
+
+    @Autowired
+    private EntrenadorRepository entrenadorRepository;
+
+    @Autowired
+    private EstadoPersonaRepository estadoPersonaRepository;
+
+    @Autowired
+    private HistorialDeportistaEstadoRepository historialDeportistaEstadoRepository;
+
+    @Autowired
+    private FileStorageService fileStorageService;
+
+    @Autowired
+    private HistorialNivelDeportistaService historialNivelDeportistaService;
+
+    public String generarUsername(String nombre, String apellidos) {
+
+        String primerNombre = UsernameUtils.primerToken(nombre);
+        String primerApellido = UsernameUtils.primerToken(apellidos);
+
+        String base = UsernameUtils.normalizar(primerNombre)
+                + "." + UsernameUtils.normalizar(primerApellido);
+
+        long count = userRepository.countByUsernameStartingWith(base);
+        String username = base + "_" + (count + 1);
+        return username;
+    }
+
+    // Método para registrar un nuevo usuario ======================================
+    // @Transactional: si existsByUsername/existsByEmail o el save fallan luego de
+    // que otra parte del flujo ya guardó datos relacionados, todo debe revertirse junto.
+    @Transactional
+    public Usuario registrarUsuario(Persona persona, String username, String email, String password, Integer rolId) {
+        // Verificar si el username o email ya existen
+        if (userRepository.existsByUsername(username)) {
+            throw new RuntimeException("El nombre de usuario ya está en uso");
+        }
+        if (userRepository.existsByEmail(email)) {
+            throw new RuntimeException("El correo electrónico ya está en uso");
+        }
+
+        // Obtener el rol correspondiente
+        Rol rol = rolRepository.findById(rolId)
+                .orElseThrow(() -> new RuntimeException("El rol con ID '" + rolId + "' no existe en la base de datos"));
+
+        // Crear el usuario
+        Usuario usuario = new Usuario();
+        usuario.setUsername(username);
+        usuario.setPasswordHash(BCrypt.hashpw(password, BCrypt.gensalt())); // Hashear la contraseña
+        usuario.setEmail(email);
+        usuario.setRol(rol);
+        usuario.setActivo(true);
+        usuario.setPersona(persona);
+        usuario.setUltimoAcceso(null); // Inicialmente no hay acceso
+        // Forzamos cambio de contraseña cuando se crea con la contraseña por defecto "0000".
+        // Si en el futuro se permite definir una contraseña real al registrar, ajustar esta bandera.
+        usuario.setRequiereCambioPassword("0000".equals(password));
+        return userRepository.save(usuario);
+    }
+
+    // Método para registrar una nueva persona
+    // ======================================
+    // Este método recibe un DTO de Persona y lo convierte a una entidad Persona
+    public Persona registrarPersona(PersonaDTO personaDTO) {
+        // Mapear el DTO a la entidad Persona
+        Persona persona = new Persona();
+        persona.setNombre(personaDTO.getNombre());
+        persona.setDireccion(personaDTO.getDireccion());
+        persona.setTelefono(personaDTO.getTelefono());
+        persona.setFechaNacimiento(personaDTO.getFechaNacimiento());
+        persona.setGeneroId(personaDTO.getGeneroId());
+
+        // Guardar la persona en la base de datos
+        return personaRepository.save(persona);
+    }
+
+    public Persona modificarPersona(Integer id, PersonaDTO personaDTO) {
+        return personaRepository.findById(id).map(persona -> {
+            persona.setNombre(personaDTO.getNombre());
+            persona.setDireccion(personaDTO.getDireccion());
+            persona.setTelefono(personaDTO.getTelefono());
+            persona.setFechaNacimiento(personaDTO.getFechaNacimiento());
+            persona.setGeneroId(personaDTO.getGeneroId());
+            return personaRepository.save(persona);
+        }).orElseThrow(() -> new RuntimeException("Persona no encontrada con el ID: " + id));
+    }
+
+    public List<Persona> listarPersonas() {
+        return personaRepository.findAll();
+    }
+
+    public List<Persona> buscarPersonasByNombre(String nombre) {
+        return personaRepository.findByNombre(nombre); // Assuming you have this method in your repository
+    }
+
+    public void eliminarPersona(Integer id) {
+        if (!personaRepository.existsById(id)) {
+            throw new RuntimeException("Persona no encontrada con el ID: " + id);
+        }
+        personaRepository.deleteById(id);
+    }
+
+    // Método para registrar un deportista
+    // ==========================================
+    // Este método recibe un DTO de Deportista y lo convierte a una entidad
+    // Deportista
+    // @Transactional: guarda Persona + Deportista + Usuario en tres pasos. Si el
+    // tercero falla (ej. username/email duplicado), los dos primeros deben revertirse
+    // para no dejar una Persona/Deportista huérfanos sin Usuario asociado.
+    @Transactional
+    public Deportista registrarDeportista(DeportistaDTO deportistaDTO) {
+        // Validar documento único
+        validarDocumentoEnRegistro(deportistaDTO.getNumeroDocumento());
+
+        // Registrar la persona
+        Persona persona = new Persona();
+        persona.setNombre(deportistaDTO.getNombre());
+        persona.setApellidos(deportistaDTO.getApellidos());
+        persona.setNumeroDocumento(deportistaDTO.getNumeroDocumento());
+        persona.setTipoDocumento(deportistaDTO.getTipoDocumento());
+        persona.setDireccion(deportistaDTO.getDireccion());
+        persona.setTelefono(deportistaDTO.getTelefono());
+        persona.setFechaNacimiento(deportistaDTO.getFechaNacimiento());
+        persona.setGeneroId(deportistaDTO.getGeneroId());
+        Persona personaGuardada = personaRepository.save(persona);
+
+        // Registrar el deportista
+        Deportista deportista = new Deportista();
+        deportista.setPersona(personaGuardada);
+        EstadoPersona estado = estadoPersonaRepository.findById(deportistaDTO.getEstadoId())
+                .orElseThrow(() -> new RuntimeException("Estado no encontrado"));
+        deportista.setEstado(estado);
+        deportista.setAltura(deportistaDTO.getAltura());
+        deportista.setPeso(deportistaDTO.getPeso());
+        deportista.setNivelActualId(deportistaDTO.getNivelActualId());
+        deportista.setFechaRegistro(LocalDate.now());
+        deportista.setContactoEmergencia(deportistaDTO.getContactoEmergencia());
+        deportista.setConvenioId(deportistaDTO.getConvenioId());
+        Deportista deportistaGuardado = deportistaRepository.save(deportista);
+
+        // Dejar constancia del nivel inicial en el historial, para que la línea de
+        // tiempo del deportista arranque desde el día 0 y no desde el primer cambio.
+        if (deportistaGuardado.getNivelActualId() != null) {
+            historialNivelDeportistaService.registrarCambio(
+                    deportistaGuardado.getId(),
+                    deportistaGuardado.getNivelActualId(),
+                    deportistaGuardado.getFechaRegistro(),
+                    "Nivel inicial al registrar el deportista");
+        }
+
+        // Registrar al deportista como usuario
+        String username = generarUsername(
+                deportistaDTO.getNombre(),
+                deportistaDTO.getApellidos());
+        String email = username + "@cheermanager.com"; // Generar un email ficticio o usar uno proporcionado
+        String password = "0000"; // Generar una contraseña por defecto o usar una proporcionada
+        // Integer rolId = 9; // ID del rol para deportista
+        registrarUsuario(personaGuardada, username, email, password, 9);
+
+        return deportistaGuardado;
+    }
+
+    // Método para modificar un deportista
+    // @Transactional: actualiza Persona, registra cambio de estado en el historial
+    // y actualiza Deportista. Las tres operaciones deben aplicarse juntas o no aplicarse.
+    @Transactional
+    public Deportista modificarDeportista(Integer id, DeportistaDTO deportistaDTO) {
+        return deportistaRepository.findById(id).map(deportista -> {
+            Persona persona = deportista.getPersona();
+
+            // Validar documento único si está siendo modificado
+            if (deportistaDTO.getNumeroDocumento() != null && !deportistaDTO.getNumeroDocumento().isEmpty()) {
+                validarDocumentoEnModificacion(persona.getId(), deportistaDTO.getNumeroDocumento());
+            }
+
+            persona.setNombre(deportistaDTO.getNombre());
+            persona.setApellidos(deportistaDTO.getApellidos());
+            persona.setNumeroDocumento(deportistaDTO.getNumeroDocumento());
+            persona.setTipoDocumento(deportistaDTO.getTipoDocumento());
+            persona.setDireccion(deportistaDTO.getDireccion());
+            persona.setTelefono(deportistaDTO.getTelefono());
+            persona.setFechaNacimiento(deportistaDTO.getFechaNacimiento());
+            persona.setGeneroId(deportistaDTO.getGeneroId());
+            personaRepository.save(persona);
+
+            // Registrar cambio de estado si es que hay
+            EstadoPersona estadoAnterior = deportista.getEstado();
+            EstadoPersona estado = estadoPersonaRepository.findById(deportistaDTO.getEstadoId())
+                    .orElseThrow(() -> new RuntimeException("Estado no encontrado"));
+
+            if (!estado.getId().equals(estadoAnterior.getId())) {
+                registrarCambioEstado(deportista, estadoAnterior, estado, null, null);
+            }
+
+            // Registrar cambio de nivel si es que hay, siguiendo el mismo patrón que
+            // el cambio de estado de arriba. Se compara contra el nivel que tenía el
+            // deportista ANTES de tocar el campo (nivelAnteriorId), y solo se deja
+            // constancia en el historial si de verdad hubo un cambio.
+            Integer nivelAnteriorId = deportista.getNivelActualId();
+            Integer nivelNuevoId = deportistaDTO.getNivelActualId();
+            boolean huboCambioDeNivel = nivelNuevoId != null && !nivelNuevoId.equals(nivelAnteriorId);
+
+            deportista.setEstado(estado);
+            deportista.setAltura(deportistaDTO.getAltura());
+            deportista.setPeso(deportistaDTO.getPeso());
+            deportista.setNivelActualId(nivelNuevoId);
+            deportista.setFechaRegistro(deportistaDTO.getFechaRegistro());
+            deportista.setContactoEmergencia(deportistaDTO.getContactoEmergencia());
+            deportista.setConvenioId(deportistaDTO.getConvenioId());
+            Deportista deportistaActualizado = deportistaRepository.save(deportista);
+
+            if (huboCambioDeNivel) {
+                historialNivelDeportistaService.registrarCambio(
+                        deportistaActualizado.getId(),
+                        nivelNuevoId,
+                        null, // fechaCambio null -> el service usa LocalDate.now()
+                        "Cambio de nivel vía modificación de deportista");
+            }
+
+            return deportistaActualizado;
+        }).orElseThrow(() -> new RuntimeException("Deportista no encontrado con el ID: " + id));
+    }
+
+    // Método para listar todos los deportistas
+    public List<Deportista> listarDeportistas() {
+        return deportistaRepository.findAll();
+    }
+
+    // Método para listar deportistas con detalles
+    public List<DeportistaVistaDTO> listarDeportistasConDetalles() {
+        List<Object[]> resultados = deportistaRepository.obtenerDeportistasConDetalles();
+
+        // Mapear los resultados al DTO
+        return resultados.stream().map(obj -> {
+            DeportistaVistaDTO dto = new DeportistaVistaDTO();
+            dto.setDeportistaId((Integer) obj[0]);
+            dto.setPersonaId((Integer) obj[1]);
+            dto.setNombre((String) obj[2]);
+            dto.setApellidos((String) obj[3]);
+            dto.setDireccion((String) obj[4]);
+            dto.setTelefono((String) obj[5]);
+
+            // Convertir java.sql.Date a java.time.LocalDate
+            dto.setFechaNacimiento(obj[6] != null ? ((java.sql.Date) obj[6]).toLocalDate() : null);
+            dto.setGeneroId((Integer) obj[7]);
+            dto.setGenero((String) obj[8]);
+
+            // Nuevos campos: altura y peso
+            dto.setAltura(obj[9] != null ? ((Number) obj[9]).floatValue() : null);
+            dto.setPeso(obj[10] != null ? ((Number) obj[10]).floatValue() : null);
+
+            dto.setFechaRegistro(obj[11] != null ? ((java.sql.Date) obj[11]).toLocalDate() : null);
+            dto.setContactoEmergencia((String) obj[12]);
+            dto.setEstadoId((Integer) obj[13]);
+            dto.setEstadoNombre((String) obj[14]);
+            dto.setNivelActualId((Integer) obj[15]);
+            dto.setNivelNombre((String) obj[16]);
+            dto.setConvenioId((Integer) obj[17]);
+            dto.setConvenioNombre((String) obj[18]);
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
+    // Método para listar deportistas con filtros (estado, nivel, grupo)
+    public List<DeportistaVistaDTO> listarDeportistasConFiltros(Integer estadoId, Integer nivelId, Integer grupoId) {
+        List<Deportista> deportistas = deportistaRepository.findByFiltros(estadoId, nivelId, grupoId);
+
+        if (deportistas.isEmpty()) {
+            return List.of();
+        }
+
+        // Mapear entidades a DTOs
+        return deportistas.stream().map(deportista -> {
+            DeportistaVistaDTO dto = new DeportistaVistaDTO();
+            Persona persona = deportista.getPersona();
+
+            dto.setDeportistaId(deportista.getId());
+            dto.setPersonaId(persona.getId());
+            dto.setNombre(persona.getNombre());
+            dto.setApellidos(persona.getApellidos());
+            dto.setDireccion(persona.getDireccion());
+            dto.setTelefono(persona.getTelefono());
+            dto.setFechaNacimiento(persona.getFechaNacimiento());
+            dto.setGeneroId(persona.getGeneroId());
+            dto.setAltura(deportista.getAltura() != null ? deportista.getAltura().floatValue() : null);
+            dto.setPeso(deportista.getPeso() != null ? deportista.getPeso().floatValue() : null);
+            dto.setFechaRegistro(deportista.getFechaRegistro());
+            dto.setContactoEmergencia(deportista.getContactoEmergencia());
+
+            if (deportista.getEstado() != null) {
+                dto.setEstadoId(deportista.getEstado().getId());
+                dto.setEstadoNombre(deportista.getEstado().getEstado());
+            }
+
+            dto.setNivelActualId(deportista.getNivelActualId());
+            dto.setConvenioId(deportista.getConvenioId());
+
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
+    // Método para obtener el perfil completo del deportista
+    public DeportistaPerfilCompletoDTO obtenerPerfilCompleto(Integer deportistaId) {
+        Deportista deportista = deportistaRepository.findById(deportistaId)
+                .orElseThrow(() -> new RuntimeException("Deportista no encontrado con ID: " + deportistaId));
+
+        DeportistaPerfilCompletoDTO perfil = new DeportistaPerfilCompletoDTO();
+        Persona persona = deportista.getPersona();
+
+        // Datos personales
+        perfil.setDeportistaId(deportista.getId());
+        perfil.setPersonaId(persona.getId());
+        perfil.setNombre(persona.getNombre());
+        perfil.setApellidos(persona.getApellidos());
+        perfil.setDireccion(persona.getDireccion());
+        perfil.setTelefono(persona.getTelefono());
+        perfil.setFechaNacimiento(persona.getFechaNacimiento());
+        perfil.setGeneroId(persona.getGeneroId());
+
+        // Datos deportivos
+        perfil.setAltura(deportista.getAltura() != null ? deportista.getAltura().floatValue() : null);
+        perfil.setPeso(deportista.getPeso() != null ? deportista.getPeso().floatValue() : null);
+        perfil.setFechaRegistro(deportista.getFechaRegistro());
+        perfil.setContactoEmergencia(deportista.getContactoEmergencia());
+
+        if (deportista.getEstado() != null) {
+            perfil.setEstadoId(deportista.getEstado().getId());
+            perfil.setEstadoNombre(deportista.getEstado().getEstado());
+        }
+
+        perfil.setNivelActualId(deportista.getNivelActualId());
+        perfil.setConvenioId(deportista.getConvenioId());
+
+        // Información del usuario vinculado
+        Usuario usuario = userRepository.findByPersona(persona).orElse(null);
+        if (usuario != null) {
+            perfil.setUsuarioId(usuario.getId());
+            perfil.setUsername(usuario.getUsername());
+            perfil.setEmail(usuario.getEmail());
+            perfil.setUsuarioActivo(usuario.getActivo());
+            perfil.setUltimoAcceso(usuario.getUltimoAcceso());
+
+            // Roles del usuario
+            List<String> roleNames = usuario.getRoles() != null ? usuario.getRoles().stream()
+                    .map(Rol::getNombre)
+                    .collect(Collectors.toList()) : List.of();
+            perfil.setRoles(roleNames);
+
+            // Permisos del usuario
+            List<String> permisos = usuario.getRoles() != null ? usuario.getRoles().stream()
+                    .flatMap(rol -> rol.getPermisos() != null ? rol.getPermisos().stream() : java.util.stream.Stream.empty())
+                    .map(p -> p.getNombre())
+                    .distinct()
+                    .collect(Collectors.toList()) : List.of();
+            perfil.setPermisos(permisos);
+        }
+
+        return perfil;
+    }
+
+    // Método para vincular un deportista con un usuario existente
+    @Transactional
+    public void vincularDeportistaConUsuario(Integer deportistaId, Integer usuarioId) {
+        Deportista deportista = deportistaRepository.findById(deportistaId)
+                .orElseThrow(() -> new RuntimeException("Deportista no encontrado con ID: " + deportistaId));
+
+        Usuario usuario = userRepository.findById(usuarioId.longValue())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + usuarioId));
+
+        // Validar que el usuario no esté ya vinculado a otra persona
+        if (usuario.getPersona() != null) {
+            throw new RuntimeException("El usuario " + usuario.getUsername() + " ya está vinculado a otra persona");
+        }
+
+        // Validar que el deportista no esté ya vinculado a otro usuario
+        Usuario usuarioExistente = userRepository.findByPersona(deportista.getPersona()).orElse(null);
+        if (usuarioExistente != null && !usuarioExistente.getId().equals(usuarioId)) {
+            throw new RuntimeException("El deportista ya está vinculado al usuario " + usuarioExistente.getUsername());
+        }
+
+        // Vincular
+        usuario.setPersona(deportista.getPersona());
+        userRepository.save(usuario);
+    }
+
+    // Método para desvinculcar un deportista de su usuario
+    // @Transactional: no es estrictamente necesario aquí (un solo save), pero se
+    // deja para mantener consistencia y dejar espacio a futuras validaciones.
+    @Transactional
+    public void desvinculcarDeportistaDeUsuario(Integer deportistaId) {
+        Deportista deportista = deportistaRepository.findById(deportistaId)
+                .orElseThrow(() -> new RuntimeException("Deportista no encontrado con ID: " + deportistaId));
+
+        Usuario usuario = userRepository.findByPersona(deportista.getPersona())
+                .orElseThrow(() -> new RuntimeException("El deportista no tiene un usuario vinculado"));
+
+        // Desvinculcar
+        usuario.setPersona(null);
+        userRepository.save(usuario);
+    }
+
+    // Método para obtener el usuario vinculado a un deportista
+    public Usuario obtenerUsuarioDeDeportista(Integer deportistaId) {
+        Deportista deportista = deportistaRepository.findById(deportistaId)
+                .orElseThrow(() -> new RuntimeException("Deportista no encontrado con ID: " + deportistaId));
+
+        return userRepository.findByPersona(deportista.getPersona())
+                .orElseThrow(() -> new RuntimeException("El deportista no tiene un usuario vinculado"));
+    }
+
+    // Método para validar si un documento de identidad está disponible (único)
+    public ValidarDocumentoDTO validarDocumentoUnico(String numeroDocumento) {
+        if (numeroDocumento == null || numeroDocumento.trim().isEmpty()) {
+            return new ValidarDocumentoDTO(false, "El número de documento no puede estar vacío");
+        }
+
+        java.util.Optional<Persona> persona = personaRepository.findByNumeroDocumento(numeroDocumento);
+        if (persona.isPresent()) {
+            return new ValidarDocumentoDTO(false, "El documento " + numeroDocumento + " ya está registrado");
+        }
+
+        return new ValidarDocumentoDTO(true, "El documento " + numeroDocumento + " está disponible");
+    }
+
+    // Validación en el registro de deportista
+    private void validarDocumentoEnRegistro(String numeroDocumento) {
+        if (numeroDocumento != null && !numeroDocumento.trim().isEmpty()) {
+            java.util.Optional<Persona> persona = personaRepository.findByNumeroDocumento(numeroDocumento);
+            if (persona.isPresent()) {
+                throw new RuntimeException("El documento " + numeroDocumento + " ya está registrado en el sistema");
+            }
+        }
+    }
+
+    // Validación en la modificación de deportista
+    private void validarDocumentoEnModificacion(Integer personaId, String numeroDocumento) {
+        if (numeroDocumento != null && !numeroDocumento.trim().isEmpty()) {
+            java.util.Optional<Persona> persona = personaRepository.findByNumeroDocumento(numeroDocumento);
+            if (persona.isPresent() && !persona.get().getId().equals(personaId)) {
+                throw new RuntimeException("El documento " + numeroDocumento + " ya está registrado en otro deportista");
+            }
+        }
+    }
+
+    // Método para registrar cambios de estado en el historial
+    private void registrarCambioEstado(Deportista deportista, EstadoPersona estadoAnterior,
+                                       EstadoPersona estadoNuevo, Integer usuarioId, String motivo) {
+        // No registrar si el estado no cambió
+        if (estadoAnterior != null && estadoAnterior.getId().equals(estadoNuevo.getId())) {
+            return;
+        }
+
+        HistorialDeportistaEstado historial = new HistorialDeportistaEstado();
+        historial.setDeportista(deportista);
+        historial.setEstadoAnterior(estadoAnterior);
+        historial.setEstadoNuevo(estadoNuevo);
+        historial.setFechaCambio(LocalDateTime.now());
+        historial.setUsuarioId(usuarioId);
+        historial.setMotivoCambio(motivo);
+        historialDeportistaEstadoRepository.save(historial);
+    }
+
+    // Método para obtener el historial de cambios de estado de un deportista
+    public List<HistorialDeportistaEstadoDTO> obtenerHistorialEstadoDeportista(Integer deportistaId) {
+        Deportista deportista = deportistaRepository.findById(deportistaId)
+                .orElseThrow(() -> new RuntimeException("Deportista no encontrado con ID: " + deportistaId));
+
+        List<HistorialDeportistaEstado> historial = historialDeportistaEstadoRepository
+                .findByDeportistaIdOrderByFechaCambioDesc(deportistaId);
+
+        return historial.stream().map(h -> {
+            HistorialDeportistaEstadoDTO dto = new HistorialDeportistaEstadoDTO();
+            dto.setId(h.getId());
+            dto.setDeportistaId(h.getDeportista().getId());
+            dto.setNombreDeportista(h.getDeportista().getPersona().getNombre());
+            dto.setApellidosDeportista(h.getDeportista().getPersona().getApellidos());
+
+            if (h.getEstadoAnterior() != null) {
+                dto.setEstadoAnteriorId(h.getEstadoAnterior().getId());
+                dto.setEstadoAnteriorNombre(h.getEstadoAnterior().getEstado());
+            }
+
+            dto.setEstadoNuevoId(h.getEstadoNuevo().getId());
+            dto.setEstadoNuevoNombre(h.getEstadoNuevo().getEstado());
+            dto.setFechaCambio(h.getFechaCambio());
+            dto.setUsuarioId(h.getUsuarioId());
+
+            if (h.getUsuarioId() != null) {
+                java.util.Optional<Usuario> usuario = userRepository.findById(h.getUsuarioId().longValue());
+                if (usuario.isPresent()) {
+                    dto.setUsuarioUsername(usuario.get().getUsername());
+                }
+            }
+
+            dto.setMotivoCambio(h.getMotivoCambio());
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
+    // Método para obtener todo el historial de cambios de estado
+    public List<HistorialDeportistaEstadoDTO> obtenerHistorialEstadoGlobal() {
+        List<HistorialDeportistaEstado> historial = historialDeportistaEstadoRepository.findAllByOrderByFechaCambioDesc();
+
+        return historial.stream().map(h -> {
+            HistorialDeportistaEstadoDTO dto = new HistorialDeportistaEstadoDTO();
+            dto.setId(h.getId());
+            dto.setDeportistaId(h.getDeportista().getId());
+            dto.setNombreDeportista(h.getDeportista().getPersona().getNombre());
+            dto.setApellidosDeportista(h.getDeportista().getPersona().getApellidos());
+
+            if (h.getEstadoAnterior() != null) {
+                dto.setEstadoAnteriorId(h.getEstadoAnterior().getId());
+                dto.setEstadoAnteriorNombre(h.getEstadoAnterior().getEstado());
+            }
+
+            dto.setEstadoNuevoId(h.getEstadoNuevo().getId());
+            dto.setEstadoNuevoNombre(h.getEstadoNuevo().getEstado());
+            dto.setFechaCambio(h.getFechaCambio());
+            dto.setUsuarioId(h.getUsuarioId());
+
+            if (h.getUsuarioId() != null) {
+                java.util.Optional<Usuario> usuario = userRepository.findById(h.getUsuarioId().longValue());
+                if (usuario.isPresent()) {
+                    dto.setUsuarioUsername(usuario.get().getUsername());
+                }
+            }
+
+            dto.setMotivoCambio(h.getMotivoCambio());
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
+    // Método para guardar foto de perfil del deportista
+    public UploadFotoDTO guardarFotoDeportista(Integer deportistaId, MultipartFile archivo) {
+        try {
+            Deportista deportista = deportistaRepository.findById(deportistaId)
+                    .orElseThrow(() -> new RuntimeException("Deportista no encontrado con ID: " + deportistaId));
+
+            // Eliminar foto anterior si existe
+            if (deportista.getFotoPerfil() != null && !deportista.getFotoPerfil().isEmpty()) {
+                try {
+                    fileStorageService.eliminarFoto(deportista.getFotoPerfil());
+                } catch (Exception e) {
+                    // Log del error pero continuar
+                }
+            }
+
+            // Guardar nueva foto
+            String rutaFoto = fileStorageService.guardarFoto(archivo, "deportistas");
+
+            // Actualizar deportista con la ruta de la foto
+            deportista.setFotoPerfil(rutaFoto);
+            deportistaRepository.save(deportista);
+
+            return new UploadFotoDTO(
+                    true,
+                    "Foto guardada exitosamente",
+                    archivo.getOriginalFilename(),
+                    "/api/deportistas/" + deportistaId + "/foto"
+            );
+        } catch (Exception e) {
+            return new UploadFotoDTO(
+                    false,
+                    "Error al guardar la foto: " + e.getMessage(),
+                    null,
+                    null
+            );
+        }
+    }
+
+    // Método para obtener la foto del deportista
+    public byte[] obtenerFotoDeportista(Integer deportistaId) throws Exception {
+        Deportista deportista = deportistaRepository.findById(deportistaId)
+                .orElseThrow(() -> new RuntimeException("Deportista no encontrado con ID: " + deportistaId));
+
+        if (deportista.getFotoPerfil() == null || deportista.getFotoPerfil().isEmpty()) {
+            throw new RuntimeException("El deportista no tiene foto de perfil");
+        }
+
+        return fileStorageService.descargarFoto(deportista.getFotoPerfil());
+    }
+
+    // Método para eliminar foto del deportista
+    public void eliminarFotoDeportista(Integer deportistaId) throws Exception {
+        Deportista deportista = deportistaRepository.findById(deportistaId)
+                .orElseThrow(() -> new RuntimeException("Deportista no encontrado con ID: " + deportistaId));
+
+        if (deportista.getFotoPerfil() != null && !deportista.getFotoPerfil().isEmpty()) {
+            fileStorageService.eliminarFoto(deportista.getFotoPerfil());
+            deportista.setFotoPerfil(null);
+            deportistaRepository.save(deportista);
+        }
+    }
+
+    // Método para eliminar un deportista
+    // @Transactional: cambia estado + escribe historial + desactiva usuario.
+    // Si falla el último paso, no queremos que el deportista quede marcado como
+    // "Retirado" con su usuario todavía activo.
+    @Transactional
+    public void eliminarDeportista(Integer deportistaId) {
+
+        Deportista deportista = deportistaRepository.findById(deportistaId)
+                .orElseThrow(() -> new RuntimeException("Deportista no encontrado"));
+
+        // Cambiar estado: obtener la entidad EstadoPersona con ID 2 (Retirado) y setearla
+        EstadoPersona estadoRetirado = estadoPersonaRepository.findById(2)
+                .orElseThrow(() -> new RuntimeException("Estado 'Retirado' no encontrado"));
+
+        // Registrar el cambio de estado en el historial
+        registrarCambioEstado(deportista, deportista.getEstado(), estadoRetirado, null, "Deportista eliminado del sistema");
+
+        deportista.setEstado(estadoRetirado);
+        deportistaRepository.save(deportista);
+
+        // Desactivar usuario
+        Usuario usuario = userRepository.findByPersona(deportista.getPersona())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        usuario.setActivo(false);
+        userRepository.save(usuario);
+    }
+
+    // Método para registrar un entrenador
+    // ==========================================
+    // Este método recibe un DTO de Entrenador y lo convierte a una entidad
+    // Entrenador
+    // @Transactional: igual que registrarDeportista, son tres guardados ligados
+    // (Persona + Entrenador + Usuario) que deben ser atómicos.
+    @Transactional
+    public Entrenador registrarEntrenador(EntrenadorDTO entrenadorDTO) {
+        // Registrar la persona
+        Persona persona = new Persona();
+        persona.setNombre(entrenadorDTO.getNombre());
+        persona.setApellidos(entrenadorDTO.getApellidos());
+        persona.setDireccion(entrenadorDTO.getDireccion());
+        persona.setTelefono(entrenadorDTO.getTelefono());
+        persona.setFechaNacimiento(entrenadorDTO.getFechaNacimiento());
+        persona.setGeneroId(entrenadorDTO.getGeneroId());
+        Persona personaGuardada = personaRepository.save(persona);
+
+        // Registrar el entrenador
+        Entrenador entrenador = new Entrenador();
+        entrenador.setPersona(personaGuardada);
+        entrenador.setFechaContratacion(entrenadorDTO.getFechaContratacion());
+        entrenador.setFechaContratacion(entrenadorDTO.getFechaContratacion());
+        entrenador.setEspecializacion(entrenadorDTO.getEspecializacion());
+        // entrenador.setEstadoId(entrenadorDTO.getEstadoId());
+        // Setear el estado usando la relación
+        EstadoPersona estado = estadoPersonaRepository.findById(entrenadorDTO.getEstadoId())
+                .orElseThrow(() -> new RuntimeException("Estado no encontrado"));
+        entrenador.setEstado(estado);
+        Entrenador entrenadorGuardado = entrenadorRepository.save(entrenador);
+
+        // Registrar al entrenador como usuario
+        String username = generarUsername(
+                entrenadorDTO.getNombre(),
+                entrenadorDTO.getApellidos());
+        String email = username + "@cheermanager.com"; // Generar un email ficticio o usar uno proporcionado
+        String password = "0000"; // Generar una contraseña por defecto o usar una proporcionada
+        Integer rolId = entrenadorDTO.getRolIdE(); // ID del rol para entrenador
+        registrarUsuario(personaGuardada, username, email, password, rolId);
+
+        return entrenadorGuardado;
+    }
+
+    // Método para modificar un entrenador
+    // @Transactional: actualiza Persona y Entrenador en el mismo flujo.
+    @Transactional
+    public Entrenador modificarEntrenador(Integer id, EntrenadorDTO dto) {
+
+        return entrenadorRepository.findById(id).map(entrenador -> {
+
+            Persona persona = entrenador.getPersona();
+
+            if (dto.getNombre() != null && !dto.getNombre().isBlank()) {
+                persona.setNombre(dto.getNombre());
+            }
+
+            if (dto.getApellidos() != null && !dto.getApellidos().isBlank()) {
+                persona.setApellidos(dto.getApellidos());
+            }
+
+            if (dto.getDireccion() != null) {
+                persona.setDireccion(dto.getDireccion());
+            }
+
+            if (dto.getTelefono() != null) {
+                persona.setTelefono(dto.getTelefono());
+            }
+
+            if (dto.getFechaNacimiento() != null) {
+                persona.setFechaNacimiento(dto.getFechaNacimiento());
+            }
+
+            if (dto.getGeneroId() != null) {
+                persona.setGeneroId(dto.getGeneroId());
+            }
+
+            personaRepository.save(persona);
+
+            if (dto.getFechaContratacion() != null) {
+                entrenador.setFechaContratacion(dto.getFechaContratacion());
+            }
+
+            if (dto.getEstadoId() != null) {
+                EstadoPersona estado = estadoPersonaRepository.findById(dto.getEstadoId())
+                        .orElseThrow(() -> new RuntimeException("Estado no encontrado"));
+                entrenador.setEstado(estado);
+            }
+
+            return entrenadorRepository.save(entrenador);
+        }).orElseThrow(() -> new RuntimeException("Entrenador no encontrado"));
+    }
+
+    // Método para listar todos los entrenadores
+    public List<Entrenador> listarEntrenadores() {
+        return entrenadorRepository.findAll();
+    }
+
+    // Método para eliminar un entrenador
+    // @Transactional: cambia estado de Entrenador + desactiva su Usuario.
+    @Transactional
+    public void eliminarEntrenador(Integer id) {
+        Entrenador entrenador = entrenadorRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Entrenador no encontrado"));
+
+        // Cambiar estado: obtener la entidad EstadoPersona con ID 2 (Retirado) y
+        // setearla
+        EstadoPersona estadoRetirado = estadoPersonaRepository.findById(2)
+                .orElseThrow(() -> new RuntimeException("Estado 'Retirado' no encontrado"));
+        entrenador.setEstado(estadoRetirado);
+        entrenadorRepository.save(entrenador);
+
+        // Desactivar usuario
+        Usuario usuario = userRepository.findByPersona(entrenador.getPersona())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        usuario.setActivo(false);
+        userRepository.save(usuario);
+    }
+
 }
 </file>
 

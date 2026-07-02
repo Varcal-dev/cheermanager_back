@@ -31,9 +31,12 @@ public class MovimientoInventario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    // Antes apuntaba a Producto (el artículo genérico) — se corrige a
+    // ProductoVariante porque el stock real se controla por talla/color, no
+    // por artículo. "Entró 1 camiseta" no dice nada sin saber de qué talla.
     @ManyToOne
-    @JoinColumn(name = "producto_id", nullable = false)
-    private Producto producto;
+    @JoinColumn(name = "producto_variante_id", nullable = false)
+    private ProductoVariante productoVariante;
 
     @Column(name = "tipo", nullable = false)
     @Enumerated(EnumType.STRING)
@@ -41,6 +44,9 @@ public class MovimientoInventario {
 
     @Column(name = "cantidad", nullable = false)
     private Integer cantidad;
+
+    @Column(name = "motivo", length = 300)
+    private String motivo; // ej. "Compra a proveedor Medellín", "Venta #123", "Ajuste por conteo físico"
 
     @Column(name = "fecha", nullable = false)
     private LocalDateTime fecha = LocalDateTime.now();

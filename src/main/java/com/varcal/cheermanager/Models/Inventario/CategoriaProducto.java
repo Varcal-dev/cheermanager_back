@@ -16,6 +16,12 @@ public class CategoriaProducto {
     @Column(name = "nombre", nullable = false, unique = true)
     private String nombre;
 
+    // 3 letras usadas en el SKU (RAT-[CAT]-...), ej. ROP, CAL, ACC, DIG.
+    // Se valida en el service que siempre sean exactamente 3 letras
+    // mayúsculas, para no romper el formato de nomenclatura del catálogo.
+    @Column(name = "codigo", nullable = false, unique = true, length = 3)
+    private String codigo;
+
     @Column(name = "descripcion")
     private String descripcion;
 }

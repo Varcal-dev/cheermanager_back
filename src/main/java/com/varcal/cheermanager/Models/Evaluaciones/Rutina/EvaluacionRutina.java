@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.varcal.cheermanager.Models.Eventos.Evento;
 import com.varcal.cheermanager.Models.Org_dep.GrupoEntrenamiento;
 
 import jakarta.persistence.CascadeType;
@@ -43,10 +44,23 @@ public class EvaluacionRutina {
     @Column(name = "fecha", nullable = false)
     private LocalDate fecha;
 
-    // Nombre del evento o "Práctica interna" / "Simulacro" si no es una
-    // competencia oficial — el sistema sirve igual para preparación.
+    // Nombre libre del evento o "Práctica interna" / "Simulacro" si no es una
+    // competencia oficial — el sistema sirve igual para preparación. Se
+    // conserva para no romper evaluaciones ya cargadas y para el caso de
+    // simulacros que nunca deberían crear un registro en `eventos`.
     @Column(name = "evento", length = 200)
     private String evento;
+
+    // FK opcional al Evento real del módulo Eventos, cuando esta evaluación
+    // corresponde a una competencia oficial ya registrada en el sistema (no
+    // a un simulacro/práctica interna). Permite construir la progresión de
+    // puntaje de un grupo evento-a-evento sin depender de que el texto libre
+    // de arriba coincida exactamente. Se deja nullable y separado del campo
+    // `evento` (String) a propósito, para no forzar una migración de datos
+    // sobre evaluaciones ya existentes.
+    @ManyToOne
+    @JoinColumn(name = "evento_oficial_id")
+    private Evento eventoOficial;
 
     // Cantidad de atletas que participaron en ESTA presentación específica
     // (puede no coincidir con el total de DeportistaPerteneceGrupo si alguien
