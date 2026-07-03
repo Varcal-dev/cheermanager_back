@@ -45,6 +45,7 @@ The content is organized as follows:
 .mvn/wrapper/maven-wrapper.properties
 ajustes_claudia/AUTH_API_v3_COMPLETE.md
 ajustes_claudia/AUTH_IMPLEMENTATION_V3.md
+ajustes_claudia/KPIs_y_Dashboards_CheerManager_propuesta.md
 ajustes_claudia/RESUMEN_CABOS_SUELTOS.md
 ajustes_claudia/RESUMEN_CAMBIOS.md
 ajustes_claudia/RESUMEN_EVALUACION_RUTINA.md
@@ -69,7 +70,10 @@ src/main/java/com/varcal/cheermanager/Controller/Evaluaciones/EvaluacionControll
 src/main/java/com/varcal/cheermanager/Controller/Evaluaciones/ObjetivoController.java
 src/main/java/com/varcal/cheermanager/Controller/Evaluaciones/Rutina/EvaluacionRutinaController.java
 src/main/java/com/varcal/cheermanager/Controller/Evaluaciones/Rutina/RubricaConfigController.java
+src/main/java/com/varcal/cheermanager/Controller/Eventos/EventoController.java
+src/main/java/com/varcal/cheermanager/Controller/Eventos/GrupoEventoController.java
 src/main/java/com/varcal/cheermanager/Controller/Eventos/PremioEventoController.java
+src/main/java/com/varcal/cheermanager/Controller/Eventos/ResultadoCompetenciaController.java
 src/main/java/com/varcal/cheermanager/Controller/Eventos/TipoEventoController.java
 src/main/java/com/varcal/cheermanager/Controller/Financiero/ConvenioController.java
 src/main/java/com/varcal/cheermanager/Controller/Financiero/DescuentoController.java
@@ -84,6 +88,11 @@ src/main/java/com/varcal/cheermanager/Controller/Historiales/HistorialNivelDepor
 src/main/java/com/varcal/cheermanager/Controller/Historiales/HistorialPlanesDeportistaController.java
 src/main/java/com/varcal/cheermanager/Controller/Horario_Asistencia/AsistenciaController.java
 src/main/java/com/varcal/cheermanager/Controller/Horario_Asistencia/HorarioController.java
+src/main/java/com/varcal/cheermanager/Controller/Inventario/CategoriaProductoController.java
+src/main/java/com/varcal/cheermanager/Controller/Inventario/MovimientoInventarioController.java
+src/main/java/com/varcal/cheermanager/Controller/Inventario/ProductoController.java
+src/main/java/com/varcal/cheermanager/Controller/Inventario/ProductoVarianteController.java
+src/main/java/com/varcal/cheermanager/Controller/Inventario/VentaController.java
 src/main/java/com/varcal/cheermanager/Controller/Org_dep/CategoriaNivelController.java
 src/main/java/com/varcal/cheermanager/Controller/Org_dep/GrupoEntrenamientoController.java
 src/main/java/com/varcal/cheermanager/Controller/Org_dep/NivelController.java
@@ -129,6 +138,15 @@ src/main/java/com/varcal/cheermanager/DTO/Horario_Asistencia/AsistenciaResponseD
 src/main/java/com/varcal/cheermanager/DTO/Horario_Asistencia/HorarioDTO.java
 src/main/java/com/varcal/cheermanager/DTO/Horario_Asistencia/HorarioResponseDTO.java
 src/main/java/com/varcal/cheermanager/DTO/Horario_Asistencia/RegistroAsistenciaMasivoDTO.java
+src/main/java/com/varcal/cheermanager/DTO/Inventario/CategoriaProductoDTO.java
+src/main/java/com/varcal/cheermanager/DTO/Inventario/MovimientoInventarioDTO.java
+src/main/java/com/varcal/cheermanager/DTO/Inventario/MovimientoInventarioResponseDTO.java
+src/main/java/com/varcal/cheermanager/DTO/Inventario/ProductoDTO.java
+src/main/java/com/varcal/cheermanager/DTO/Inventario/ProductoResponseDTO.java
+src/main/java/com/varcal/cheermanager/DTO/Inventario/ProductoVarianteDTO.java
+src/main/java/com/varcal/cheermanager/DTO/Inventario/ProductoVarianteResponseDTO.java
+src/main/java/com/varcal/cheermanager/DTO/Inventario/VentaDTO.java
+src/main/java/com/varcal/cheermanager/DTO/Inventario/VentaResponseDTO.java
 src/main/java/com/varcal/cheermanager/DTO/Org_dep/AsignacionGrupoDTO.java
 src/main/java/com/varcal/cheermanager/DTO/Org_dep/CategoriaNivelDTO.java
 src/main/java/com/varcal/cheermanager/DTO/Org_dep/CreateInscripcionDto.java
@@ -201,6 +219,7 @@ src/main/java/com/varcal/cheermanager/Models/Inventario/CategoriaProducto.java
 src/main/java/com/varcal/cheermanager/Models/Inventario/DetalleVenta.java
 src/main/java/com/varcal/cheermanager/Models/Inventario/MovimientoInventario.java
 src/main/java/com/varcal/cheermanager/Models/Inventario/Producto.java
+src/main/java/com/varcal/cheermanager/Models/Inventario/ProductoVariante.java
 src/main/java/com/varcal/cheermanager/Models/Inventario/Venta.java
 src/main/java/com/varcal/cheermanager/Models/Org_dep/CategoriaNivel.java
 src/main/java/com/varcal/cheermanager/Models/Org_dep/DeportistaPerteneceGrupo.java
@@ -259,6 +278,11 @@ src/main/java/com/varcal/cheermanager/repository/Horario_Asistencia/AsistenciaRe
 src/main/java/com/varcal/cheermanager/repository/Horario_Asistencia/EstadoAsistenciaRepository.java
 src/main/java/com/varcal/cheermanager/repository/Horario_Asistencia/HorarioEntrenamientoRepository.java
 src/main/java/com/varcal/cheermanager/repository/Horario_Asistencia/HorarioRepository.java
+src/main/java/com/varcal/cheermanager/repository/Inventario/CategoriaProductoRepository.java
+src/main/java/com/varcal/cheermanager/repository/Inventario/MovimientoInventarioRepository.java
+src/main/java/com/varcal/cheermanager/repository/Inventario/ProductoRepository.java
+src/main/java/com/varcal/cheermanager/repository/Inventario/ProductoVarianteRepository.java
+src/main/java/com/varcal/cheermanager/repository/Inventario/VentaRepository.java
 src/main/java/com/varcal/cheermanager/repository/Org_dep/CategoriaNivelRepository.java
 src/main/java/com/varcal/cheermanager/repository/Org_dep/DeportistaPerteneceGrupoRepository.java
 src/main/java/com/varcal/cheermanager/repository/Org_dep/DiaSemanaRepository.java
@@ -311,6 +335,11 @@ src/main/java/com/varcal/cheermanager/Service/Historiales/HistorialNivelDeportis
 src/main/java/com/varcal/cheermanager/Service/Historiales/HistorialPlanesDeportistaService.java
 src/main/java/com/varcal/cheermanager/Service/Horario_Asistencia/AsistenciaService.java
 src/main/java/com/varcal/cheermanager/Service/Horario_Asistencia/HorarioService.java
+src/main/java/com/varcal/cheermanager/Service/Inventario/CategoriaProductoService.java
+src/main/java/com/varcal/cheermanager/Service/Inventario/MovimientoInventarioService.java
+src/main/java/com/varcal/cheermanager/Service/Inventario/ProductoService.java
+src/main/java/com/varcal/cheermanager/Service/Inventario/ProductoVarianteService.java
+src/main/java/com/varcal/cheermanager/Service/Inventario/VentaService.java
 src/main/java/com/varcal/cheermanager/Service/Org_dep/DivisionService.java
 src/main/java/com/varcal/cheermanager/Service/Org_dep/GrupoEntrenamientoService.java
 src/main/java/com/varcal/cheermanager/Service/Org_dep/InscripcionService.java
@@ -328,8 +357,8 @@ src/test/java/com/varcal/cheermanager/CheermanagerApplicationTests.java
 <files>
 This section contains the contents of the repository's files.
 
-<file path="src/main/java/com/varcal/cheermanager/Controller/Eventos/PremioEventoController.java">
-package com.varcal.cheermanager.Controller.Eventos;
+<file path="src/main/java/com/varcal/cheermanager/Controller/Inventario/CategoriaProductoController.java">
+package com.varcal.cheermanager.Controller.Inventario;
 
 import java.util.List;
 
@@ -338,52 +367,59 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.varcal.cheermanager.DTO.Eventos.PremioEventoDTO;
-import com.varcal.cheermanager.Service.Eventos.PremioEventoService;
+import com.varcal.cheermanager.DTO.Inventario.CategoriaProductoDTO;
+import com.varcal.cheermanager.Models.Inventario.CategoriaProducto;
+import com.varcal.cheermanager.Service.Inventario.CategoriaProductoService;
 import com.varcal.cheermanager.Utils.RequiresPermission;
 
 @RestController
-@RequestMapping("/api/premios-evento")
-public class PremioEventoController {
+@RequestMapping("/api/categorias-producto")
+public class CategoriaProductoController {
 
     @Autowired
-    private PremioEventoService premioEventoService;
+    private CategoriaProductoService categoriaProductoService;
 
-    @PostMapping
-    @RequiresPermission("modificar_evento")
-    public ResponseEntity<?> crear(@RequestBody PremioEventoDTO dto) {
-        try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(premioEventoService.crear(dto));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
-        }
+    @GetMapping
+    @RequiresPermission("ver_producto")
+    public ResponseEntity<List<CategoriaProducto>> listar() {
+        return ResponseEntity.ok(categoriaProductoService.listarTodas());
     }
 
-    @GetMapping("/evento/{eventoId}")
-    @RequiresPermission("ver_evento")
-    public ResponseEntity<?> listarPorEvento(@PathVariable Integer eventoId) {
+    @GetMapping("/{id}")
+    @RequiresPermission("ver_producto")
+    public ResponseEntity<?> obtener(@PathVariable Integer id) {
         try {
-            return ResponseEntity.ok(premioEventoService.listarPorEvento(eventoId));
+            return ResponseEntity.ok(categoriaProductoService.obtenerPorId(id));
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }
 
-    @PutMapping("/{id}")
-    @RequiresPermission("modificar_evento")
-    public ResponseEntity<?> actualizar(@PathVariable Integer id, @RequestBody PremioEventoDTO dto) {
+    @PostMapping
+    @RequiresPermission("crear_producto")
+    public ResponseEntity<?> crear(@RequestBody CategoriaProductoDTO dto) {
         try {
-            return ResponseEntity.ok(premioEventoService.actualizar(id, dto));
+            return ResponseEntity.status(HttpStatus.CREATED).body(categoriaProductoService.crear(dto));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(409).body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}")
+    @RequiresPermission("modificar_producto")
+    public ResponseEntity<?> actualizar(@PathVariable Integer id, @RequestBody CategoriaProductoDTO dto) {
+        try {
+            return ResponseEntity.ok(categoriaProductoService.actualizar(id, dto));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(409).body(e.getMessage());
         }
     }
 
     @DeleteMapping("/{id}")
-    @RequiresPermission("modificar_evento")
+    @RequiresPermission("eliminar_producto")
     public ResponseEntity<?> eliminar(@PathVariable Integer id) {
         try {
-            premioEventoService.eliminar(id);
+            categoriaProductoService.eliminar(id);
             return ResponseEntity.noContent().build();
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
@@ -392,292 +428,635 @@ public class PremioEventoController {
 }
 </file>
 
-<file path="src/main/java/com/varcal/cheermanager/Controller/Eventos/TipoEventoController.java">
-package com.varcal.cheermanager.Controller.Eventos;
+<file path="src/main/java/com/varcal/cheermanager/Controller/Inventario/MovimientoInventarioController.java">
+package com.varcal.cheermanager.Controller.Inventario;
 
 import java.util.List;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import com.varcal.cheermanager.Models.Eventos.TipoEvento;
-import com.varcal.cheermanager.repository.Eventos.TipoEventoRepository;
+import com.varcal.cheermanager.DTO.Inventario.MovimientoInventarioDTO;
+import com.varcal.cheermanager.DTO.Inventario.MovimientoInventarioResponseDTO;
+import com.varcal.cheermanager.Service.Inventario.MovimientoInventarioService;
+import com.varcal.cheermanager.Utils.RequiresPermission;
 
 @RestController
-@RequestMapping("/api/tipos-evento")
-public class TipoEventoController {
+@RequestMapping("/api/movimientos-inventario")
+public class MovimientoInventarioController {
 
-    private final TipoEventoRepository tipoEventoRepo;
+    @Autowired
+    private MovimientoInventarioService movimientoInventarioService;
 
-    public TipoEventoController(TipoEventoRepository tipoEventoRepo) {
-        this.tipoEventoRepo = tipoEventoRepo;
+    @PostMapping
+    @RequiresPermission("registrar_movimiento_inventario")
+    public ResponseEntity<?> registrar(@RequestBody MovimientoInventarioDTO dto) {
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED).body(movimientoInventarioService.registrar(dto));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(409).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/variante/{productoVarianteId}")
+    @RequiresPermission("ver_movimiento_inventario")
+    public ResponseEntity<List<MovimientoInventarioResponseDTO>> listarPorVariante(@PathVariable Integer productoVarianteId) {
+        return ResponseEntity.ok(movimientoInventarioService.listarPorVariante(productoVarianteId));
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Controller/Inventario/ProductoController.java">
+package com.varcal.cheermanager.Controller.Inventario;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import com.varcal.cheermanager.DTO.Inventario.ProductoDTO;
+import com.varcal.cheermanager.DTO.Inventario.ProductoResponseDTO;
+import com.varcal.cheermanager.Service.Inventario.ProductoService;
+import com.varcal.cheermanager.Utils.RequiresPermission;
+
+@RestController
+@RequestMapping("/api/productos")
+public class ProductoController {
+
+    @Autowired
+    private ProductoService productoService;
+
+    @GetMapping
+    @RequiresPermission("ver_producto")
+    public ResponseEntity<List<ProductoResponseDTO>> listar() {
+        return ResponseEntity.ok(productoService.listarTodos());
+    }
+
+    @GetMapping("/activos")
+    @RequiresPermission("ver_producto")
+    public ResponseEntity<List<ProductoResponseDTO>> listarActivos() {
+        return ResponseEntity.ok(productoService.listarActivos());
+    }
+
+    @GetMapping("/{id}")
+    @RequiresPermission("ver_producto")
+    public ResponseEntity<?> obtener(@PathVariable Integer id) {
+        try {
+            return ResponseEntity.ok(productoService.obtenerPorId(id));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping
+    @RequiresPermission("crear_producto")
+    public ResponseEntity<?> crear(@RequestBody ProductoDTO dto) {
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED).body(productoService.crear(dto));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(409).body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}")
+    @RequiresPermission("modificar_producto")
+    public ResponseEntity<?> actualizar(@PathVariable Integer id, @RequestBody ProductoDTO dto) {
+        try {
+            return ResponseEntity.ok(productoService.actualizar(id, dto));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(e.getMessage());
+        }
+    }
+
+    // No hay borrado físico — desactiva el producto (ver nota en el service).
+    @DeleteMapping("/{id}")
+    @RequiresPermission("eliminar_producto")
+    public ResponseEntity<?> eliminar(@PathVariable Integer id) {
+        try {
+            productoService.eliminar(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Controller/Inventario/ProductoVarianteController.java">
+package com.varcal.cheermanager.Controller.Inventario;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import com.varcal.cheermanager.DTO.Inventario.ProductoVarianteDTO;
+import com.varcal.cheermanager.DTO.Inventario.ProductoVarianteResponseDTO;
+import com.varcal.cheermanager.Service.Inventario.ProductoVarianteService;
+import com.varcal.cheermanager.Utils.RequiresPermission;
+
+@RestController
+@RequestMapping("/api/producto-variantes")
+public class ProductoVarianteController {
+
+    @Autowired
+    private ProductoVarianteService productoVarianteService;
+
+    @GetMapping("/producto/{productoId}")
+    @RequiresPermission("ver_producto")
+    public ResponseEntity<List<ProductoVarianteResponseDTO>> listarPorProducto(@PathVariable Integer productoId) {
+        return ResponseEntity.ok(productoVarianteService.listarPorProducto(productoId));
+    }
+
+    // Umbral configurable por query param para que cada dashboard/reporte
+    // decida qué considera "stock bajo" sin tocar código (ej. ?umbral=5).
+    @GetMapping("/stock-bajo")
+    @RequiresPermission("ver_producto")
+    public ResponseEntity<List<ProductoVarianteResponseDTO>> listarConStockBajo(
+            @RequestParam(defaultValue = "5") int umbral) {
+        return ResponseEntity.ok(productoVarianteService.listarConStockBajo(umbral));
+    }
+
+    @PostMapping
+    @RequiresPermission("crear_producto")
+    public ResponseEntity<?> crear(@RequestBody ProductoVarianteDTO dto) {
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED).body(productoVarianteService.crear(dto));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}/precio")
+    @RequiresPermission("modificar_producto")
+    public ResponseEntity<?> actualizarPrecio(@PathVariable Integer id, @RequestBody java.util.Map<String, java.math.BigDecimal> body) {
+        try {
+            return ResponseEntity.ok(productoVarianteService.actualizarPrecio(id, body.get("precioVenta")));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    @RequiresPermission("eliminar_producto")
+    public ResponseEntity<?> desactivar(@PathVariable Integer id) {
+        try {
+            productoVarianteService.desactivar(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Controller/Inventario/VentaController.java">
+package com.varcal.cheermanager.Controller.Inventario;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import com.varcal.cheermanager.DTO.Inventario.VentaDTO;
+import com.varcal.cheermanager.DTO.Inventario.VentaResponseDTO;
+import com.varcal.cheermanager.Service.Inventario.VentaService;
+import com.varcal.cheermanager.Utils.RequiresPermission;
+
+@RestController
+@RequestMapping("/api/ventas")
+public class VentaController {
+
+    @Autowired
+    private VentaService ventaService;
+
+    @PostMapping
+    @RequiresPermission("registrar_venta")
+    public ResponseEntity<?> registrar(@RequestBody VentaDTO dto) {
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED).body(ventaService.registrar(dto));
+        } catch (RuntimeException e) {
+            // 409 cubre tanto "comprador inválido" como "stock insuficiente"
+            // (ambas son conflictos de reglas de negocio, no recursos faltantes).
+            return ResponseEntity.status(409).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/{id}")
+    @RequiresPermission("ver_venta")
+    public ResponseEntity<?> obtener(@PathVariable Integer id) {
+        try {
+            return ResponseEntity.ok(ventaService.obtenerPorId(id));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping
-    public List<TipoEvento> listarTodos() {
-        return tipoEventoRepo.findAll();
+    @RequiresPermission("ver_venta")
+    public ResponseEntity<List<VentaResponseDTO>> listarPorRango(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta) {
+        return ResponseEntity.ok(ventaService.listarPorRango(desde, hasta));
+    }
+
+    @GetMapping("/persona/{personaId}")
+    @RequiresPermission("ver_venta")
+    public ResponseEntity<List<VentaResponseDTO>> listarPorPersona(@PathVariable Integer personaId) {
+        return ResponseEntity.ok(ventaService.listarPorPersona(personaId));
     }
 }
 </file>
 
-<file path="src/main/java/com/varcal/cheermanager/DTO/Eventos/EventoDTO.java">
-package com.varcal.cheermanager.DTO.Eventos;
-
-import java.time.LocalDate;
+<file path="src/main/java/com/varcal/cheermanager/DTO/Inventario/CategoriaProductoDTO.java">
+package com.varcal.cheermanager.DTO.Inventario;
 
 import lombok.Data;
 
 @Data
-public class EventoDTO {
+public class CategoriaProductoDTO {
     private String nombre;
-    private LocalDate fecha;
-    private Integer tipoEventoId;
-    private String ubicacion;
-    private Boolean tieneResultados; // si el productor del evento publica resultados oficiales
-}
-</file>
-
-<file path="src/main/java/com/varcal/cheermanager/DTO/Eventos/EventoResponseDTO.java">
-package com.varcal.cheermanager.DTO.Eventos;
-
-import java.time.LocalDate;
-
-import lombok.Data;
-
-@Data
-public class EventoResponseDTO {
-    private Integer id;
-    private String nombre;
-    private LocalDate fecha;
-    private Integer tipoEventoId;
-    private String tipoEvento;
-    private String ubicacion;
-    private Boolean tieneResultados;
-    private Integer cantidadGruposInscritos;
-    private Integer cantidadPremios;
-}
-</file>
-
-<file path="src/main/java/com/varcal/cheermanager/DTO/Eventos/GrupoEventoDTO.java">
-package com.varcal.cheermanager.DTO.Eventos;
-
-import lombok.Data;
-
-@Data
-public class GrupoEventoDTO {
-    private Integer grupoEntrenamientoId;
-    private Integer eventoId;
-}
-</file>
-
-<file path="src/main/java/com/varcal/cheermanager/DTO/Eventos/GrupoEventoResponseDTO.java">
-package com.varcal.cheermanager.DTO.Eventos;
-
-import java.time.LocalDate;
-
-import lombok.Data;
-
-@Data
-public class GrupoEventoResponseDTO {
-    private Integer id;
-    private Integer grupoEntrenamientoId;
-    private String nombreGrupo;
-    private Integer eventoId;
-    private String nombreEvento;
-    private LocalDate fechaEvento;
-}
-</file>
-
-<file path="src/main/java/com/varcal/cheermanager/DTO/Eventos/PremioEventoDTO.java">
-package com.varcal.cheermanager.DTO.Eventos;
-
-import lombok.Data;
-
-@Data
-public class PremioEventoDTO {
-    private Integer eventoId;
-    private String descripcion; // ej. "1er lugar Nivel 3 Youth"
-    private String premio;      // ej. "Trofeo + beca 20% próxima temporada"
-}
-</file>
-
-<file path="src/main/java/com/varcal/cheermanager/DTO/Eventos/PremioEventoResponseDTO.java">
-package com.varcal.cheermanager.DTO.Eventos;
-
-import lombok.Data;
-
-@Data
-public class PremioEventoResponseDTO {
-    private Integer id;
-    private Integer eventoId;
-    private String nombreEvento;
+    private String codigo; // 3 letras, ej. ROP, CAL, DIG
     private String descripcion;
-    private String premio;
 }
 </file>
 
-<file path="src/main/java/com/varcal/cheermanager/DTO/Eventos/ResultadoCompetenciaDTO.java">
-package com.varcal.cheermanager.DTO.Eventos;
-
-import java.math.BigDecimal;
+<file path="src/main/java/com/varcal/cheermanager/DTO/Inventario/MovimientoInventarioDTO.java">
+package com.varcal.cheermanager.DTO.Inventario;
 
 import lombok.Data;
 
 @Data
-public class ResultadoCompetenciaDTO {
-    private Integer eventoId;
-    private Integer grupoEntrenamientoId;
-    private Integer posicion;
-    private BigDecimal puntaje;
-    private Integer premioId;           // opcional
-    private Integer evaluacionRutinaId; // opcional, si el evento se evaluó dentro del sistema
-    private String observaciones;
+public class MovimientoInventarioDTO {
+    private Integer productoVarianteId;
+    private String tipo; // entrada, salida, ajuste
+    private Integer cantidad;
+    private String motivo;
+
+    // TODO: hoy no encontré en el proyecto un mecanismo para resolver el
+    // usuario autenticado dentro de un Service (no hay uso de
+    // SecurityContextHolder ni @AuthenticationPrincipal en el resto del
+    // código) — se recibe explícito desde el controller mientras tanto.
+    // Cuando exista ese mecanismo, quitar este campo y tomarlo del contexto.
+    private Integer usuarioId;
 }
 </file>
 
-<file path="src/main/java/com/varcal/cheermanager/DTO/Eventos/ResultadoCompetenciaResponseDTO.java">
-package com.varcal.cheermanager.DTO.Eventos;
+<file path="src/main/java/com/varcal/cheermanager/DTO/Inventario/MovimientoInventarioResponseDTO.java">
+package com.varcal.cheermanager.DTO.Inventario;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import lombok.Data;
 
 @Data
-public class ResultadoCompetenciaResponseDTO {
+public class MovimientoInventarioResponseDTO {
     private Integer id;
-    private Integer eventoId;
-    private String nombreEvento;
-    private LocalDate fechaEvento;
-    private Integer grupoEntrenamientoId;
-    private String nombreGrupo;
-    private Integer posicion;
-    private BigDecimal puntaje;
-    private Integer premioId;
-    private String descripcionPremio;
-    private Integer evaluacionRutinaId;
-    private String observaciones;
+    private Integer productoVarianteId;
+    private String skuVariante;
+    private String nombreProducto;
+    private String tipo;
+    private Integer cantidad;
+    private String motivo;
+    private LocalDateTime fecha;
+    private String usuario;
 }
 </file>
 
-<file path="src/main/java/com/varcal/cheermanager/DTO/Eventos/TipoEventoDTO.java">
-package com.varcal.cheermanager.DTO.Eventos;
+<file path="src/main/java/com/varcal/cheermanager/DTO/Inventario/ProductoDTO.java">
+package com.varcal.cheermanager.DTO.Inventario;
+
+import java.math.BigDecimal;
 
 import lombok.Data;
 
 @Data
-public class TipoEventoDTO {
-    private String evento; // nombre del tipo, ej. "Competencia federada", "Simulacro", "Clínica"
+public class ProductoDTO {
+    // "codigo" es solo el segmento COD (3 letras del artículo, ej. CAE) —
+    // el prefijo RAT y la categoría se arman en el service a partir de la
+    // categoría seleccionada, para no depender de que el usuario escriba el
+    // SKU completo a mano y se equivoque de formato.
+    private String codigo;
+    private String nombre;
+    private String descripcion;
+    private Integer categoriaProductoId;
+    private BigDecimal precioMinReferencia;
+    private BigDecimal precioMaxReferencia;
+    private String origen;
+    private String notasProveedor;
+    private Boolean requiereControlStock;
 }
 </file>
 
-<file path="src/main/java/com/varcal/cheermanager/repository/Eventos/EventoRepository.java">
-package com.varcal.cheermanager.repository.Eventos;
+<file path="src/main/java/com/varcal/cheermanager/DTO/Inventario/ProductoResponseDTO.java">
+package com.varcal.cheermanager.DTO.Inventario;
 
+import java.math.BigDecimal;
+import java.util.List;
+
+import lombok.Data;
+
+@Data
+public class ProductoResponseDTO {
+    private Integer id;
+    private String sku;
+    private String nombre;
+    private String descripcion;
+    private Integer categoriaProductoId;
+    private String categoriaNombre;
+    private BigDecimal precioMinReferencia;
+    private BigDecimal precioMaxReferencia;
+    private String origen;
+    private String notasProveedor;
+    private Boolean requiereControlStock;
+    private Boolean activo;
+    private Integer stockTotal; // suma de stock de todas sus variantes (null si no controla stock)
+    private List<ProductoVarianteResponseDTO> variantes;
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/DTO/Inventario/ProductoVarianteDTO.java">
+package com.varcal.cheermanager.DTO.Inventario;
+
+import java.math.BigDecimal;
+
+import lombok.Data;
+
+@Data
+public class ProductoVarianteDTO {
+    private Integer productoId;
+    private String talla;   // nullable
+    private String color;   // nullable — para DIG se usa como "tier" (Básico/Competencia/Elite)
+    private BigDecimal precioVenta;
+    private Integer stockInicial; // se ignora si producto.requiereControlStock = false
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/DTO/Inventario/ProductoVarianteResponseDTO.java">
+package com.varcal.cheermanager.DTO.Inventario;
+
+import java.math.BigDecimal;
+
+import lombok.Data;
+
+@Data
+public class ProductoVarianteResponseDTO {
+    private Integer id;
+    private Integer productoId;
+    private String nombreProducto;
+    private String talla;
+    private String color;
+    private String skuVariante;
+    private BigDecimal precioVenta;
+    private Integer stockActual; // null si el producto no controla stock
+    private Boolean activo;
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/DTO/Inventario/VentaDTO.java">
+package com.varcal.cheermanager.DTO.Inventario;
+
+import java.util.List;
+
+import lombok.Data;
+
+@Data
+public class VentaDTO {
+    // Exactamente uno de los dos: personaId (comprador del club) o
+    // nombreCompradorExterno (comprador externo). El service rechaza si
+    // vienen ambos o ninguno.
+    private Integer personaId;
+    private String nombreCompradorExterno;
+    private String contactoCompradorExterno;
+
+    private String metodoPago;
+    private Integer facturaId; // opcional, solo si se carga a la cuenta del deportista
+    private Integer usuarioId; // quien registra la venta — ver nota en MovimientoInventarioDTO
+
+    private List<ItemVentaDTO> items;
+
+    @Data
+    public static class ItemVentaDTO {
+        private Integer productoVarianteId;
+        private Integer cantidad;
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/DTO/Inventario/VentaResponseDTO.java">
+package com.varcal.cheermanager.DTO.Inventario;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import lombok.Data;
 
-import com.varcal.cheermanager.Models.Eventos.Evento;
+@Data
+public class VentaResponseDTO {
+    private Integer id;
+    private LocalDate fecha;
+    private BigDecimal total;
+    private String metodoPago;
+    private Integer personaId;
+    private String nombreComprador; // nombre de la Persona, o el externo si aplica
+    private Integer facturaId;
+    private List<DetalleVentaResponseDTO> detalles;
 
-public interface EventoRepository extends JpaRepository<Evento, Integer> {
-
-    // Calendario: próximos eventos desde hoy en adelante, ordenados.
-    List<Evento> findByFechaGreaterThanEqualOrderByFechaAsc(LocalDate desde);
-
-    // Historial: eventos ya pasados, más recientes primero.
-    List<Evento> findByFechaLessThanOrderByFechaDesc(LocalDate hasta);
-
-    List<Evento> findByTipoEventoIdOrderByFechaDesc(Integer tipoEventoId);
-
-    List<Evento> findByFechaBetweenOrderByFechaAsc(LocalDate desde, LocalDate hasta);
+    @Data
+    public static class DetalleVentaResponseDTO {
+        private Integer productoVarianteId;
+        private String skuVariante;
+        private String nombreProducto;
+        private String talla;
+        private String color;
+        private Integer cantidad;
+        private BigDecimal precioUnitario;
+        private BigDecimal subtotal;
+    }
 }
 </file>
 
-<file path="src/main/java/com/varcal/cheermanager/repository/Eventos/GrupoEventoRepository.java">
-package com.varcal.cheermanager.repository.Eventos;
+<file path="src/main/java/com/varcal/cheermanager/repository/Inventario/CategoriaProductoRepository.java">
+package com.varcal.cheermanager.repository.Inventario;
+
+import java.util.Optional;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.varcal.cheermanager.Models.Inventario.CategoriaProducto;
+
+public interface CategoriaProductoRepository extends JpaRepository<CategoriaProducto, Integer> {
+    Optional<CategoriaProducto> findByCodigo(String codigo);
+    Optional<CategoriaProducto> findByNombre(String nombre);
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/repository/Inventario/MovimientoInventarioRepository.java">
+package com.varcal.cheermanager.repository.Inventario;
 
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.varcal.cheermanager.Models.Eventos.GrupoEvento;
+import com.varcal.cheermanager.Models.Inventario.MovimientoInventario;
 
-public interface GrupoEventoRepository extends JpaRepository<GrupoEvento, Integer> {
-
-    List<GrupoEvento> findByEventoId(Integer eventoId);
-
-    // Historial de competencias de un grupo, para armar su línea de tiempo.
-    List<GrupoEvento> findByGrupoEntrenamientoId(Integer grupoEntrenamientoId);
-
-    boolean existsByEventoIdAndGrupoEntrenamientoId(Integer eventoId, Integer grupoEntrenamientoId);
+public interface MovimientoInventarioRepository extends JpaRepository<MovimientoInventario, Integer> {
+    List<MovimientoInventario> findByProductoVarianteIdOrderByFechaDesc(Integer productoVarianteId);
 }
 </file>
 
-<file path="src/main/java/com/varcal/cheermanager/repository/Eventos/PremioEventoRepository.java">
-package com.varcal.cheermanager.repository.Eventos;
+<file path="src/main/java/com/varcal/cheermanager/repository/Inventario/ProductoRepository.java">
+package com.varcal.cheermanager.repository.Inventario;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.varcal.cheermanager.Models.Eventos.PremioEvento;
+import com.varcal.cheermanager.Models.Inventario.Producto;
 
-public interface PremioEventoRepository extends JpaRepository<PremioEvento, Integer> {
-    List<PremioEvento> findByEventoId(Integer eventoId);
+public interface ProductoRepository extends JpaRepository<Producto, Integer> {
+    Optional<Producto> findBySku(String sku);
+    List<Producto> findByCategoriaProductoId(Integer categoriaId);
+    List<Producto> findByActivoTrue();
+    List<Producto> findByRequiereControlStockTrue();
+    boolean existsBySku(String sku);
 }
 </file>
 
-<file path="src/main/java/com/varcal/cheermanager/repository/Eventos/ResultadoCompetenciaRepository.java">
-package com.varcal.cheermanager.repository.Eventos;
+<file path="src/main/java/com/varcal/cheermanager/repository/Inventario/ProductoVarianteRepository.java">
+package com.varcal.cheermanager.repository.Inventario;
 
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
-import com.varcal.cheermanager.Models.Eventos.ResultadoCompetencia;
+import com.varcal.cheermanager.Models.Inventario.ProductoVariante;
 
-public interface ResultadoCompetenciaRepository extends JpaRepository<ResultadoCompetencia, Integer> {
+public interface ProductoVarianteRepository extends JpaRepository<ProductoVariante, Integer> {
+    List<ProductoVariante> findByProductoId(Integer productoId);
+    Optional<ProductoVariante> findBySkuVariante(String skuVariante);
+    boolean existsBySkuVariante(String skuVariante);
 
-    List<ResultadoCompetencia> findByEventoIdOrderByPosicionAsc(Integer eventoId);
-
-    // Línea de tiempo de un grupo evento-a-evento, más antiguo primero — es
-    // la fuente para el KPI de "progresión de puntaje" que se propuso.
-    @Query("SELECT r FROM ResultadoCompetencia r WHERE r.grupoEntrenamiento.id = :grupoId " +
-           "ORDER BY r.evento.fecha ASC")
-    List<ResultadoCompetencia> findProgresionPorGrupo(@Param("grupoId") Integer grupoId);
-
-    Optional<ResultadoCompetencia> findByEventoIdAndGrupoEntrenamientoId(Integer eventoId, Integer grupoEntrenamientoId);
-
-    boolean existsByPremioId(Integer premioId);
-
-    List<ResultadoCompetencia> findByGrupoEntrenamientoId(Integer grupoEntrenamientoId);
+    // Stock bajo: solo tiene sentido para variantes de productos que sí
+    // controlan stock (las de DIG tienen stockActual null y quedan afuera
+    // automáticamente por la comparación numérica).
+    @Query("SELECT v FROM ProductoVariante v WHERE v.producto.requiereControlStock = true " +
+           "AND v.stockActual IS NOT NULL AND v.stockActual <= :umbral AND v.activo = true")
+    List<ProductoVariante> findConStockBajo(int umbral);
 }
 </file>
 
-<file path="src/main/java/com/varcal/cheermanager/repository/Eventos/TipoEventoRepository.java">
-package com.varcal.cheermanager.repository.Eventos;
+<file path="src/main/java/com/varcal/cheermanager/repository/Inventario/VentaRepository.java">
+package com.varcal.cheermanager.repository.Inventario;
 
-import java.util.Optional;
+import java.time.LocalDate;
+import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.varcal.cheermanager.Models.Eventos.TipoEvento;
+import com.varcal.cheermanager.Models.Inventario.Venta;
 
-public interface TipoEventoRepository extends JpaRepository<TipoEvento, Integer> {
-    Optional<TipoEvento> findByEvento(String evento);
+public interface VentaRepository extends JpaRepository<Venta, Integer> {
+    List<Venta> findByFechaBetweenOrderByFechaDesc(LocalDate desde, LocalDate hasta);
+    List<Venta> findByPersonaIdOrderByFechaDesc(Integer personaId);
 }
 </file>
 
-<file path="src/main/java/com/varcal/cheermanager/Service/Eventos/EventoService.java">
-package com.varcal.cheermanager.Service.Eventos;
+<file path="src/main/java/com/varcal/cheermanager/Service/Inventario/CategoriaProductoService.java">
+package com.varcal.cheermanager.Service.Inventario;
 
-import java.time.LocalDate;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.varcal.cheermanager.DTO.Inventario.CategoriaProductoDTO;
+import com.varcal.cheermanager.Models.Inventario.CategoriaProducto;
+import com.varcal.cheermanager.repository.Inventario.CategoriaProductoRepository;
+
+@Service
+public class CategoriaProductoService {
+
+    @Autowired
+    private CategoriaProductoRepository categoriaProductoRepository;
+
+    public List<CategoriaProducto> listarTodas() {
+        return categoriaProductoRepository.findAll();
+    }
+
+    public CategoriaProducto obtenerPorId(Integer id) {
+        return categoriaProductoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Categoría de producto no encontrada con ID: " + id));
+    }
+
+    public CategoriaProducto crear(CategoriaProductoDTO dto) {
+        String codigo = validarCodigo(dto.getCodigo());
+
+        categoriaProductoRepository.findByCodigo(codigo).ifPresent(c -> {
+            throw new RuntimeException("Ya existe una categoría con el código '" + codigo + "'");
+        });
+        categoriaProductoRepository.findByNombre(dto.getNombre()).ifPresent(c -> {
+            throw new RuntimeException("Ya existe una categoría llamada '" + dto.getNombre() + "'");
+        });
+
+        CategoriaProducto categoria = new CategoriaProducto();
+        categoria.setNombre(dto.getNombre());
+        categoria.setCodigo(codigo);
+        categoria.setDescripcion(dto.getDescripcion());
+        return categoriaProductoRepository.save(categoria);
+    }
+
+    public CategoriaProducto actualizar(Integer id, CategoriaProductoDTO dto) {
+        CategoriaProducto categoria = obtenerPorId(id);
+        String codigo = validarCodigo(dto.getCodigo());
+
+        categoriaProductoRepository.findByCodigo(codigo)
+                .filter(c -> !c.getId().equals(id))
+                .ifPresent(c -> { throw new RuntimeException("Ya existe otra categoría con el código '" + codigo + "'"); });
+
+        categoria.setNombre(dto.getNombre());
+        categoria.setCodigo(codigo);
+        categoria.setDescripcion(dto.getDescripcion());
+        return categoriaProductoRepository.save(categoria);
+    }
+
+    public void eliminar(Integer id) {
+        if (!categoriaProductoRepository.existsById(id)) {
+            throw new RuntimeException("Categoría de producto no encontrada con ID: " + id);
+        }
+        categoriaProductoRepository.deleteById(id);
+    }
+
+    // El formato del SKU (RAT-[CAT]-...) exige exactamente 3 letras
+    // mayúsculas para el segmento de categoría — se normaliza y valida acá,
+    // en el único lugar donde se crean/editan categorías.
+    private String validarCodigo(String codigo) {
+        if (codigo == null || !codigo.matches("[A-Za-z]{3}")) {
+            throw new RuntimeException("El código de categoría debe tener exactamente 3 letras (ej. ROP, CAL, DIG)");
+        }
+        return codigo.toUpperCase();
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Service/Inventario/MovimientoInventarioService.java">
+package com.varcal.cheermanager.Service.Inventario;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -685,198 +1064,109 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.varcal.cheermanager.DTO.Eventos.EventoDTO;
-import com.varcal.cheermanager.DTO.Eventos.EventoResponseDTO;
-import com.varcal.cheermanager.Models.Eventos.Evento;
-import com.varcal.cheermanager.Models.Eventos.TipoEvento;
-import com.varcal.cheermanager.repository.Eventos.EventoRepository;
-import com.varcal.cheermanager.repository.Eventos.GrupoEventoRepository;
-import com.varcal.cheermanager.repository.Eventos.PremioEventoRepository;
-import com.varcal.cheermanager.repository.Eventos.ResultadoCompetenciaRepository;
-import com.varcal.cheermanager.repository.Eventos.TipoEventoRepository;
+import com.varcal.cheermanager.DTO.Inventario.MovimientoInventarioDTO;
+import com.varcal.cheermanager.DTO.Inventario.MovimientoInventarioResponseDTO;
+import com.varcal.cheermanager.Models.Auth.Usuario;
+import com.varcal.cheermanager.Models.Inventario.MovimientoInventario;
+import com.varcal.cheermanager.Models.Inventario.MovimientoInventario.TipoMovimiento;
+import com.varcal.cheermanager.Models.Inventario.ProductoVariante;
+import com.varcal.cheermanager.repository.Auth.UserRepository;
+import com.varcal.cheermanager.repository.Inventario.MovimientoInventarioRepository;
+import com.varcal.cheermanager.repository.Inventario.ProductoVarianteRepository;
 
 @Service
-public class EventoService {
+public class MovimientoInventarioService {
 
     @Autowired
-    private EventoRepository eventoRepository;
+    private MovimientoInventarioRepository movimientoInventarioRepository;
 
     @Autowired
-    private TipoEventoRepository tipoEventoRepository;
+    private ProductoVarianteRepository productoVarianteRepository;
 
     @Autowired
-    private GrupoEventoRepository grupoEventoRepository;
+    private UserRepository userRepository;
 
-    @Autowired
-    private PremioEventoRepository premioEventoRepository;
-
-    @Autowired
-    private ResultadoCompetenciaRepository resultadoCompetenciaRepository;
-
-    public List<EventoResponseDTO> listarTodos() {
-        return eventoRepository.findAll().stream().map(this::toResponseDTO).collect(Collectors.toList());
-    }
-
-    public EventoResponseDTO obtenerPorId(Integer id) {
-        return toResponseDTO(buscarOFallar(id));
-    }
-
-    // Calendario: próximos eventos, para mostrar en un dashboard o notificar
-    // a entrenadores/deportistas de lo que se viene.
-    public List<EventoResponseDTO> proximos() {
-        return eventoRepository.findByFechaGreaterThanEqualOrderByFechaAsc(LocalDate.now()).stream()
-                .map(this::toResponseDTO).collect(Collectors.toList());
-    }
-
-    public List<EventoResponseDTO> historial() {
-        return eventoRepository.findByFechaLessThanOrderByFechaDesc(LocalDate.now()).stream()
-                .map(this::toResponseDTO).collect(Collectors.toList());
-    }
-
-    public Evento crear(EventoDTO dto) {
-        Evento evento = new Evento();
-        aplicarDatos(evento, dto);
-        return eventoRepository.save(evento);
-    }
-
-    public Evento actualizar(Integer id, EventoDTO dto) {
-        Evento evento = buscarOFallar(id);
-        aplicarDatos(evento, dto);
-        return eventoRepository.save(evento);
-    }
-
-    // Se protege contra el borrado accidental de un evento que ya tiene
-    // resultados oficiales registrados — perder esa trazabilidad afecta el
-    // historial competitivo del club, no es un simple registro de calendario.
+    // Único método del sistema que debe modificar ProductoVariante.stockActual
+    // — cualquier ajuste de stock (venta, compra, conteo físico) pasa por
+    // acá, para que MovimientoInventario sea siempre el registro fiel de por
+    // qué cambió cada unidad.
     @Transactional
-    public void eliminar(Integer id) {
-        Evento evento = buscarOFallar(id);
-        boolean tieneResultados = !resultadoCompetenciaRepository.findByEventoIdOrderByPosicionAsc(id).isEmpty();
-        if (tieneResultados) {
+    public MovimientoInventario registrar(MovimientoInventarioDTO dto) {
+        ProductoVariante variante = productoVarianteRepository.findById(dto.getProductoVarianteId())
+                .orElseThrow(() -> new RuntimeException("Variante no encontrada con ID: " + dto.getProductoVarianteId()));
+
+        if (!Boolean.TRUE.equals(variante.getProducto().getRequiereControlStock())) {
             throw new RuntimeException(
-                    "No se puede eliminar el evento '" + evento.getNombre() +
-                    "': ya tiene resultados de competencia registrados. Elimínalos primero si de verdad quieres borrar el evento.");
-        }
-        eventoRepository.delete(evento);
-    }
-
-    private void aplicarDatos(Evento evento, EventoDTO dto) {
-        evento.setNombre(dto.getNombre());
-        evento.setFecha(dto.getFecha());
-        evento.setUbicacion(dto.getUbicacion());
-        evento.setTieneResultados(dto.getTieneResultados() != null ? dto.getTieneResultados() : Boolean.FALSE);
-
-        if (dto.getTipoEventoId() != null) {
-            TipoEvento tipo = tipoEventoRepository.findById(dto.getTipoEventoId())
-                    .orElseThrow(() -> new RuntimeException("Tipo de evento no encontrado con ID: " + dto.getTipoEventoId()));
-            evento.setTipoEvento(tipo);
-        } else {
-            evento.setTipoEvento(null);
-        }
-    }
-
-    private Evento buscarOFallar(Integer id) {
-        return eventoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Evento no encontrado con ID: " + id));
-    }
-
-    private EventoResponseDTO toResponseDTO(Evento e) {
-        EventoResponseDTO dto = new EventoResponseDTO();
-        dto.setId(e.getId());
-        dto.setNombre(e.getNombre());
-        dto.setFecha(e.getFecha());
-        dto.setTipoEventoId(e.getTipoEvento() != null ? e.getTipoEvento().getId() : null);
-        dto.setTipoEvento(e.getTipoEvento() != null ? e.getTipoEvento().getEvento() : null);
-        dto.setUbicacion(e.getUbicacion());
-        dto.setTieneResultados(e.getTieneResultados());
-        dto.setCantidadGruposInscritos(grupoEventoRepository.findByEventoId(e.getId()).size());
-        dto.setCantidadPremios(premioEventoRepository.findByEventoId(e.getId()).size());
-        return dto;
-    }
-}
-</file>
-
-<file path="src/main/java/com/varcal/cheermanager/Service/Eventos/GrupoEventoService.java">
-package com.varcal.cheermanager.Service.Eventos;
-
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.varcal.cheermanager.DTO.Eventos.GrupoEventoDTO;
-import com.varcal.cheermanager.DTO.Eventos.GrupoEventoResponseDTO;
-import com.varcal.cheermanager.Models.Eventos.Evento;
-import com.varcal.cheermanager.Models.Eventos.GrupoEvento;
-import com.varcal.cheermanager.Models.Org_dep.GrupoEntrenamiento;
-import com.varcal.cheermanager.repository.Eventos.EventoRepository;
-import com.varcal.cheermanager.repository.Eventos.GrupoEventoRepository;
-import com.varcal.cheermanager.repository.Org_dep.GrupoEntrenamientoRepository;
-
-@Service
-public class GrupoEventoService {
-
-    @Autowired
-    private GrupoEventoRepository grupoEventoRepository;
-
-    @Autowired
-    private EventoRepository eventoRepository;
-
-    @Autowired
-    private GrupoEntrenamientoRepository grupoEntrenamientoRepository;
-
-    public GrupoEvento inscribir(GrupoEventoDTO dto) {
-        Evento evento = eventoRepository.findById(dto.getEventoId())
-                .orElseThrow(() -> new RuntimeException("Evento no encontrado con ID: " + dto.getEventoId()));
-
-        GrupoEntrenamiento grupo = grupoEntrenamientoRepository.findById(dto.getGrupoEntrenamientoId())
-                .orElseThrow(() -> new RuntimeException("Grupo no encontrado con ID: " + dto.getGrupoEntrenamientoId()));
-
-        if (grupoEventoRepository.existsByEventoIdAndGrupoEntrenamientoId(evento.getId(), grupo.getId())) {
-            throw new RuntimeException(
-                    "El grupo '" + grupo.getNombre() + "' ya está inscrito en el evento '" + evento.getNombre() + "'");
+                    "'" + variante.getProducto().getNombre() + "' es un artículo digital y no controla stock");
         }
 
-        GrupoEvento ge = new GrupoEvento();
-        ge.setEvento(evento);
-        ge.setGrupoEntrenamiento(grupo);
-        return grupoEventoRepository.save(ge);
+        if (dto.getCantidad() == null || dto.getCantidad() <= 0) {
+            throw new RuntimeException("La cantidad del movimiento debe ser mayor a cero");
+        }
+
+        TipoMovimiento tipo;
+        try {
+            tipo = TipoMovimiento.valueOf(dto.getTipo());
+        } catch (Exception e) {
+            throw new RuntimeException("Tipo de movimiento inválido. Debe ser: entrada, salida o ajuste");
+        }
+
+        Usuario usuario = userRepository.findById(dto.getUsuarioId())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + dto.getUsuarioId()));
+
+        int stockActual = variante.getStockActual() != null ? variante.getStockActual() : 0;
+        int nuevoStock;
+        switch (tipo) {
+            case entrada -> nuevoStock = stockActual + dto.getCantidad();
+            case salida -> {
+                nuevoStock = stockActual - dto.getCantidad();
+                if (nuevoStock < 0) {
+                    throw new RuntimeException(
+                            "Stock insuficiente: quedan " + stockActual + " unidades de '" + variante.getSkuVariante() + "'");
+                }
+            }
+            // "ajuste" fija el stock al valor exacto informado en `cantidad`
+            // (para cuadrar tras un conteo físico), en vez de sumar/restar.
+            case ajuste -> nuevoStock = dto.getCantidad();
+            default -> throw new RuntimeException("Tipo de movimiento inválido");
+        }
+
+        variante.setStockActual(nuevoStock);
+        productoVarianteRepository.save(variante);
+
+        MovimientoInventario movimiento = new MovimientoInventario();
+        movimiento.setProductoVariante(variante);
+        movimiento.setTipo(tipo);
+        movimiento.setCantidad(dto.getCantidad());
+        movimiento.setMotivo(dto.getMotivo());
+        movimiento.setFecha(LocalDateTime.now());
+        movimiento.setUsuario(usuario);
+        return movimientoInventarioRepository.save(movimiento);
     }
 
-    public List<GrupoEventoResponseDTO> listarPorEvento(Integer eventoId) {
-        return grupoEventoRepository.findByEventoId(eventoId).stream().map(this::toDTO).collect(Collectors.toList());
-    }
-
-    // Historial de competencias en las que ha participado un grupo — la base
-    // para la línea de tiempo/progresión de un equipo.
-    public List<GrupoEventoResponseDTO> listarPorGrupo(Integer grupoEntrenamientoId) {
-        return grupoEventoRepository.findByGrupoEntrenamientoId(grupoEntrenamientoId).stream()
+    public List<MovimientoInventarioResponseDTO> listarPorVariante(Integer productoVarianteId) {
+        return movimientoInventarioRepository.findByProductoVarianteIdOrderByFechaDesc(productoVarianteId).stream()
                 .map(this::toDTO).collect(Collectors.toList());
     }
 
-    public void desinscribir(Integer id) {
-        if (!grupoEventoRepository.existsById(id)) {
-            throw new RuntimeException("Inscripción de grupo a evento no encontrada con ID: " + id);
-        }
-        grupoEventoRepository.deleteById(id);
-    }
-
-    private GrupoEventoResponseDTO toDTO(GrupoEvento ge) {
-        GrupoEventoResponseDTO dto = new GrupoEventoResponseDTO();
-        dto.setId(ge.getId());
-        dto.setGrupoEntrenamientoId(ge.getGrupoEntrenamiento().getId());
-        dto.setNombreGrupo(ge.getGrupoEntrenamiento().getNombre());
-        dto.setEventoId(ge.getEvento().getId());
-        dto.setNombreEvento(ge.getEvento().getNombre());
-        dto.setFechaEvento(ge.getEvento().getFecha());
+    private MovimientoInventarioResponseDTO toDTO(MovimientoInventario m) {
+        MovimientoInventarioResponseDTO dto = new MovimientoInventarioResponseDTO();
+        dto.setId(m.getId());
+        dto.setProductoVarianteId(m.getProductoVariante().getId());
+        dto.setSkuVariante(m.getProductoVariante().getSkuVariante());
+        dto.setNombreProducto(m.getProductoVariante().getProducto().getNombre());
+        dto.setTipo(m.getTipo().name());
+        dto.setCantidad(m.getCantidad());
+        dto.setMotivo(m.getMotivo());
+        dto.setFecha(m.getFecha());
+        dto.setUsuario(m.getUsuario().getUsername());
         return dto;
     }
 }
 </file>
 
-<file path="src/main/java/com/varcal/cheermanager/Service/Eventos/PremioEventoService.java">
-package com.varcal.cheermanager.Service.Eventos;
+<file path="src/main/java/com/varcal/cheermanager/Service/Inventario/ProductoService.java">
+package com.varcal.cheermanager.Service.Inventario;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -884,74 +1174,146 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.varcal.cheermanager.DTO.Eventos.PremioEventoDTO;
-import com.varcal.cheermanager.DTO.Eventos.PremioEventoResponseDTO;
-import com.varcal.cheermanager.Models.Eventos.Evento;
-import com.varcal.cheermanager.Models.Eventos.PremioEvento;
-import com.varcal.cheermanager.repository.Eventos.EventoRepository;
-import com.varcal.cheermanager.repository.Eventos.PremioEventoRepository;
+import com.varcal.cheermanager.DTO.Inventario.ProductoDTO;
+import com.varcal.cheermanager.DTO.Inventario.ProductoResponseDTO;
+import com.varcal.cheermanager.DTO.Inventario.ProductoVarianteResponseDTO;
+import com.varcal.cheermanager.Models.Inventario.CategoriaProducto;
+import com.varcal.cheermanager.Models.Inventario.Producto;
+import com.varcal.cheermanager.Models.Inventario.ProductoVariante;
+import com.varcal.cheermanager.repository.Inventario.CategoriaProductoRepository;
+import com.varcal.cheermanager.repository.Inventario.ProductoRepository;
 
 @Service
-public class PremioEventoService {
+public class ProductoService {
 
     @Autowired
-    private PremioEventoRepository premioEventoRepository;
+    private ProductoRepository productoRepository;
 
     @Autowired
-    private EventoRepository eventoRepository;
+    private CategoriaProductoRepository categoriaProductoRepository;
 
-    public PremioEventoResponseDTO crear(PremioEventoDTO dto) {
-        Evento evento = eventoRepository.findById(dto.getEventoId())
-                .orElseThrow(() -> new RuntimeException("Evento no encontrado con ID: " + dto.getEventoId()));
-
-        PremioEvento premio = new PremioEvento();
-        premio.setEvento(evento);
-        premio.setDescripcion(dto.getDescripcion());
-        premio.setPremio(dto.getPremio());
-
-        return toDTO(premioEventoRepository.save(premio));
+    public List<ProductoResponseDTO> listarTodos() {
+        return productoRepository.findAll().stream().map(this::toResponseDTO).collect(Collectors.toList());
     }
 
-    public List<PremioEventoResponseDTO> listarPorEvento(Integer eventoId) {
-        if (!eventoRepository.existsById(eventoId)) {
-            throw new RuntimeException("Evento no encontrado con ID: " + eventoId);
+    public List<ProductoResponseDTO> listarActivos() {
+        return productoRepository.findByActivoTrue().stream().map(this::toResponseDTO).collect(Collectors.toList());
+    }
+
+    public ProductoResponseDTO obtenerPorId(Integer id) {
+        return toResponseDTO(buscarOFallar(id));
+    }
+
+    public Producto crear(ProductoDTO dto) {
+        CategoriaProducto categoria = categoriaProductoRepository.findById(dto.getCategoriaProductoId())
+                .orElseThrow(() -> new RuntimeException("Categoría no encontrada con ID: " + dto.getCategoriaProductoId()));
+
+        String codigoArticulo = validarCodigoArticulo(dto.getCodigo());
+        String sku = "RAT-" + categoria.getCodigo() + "-" + codigoArticulo;
+
+        if (productoRepository.existsBySku(sku)) {
+            throw new RuntimeException("Ya existe un producto con el SKU '" + sku + "'");
         }
-        return premioEventoRepository.findByEventoId(eventoId).stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
+
+        Producto producto = new Producto();
+        producto.setSku(sku);
+        aplicarDatos(producto, dto, categoria);
+        return productoRepository.save(producto);
     }
 
-    public PremioEventoResponseDTO actualizar(Integer id, PremioEventoDTO dto) {
-        PremioEvento premio = premioEventoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Premio no encontrado con ID: " + id));
+    public Producto actualizar(Integer id, ProductoDTO dto) {
+        Producto producto = buscarOFallar(id);
+        CategoriaProducto categoria = categoriaProductoRepository.findById(dto.getCategoriaProductoId())
+                .orElseThrow(() -> new RuntimeException("Categoría no encontrada con ID: " + dto.getCategoriaProductoId()));
 
-        premio.setDescripcion(dto.getDescripcion());
-        premio.setPremio(dto.getPremio());
-
-        return toDTO(premioEventoRepository.save(premio));
+        // El SKU no se regenera al editar, aunque cambie de categoría — es un
+        // identificador estable una vez creado (evita romper etiquetas ya
+        // impresas o referencias en ventas históricas).
+        aplicarDatos(producto, dto, categoria);
+        return productoRepository.save(producto);
     }
 
+    public void desactivar(Integer id) {
+        Producto producto = buscarOFallar(id);
+        producto.setActivo(false);
+        productoRepository.save(producto);
+    }
+
+    // No se hace DELETE físico: un producto con historial de ventas no puede
+    // desaparecer sin dejar huérfanas las ventas pasadas. Se desactiva.
     public void eliminar(Integer id) {
-        if (!premioEventoRepository.existsById(id)) {
-            throw new RuntimeException("Premio no encontrado con ID: " + id);
-        }
-        premioEventoRepository.deleteById(id);
+        desactivar(id);
     }
 
-    private PremioEventoResponseDTO toDTO(PremioEvento p) {
-        PremioEventoResponseDTO dto = new PremioEventoResponseDTO();
+    private void aplicarDatos(Producto producto, ProductoDTO dto, CategoriaProducto categoria) {
+        producto.setNombre(dto.getNombre());
+        producto.setDescripcion(dto.getDescripcion());
+        producto.setCategoriaProducto(categoria);
+        producto.setPrecioMinReferencia(dto.getPrecioMinReferencia());
+        producto.setPrecioMaxReferencia(dto.getPrecioMaxReferencia());
+        producto.setOrigen(dto.getOrigen());
+        producto.setNotasProveedor(dto.getNotasProveedor());
+        producto.setRequiereControlStock(dto.getRequiereControlStock() != null ? dto.getRequiereControlStock() : Boolean.TRUE);
+        producto.setActivo(true);
+    }
+
+    private String validarCodigoArticulo(String codigo) {
+        if (codigo == null || !codigo.matches("[A-Za-z]{3}")) {
+            throw new RuntimeException("El código de artículo debe tener exactamente 3 letras (ej. CAE, ZAP, MON)");
+        }
+        return codigo.toUpperCase();
+    }
+
+    private Producto buscarOFallar(Integer id) {
+        return productoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado con ID: " + id));
+    }
+
+    private ProductoResponseDTO toResponseDTO(Producto p) {
+        ProductoResponseDTO dto = new ProductoResponseDTO();
         dto.setId(p.getId());
-        dto.setEventoId(p.getEvento().getId());
-        dto.setNombreEvento(p.getEvento().getNombre());
+        dto.setSku(p.getSku());
+        dto.setNombre(p.getNombre());
         dto.setDescripcion(p.getDescripcion());
-        dto.setPremio(p.getPremio());
+        dto.setCategoriaProductoId(p.getCategoriaProducto().getId());
+        dto.setCategoriaNombre(p.getCategoriaProducto().getNombre());
+        dto.setPrecioMinReferencia(p.getPrecioMinReferencia());
+        dto.setPrecioMaxReferencia(p.getPrecioMaxReferencia());
+        dto.setOrigen(p.getOrigen());
+        dto.setNotasProveedor(p.getNotasProveedor());
+        dto.setRequiereControlStock(p.getRequiereControlStock());
+        dto.setActivo(p.getActivo());
+
+        List<ProductoVariante> variantes = p.getVariantes();
+        if (variantes != null) {
+            dto.setVariantes(variantes.stream().map(this::toVarianteDTO).collect(Collectors.toList()));
+            if (Boolean.TRUE.equals(p.getRequiereControlStock())) {
+                dto.setStockTotal(variantes.stream()
+                        .mapToInt(v -> v.getStockActual() != null ? v.getStockActual() : 0)
+                        .sum());
+            }
+        }
+        return dto;
+    }
+
+    private ProductoVarianteResponseDTO toVarianteDTO(ProductoVariante v) {
+        ProductoVarianteResponseDTO dto = new ProductoVarianteResponseDTO();
+        dto.setId(v.getId());
+        dto.setProductoId(v.getProducto().getId());
+        dto.setNombreProducto(v.getProducto().getNombre());
+        dto.setTalla(v.getTalla());
+        dto.setColor(v.getColor());
+        dto.setSkuVariante(v.getSkuVariante());
+        dto.setPrecioVenta(v.getPrecioVenta());
+        dto.setStockActual(v.getStockActual());
+        dto.setActivo(v.getActivo());
         return dto;
     }
 }
 </file>
 
-<file path="src/main/java/com/varcal/cheermanager/Service/Eventos/ResultadoCompetenciaService.java">
-package com.varcal.cheermanager.Service.Eventos;
+<file path="src/main/java/com/varcal/cheermanager/Service/Inventario/ProductoVarianteService.java">
+package com.varcal.cheermanager.Service.Inventario;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -959,196 +1321,273 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.varcal.cheermanager.DTO.Eventos.ResultadoCompetenciaDTO;
-import com.varcal.cheermanager.DTO.Eventos.ResultadoCompetenciaResponseDTO;
-import com.varcal.cheermanager.Models.Eventos.Evento;
-import com.varcal.cheermanager.Models.Eventos.PremioEvento;
-import com.varcal.cheermanager.Models.Eventos.ResultadoCompetencia;
-import com.varcal.cheermanager.Models.Evaluaciones.Rutina.EvaluacionRutina;
-import com.varcal.cheermanager.Models.Org_dep.GrupoEntrenamiento;
-import com.varcal.cheermanager.repository.Eventos.EventoRepository;
-import com.varcal.cheermanager.repository.Eventos.PremioEventoRepository;
-import com.varcal.cheermanager.repository.Eventos.ResultadoCompetenciaRepository;
-import com.varcal.cheermanager.repository.Evaluaciones.Rutina.EvaluacionRutinaRepository;
-import com.varcal.cheermanager.repository.Org_dep.GrupoEntrenamientoRepository;
+import com.varcal.cheermanager.DTO.Inventario.ProductoVarianteDTO;
+import com.varcal.cheermanager.DTO.Inventario.ProductoVarianteResponseDTO;
+import com.varcal.cheermanager.Models.Inventario.Producto;
+import com.varcal.cheermanager.Models.Inventario.ProductoVariante;
+import com.varcal.cheermanager.repository.Inventario.ProductoRepository;
+import com.varcal.cheermanager.repository.Inventario.ProductoVarianteRepository;
 
 @Service
-public class ResultadoCompetenciaService {
+public class ProductoVarianteService {
 
     @Autowired
-    private ResultadoCompetenciaRepository resultadoCompetenciaRepository;
+    private ProductoVarianteRepository productoVarianteRepository;
 
     @Autowired
-    private EventoRepository eventoRepository;
+    private ProductoRepository productoRepository;
 
-    @Autowired
-    private GrupoEntrenamientoRepository grupoEntrenamientoRepository;
-
-    @Autowired
-    private PremioEventoRepository premioEventoRepository;
-
-    @Autowired
-    private EvaluacionRutinaRepository evaluacionRutinaRepository;
-
-    public ResultadoCompetenciaResponseDTO registrar(ResultadoCompetenciaDTO dto) {
-        Evento evento = eventoRepository.findById(dto.getEventoId())
-                .orElseThrow(() -> new RuntimeException("Evento no encontrado con ID: " + dto.getEventoId()));
-
-        GrupoEntrenamiento grupo = null;
-        if (dto.getGrupoEntrenamientoId() != null) {
-            grupo = grupoEntrenamientoRepository.findById(dto.getGrupoEntrenamientoId())
-                    .orElseThrow(() -> new RuntimeException(
-                            "Grupo de entrenamiento no encontrado con ID: " + dto.getGrupoEntrenamientoId()));
-        }
-
-        PremioEvento premio = resolverPremio(dto.getPremioId(), evento);
-
-        EvaluacionRutina evaluacionRutina = null;
-        if (dto.getEvaluacionRutinaId() != null) {
-            evaluacionRutina = evaluacionRutinaRepository.findById(dto.getEvaluacionRutinaId())
-                    .orElseThrow(() -> new RuntimeException(
-                            "Evaluación de rutina no encontrada con ID: " + dto.getEvaluacionRutinaId()));
-        }
-
-        ResultadoCompetencia resultado = new ResultadoCompetencia();
-        resultado.setEvento(evento);
-        resultado.setGrupoEntrenamiento(grupo);
-        resultado.setPosicion(dto.getPosicion());
-        resultado.setPuntaje(dto.getPuntaje());
-        resultado.setPremio(premio);
-        resultado.setEvaluacionRutina(evaluacionRutina);
-        resultado.setObservaciones(dto.getObservaciones());
-
-        return toDTO(resultadoCompetenciaRepository.save(resultado));
+    public List<ProductoVarianteResponseDTO> listarPorProducto(Integer productoId) {
+        return productoVarianteRepository.findByProductoId(productoId).stream()
+                .map(this::toDTO).collect(Collectors.toList());
     }
 
-    public List<ResultadoCompetenciaResponseDTO> listarPorEvento(Integer eventoId) {
-        if (!eventoRepository.existsById(eventoId)) {
-            throw new RuntimeException("Evento no encontrado con ID: " + eventoId);
-        }
-        return resultadoCompetenciaRepository.findByEventoIdOrderByPosicionAsc(eventoId).stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
+    public List<ProductoVarianteResponseDTO> listarConStockBajo(int umbral) {
+        return productoVarianteRepository.findConStockBajo(umbral).stream()
+                .map(this::toDTO).collect(Collectors.toList());
     }
 
-    public List<ResultadoCompetenciaResponseDTO> listarPorGrupo(Integer grupoId) {
-        if (!grupoEntrenamientoRepository.existsById(grupoId)) {
-            throw new RuntimeException("Grupo de entrenamiento no encontrado con ID: " + grupoId);
-        }
-        return resultadoCompetenciaRepository.findByGrupoEntrenamientoId(grupoId).stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
-    }
+    public ProductoVariante crear(ProductoVarianteDTO dto) {
+        Producto producto = productoRepository.findById(dto.getProductoId())
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado con ID: " + dto.getProductoId()));
 
-    public ResultadoCompetenciaResponseDTO actualizar(Integer id, ResultadoCompetenciaDTO dto) {
-        ResultadoCompetencia resultado = resultadoCompetenciaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Resultado no encontrado con ID: " + id));
-
-        if (dto.getGrupoEntrenamientoId() != null) {
-            GrupoEntrenamiento grupo = grupoEntrenamientoRepository.findById(dto.getGrupoEntrenamientoId())
-                    .orElseThrow(() -> new RuntimeException(
-                            "Grupo de entrenamiento no encontrado con ID: " + dto.getGrupoEntrenamientoId()));
-            resultado.setGrupoEntrenamiento(grupo);
+        if (dto.getPrecioVenta() == null) {
+            throw new RuntimeException("La variante necesita un precio de venta");
         }
 
-        PremioEvento premio = resolverPremio(dto.getPremioId(), resultado.getEvento());
-        resultado.setPremio(premio);
+        ProductoVariante variante = new ProductoVariante();
+        variante.setProducto(producto);
+        variante.setTalla(dto.getTalla());
+        variante.setColor(dto.getColor());
+        variante.setPrecioVenta(dto.getPrecioVenta());
+        variante.setActivo(true);
 
-        if (dto.getEvaluacionRutinaId() != null) {
-            EvaluacionRutina evaluacionRutina = evaluacionRutinaRepository.findById(dto.getEvaluacionRutinaId())
-                    .orElseThrow(() -> new RuntimeException(
-                            "Evaluación de rutina no encontrada con ID: " + dto.getEvaluacionRutinaId()));
-            resultado.setEvaluacionRutina(evaluacionRutina);
+        // Secuencia 001, 002... por producto, siguiendo el formato oficial
+        // RAT-[CAT]-[COD]-[SEQ] del catálogo. El stock inicial se asigna
+        // directo (no genera un MovimientoInventario retroactivo) — desde
+        // ahí en adelante, todo cambio de stock sí debe pasar por
+        // MovimientoInventarioService para quedar trazado.
+        int siguienteSeq = productoVarianteRepository.findByProductoId(producto.getId()).size() + 1;
+        variante.setSkuVariante(producto.getSku() + "-" + String.format("%03d", siguienteSeq));
+
+        if (Boolean.TRUE.equals(producto.getRequiereControlStock())) {
+            variante.setStockActual(dto.getStockInicial() != null ? dto.getStockInicial() : 0);
         } else {
-            resultado.setEvaluacionRutina(null);
+            variante.setStockActual(null); // artículos digitales (DIG): no se controla stock
         }
 
-        resultado.setPosicion(dto.getPosicion());
-        resultado.setPuntaje(dto.getPuntaje());
-        resultado.setObservaciones(dto.getObservaciones());
-
-        return toDTO(resultadoCompetenciaRepository.save(resultado));
+        return productoVarianteRepository.save(variante);
     }
 
-    public void eliminar(Integer id) {
-        if (!resultadoCompetenciaRepository.existsById(id)) {
-            throw new RuntimeException("Resultado no encontrado con ID: " + id);
-        }
-        resultadoCompetenciaRepository.deleteById(id);
+    public ProductoVariante actualizarPrecio(Integer id, java.math.BigDecimal nuevoPrecio) {
+        ProductoVariante variante = buscarOFallar(id);
+        variante.setPrecioVenta(nuevoPrecio);
+        return productoVarianteRepository.save(variante);
     }
 
-    // Centraliza la búsqueda + validación de pertenencia del premio al evento,
-    // usada tanto en registrar() como en actualizar() para evitar duplicar
-    // la regla de negocio (y el bug de que actualizar() no la aplicaba).
-    private PremioEvento resolverPremio(Integer premioId, Evento evento) {
-        if (premioId == null) {
-            return null;
-        }
-        return premioEventoRepository.findById(premioId)
-                .filter(p -> p.getEvento().getId().equals(evento.getId()))
-                .orElseThrow(() -> new RuntimeException(
-                        "El premio con ID " + premioId + " no existe o no pertenece a este evento"));
+    public void desactivar(Integer id) {
+        ProductoVariante variante = buscarOFallar(id);
+        variante.setActivo(false);
+        productoVarianteRepository.save(variante);
     }
 
-    private ResultadoCompetenciaResponseDTO toDTO(ResultadoCompetencia r) {
-        ResultadoCompetenciaResponseDTO dto = new ResultadoCompetenciaResponseDTO();
-        dto.setId(r.getId());
-        dto.setEventoId(r.getEvento().getId());
-        dto.setNombreEvento(r.getEvento().getNombre());
-        dto.setFechaEvento(r.getEvento().getFecha());
-        dto.setGrupoEntrenamientoId(r.getGrupoEntrenamiento() != null ? r.getGrupoEntrenamiento().getId() : null);
-        dto.setNombreGrupo(r.getGrupoEntrenamiento() != null ? r.getGrupoEntrenamiento().getNombre() : null);
-        dto.setPosicion(r.getPosicion());
-        dto.setPuntaje(r.getPuntaje());
-        dto.setPremioId(r.getPremio() != null ? r.getPremio().getId() : null);
-        dto.setDescripcionPremio(r.getPremio() != null ? r.getPremio().getDescripcion() : null);
-        dto.setEvaluacionRutinaId(r.getEvaluacionRutina() != null ? r.getEvaluacionRutina().getId() : null);
-        dto.setObservaciones(r.getObservaciones());
+    private ProductoVariante buscarOFallar(Integer id) {
+        return productoVarianteRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Variante de producto no encontrada con ID: " + id));
+    }
+
+    private ProductoVarianteResponseDTO toDTO(ProductoVariante v) {
+        ProductoVarianteResponseDTO dto = new ProductoVarianteResponseDTO();
+        dto.setId(v.getId());
+        dto.setProductoId(v.getProducto().getId());
+        dto.setNombreProducto(v.getProducto().getNombre());
+        dto.setTalla(v.getTalla());
+        dto.setColor(v.getColor());
+        dto.setSkuVariante(v.getSkuVariante());
+        dto.setPrecioVenta(v.getPrecioVenta());
+        dto.setStockActual(v.getStockActual());
+        dto.setActivo(v.getActivo());
         return dto;
     }
 }
 </file>
 
-<file path="src/main/java/com/varcal/cheermanager/Service/Eventos/TipoEventoService.java">
-package com.varcal.cheermanager.Service.Eventos;
+<file path="src/main/java/com/varcal/cheermanager/Service/Inventario/VentaService.java">
+package com.varcal.cheermanager.Service.Inventario;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.varcal.cheermanager.Models.Eventos.TipoEvento;
-import com.varcal.cheermanager.repository.Eventos.TipoEventoRepository;
+import com.varcal.cheermanager.DTO.Inventario.MovimientoInventarioDTO;
+import com.varcal.cheermanager.DTO.Inventario.VentaDTO;
+import com.varcal.cheermanager.DTO.Inventario.VentaResponseDTO;
+import com.varcal.cheermanager.Models.Financiero.Factura;
+import com.varcal.cheermanager.Models.Inventario.DetalleVenta;
+import com.varcal.cheermanager.Models.Inventario.ProductoVariante;
+import com.varcal.cheermanager.Models.Inventario.Venta;
+import com.varcal.cheermanager.Models.Personas.Persona;
+import com.varcal.cheermanager.repository.Financiero.FacturaRepository;
+import com.varcal.cheermanager.repository.Inventario.ProductoVarianteRepository;
+import com.varcal.cheermanager.repository.Inventario.VentaRepository;
+import com.varcal.cheermanager.repository.Personas.PersonaRepository;
 
 @Service
-public class TipoEventoService {
+public class VentaService {
 
     @Autowired
-    private TipoEventoRepository tipoEventoRepository;
+    private VentaRepository ventaRepository;
 
-    public List<TipoEvento> listarTodos() {
-        return tipoEventoRepository.findAll();
-    }
+    @Autowired
+    private ProductoVarianteRepository productoVarianteRepository;
 
-    public TipoEvento obtenerPorId(Integer id) {
-        return tipoEventoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Tipo de evento no encontrado con ID: " + id));
-    }
+    @Autowired
+    private PersonaRepository personaRepository;
 
-    public TipoEvento crear(String nombre) {
-        tipoEventoRepository.findByEvento(nombre).ifPresent(t -> {
-            throw new RuntimeException("Ya existe un tipo de evento llamado '" + nombre + "'");
-        });
-        TipoEvento tipo = new TipoEvento();
-        tipo.setEvento(nombre);
-        return tipoEventoRepository.save(tipo);
-    }
+    @Autowired
+    private FacturaRepository facturaRepository;
 
-    public void eliminar(Integer id) {
-        if (!tipoEventoRepository.existsById(id)) {
-            throw new RuntimeException("Tipo de evento no encontrado con ID: " + id);
+    @Autowired
+    private MovimientoInventarioService movimientoInventarioService;
+
+    // Se marca @Transactional porque una venta toca varias tablas (Venta,
+    // N DetalleVenta, N MovimientoInventario, N ProductoVariante.stockActual)
+    // — si falla a mitad de camino (ej. un ítem sin stock), nada debe quedar
+    // guardado a medias.
+    @Transactional
+    public Venta registrar(VentaDTO dto) {
+        validarComprador(dto);
+
+        if (dto.getItems() == null || dto.getItems().isEmpty()) {
+            throw new RuntimeException("La venta debe tener al menos un ítem");
         }
-        tipoEventoRepository.deleteById(id);
+
+        Venta venta = new Venta();
+        venta.setFecha(LocalDate.now());
+        venta.setMetodoPago(dto.getMetodoPago());
+
+        if (dto.getPersonaId() != null) {
+            Persona persona = personaRepository.findById(dto.getPersonaId())
+                    .orElseThrow(() -> new RuntimeException("Persona no encontrada con ID: " + dto.getPersonaId()));
+            venta.setPersona(persona);
+        } else {
+            venta.setNombreCompradorExterno(dto.getNombreCompradorExterno());
+            venta.setContactoCompradorExterno(dto.getContactoCompradorExterno());
+        }
+
+        if (dto.getFacturaId() != null) {
+            Factura factura = facturaRepository.findById(dto.getFacturaId())
+                    .orElseThrow(() -> new RuntimeException("Factura no encontrada con ID: " + dto.getFacturaId()));
+            venta.setFactura(factura);
+        }
+
+        List<DetalleVenta> detalles = new ArrayList<>();
+        BigDecimal total = BigDecimal.ZERO;
+
+        for (VentaDTO.ItemVentaDTO item : dto.getItems()) {
+            ProductoVariante variante = productoVarianteRepository.findById(item.getProductoVarianteId())
+                    .orElseThrow(() -> new RuntimeException("Variante no encontrada con ID: " + item.getProductoVarianteId()));
+
+            if (item.getCantidad() == null || item.getCantidad() <= 0) {
+                throw new RuntimeException("Cantidad inválida para '" + variante.getSkuVariante() + "'");
+            }
+
+            // Descuenta stock (si el producto lo controla) a través del
+            // service de movimientos, para que quede trazado como salida
+            // por venta — no se toca stockActual directo desde acá.
+            if (Boolean.TRUE.equals(variante.getProducto().getRequiereControlStock())) {
+                MovimientoInventarioDTO movDto = new MovimientoInventarioDTO();
+                movDto.setProductoVarianteId(variante.getId());
+                movDto.setTipo("salida");
+                movDto.setCantidad(item.getCantidad());
+                movDto.setMotivo("Venta de tienda");
+                movDto.setUsuarioId(dto.getUsuarioId());
+                movimientoInventarioService.registrar(movDto);
+            }
+
+            BigDecimal subtotal = variante.getPrecioVenta().multiply(BigDecimal.valueOf(item.getCantidad()));
+            total = total.add(subtotal);
+
+            DetalleVenta detalle = new DetalleVenta();
+            detalle.setVenta(venta);
+            detalle.setProductoVariante(variante);
+            detalle.setCantidad(item.getCantidad());
+            detalle.setPrecioUnitario(variante.getPrecioVenta());
+            detalle.setSubtotal(subtotal);
+            detalles.add(detalle);
+        }
+
+        venta.setTotal(total);
+        venta.setDetalles(detalles);
+        return ventaRepository.save(venta); // cascade guarda los detalles
+    }
+
+    public List<VentaResponseDTO> listarPorRango(LocalDate desde, LocalDate hasta) {
+        return ventaRepository.findByFechaBetweenOrderByFechaDesc(desde, hasta).stream()
+                .map(this::toResponseDTO).collect(Collectors.toList());
+    }
+
+    public List<VentaResponseDTO> listarPorPersona(Integer personaId) {
+        return ventaRepository.findByPersonaIdOrderByFechaDesc(personaId).stream()
+                .map(this::toResponseDTO).collect(Collectors.toList());
+    }
+
+    public VentaResponseDTO obtenerPorId(Integer id) {
+        return toResponseDTO(ventaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Venta no encontrada con ID: " + id)));
+    }
+
+    // Nota: no hay "eliminar" venta — anular_venta (permiso ya existe en el
+    // seed) debería implementarse como una reversión que genera movimientos
+    // de entrada compensatorios, no un borrado, para no perder el rastro
+    // contable. Se deja pendiente hasta que se defina esa regla de negocio.
+
+    private void validarComprador(VentaDTO dto) {
+        boolean tienePersona = dto.getPersonaId() != null;
+        boolean tieneExterno = dto.getNombreCompradorExterno() != null && !dto.getNombreCompradorExterno().isBlank();
+
+        if (tienePersona == tieneExterno) {
+            throw new RuntimeException(
+                    "La venta debe tener exactamente un comprador: o una persona del club (personaId) o un comprador externo (nombreCompradorExterno), no ambos ni ninguno");
+        }
+    }
+
+    private VentaResponseDTO toResponseDTO(Venta v) {
+        VentaResponseDTO dto = new VentaResponseDTO();
+        dto.setId(v.getId());
+        dto.setFecha(v.getFecha());
+        dto.setTotal(v.getTotal());
+        dto.setMetodoPago(v.getMetodoPago());
+        dto.setFacturaId(v.getFactura() != null ? v.getFactura().getId() : null);
+
+        if (v.getPersona() != null) {
+            dto.setPersonaId(v.getPersona().getId());
+            dto.setNombreComprador(v.getPersona().getNombre() + " " + v.getPersona().getApellidos());
+        } else {
+            dto.setNombreComprador(v.getNombreCompradorExterno());
+        }
+
+        if (v.getDetalles() != null) {
+            dto.setDetalles(v.getDetalles().stream().map(d -> {
+                VentaResponseDTO.DetalleVentaResponseDTO det = new VentaResponseDTO.DetalleVentaResponseDTO();
+                det.setProductoVarianteId(d.getProductoVariante().getId());
+                det.setSkuVariante(d.getProductoVariante().getSkuVariante());
+                det.setNombreProducto(d.getProductoVariante().getProducto().getNombre());
+                det.setTalla(d.getProductoVariante().getTalla());
+                det.setColor(d.getProductoVariante().getColor());
+                det.setCantidad(d.getCantidad());
+                det.setPrecioUnitario(d.getPrecioUnitario());
+                det.setSubtotal(d.getSubtotal());
+                return det;
+            }).collect(Collectors.toList()));
+        }
+        return dto;
     }
 }
 </file>
@@ -1951,6 +2390,204 @@ POST /auth/change-password
 5. **Tests unitarios**
    - MockMvc para endpoints
    - Test de bloqueo y reset
+</file>
+
+<file path="ajustes_claudia/KPIs_y_Dashboards_CheerManager_propuesta.md">
+# CheerManager — Diseño de KPIs y Métricas por Dashboard
+
+Estructurado sobre los 9 permisos de dashboard que ya existen en el seed
+(`ver_dash_*`), que hasta ahora no tienen ningún controller/service detrás.
+Cada sección indica: qué mostrar, de qué tabla/entidad sale, y qué tan listo
+está hoy el dato (🟢 disponible ya / 🟡 disponible parcial / 🔴 requiere
+construir el módulo primero).
+
+---
+
+## 1. `ver_dash_inicio` — Overview general (landing al entrar)
+
+Vista resumen de una sola pantalla, pensada para cualquier rol con acceso
+básico. Un número por tarjeta, sin desglose.
+
+| KPI | Fuente | Estado |
+|---|---|---|
+| Deportistas activos | `Deportista` + `Persona.estado` | 🟢 |
+| Grupos de entrenamiento activos | `GrupoEntrenamiento` | 🟢 |
+| Próximo evento (nombre + fecha + días restantes) | `Evento.findByFechaGreaterThanEqual` | 🟢 |
+| Cartera pendiente total (COP) | `Factura.saldoPendienteFactura` sumado | 🟢 |
+| % asistencia últimos 7 días (todos los grupos) | `Asistencia` | 🟢 |
+| Alertas activas (médicas + facturas vencidas) | `HistorialMedico.tieneCondicionActiva()` + `Factura` vencida | 🟡 (falta exponerlo agregado) |
+
+---
+
+## 2. `ver_dash_personas` — Deportistas y entrenadores
+
+| KPI | Fuente | Estado |
+|---|---|---|
+| Total deportistas por género / edad / nivel | `Deportista`, `Persona` | 🟢 |
+| Distribución por división FEDECOLCHEER (Tiny/Mini/Youth/Junior/Senior/Open) | Requiere el campo de división por año de nacimiento del PDF 2026 que aún no está cargado en `ReglaCategoria`/`CategoriaNivel` | 🔴 |
+| Altas y bajas del mes/trimestre | `Persona.estado` + fecha de cambio (no hay historial de estado hoy) | 🔴 (falta `HistorialEstadoPersona` o similar) |
+| Tiempo promedio de permanencia por nivel | `HistorialNivelDeportista` | 🔴 (módulo existe pero no está conectado — cambios de nivel no generan registro automático) |
+| Entrenadores activos y grupos a cargo c/u | `Entrenador`, `GrupoEntrenamiento` | 🟢 |
+| Condiciones médicas activas (conteo, no detalle clínico en el dashboard) | `HistorialMedico` | 🟢 |
+| % de deportistas con documentos completos (waiver, registro médico) | `Documento` | 🟡 (según qué tan completo esté ese módulo) |
+
+**Nota de privacidad:** el dashboard debe mostrar *conteos* de condiciones
+médicas, nunca el detalle — el detalle sigue restringido a
+`ver_historial_medico`.
+
+---
+
+## 3. `ver_dash_organizacion` — Grupos, niveles, divisiones
+
+| KPI | Fuente | Estado |
+|---|---|---|
+| Deportistas por grupo (ocupación vs. rango 8-30 de la tabla FEDECOLCHEER) | `GrupoEntrenamiento.deportistas` | 🟢 |
+| Grupos por debajo del mínimo de atletas (riesgo de no calificar en competencia) | Cruce `GrupoEntrenamiento` + tabla de cantidades por nivel | 🟡 (la tabla de cantidades ya existe para la rúbrica, falta el cruce) |
+| Distribución de grupos por nivel/modalidad (Novice/Prep/Elite/International) | `GrupoEntrenamiento.categoriaNivel` | 🟢 |
+| Grupos mixtos vs. femeninos, y cumplimiento de la regla COED (nivel 3-4) | `GrupoEntrenamiento` + conteo de hombres | 🟡 (dato existe, falta el cálculo de regla) |
+
+---
+
+## 4. `ver_dash_horarios` — Asistencia y operación diaria
+
+| KPI | Fuente | Estado |
+|---|---|---|
+| % asistencia por grupo (semana/mes) | `Asistencia`, `Horario` | 🟢 |
+| Deportistas con asistencia < 70% (alerta de deserción temprana) | `Asistencia` agregada por deportista | 🟢 |
+| Horas de entrenamiento programadas vs. efectivas | `Horario` + `Asistencia` | 🟢 |
+| Entrenador con más carga horaria semanal | `Horario.entrenador` | 🟢 |
+
+Esta es de las más fáciles de construir ya — todo el dato está completo y
+con las 4 capas armadas.
+
+---
+
+## 5. `ver_dash_evaluacion` — Rendimiento técnico
+
+Es el dashboard más rico dado el motor de `EvaluacionRutina` que ya está
+construido.
+
+| KPI | Fuente | Estado |
+|---|---|---|
+| Puntaje total más reciente por grupo | `EvaluacionRutina.puntajeTotal` | 🟢 |
+| **Progresión de puntaje evento-a-evento** (línea de tiempo) | `EvaluacionRutina.eventoOficial` + `ResultadoCompetencia` (ya conectados) | 🟢 recién habilitado |
+| Desglose por sub-criterio (dificultad vs. ejecución vs. showmanship) | `RegistroSubCriterio` | 🟢 |
+| Comparativo entre grupos del mismo nivel | `EvaluacionRutina` filtrado por `NivelCompetencia` | 🟢 |
+| Objetivos cumplidos vs. pendientes por deportista/grupo | `Objetivo`, `Evaluacion` (módulo de evaluación individual, distinto al de rutina) | 🟢 |
+| Brecha entre puntaje interno (simulacro) y puntaje real de competencia | `EvaluacionRutina.evento` (texto libre = simulacro) vs. `eventoOficial` (FK) | 🟢 — es justo el uso que se pensó para separar ambos campos |
+
+---
+
+## 6. `ver_dash_eventos` — Competencias
+
+| KPI | Fuente | Estado |
+|---|---|---|
+| Próximos eventos + grupos inscritos por evento | `Evento`, `GrupoEvento` | 🟢 |
+| Historial de resultados (posición, puntaje) por evento | `ResultadoCompetencia` | 🟢 |
+| Podios totales de la temporada (conteo de top-3) | `ResultadoCompetencia.posicion <= 3` | 🟢 |
+| Premios ganados (tipo/cantidad) | `PremioEvento` + `ResultadoCompetencia.premio` | 🟢 |
+| Costo de participación por evento (si se liga a `Financiero`) | No existe hoy relación Evento↔gasto | 🔴 |
+
+---
+
+## 7. `ver_dash_finanzas` — Financiero
+
+| KPI | Fuente | Estado |
+|---|---|---|
+| Recaudo del mes vs. proyectado | `Pago`, `PlanPago` | 🟢 |
+| Cartera vencida (monto y % sobre cartera total) | `Factura.saldoPendienteFactura` + `fechaVencimiento` | 🟢 |
+| Tasa de morosidad por plan de pago | `Factura` agrupado por `PlanPago` | 🟢 |
+| Ingreso por convenios/descuentos aplicados (impacto real en recaudo) | `Convenio`, `Descuento` | 🟢 |
+| Ingreso por venta de inventario (tienda) | `Venta` | 🔴 (módulo Inventario sin construir) |
+| Proyección de flujo de caja próximos 30/60/90 días | `Factura.fechaVencimiento` futura | 🟢 |
+
+---
+
+## 8. `ver_dash_tienda` — Inventario y ventas
+
+**Bloqueado por completo**: el módulo `Inventario` solo tiene Models
+(`Producto`, `CategoriaProducto`, `MovimientoInventario`, `Venta`,
+`DetalleVenta`) — cero Repository/Service/Controller. Este dashboard no
+puede construirse hasta que se levante el módulo, igual que se hizo recién
+con `Eventos`.
+
+KPIs previstos una vez exista el módulo:
+- Ventas del mes (monto y unidades)
+- Productos con stock bajo (`MovimientoInventario` acumulado vs. mínimo)
+- Producto más vendido / margen por categoría
+- Rotación de inventario
+
+**Recomendación de secuencia**: dado que `Eventos` ya quedó cerrado, el
+candidato natural para el próximo módulo completo es `Inventario` — no solo
+por este dashboard, sino porque hoy es el único módulo (junto a Eventos) sin
+ninguna capa construida.
+
+---
+
+## 9. `ver_dash_administracion` — Vista para Admin/Dirección técnica
+
+Agregador de alto nivel, cruza varios dominios — es el único dashboard que
+necesita datos de todos los demás módulos.
+
+| KPI | Fuente | Estado |
+|---|---|---|
+| Salud financiera (recaudo vs. cartera vencida) | Finanzas | 🟢 |
+| Salud operativa (asistencia promedio general) | Horarios | 🟢 |
+| Salud competitiva (progresión de puntaje promedio del club) | Evaluación | 🟢 |
+| Uso del sistema (usuarios activos, logs de acceso) | `LogAcceso` | 🟢 |
+| Auditoría reciente (últimos cambios sensibles: pagos, historial médico) | `Auditoria` (si tiene las 4 capas — verificar, quedó pendiente de confirmar en el análisis anterior) | 🟡 |
+
+---
+
+## Arquitectura propuesta para implementar esto
+
+En vez de que cada `Service` existente calcule sus propios KPIs (lo que
+duplicaría lógica de agregación por todos lados), conviene un módulo nuevo
+y transversal:
+
+```
+Models/Dashboard/          (no necesita entidades propias, solo lee)
+DTO/Dashboard/
+    ResumenInicioDTO.java
+    ResumenPersonasDTO.java
+    ResumenOrganizacionDTO.java
+    ResumenHorariosDTO.java
+    ResumenEvaluacionDTO.java
+    ResumenEventosDTO.java
+    ResumenFinanzasDTO.java
+    ResumenTiendaDTO.java        (cuando exista Inventario)
+    ResumenAdministracionDTO.java
+Service/Dashboard/
+    DashboardService.java   (o uno por área, si crecen mucho)
+Controller/Dashboard/
+    DashboardController.java
+    GET /api/dashboard/inicio
+    GET /api/dashboard/personas
+    GET /api/dashboard/organizacion
+    GET /api/dashboard/horarios
+    GET /api/dashboard/evaluacion
+    GET /api/dashboard/eventos
+    GET /api/dashboard/finanzas
+    GET /api/dashboard/tienda
+    GET /api/dashboard/administracion
+```
+
+Cada método del `DashboardService` inyecta los repositories que ya existen
+(no crea entidades nuevas, no duplica lógica de negocio) y arma queries de
+agregación (`@Query` con `COUNT`, `SUM`, `AVG`, o cálculo en Java sobre listas
+pequeñas — a esta escala de club no hace falta optimizar con vistas
+materializadas todavía).
+
+**Sugerencia de orden de construcción**, de más a menos inmediato:
+
+1. `ver_dash_horarios` y `ver_dash_evaluacion` — 100% de datos ya disponibles, cero bloqueos.
+2. `ver_dash_finanzas` y `ver_dash_eventos` — mismo caso, datos completos.
+3. `ver_dash_inicio` y `ver_dash_personas` — casi completos, con 1-2 huecos menores (historial de altas/bajas, cruce de división FEDECOLCHEER).
+4. `ver_dash_organizacion` — requiere el cruce con las tablas de cantidad por nivel (ya existen, falta la consulta).
+5. `ver_dash_administracion` — al final, porque agrega todo lo anterior.
+6. `ver_dash_tienda` — depende de construir Inventario completo primero.
+
+¿Empezamos por `ver_dash_horarios` y `ver_dash_evaluacion` (los más listos), o prefieres que levantemos primero el módulo `Inventario` para desbloquear `ver_dash_tienda` y `ver_dash_finanzas` completo?
 </file>
 
 <file path="ajustes_claudia/RESUMEN_CABOS_SUELTOS.md">
@@ -3858,6 +4495,328 @@ public class RubricaConfigController {
 }
 </file>
 
+<file path="src/main/java/com/varcal/cheermanager/Controller/Eventos/EventoController.java">
+package com.varcal.cheermanager.Controller.Eventos;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import com.varcal.cheermanager.DTO.Eventos.EventoDTO;
+import com.varcal.cheermanager.DTO.Eventos.EventoResponseDTO;
+import com.varcal.cheermanager.Service.Eventos.EventoService;
+import com.varcal.cheermanager.Utils.RequiresPermission;
+
+@RestController
+@RequestMapping("/api/eventos")
+public class EventoController {
+
+    @Autowired
+    private EventoService eventoService;
+
+    @GetMapping
+    @RequiresPermission("ver_evento")
+    public ResponseEntity<List<EventoResponseDTO>> listar() {
+        return ResponseEntity.ok(eventoService.listarTodos());
+    }
+
+    // Calendario: eventos desde hoy en adelante, para dashboard o notificaciones.
+    @GetMapping("/proximos")
+    @RequiresPermission("ver_evento")
+    public ResponseEntity<List<EventoResponseDTO>> proximos() {
+        return ResponseEntity.ok(eventoService.proximos());
+    }
+
+    // Historial: eventos ya pasados, más recientes primero.
+    @GetMapping("/historial")
+    @RequiresPermission("ver_evento")
+    public ResponseEntity<List<EventoResponseDTO>> historial() {
+        return ResponseEntity.ok(eventoService.historial());
+    }
+
+    @GetMapping("/{id}")
+    @RequiresPermission("ver_evento")
+    public ResponseEntity<?> obtener(@PathVariable Integer id) {
+        try {
+            return ResponseEntity.ok(eventoService.obtenerPorId(id));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping
+    @RequiresPermission("crear_evento")
+    public ResponseEntity<?> crear(@RequestBody EventoDTO dto) {
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED).body(eventoService.crear(dto));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}")
+    @RequiresPermission("modificar_evento")
+    public ResponseEntity<?> actualizar(@PathVariable Integer id, @RequestBody EventoDTO dto) {
+        try {
+            return ResponseEntity.ok(eventoService.actualizar(id, dto));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    @RequiresPermission("eliminar_evento")
+    public ResponseEntity<?> eliminar(@PathVariable Integer id) {
+        try {
+            eventoService.eliminar(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            // No siempre es 404 (puede ser conflicto por resultados ya cargados),
+            // pero se devuelve el mensaje explicando la causa igual.
+            return ResponseEntity.status(409).body(e.getMessage());
+        }
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Controller/Eventos/GrupoEventoController.java">
+package com.varcal.cheermanager.Controller.Eventos;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import com.varcal.cheermanager.DTO.Eventos.GrupoEventoDTO;
+import com.varcal.cheermanager.DTO.Eventos.GrupoEventoResponseDTO;
+import com.varcal.cheermanager.Service.Eventos.GrupoEventoService;
+import com.varcal.cheermanager.Utils.RequiresPermission;
+
+@RestController
+@RequestMapping("/api/grupos-evento")
+public class GrupoEventoController {
+
+    @Autowired
+    private GrupoEventoService grupoEventoService;
+
+    @PostMapping
+    @RequiresPermission("modificar_evento")
+    public ResponseEntity<?> inscribir(@RequestBody GrupoEventoDTO dto) {
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED).body(grupoEventoService.inscribir(dto));
+        } catch (RuntimeException e) {
+            // "ya está inscrito" es conflicto (409), "no encontrado" es 404 —
+            // se distingue por el mensaje para no complicar el service con
+            // tipos de excepción propios todavía.
+            HttpStatus status = e.getMessage() != null && e.getMessage().contains("ya está inscrito")
+                    ? HttpStatus.CONFLICT
+                    : HttpStatus.NOT_FOUND;
+            return ResponseEntity.status(status).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/evento/{eventoId}")
+    @RequiresPermission("ver_evento")
+    public ResponseEntity<List<GrupoEventoResponseDTO>> listarPorEvento(@PathVariable Integer eventoId) {
+        return ResponseEntity.ok(grupoEventoService.listarPorEvento(eventoId));
+    }
+
+    // Historial de competencias de un grupo — línea de tiempo del equipo.
+    @GetMapping("/grupo/{grupoEntrenamientoId}")
+    @RequiresPermission("ver_evento")
+    public ResponseEntity<List<GrupoEventoResponseDTO>> listarPorGrupo(@PathVariable Integer grupoEntrenamientoId) {
+        return ResponseEntity.ok(grupoEventoService.listarPorGrupo(grupoEntrenamientoId));
+    }
+
+    @DeleteMapping("/{id}")
+    @RequiresPermission("modificar_evento")
+    public ResponseEntity<?> desinscribir(@PathVariable Integer id) {
+        try {
+            grupoEventoService.desinscribir(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Controller/Eventos/PremioEventoController.java">
+package com.varcal.cheermanager.Controller.Eventos;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import com.varcal.cheermanager.DTO.Eventos.PremioEventoDTO;
+import com.varcal.cheermanager.Service.Eventos.PremioEventoService;
+import com.varcal.cheermanager.Utils.RequiresPermission;
+
+@RestController
+@RequestMapping("/api/premios-evento")
+public class PremioEventoController {
+
+    @Autowired
+    private PremioEventoService premioEventoService;
+
+    @PostMapping
+    @RequiresPermission("modificar_evento")
+    public ResponseEntity<?> crear(@RequestBody PremioEventoDTO dto) {
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED).body(premioEventoService.crear(dto));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/evento/{eventoId}")
+    @RequiresPermission("ver_evento")
+    public ResponseEntity<?> listarPorEvento(@PathVariable Integer eventoId) {
+        try {
+            return ResponseEntity.ok(premioEventoService.listarPorEvento(eventoId));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PutMapping("/{id}")
+    @RequiresPermission("modificar_evento")
+    public ResponseEntity<?> actualizar(@PathVariable Integer id, @RequestBody PremioEventoDTO dto) {
+        try {
+            return ResponseEntity.ok(premioEventoService.actualizar(id, dto));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    @RequiresPermission("modificar_evento")
+    public ResponseEntity<?> eliminar(@PathVariable Integer id) {
+        try {
+            premioEventoService.eliminar(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Controller/Eventos/ResultadoCompetenciaController.java">
+package com.varcal.cheermanager.Controller.Eventos;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import com.varcal.cheermanager.DTO.Eventos.ResultadoCompetenciaDTO;
+import com.varcal.cheermanager.DTO.Eventos.ResultadoCompetenciaResponseDTO;
+import com.varcal.cheermanager.Service.Eventos.ResultadoCompetenciaService;
+import com.varcal.cheermanager.Utils.RequiresPermission;
+
+@RestController
+@RequestMapping("/api/resultados-competencia")
+public class ResultadoCompetenciaController {
+
+    @Autowired
+    private ResultadoCompetenciaService resultadoCompetenciaService;
+
+    @PostMapping
+    @RequiresPermission("modificar_evento")
+    public ResponseEntity<?> registrar(@RequestBody ResultadoCompetenciaDTO dto) {
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED).body(resultadoCompetenciaService.registrar(dto));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(e.getMessage());
+        }
+    }
+
+    // Tabla de posiciones de un evento, ya ordenada por puesto.
+    @GetMapping("/evento/{eventoId}")
+    @RequiresPermission("ver_evento")
+    public ResponseEntity<?> listarPorEvento(@PathVariable Integer eventoId) {
+        try {
+            return ResponseEntity.ok(resultadoCompetenciaService.listarPorEvento(eventoId));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    // Línea de tiempo de resultados de un grupo — la fuente del KPI de
+    // progresión de puntaje evento-a-evento.
+    @GetMapping("/grupo/{grupoId}")
+    @RequiresPermission("ver_evento")
+    public ResponseEntity<?> listarPorGrupo(@PathVariable Integer grupoId) {
+        try {
+            return ResponseEntity.ok(resultadoCompetenciaService.listarPorGrupo(grupoId));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PutMapping("/{id}")
+    @RequiresPermission("modificar_evento")
+    public ResponseEntity<?> actualizar(@PathVariable Integer id, @RequestBody ResultadoCompetenciaDTO dto) {
+        try {
+            return ResponseEntity.ok(resultadoCompetenciaService.actualizar(id, dto));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    @RequiresPermission("modificar_evento")
+    public ResponseEntity<?> eliminar(@PathVariable Integer id) {
+        try {
+            resultadoCompetenciaService.eliminar(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Controller/Eventos/TipoEventoController.java">
+package com.varcal.cheermanager.Controller.Eventos;
+
+import java.util.List;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.varcal.cheermanager.Models.Eventos.TipoEvento;
+import com.varcal.cheermanager.repository.Eventos.TipoEventoRepository;
+
+@RestController
+@RequestMapping("/api/tipos-evento")
+public class TipoEventoController {
+
+    private final TipoEventoRepository tipoEventoRepo;
+
+    public TipoEventoController(TipoEventoRepository tipoEventoRepo) {
+        this.tipoEventoRepo = tipoEventoRepo;
+    }
+
+    @GetMapping
+    public List<TipoEvento> listarTodos() {
+        return tipoEventoRepo.findAll();
+    }
+}
+</file>
+
 <file path="src/main/java/com/varcal/cheermanager/Controller/Financiero/ConvenioController.java">
 package com.varcal.cheermanager.Controller.Financiero;
 
@@ -4991,6 +5950,157 @@ public class EvaluacionRutinaResponseDTO {
 }
 </file>
 
+<file path="src/main/java/com/varcal/cheermanager/DTO/Eventos/EventoDTO.java">
+package com.varcal.cheermanager.DTO.Eventos;
+
+import java.time.LocalDate;
+
+import lombok.Data;
+
+@Data
+public class EventoDTO {
+    private String nombre;
+    private LocalDate fecha;
+    private Integer tipoEventoId;
+    private String ubicacion;
+    private Boolean tieneResultados; // si el productor del evento publica resultados oficiales
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/DTO/Eventos/EventoResponseDTO.java">
+package com.varcal.cheermanager.DTO.Eventos;
+
+import java.time.LocalDate;
+
+import lombok.Data;
+
+@Data
+public class EventoResponseDTO {
+    private Integer id;
+    private String nombre;
+    private LocalDate fecha;
+    private Integer tipoEventoId;
+    private String tipoEvento;
+    private String ubicacion;
+    private Boolean tieneResultados;
+    private Integer cantidadGruposInscritos;
+    private Integer cantidadPremios;
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/DTO/Eventos/GrupoEventoDTO.java">
+package com.varcal.cheermanager.DTO.Eventos;
+
+import lombok.Data;
+
+@Data
+public class GrupoEventoDTO {
+    private Integer grupoEntrenamientoId;
+    private Integer eventoId;
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/DTO/Eventos/GrupoEventoResponseDTO.java">
+package com.varcal.cheermanager.DTO.Eventos;
+
+import java.time.LocalDate;
+
+import lombok.Data;
+
+@Data
+public class GrupoEventoResponseDTO {
+    private Integer id;
+    private Integer grupoEntrenamientoId;
+    private String nombreGrupo;
+    private Integer eventoId;
+    private String nombreEvento;
+    private LocalDate fechaEvento;
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/DTO/Eventos/PremioEventoDTO.java">
+package com.varcal.cheermanager.DTO.Eventos;
+
+import lombok.Data;
+
+@Data
+public class PremioEventoDTO {
+    private Integer eventoId;
+    private String descripcion; // ej. "1er lugar Nivel 3 Youth"
+    private String premio;      // ej. "Trofeo + beca 20% próxima temporada"
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/DTO/Eventos/PremioEventoResponseDTO.java">
+package com.varcal.cheermanager.DTO.Eventos;
+
+import lombok.Data;
+
+@Data
+public class PremioEventoResponseDTO {
+    private Integer id;
+    private Integer eventoId;
+    private String nombreEvento;
+    private String descripcion;
+    private String premio;
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/DTO/Eventos/ResultadoCompetenciaDTO.java">
+package com.varcal.cheermanager.DTO.Eventos;
+
+import java.math.BigDecimal;
+
+import lombok.Data;
+
+@Data
+public class ResultadoCompetenciaDTO {
+    private Integer eventoId;
+    private Integer grupoEntrenamientoId;
+    private Integer posicion;
+    private BigDecimal puntaje;
+    private Integer premioId;           // opcional
+    private Integer evaluacionRutinaId; // opcional, si el evento se evaluó dentro del sistema
+    private String observaciones;
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/DTO/Eventos/ResultadoCompetenciaResponseDTO.java">
+package com.varcal.cheermanager.DTO.Eventos;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
+import lombok.Data;
+
+@Data
+public class ResultadoCompetenciaResponseDTO {
+    private Integer id;
+    private Integer eventoId;
+    private String nombreEvento;
+    private LocalDate fechaEvento;
+    private Integer grupoEntrenamientoId;
+    private String nombreGrupo;
+    private Integer posicion;
+    private BigDecimal puntaje;
+    private Integer premioId;
+    private String descripcionPremio;
+    private Integer evaluacionRutinaId;
+    private String observaciones;
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/DTO/Eventos/TipoEventoDTO.java">
+package com.varcal.cheermanager.DTO.Eventos;
+
+import lombok.Data;
+
+@Data
+public class TipoEventoDTO {
+    private String evento; // nombre del tipo, ej. "Competencia federada", "Simulacro", "Clínica"
+}
+</file>
+
 <file path="src/main/java/com/varcal/cheermanager/DTO/Financiero/ConvenioDto.java">
 package com.varcal.cheermanager.DTO.Financiero;
 
@@ -5829,91 +6939,6 @@ public class EscalonDriverNivel {
 }
 </file>
 
-<file path="src/main/java/com/varcal/cheermanager/Models/Evaluaciones/Rutina/EvaluacionRutina.java">
-package com.varcal.cheermanager.Models.Evaluaciones.Rutina;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.List;
-
-import com.varcal.cheermanager.Models.Eventos.Evento;
-import com.varcal.cheermanager.Models.Org_dep.GrupoEntrenamiento;
-
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-// La evaluación de UNA rutina completa de UN grupo, en UNA fecha/evento
-// (puede ser una competencia real o un simulacro/práctica interna). El
-// puntaje final se compone de los RegistroSubCriterio asociados — ver
-// EvaluacionRutinaService para el detalle del cálculo y la suma final.
-@Data
-@NoArgsConstructor
-@Entity
-@Table(name = "evaluaciones_rutina")
-public class EvaluacionRutina {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-
-    @ManyToOne
-    @JoinColumn(name = "grupo_entrenamiento_id", nullable = false)
-    private GrupoEntrenamiento grupo;
-
-    @ManyToOne
-    @JoinColumn(name = "nivel_id", nullable = false)
-    private NivelCompetencia nivel;
-
-    @Column(name = "fecha", nullable = false)
-    private LocalDate fecha;
-
-    // Nombre libre del evento o "Práctica interna" / "Simulacro" si no es una
-    // competencia oficial — el sistema sirve igual para preparación. Se
-    // conserva para no romper evaluaciones ya cargadas y para el caso de
-    // simulacros que nunca deberían crear un registro en `eventos`.
-    @Column(name = "evento", length = 200)
-    private String evento;
-
-    // FK opcional al Evento real del módulo Eventos, cuando esta evaluación
-    // corresponde a una competencia oficial ya registrada en el sistema (no
-    // a un simulacro/práctica interna). Permite construir la progresión de
-    // puntaje de un grupo evento-a-evento sin depender de que el texto libre
-    // de arriba coincida exactamente. Se deja nullable y separado del campo
-    // `evento` (String) a propósito, para no forzar una migración de datos
-    // sobre evaluaciones ya existentes.
-    @ManyToOne
-    @JoinColumn(name = "evento_oficial_id")
-    private Evento eventoOficial;
-
-    // Cantidad de atletas que participaron en ESTA presentación específica
-    // (puede no coincidir con el total de DeportistaPerteneceGrupo si alguien
-    // no asistió ese día) — necesario porque las tablas de cantidad dependen
-    // del número real de atletas en el piso.
-    @Column(name = "cantidad_atletas", nullable = false)
-    private Integer cantidadAtletas;
-
-    // Suma final de todos los RegistroSubCriterio. Se recalcula cada vez que
-    // se agrega/edita un registro (ver EvaluacionRutinaService.recalcularTotal).
-    @Column(name = "puntaje_total", precision = 6, scale = 2)
-    private BigDecimal puntajeTotal;
-
-    @Column(name = "observaciones", length = 1000)
-    private String observaciones;
-
-    @OneToMany(mappedBy = "evaluacionRutina", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<RegistroSubCriterio> registros;
-}
-</file>
-
 <file path="src/main/java/com/varcal/cheermanager/Models/Evaluaciones/Rutina/NivelCompetencia.java">
 package com.varcal.cheermanager.Models.Evaluaciones.Rutina;
 
@@ -6505,64 +7530,6 @@ public class PremioEvento {
 }
 </file>
 
-<file path="src/main/java/com/varcal/cheermanager/Models/Eventos/ResultadoCompetencia.java">
-package com.varcal.cheermanager.Models.Eventos;
-
-import java.math.BigDecimal;
-
-import com.varcal.cheermanager.Models.Evaluaciones.Rutina.EvaluacionRutina;
-import com.varcal.cheermanager.Models.Org_dep.GrupoEntrenamiento;
-
-import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@NoArgsConstructor
-@Entity
-@Table(name = "resultados_competencia")
-public class ResultadoCompetencia {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-
-    @ManyToOne
-    @JoinColumn(name = "evento_id", nullable = false)
-    private Evento evento;
-
-    @ManyToOne
-    @JoinColumn(name = "grupo_id")
-    private GrupoEntrenamiento grupoEntrenamiento;
-
-    @Column(name = "posicion")
-    private Integer posicion;
-
-    @Column(name = "puntaje", precision = 10, scale = 2)
-    private BigDecimal puntaje;
-
-    // Antes era un Integer suelto sin relación real (premioId). Se corrige a
-    // FK propiamente dicha para poder navegar el objeto Premio completo y que
-    // JPA valide la integridad referencial. Nullable porque no todo resultado
-    // implica premio (ej. un grupo que queda en posición 12 de 20).
-    @ManyToOne
-    @JoinColumn(name = "premio_id")
-    private PremioEvento premio;
-
-    // Enlaza el resultado (posición + puntaje oficial del evento) con el
-    // desglose técnico completo que ya calculó el motor de EvaluacionRutina,
-    // si es que esa competencia se evaluó dentro del sistema (no todas lo
-    // estarán, ej. eventos de otros productores donde solo se registra el
-    // resultado final). Nullable a propósito: permite cargar resultados
-    // históricos/externos sin exigir que exista una EvaluacionRutina.
-    @ManyToOne
-    @JoinColumn(name = "evaluacion_rutina_id")
-    private EvaluacionRutina evaluacionRutina;
-
-    @Column(name = "observaciones")
-    private String observaciones;
-}
-</file>
-
 <file path="src/main/java/com/varcal/cheermanager/Models/Eventos/TipoEvento.java">
 package com.varcal.cheermanager.Models.Eventos;
 
@@ -6989,36 +7956,25 @@ public class HorarioEntrenamiento {
 }
 </file>
 
-<file path="src/main/java/com/varcal/cheermanager/Models/Inventario/MovimientoInventario.java">
+<file path="src/main/java/com/varcal/cheermanager/Models/Inventario/ProductoVariante.java">
 package com.varcal.cheermanager.Models.Inventario;
 
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
-import com.varcal.cheermanager.Models.Auth.Usuario;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+// La combinación real que se vende y de la que se controla stock: una talla
+// + color de una camiseta, un tier de membresía digital, etc. Un Producto
+// sin variantes reales (ej. "Sticker pack", talla única) igual tiene UNA
+// ProductoVariante — así toda la lógica de precio/stock/venta pasa siempre
+// por aquí, sin casos especiales para productos "simples".
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "movimientos_inventario")
-public class MovimientoInventario {
-
-    public enum TipoMovimiento {
-        entrada, salida, ajuste
-    }
-
+@Table(name = "producto_variantes")
+public class ProductoVariante {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -7027,55 +7983,31 @@ public class MovimientoInventario {
     @JoinColumn(name = "producto_id", nullable = false)
     private Producto producto;
 
-    @Column(name = "tipo", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private TipoMovimiento tipo;
+    // Nullable: no todo artículo tiene talla (ej. llavero, sticker pack).
+    @Column(name = "talla", length = 20)
+    private String talla;
 
-    @Column(name = "cantidad", nullable = false)
-    private Integer cantidad;
+    // Nullable: no todo artículo tiene color, o el color es fijo del producto.
+    // Para DIG también se usa este campo para el "tier" (Básico/Competencia/Elite).
+    @Column(name = "color", length = 30)
+    private String color;
 
-    @Column(name = "fecha", nullable = false)
-    private LocalDateTime fecha = LocalDateTime.now();
+    // SKU completo para etiqueta/código de barras, ej. RAT-ROP-CAE-001-NEG-M.
+    // Se genera en el service a partir del SKU del producto + secuencia.
+    @Column(name = "sku_variante", unique = true, length = 40)
+    private String skuVariante;
 
-    @ManyToOne
-    @JoinColumn(name = "usuario_id", nullable = false)
-    private Usuario usuario;
-}
-</file>
+    // Precio de venta real (a diferencia del rango de referencia en Producto).
+    @Column(name = "precio_venta", nullable = false, precision = 10, scale = 2)
+    private BigDecimal precioVenta;
 
-<file path="src/main/java/com/varcal/cheermanager/Models/Inventario/Producto.java">
-package com.varcal.cheermanager.Models.Inventario;
+    // Nullable cuando producto.requiereControlStock = false (artículos
+    // digitales) — no tiene sentido llevar unidades de una membresía.
+    @Column(name = "stock_actual")
+    private Integer stockActual;
 
-import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.math.BigDecimal;
-
-@Data
-@NoArgsConstructor
-@Entity
-@Table(name = "productos")
-public class Producto {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-
-    @Column(name = "nombre", nullable = false)
-    private String nombre;
-
-    @Column(name = "descripcion")
-    private String descripcion;
-
-    @Column(name = "precio", precision = 10, scale = 2, nullable = false)
-    private BigDecimal precio;
-
-    @Column(name = "cantidad_stock", nullable = false)
-    private Integer cantidadStock;
-
-    @ManyToOne
-    @JoinColumn(name = "categoria_id", nullable = false)
-    private CategoriaProducto categoriaProducto;
+    @Column(name = "activo", nullable = false)
+    private Boolean activo = true;
 }
 </file>
 
@@ -7568,6 +8500,108 @@ import com.varcal.cheermanager.Models.Evaluaciones.TipoCategoria;
 
 public interface TipoCategoriaRepository extends JpaRepository<TipoCategoria, Integer> {
     Optional<TipoCategoria> findByCategoria(String categoria);
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/repository/Eventos/EventoRepository.java">
+package com.varcal.cheermanager.repository.Eventos;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.varcal.cheermanager.Models.Eventos.Evento;
+
+public interface EventoRepository extends JpaRepository<Evento, Integer> {
+
+    // Calendario: próximos eventos desde hoy en adelante, ordenados.
+    List<Evento> findByFechaGreaterThanEqualOrderByFechaAsc(LocalDate desde);
+
+    // Historial: eventos ya pasados, más recientes primero.
+    List<Evento> findByFechaLessThanOrderByFechaDesc(LocalDate hasta);
+
+    List<Evento> findByTipoEventoIdOrderByFechaDesc(Integer tipoEventoId);
+
+    List<Evento> findByFechaBetweenOrderByFechaAsc(LocalDate desde, LocalDate hasta);
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/repository/Eventos/GrupoEventoRepository.java">
+package com.varcal.cheermanager.repository.Eventos;
+
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.varcal.cheermanager.Models.Eventos.GrupoEvento;
+
+public interface GrupoEventoRepository extends JpaRepository<GrupoEvento, Integer> {
+
+    List<GrupoEvento> findByEventoId(Integer eventoId);
+
+    // Historial de competencias de un grupo, para armar su línea de tiempo.
+    List<GrupoEvento> findByGrupoEntrenamientoId(Integer grupoEntrenamientoId);
+
+    boolean existsByEventoIdAndGrupoEntrenamientoId(Integer eventoId, Integer grupoEntrenamientoId);
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/repository/Eventos/PremioEventoRepository.java">
+package com.varcal.cheermanager.repository.Eventos;
+
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.varcal.cheermanager.Models.Eventos.PremioEvento;
+
+public interface PremioEventoRepository extends JpaRepository<PremioEvento, Integer> {
+    List<PremioEvento> findByEventoId(Integer eventoId);
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/repository/Eventos/ResultadoCompetenciaRepository.java">
+package com.varcal.cheermanager.repository.Eventos;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import com.varcal.cheermanager.Models.Eventos.ResultadoCompetencia;
+
+public interface ResultadoCompetenciaRepository extends JpaRepository<ResultadoCompetencia, Integer> {
+
+    List<ResultadoCompetencia> findByEventoIdOrderByPosicionAsc(Integer eventoId);
+
+    // Línea de tiempo de un grupo evento-a-evento, más antiguo primero — es
+    // la fuente para el KPI de "progresión de puntaje" que se propuso.
+    @Query("SELECT r FROM ResultadoCompetencia r WHERE r.grupoEntrenamiento.id = :grupoId " +
+           "ORDER BY r.evento.fecha ASC")
+    List<ResultadoCompetencia> findProgresionPorGrupo(@Param("grupoId") Integer grupoId);
+
+    Optional<ResultadoCompetencia> findByEventoIdAndGrupoEntrenamientoId(Integer eventoId, Integer grupoEntrenamientoId);
+
+    boolean existsByPremioId(Integer premioId);
+
+    List<ResultadoCompetencia> findByGrupoEntrenamientoId(Integer grupoEntrenamientoId);
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/repository/Eventos/TipoEventoRepository.java">
+package com.varcal.cheermanager.repository.Eventos;
+
+import java.util.Optional;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.varcal.cheermanager.Models.Eventos.TipoEvento;
+
+public interface TipoEventoRepository extends JpaRepository<TipoEvento, Integer> {
+    Optional<TipoEvento> findByEvento(String evento);
 }
 </file>
 
@@ -9389,6 +10423,485 @@ public class RubricaConfigService {
 }
 </file>
 
+<file path="src/main/java/com/varcal/cheermanager/Service/Eventos/EventoService.java">
+package com.varcal.cheermanager.Service.Eventos;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.varcal.cheermanager.DTO.Eventos.EventoDTO;
+import com.varcal.cheermanager.DTO.Eventos.EventoResponseDTO;
+import com.varcal.cheermanager.Models.Eventos.Evento;
+import com.varcal.cheermanager.Models.Eventos.TipoEvento;
+import com.varcal.cheermanager.repository.Eventos.EventoRepository;
+import com.varcal.cheermanager.repository.Eventos.GrupoEventoRepository;
+import com.varcal.cheermanager.repository.Eventos.PremioEventoRepository;
+import com.varcal.cheermanager.repository.Eventos.ResultadoCompetenciaRepository;
+import com.varcal.cheermanager.repository.Eventos.TipoEventoRepository;
+
+@Service
+public class EventoService {
+
+    @Autowired
+    private EventoRepository eventoRepository;
+
+    @Autowired
+    private TipoEventoRepository tipoEventoRepository;
+
+    @Autowired
+    private GrupoEventoRepository grupoEventoRepository;
+
+    @Autowired
+    private PremioEventoRepository premioEventoRepository;
+
+    @Autowired
+    private ResultadoCompetenciaRepository resultadoCompetenciaRepository;
+
+    public List<EventoResponseDTO> listarTodos() {
+        return eventoRepository.findAll().stream().map(this::toResponseDTO).collect(Collectors.toList());
+    }
+
+    public EventoResponseDTO obtenerPorId(Integer id) {
+        return toResponseDTO(buscarOFallar(id));
+    }
+
+    // Calendario: próximos eventos, para mostrar en un dashboard o notificar
+    // a entrenadores/deportistas de lo que se viene.
+    public List<EventoResponseDTO> proximos() {
+        return eventoRepository.findByFechaGreaterThanEqualOrderByFechaAsc(LocalDate.now()).stream()
+                .map(this::toResponseDTO).collect(Collectors.toList());
+    }
+
+    public List<EventoResponseDTO> historial() {
+        return eventoRepository.findByFechaLessThanOrderByFechaDesc(LocalDate.now()).stream()
+                .map(this::toResponseDTO).collect(Collectors.toList());
+    }
+
+    public Evento crear(EventoDTO dto) {
+        Evento evento = new Evento();
+        aplicarDatos(evento, dto);
+        return eventoRepository.save(evento);
+    }
+
+    public Evento actualizar(Integer id, EventoDTO dto) {
+        Evento evento = buscarOFallar(id);
+        aplicarDatos(evento, dto);
+        return eventoRepository.save(evento);
+    }
+
+    // Se protege contra el borrado accidental de un evento que ya tiene
+    // resultados oficiales registrados — perder esa trazabilidad afecta el
+    // historial competitivo del club, no es un simple registro de calendario.
+    @Transactional
+    public void eliminar(Integer id) {
+        Evento evento = buscarOFallar(id);
+        boolean tieneResultados = !resultadoCompetenciaRepository.findByEventoIdOrderByPosicionAsc(id).isEmpty();
+        if (tieneResultados) {
+            throw new RuntimeException(
+                    "No se puede eliminar el evento '" + evento.getNombre() +
+                    "': ya tiene resultados de competencia registrados. Elimínalos primero si de verdad quieres borrar el evento.");
+        }
+        eventoRepository.delete(evento);
+    }
+
+    private void aplicarDatos(Evento evento, EventoDTO dto) {
+        evento.setNombre(dto.getNombre());
+        evento.setFecha(dto.getFecha());
+        evento.setUbicacion(dto.getUbicacion());
+        evento.setTieneResultados(dto.getTieneResultados() != null ? dto.getTieneResultados() : Boolean.FALSE);
+
+        if (dto.getTipoEventoId() != null) {
+            TipoEvento tipo = tipoEventoRepository.findById(dto.getTipoEventoId())
+                    .orElseThrow(() -> new RuntimeException("Tipo de evento no encontrado con ID: " + dto.getTipoEventoId()));
+            evento.setTipoEvento(tipo);
+        } else {
+            evento.setTipoEvento(null);
+        }
+    }
+
+    private Evento buscarOFallar(Integer id) {
+        return eventoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Evento no encontrado con ID: " + id));
+    }
+
+    private EventoResponseDTO toResponseDTO(Evento e) {
+        EventoResponseDTO dto = new EventoResponseDTO();
+        dto.setId(e.getId());
+        dto.setNombre(e.getNombre());
+        dto.setFecha(e.getFecha());
+        dto.setTipoEventoId(e.getTipoEvento() != null ? e.getTipoEvento().getId() : null);
+        dto.setTipoEvento(e.getTipoEvento() != null ? e.getTipoEvento().getEvento() : null);
+        dto.setUbicacion(e.getUbicacion());
+        dto.setTieneResultados(e.getTieneResultados());
+        dto.setCantidadGruposInscritos(grupoEventoRepository.findByEventoId(e.getId()).size());
+        dto.setCantidadPremios(premioEventoRepository.findByEventoId(e.getId()).size());
+        return dto;
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Service/Eventos/GrupoEventoService.java">
+package com.varcal.cheermanager.Service.Eventos;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.varcal.cheermanager.DTO.Eventos.GrupoEventoDTO;
+import com.varcal.cheermanager.DTO.Eventos.GrupoEventoResponseDTO;
+import com.varcal.cheermanager.Models.Eventos.Evento;
+import com.varcal.cheermanager.Models.Eventos.GrupoEvento;
+import com.varcal.cheermanager.Models.Org_dep.GrupoEntrenamiento;
+import com.varcal.cheermanager.repository.Eventos.EventoRepository;
+import com.varcal.cheermanager.repository.Eventos.GrupoEventoRepository;
+import com.varcal.cheermanager.repository.Org_dep.GrupoEntrenamientoRepository;
+
+@Service
+public class GrupoEventoService {
+
+    @Autowired
+    private GrupoEventoRepository grupoEventoRepository;
+
+    @Autowired
+    private EventoRepository eventoRepository;
+
+    @Autowired
+    private GrupoEntrenamientoRepository grupoEntrenamientoRepository;
+
+    public GrupoEvento inscribir(GrupoEventoDTO dto) {
+        Evento evento = eventoRepository.findById(dto.getEventoId())
+                .orElseThrow(() -> new RuntimeException("Evento no encontrado con ID: " + dto.getEventoId()));
+
+        GrupoEntrenamiento grupo = grupoEntrenamientoRepository.findById(dto.getGrupoEntrenamientoId())
+                .orElseThrow(() -> new RuntimeException("Grupo no encontrado con ID: " + dto.getGrupoEntrenamientoId()));
+
+        if (grupoEventoRepository.existsByEventoIdAndGrupoEntrenamientoId(evento.getId(), grupo.getId())) {
+            throw new RuntimeException(
+                    "El grupo '" + grupo.getNombre() + "' ya está inscrito en el evento '" + evento.getNombre() + "'");
+        }
+
+        GrupoEvento ge = new GrupoEvento();
+        ge.setEvento(evento);
+        ge.setGrupoEntrenamiento(grupo);
+        return grupoEventoRepository.save(ge);
+    }
+
+    public List<GrupoEventoResponseDTO> listarPorEvento(Integer eventoId) {
+        return grupoEventoRepository.findByEventoId(eventoId).stream().map(this::toDTO).collect(Collectors.toList());
+    }
+
+    // Historial de competencias en las que ha participado un grupo — la base
+    // para la línea de tiempo/progresión de un equipo.
+    public List<GrupoEventoResponseDTO> listarPorGrupo(Integer grupoEntrenamientoId) {
+        return grupoEventoRepository.findByGrupoEntrenamientoId(grupoEntrenamientoId).stream()
+                .map(this::toDTO).collect(Collectors.toList());
+    }
+
+    public void desinscribir(Integer id) {
+        if (!grupoEventoRepository.existsById(id)) {
+            throw new RuntimeException("Inscripción de grupo a evento no encontrada con ID: " + id);
+        }
+        grupoEventoRepository.deleteById(id);
+    }
+
+    private GrupoEventoResponseDTO toDTO(GrupoEvento ge) {
+        GrupoEventoResponseDTO dto = new GrupoEventoResponseDTO();
+        dto.setId(ge.getId());
+        dto.setGrupoEntrenamientoId(ge.getGrupoEntrenamiento().getId());
+        dto.setNombreGrupo(ge.getGrupoEntrenamiento().getNombre());
+        dto.setEventoId(ge.getEvento().getId());
+        dto.setNombreEvento(ge.getEvento().getNombre());
+        dto.setFechaEvento(ge.getEvento().getFecha());
+        return dto;
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Service/Eventos/PremioEventoService.java">
+package com.varcal.cheermanager.Service.Eventos;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.varcal.cheermanager.DTO.Eventos.PremioEventoDTO;
+import com.varcal.cheermanager.DTO.Eventos.PremioEventoResponseDTO;
+import com.varcal.cheermanager.Models.Eventos.Evento;
+import com.varcal.cheermanager.Models.Eventos.PremioEvento;
+import com.varcal.cheermanager.repository.Eventos.EventoRepository;
+import com.varcal.cheermanager.repository.Eventos.PremioEventoRepository;
+
+@Service
+public class PremioEventoService {
+
+    @Autowired
+    private PremioEventoRepository premioEventoRepository;
+
+    @Autowired
+    private EventoRepository eventoRepository;
+
+    public PremioEventoResponseDTO crear(PremioEventoDTO dto) {
+        Evento evento = eventoRepository.findById(dto.getEventoId())
+                .orElseThrow(() -> new RuntimeException("Evento no encontrado con ID: " + dto.getEventoId()));
+
+        PremioEvento premio = new PremioEvento();
+        premio.setEvento(evento);
+        premio.setDescripcion(dto.getDescripcion());
+        premio.setPremio(dto.getPremio());
+
+        return toDTO(premioEventoRepository.save(premio));
+    }
+
+    public List<PremioEventoResponseDTO> listarPorEvento(Integer eventoId) {
+        if (!eventoRepository.existsById(eventoId)) {
+            throw new RuntimeException("Evento no encontrado con ID: " + eventoId);
+        }
+        return premioEventoRepository.findByEventoId(eventoId).stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public PremioEventoResponseDTO actualizar(Integer id, PremioEventoDTO dto) {
+        PremioEvento premio = premioEventoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Premio no encontrado con ID: " + id));
+
+        premio.setDescripcion(dto.getDescripcion());
+        premio.setPremio(dto.getPremio());
+
+        return toDTO(premioEventoRepository.save(premio));
+    }
+
+    public void eliminar(Integer id) {
+        if (!premioEventoRepository.existsById(id)) {
+            throw new RuntimeException("Premio no encontrado con ID: " + id);
+        }
+        premioEventoRepository.deleteById(id);
+    }
+
+    private PremioEventoResponseDTO toDTO(PremioEvento p) {
+        PremioEventoResponseDTO dto = new PremioEventoResponseDTO();
+        dto.setId(p.getId());
+        dto.setEventoId(p.getEvento().getId());
+        dto.setNombreEvento(p.getEvento().getNombre());
+        dto.setDescripcion(p.getDescripcion());
+        dto.setPremio(p.getPremio());
+        return dto;
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Service/Eventos/ResultadoCompetenciaService.java">
+package com.varcal.cheermanager.Service.Eventos;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.varcal.cheermanager.DTO.Eventos.ResultadoCompetenciaDTO;
+import com.varcal.cheermanager.DTO.Eventos.ResultadoCompetenciaResponseDTO;
+import com.varcal.cheermanager.Models.Eventos.Evento;
+import com.varcal.cheermanager.Models.Eventos.PremioEvento;
+import com.varcal.cheermanager.Models.Eventos.ResultadoCompetencia;
+import com.varcal.cheermanager.Models.Evaluaciones.Rutina.EvaluacionRutina;
+import com.varcal.cheermanager.Models.Org_dep.GrupoEntrenamiento;
+import com.varcal.cheermanager.repository.Eventos.EventoRepository;
+import com.varcal.cheermanager.repository.Eventos.PremioEventoRepository;
+import com.varcal.cheermanager.repository.Eventos.ResultadoCompetenciaRepository;
+import com.varcal.cheermanager.repository.Evaluaciones.Rutina.EvaluacionRutinaRepository;
+import com.varcal.cheermanager.repository.Org_dep.GrupoEntrenamientoRepository;
+
+@Service
+public class ResultadoCompetenciaService {
+
+    @Autowired
+    private ResultadoCompetenciaRepository resultadoCompetenciaRepository;
+
+    @Autowired
+    private EventoRepository eventoRepository;
+
+    @Autowired
+    private GrupoEntrenamientoRepository grupoEntrenamientoRepository;
+
+    @Autowired
+    private PremioEventoRepository premioEventoRepository;
+
+    @Autowired
+    private EvaluacionRutinaRepository evaluacionRutinaRepository;
+
+    public ResultadoCompetenciaResponseDTO registrar(ResultadoCompetenciaDTO dto) {
+        Evento evento = eventoRepository.findById(dto.getEventoId())
+                .orElseThrow(() -> new RuntimeException("Evento no encontrado con ID: " + dto.getEventoId()));
+
+        GrupoEntrenamiento grupo = null;
+        if (dto.getGrupoEntrenamientoId() != null) {
+            grupo = grupoEntrenamientoRepository.findById(dto.getGrupoEntrenamientoId())
+                    .orElseThrow(() -> new RuntimeException(
+                            "Grupo de entrenamiento no encontrado con ID: " + dto.getGrupoEntrenamientoId()));
+        }
+
+        PremioEvento premio = resolverPremio(dto.getPremioId(), evento);
+
+        EvaluacionRutina evaluacionRutina = null;
+        if (dto.getEvaluacionRutinaId() != null) {
+            evaluacionRutina = evaluacionRutinaRepository.findById(dto.getEvaluacionRutinaId())
+                    .orElseThrow(() -> new RuntimeException(
+                            "Evaluación de rutina no encontrada con ID: " + dto.getEvaluacionRutinaId()));
+        }
+
+        ResultadoCompetencia resultado = new ResultadoCompetencia();
+        resultado.setEvento(evento);
+        resultado.setGrupoEntrenamiento(grupo);
+        resultado.setPosicion(dto.getPosicion());
+        resultado.setPuntaje(dto.getPuntaje());
+        resultado.setPremio(premio);
+        resultado.setEvaluacionRutina(evaluacionRutina);
+        resultado.setObservaciones(dto.getObservaciones());
+
+        return toDTO(resultadoCompetenciaRepository.save(resultado));
+    }
+
+    public List<ResultadoCompetenciaResponseDTO> listarPorEvento(Integer eventoId) {
+        if (!eventoRepository.existsById(eventoId)) {
+            throw new RuntimeException("Evento no encontrado con ID: " + eventoId);
+        }
+        return resultadoCompetenciaRepository.findByEventoIdOrderByPosicionAsc(eventoId).stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<ResultadoCompetenciaResponseDTO> listarPorGrupo(Integer grupoId) {
+        if (!grupoEntrenamientoRepository.existsById(grupoId)) {
+            throw new RuntimeException("Grupo de entrenamiento no encontrado con ID: " + grupoId);
+        }
+        return resultadoCompetenciaRepository.findByGrupoEntrenamientoId(grupoId).stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public ResultadoCompetenciaResponseDTO actualizar(Integer id, ResultadoCompetenciaDTO dto) {
+        ResultadoCompetencia resultado = resultadoCompetenciaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Resultado no encontrado con ID: " + id));
+
+        if (dto.getGrupoEntrenamientoId() != null) {
+            GrupoEntrenamiento grupo = grupoEntrenamientoRepository.findById(dto.getGrupoEntrenamientoId())
+                    .orElseThrow(() -> new RuntimeException(
+                            "Grupo de entrenamiento no encontrado con ID: " + dto.getGrupoEntrenamientoId()));
+            resultado.setGrupoEntrenamiento(grupo);
+        }
+
+        PremioEvento premio = resolverPremio(dto.getPremioId(), resultado.getEvento());
+        resultado.setPremio(premio);
+
+        if (dto.getEvaluacionRutinaId() != null) {
+            EvaluacionRutina evaluacionRutina = evaluacionRutinaRepository.findById(dto.getEvaluacionRutinaId())
+                    .orElseThrow(() -> new RuntimeException(
+                            "Evaluación de rutina no encontrada con ID: " + dto.getEvaluacionRutinaId()));
+            resultado.setEvaluacionRutina(evaluacionRutina);
+        } else {
+            resultado.setEvaluacionRutina(null);
+        }
+
+        resultado.setPosicion(dto.getPosicion());
+        resultado.setPuntaje(dto.getPuntaje());
+        resultado.setObservaciones(dto.getObservaciones());
+
+        return toDTO(resultadoCompetenciaRepository.save(resultado));
+    }
+
+    public void eliminar(Integer id) {
+        if (!resultadoCompetenciaRepository.existsById(id)) {
+            throw new RuntimeException("Resultado no encontrado con ID: " + id);
+        }
+        resultadoCompetenciaRepository.deleteById(id);
+    }
+
+    // Centraliza la búsqueda + validación de pertenencia del premio al evento,
+    // usada tanto en registrar() como en actualizar() para evitar duplicar
+    // la regla de negocio (y el bug de que actualizar() no la aplicaba).
+    private PremioEvento resolverPremio(Integer premioId, Evento evento) {
+        if (premioId == null) {
+            return null;
+        }
+        return premioEventoRepository.findById(premioId)
+                .filter(p -> p.getEvento().getId().equals(evento.getId()))
+                .orElseThrow(() -> new RuntimeException(
+                        "El premio con ID " + premioId + " no existe o no pertenece a este evento"));
+    }
+
+    private ResultadoCompetenciaResponseDTO toDTO(ResultadoCompetencia r) {
+        ResultadoCompetenciaResponseDTO dto = new ResultadoCompetenciaResponseDTO();
+        dto.setId(r.getId());
+        dto.setEventoId(r.getEvento().getId());
+        dto.setNombreEvento(r.getEvento().getNombre());
+        dto.setFechaEvento(r.getEvento().getFecha());
+        dto.setGrupoEntrenamientoId(r.getGrupoEntrenamiento() != null ? r.getGrupoEntrenamiento().getId() : null);
+        dto.setNombreGrupo(r.getGrupoEntrenamiento() != null ? r.getGrupoEntrenamiento().getNombre() : null);
+        dto.setPosicion(r.getPosicion());
+        dto.setPuntaje(r.getPuntaje());
+        dto.setPremioId(r.getPremio() != null ? r.getPremio().getId() : null);
+        dto.setDescripcionPremio(r.getPremio() != null ? r.getPremio().getDescripcion() : null);
+        dto.setEvaluacionRutinaId(r.getEvaluacionRutina() != null ? r.getEvaluacionRutina().getId() : null);
+        dto.setObservaciones(r.getObservaciones());
+        return dto;
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Service/Eventos/TipoEventoService.java">
+package com.varcal.cheermanager.Service.Eventos;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.varcal.cheermanager.Models.Eventos.TipoEvento;
+import com.varcal.cheermanager.repository.Eventos.TipoEventoRepository;
+
+@Service
+public class TipoEventoService {
+
+    @Autowired
+    private TipoEventoRepository tipoEventoRepository;
+
+    public List<TipoEvento> listarTodos() {
+        return tipoEventoRepository.findAll();
+    }
+
+    public TipoEvento obtenerPorId(Integer id) {
+        return tipoEventoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Tipo de evento no encontrado con ID: " + id));
+    }
+
+    public TipoEvento crear(String nombre) {
+        tipoEventoRepository.findByEvento(nombre).ifPresent(t -> {
+            throw new RuntimeException("Ya existe un tipo de evento llamado '" + nombre + "'");
+        });
+        TipoEvento tipo = new TipoEvento();
+        tipo.setEvento(nombre);
+        return tipoEventoRepository.save(tipo);
+    }
+
+    public void eliminar(Integer id) {
+        if (!tipoEventoRepository.existsById(id)) {
+            throw new RuntimeException("Tipo de evento no encontrado con ID: " + id);
+        }
+        tipoEventoRepository.deleteById(id);
+    }
+}
+</file>
+
 <file path="src/main/java/com/varcal/cheermanager/Service/File/FileStorageService.java">
 package com.varcal.cheermanager.Service.File;
 
@@ -10970,6 +12483,91 @@ public class Objetivo {
 }
 </file>
 
+<file path="src/main/java/com/varcal/cheermanager/Models/Evaluaciones/Rutina/EvaluacionRutina.java">
+package com.varcal.cheermanager.Models.Evaluaciones.Rutina;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+
+import com.varcal.cheermanager.Models.Eventos.Evento;
+import com.varcal.cheermanager.Models.Org_dep.GrupoEntrenamiento;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+// La evaluación de UNA rutina completa de UN grupo, en UNA fecha/evento
+// (puede ser una competencia real o un simulacro/práctica interna). El
+// puntaje final se compone de los RegistroSubCriterio asociados — ver
+// EvaluacionRutinaService para el detalle del cálculo y la suma final.
+@Data
+@NoArgsConstructor
+@Entity
+@Table(name = "evaluaciones_rutina")
+public class EvaluacionRutina {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    @ManyToOne
+    @JoinColumn(name = "grupo_entrenamiento_id", nullable = false)
+    private GrupoEntrenamiento grupo;
+
+    @ManyToOne
+    @JoinColumn(name = "nivel_id", nullable = false)
+    private NivelCompetencia nivel;
+
+    @Column(name = "fecha", nullable = false)
+    private LocalDate fecha;
+
+    // Nombre libre del evento o "Práctica interna" / "Simulacro" si no es una
+    // competencia oficial — el sistema sirve igual para preparación. Se
+    // conserva para no romper evaluaciones ya cargadas y para el caso de
+    // simulacros que nunca deberían crear un registro en `eventos`.
+    @Column(name = "evento", length = 200)
+    private String evento;
+
+    // FK opcional al Evento real del módulo Eventos, cuando esta evaluación
+    // corresponde a una competencia oficial ya registrada en el sistema (no
+    // a un simulacro/práctica interna). Permite construir la progresión de
+    // puntaje de un grupo evento-a-evento sin depender de que el texto libre
+    // de arriba coincida exactamente. Se deja nullable y separado del campo
+    // `evento` (String) a propósito, para no forzar una migración de datos
+    // sobre evaluaciones ya existentes.
+    @ManyToOne
+    @JoinColumn(name = "evento_oficial_id")
+    private Evento eventoOficial;
+
+    // Cantidad de atletas que participaron en ESTA presentación específica
+    // (puede no coincidir con el total de DeportistaPerteneceGrupo si alguien
+    // no asistió ese día) — necesario porque las tablas de cantidad dependen
+    // del número real de atletas en el piso.
+    @Column(name = "cantidad_atletas", nullable = false)
+    private Integer cantidadAtletas;
+
+    // Suma final de todos los RegistroSubCriterio. Se recalcula cada vez que
+    // se agrega/edita un registro (ver EvaluacionRutinaService.recalcularTotal).
+    @Column(name = "puntaje_total", precision = 6, scale = 2)
+    private BigDecimal puntajeTotal;
+
+    @Column(name = "observaciones", length = 1000)
+    private String observaciones;
+
+    @OneToMany(mappedBy = "evaluacionRutina", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RegistroSubCriterio> registros;
+}
+</file>
+
 <file path="src/main/java/com/varcal/cheermanager/Models/Eventos/Evento.java">
 package com.varcal.cheermanager.Models.Eventos;
 
@@ -11007,6 +12605,64 @@ public class Evento {
 
     @OneToMany(mappedBy = "evento", cascade = CascadeType.ALL)
     private List<PremioEvento> premios;
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Models/Eventos/ResultadoCompetencia.java">
+package com.varcal.cheermanager.Models.Eventos;
+
+import java.math.BigDecimal;
+
+import com.varcal.cheermanager.Models.Evaluaciones.Rutina.EvaluacionRutina;
+import com.varcal.cheermanager.Models.Org_dep.GrupoEntrenamiento;
+
+import jakarta.persistence.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@Entity
+@Table(name = "resultados_competencia")
+public class ResultadoCompetencia {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    @ManyToOne
+    @JoinColumn(name = "evento_id", nullable = false)
+    private Evento evento;
+
+    @ManyToOne
+    @JoinColumn(name = "grupo_id")
+    private GrupoEntrenamiento grupoEntrenamiento;
+
+    @Column(name = "posicion")
+    private Integer posicion;
+
+    @Column(name = "puntaje", precision = 10, scale = 2)
+    private BigDecimal puntaje;
+
+    // Antes era un Integer suelto sin relación real (premioId). Se corrige a
+    // FK propiamente dicha para poder navegar el objeto Premio completo y que
+    // JPA valide la integridad referencial. Nullable porque no todo resultado
+    // implica premio (ej. un grupo que queda en posición 12 de 20).
+    @ManyToOne
+    @JoinColumn(name = "premio_id")
+    private PremioEvento premio;
+
+    // Enlaza el resultado (posición + puntaje oficial del evento) con el
+    // desglose técnico completo que ya calculó el motor de EvaluacionRutina,
+    // si es que esa competencia se evaluó dentro del sistema (no todas lo
+    // estarán, ej. eventos de otros productores donde solo se registra el
+    // resultado final). Nullable a propósito: permite cargar resultados
+    // históricos/externos sin exigir que exista una EvaluacionRutina.
+    @ManyToOne
+    @JoinColumn(name = "evaluacion_rutina_id")
+    private EvaluacionRutina evaluacionRutina;
+
+    @Column(name = "observaciones")
+    private String observaciones;
 }
 </file>
 
@@ -11161,72 +12817,17 @@ public class Horario {
 }
 </file>
 
-<file path="src/main/java/com/varcal/cheermanager/Models/Inventario/CategoriaProducto.java">
+<file path="src/main/java/com/varcal/cheermanager/Models/Inventario/MovimientoInventario.java">
 package com.varcal.cheermanager.Models.Inventario;
 
-import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.time.LocalDateTime;
 
-@Data
-@NoArgsConstructor
-@Entity
-@Table(name = "categorias_producto")
-public class CategoriaProducto {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-
-    @Column(name = "nombre", nullable = false, unique = true)
-    private String nombre;
-
-    @Column(name = "descripcion")
-    private String descripcion;
-}
-</file>
-
-<file path="src/main/java/com/varcal/cheermanager/Models/Inventario/DetalleVenta.java">
-package com.varcal.cheermanager.Models.Inventario;
-
-
-import com.varcal.cheermanager.Models.Financiero.Factura;
-
-import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@NoArgsConstructor
-@Entity
-@Table(name = "detalles_venta")
-public class DetalleVenta {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-
-    @ManyToOne
-    @JoinColumn(name = "factura_id", nullable = false)
-    private Factura factura;
-
-    @ManyToOne
-    @JoinColumn(name = "producto_id", nullable = false)
-    private Producto producto;
-
-    @Column(name = "cantidad", nullable = false)
-    private Integer cantidad;
-}
-</file>
-
-<file path="src/main/java/com/varcal/cheermanager/Models/Inventario/Venta.java">
-package com.varcal.cheermanager.Models.Inventario;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-
-import com.varcal.cheermanager.Models.Financiero.Factura;
+import com.varcal.cheermanager.Models.Auth.Usuario;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -11239,21 +12840,107 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "ventas")
-public class Venta {
+@Table(name = "movimientos_inventario")
+public class MovimientoInventario {
+
+    public enum TipoMovimiento {
+        entrada, salida, ajuste
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "fecha", nullable = false)
-    private LocalDate fecha;
+    // Antes apuntaba a Producto (el artículo genérico) — se corrige a
+    // ProductoVariante porque el stock real se controla por talla/color, no
+    // por artículo. "Entró 1 camiseta" no dice nada sin saber de qué talla.
+    @ManyToOne
+    @JoinColumn(name = "producto_variante_id", nullable = false)
+    private ProductoVariante productoVariante;
 
-    @Column(name = "total", precision = 10, scale = 2, nullable = false)
-    private BigDecimal total;
+    @Column(name = "tipo", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private TipoMovimiento tipo;
+
+    @Column(name = "cantidad", nullable = false)
+    private Integer cantidad;
+
+    @Column(name = "motivo", length = 300)
+    private String motivo; // ej. "Compra a proveedor Medellín", "Venta #123", "Ajuste por conteo físico"
+
+    @Column(name = "fecha", nullable = false)
+    private LocalDateTime fecha = LocalDateTime.now();
 
     @ManyToOne
-    @JoinColumn(name = "factura_id")
-    private Factura factura;
+    @JoinColumn(name = "usuario_id", nullable = false)
+    private Usuario usuario;
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Models/Inventario/Producto.java">
+package com.varcal.cheermanager.Models.Inventario;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+import jakarta.persistence.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+// Ficha del artículo del catálogo (ej. "Camiseta entrenamiento"). NO tiene
+// precio ni stock propios — esos viven en ProductoVariante, porque el
+// catálogo real vende por talla/color con stock independiente por
+// combinación. Precio aquí es solo un rango de referencia para costeo.
+@Data
+@NoArgsConstructor
+@Entity
+@Table(name = "productos")
+public class Producto {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    // SKU base del artículo, formato RAT-[CAT]-[COD] (sin el SEQ de 3
+    // dígitos, ese vive en la variante si aplica). Ej: RAT-ROP-CAE.
+    @Column(name = "sku", nullable = false, unique = true, length = 20)
+    private String sku;
+
+    @Column(name = "nombre", nullable = false)
+    private String nombre;
+
+    @Column(name = "descripcion")
+    private String descripcion;
+
+    @ManyToOne
+    @JoinColumn(name = "categoria_id", nullable = false)
+    private CategoriaProducto categoriaProducto;
+
+    // Rango de costo de referencia (lo que trae el catálogo de proveedores).
+    // El precio de venta real, el que se cobra, vive en cada ProductoVariante
+    // — puede diferir del costo por margen, y varía por talla/tier.
+    @Column(name = "precio_min_referencia", precision = 10, scale = 2)
+    private BigDecimal precioMinReferencia;
+
+    @Column(name = "precio_max_referencia", precision = 10, scale = 2)
+    private BigDecimal precioMaxReferencia;
+
+    @Column(name = "origen")
+    private String origen; // ej. "Medellín", "Bogotá", "Interno"
+
+    @Column(name = "notas_proveedor", length = 500)
+    private String notasProveedor;
+
+    // false para los artículos digitales (categoría DIG: membresía, clase
+    // suelta, foto/certificado digital) — no tienen unidades físicas, así
+    // que no participan de MovimientoInventario ni de alertas de stock bajo.
+    @Column(name = "requiere_control_stock", nullable = false)
+    private Boolean requiereControlStock = true;
+
+    @Column(name = "activo", nullable = false)
+    private Boolean activo = true;
+
+    @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductoVariante> variantes;
 }
 </file>
 
@@ -12146,6 +13833,150 @@ public class HistorialMedico {
     @Column(name = "medico_tratante")
     private String medicoTratante;
 
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Models/Inventario/CategoriaProducto.java">
+package com.varcal.cheermanager.Models.Inventario;
+
+import jakarta.persistence.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@Entity
+@Table(name = "categorias_producto")
+public class CategoriaProducto {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    @Column(name = "nombre", nullable = false, unique = true)
+    private String nombre;
+
+    // 3 letras usadas en el SKU (RAT-[CAT]-...), ej. ROP, CAL, ACC, DIG.
+    // Se valida en el service que siempre sean exactamente 3 letras
+    // mayúsculas, para no romper el formato de nomenclatura del catálogo.
+    @Column(name = "codigo", nullable = false, unique = true, length = 3)
+    private String codigo;
+
+    @Column(name = "descripcion")
+    private String descripcion;
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Models/Inventario/DetalleVenta.java">
+package com.varcal.cheermanager.Models.Inventario;
+
+import java.math.BigDecimal;
+
+import jakarta.persistence.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@Entity
+@Table(name = "detalles_venta")
+public class DetalleVenta {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    // Antes apuntaba directo a Factura y nunca a Venta — no existía forma de
+    // agrupar las líneas de una misma venta. Se corrige: cada línea
+    // pertenece a UNA Venta, y es la Venta la que opcionalmente se liga a
+    // una Factura (ver Venta.factura).
+    @ManyToOne
+    @JoinColumn(name = "venta_id", nullable = false)
+    private Venta venta;
+
+    @ManyToOne
+    @JoinColumn(name = "producto_variante_id", nullable = false)
+    private ProductoVariante productoVariante;
+
+    @Column(name = "cantidad", nullable = false)
+    private Integer cantidad;
+
+    // Precio unitario AL MOMENTO de la venta — se copia desde
+    // ProductoVariante.precioVenta al crear el detalle. Si el precio del
+    // producto cambia después, esta venta histórica no debe verse afectada.
+    @Column(name = "precio_unitario", nullable = false, precision = 10, scale = 2)
+    private BigDecimal precioUnitario;
+
+    @Column(name = "subtotal", nullable = false, precision = 10, scale = 2)
+    private BigDecimal subtotal;
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Models/Inventario/Venta.java">
+package com.varcal.cheermanager.Models.Inventario;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+
+import com.varcal.cheermanager.Models.Financiero.Factura;
+import com.varcal.cheermanager.Models.Personas.Persona;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@Entity
+@Table(name = "ventas")
+public class Venta {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    @Column(name = "fecha", nullable = false)
+    private LocalDate fecha;
+
+    @Column(name = "total", precision = 10, scale = 2, nullable = false)
+    private BigDecimal total;
+
+    @Column(name = "metodo_pago", length = 30)
+    private String metodoPago; // ej. "efectivo", "transferencia" — sin catálogo formal aún, igual que en Financiero
+
+    // --- Comprador: exactamente uno de los dos grupos debe estar diligenciado ---
+
+    // Si el comprador es un deportista/entrenador/persona ya registrada en el
+    // club (ej. compra su propia licra, o un papá compra para su hija).
+    @ManyToOne
+    @JoinColumn(name = "persona_id")
+    private Persona persona;
+
+    // Si el comprador es externo (no inscrito en el club) — ej. alguien que
+    // compra merchandising o un regalo en un evento. El service valida que
+    // se llene esto SOLO cuando persona_id es null.
+    @Column(name = "nombre_comprador_externo", length = 150)
+    private String nombreCompradorExterno;
+
+    @Column(name = "contacto_comprador_externo", length = 150)
+    private String contactoCompradorExterno; // teléfono o email, texto libre
+
+    // Opcional: si la venta se carga a la cuenta del deportista (ej. se suma
+    // a su próxima factura de mensualidad) en vez de cobrarse de contado.
+    // Queda null en la inmensa mayoría de ventas de tienda (pago inmediato).
+    @ManyToOne
+    @JoinColumn(name = "factura_id")
+    private Factura factura;
+
+    @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DetalleVenta> detalles;
 }
 </file>
 
@@ -13577,6 +15408,7 @@ import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.data.repository.query.Param;
 
 import com.varcal.cheermanager.Models.Auth.Usuario;
+import com.varcal.cheermanager.Models.Inventario.ProductoVariante;
 import com.varcal.cheermanager.Models.Personas.Persona;
 
 import java.time.LocalDateTime;
@@ -13596,6 +15428,7 @@ public interface UserRepository extends JpaRepository<Usuario, Long> {
     boolean existsByEmail(String email);
 
     long countByUsernameStartingWith(String base);
+    Optional<ProductoVariante> findById(Integer usuarioId);
 
 }
 </file>
