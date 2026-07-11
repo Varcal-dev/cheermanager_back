@@ -26,7 +26,7 @@ import com.varcal.cheermanager.DTO.Persona.VincularDeportistaUsuarioDTO;
 import com.varcal.cheermanager.Models.Auth.Usuario;
 import com.varcal.cheermanager.Models.Financiero.Convenio;
 import com.varcal.cheermanager.Models.Personas.Deportista;
-import com.varcal.cheermanager.Service.Persona.HistorialMedicoService;
+import com.varcal.cheermanager.Service.Historiales.HistorialMedicoService;
 import com.varcal.cheermanager.Service.Persona.PersonaService;
 import com.varcal.cheermanager.Utils.RequiresPermission;
 import com.varcal.cheermanager.repository.Financiero.ConvenioRepository;
@@ -102,16 +102,15 @@ public class DeprotistasController {
         try {
             List<DeportistaVistaDTO> deportistas;
 
-            // Si hay filtros, usar método con filtros
             if (estadoId != null || nivelId != null || grupoId != null) {
                 deportistas = personaService.listarDeportistasConFiltros(estadoId, nivelId, grupoId);
             } else {
-                // Si no hay filtros, listar todos los deportistas con detalles
                 deportistas = personaService.listarDeportistasConDetalles();
             }
 
             return ResponseEntity.ok(deportistas);
         } catch (Exception e) {
+            e.printStackTrace(); // 👈 agregar acá
             return ResponseEntity.status(500).body("Error al listar los deportistas: " + e.getMessage());
         }
     }
@@ -272,8 +271,7 @@ public class DeprotistasController {
     @RequiresPermission("crear_historial_medico")
     public ResponseEntity<?> crearHistorialMedico(@PathVariable Integer id, @RequestBody HistorialMedicoDTO dto) {
         try {
-            dto.setPersonaId(id);
-            HistorialMedicoDTO result = historialMedicoService.crearHistorialMedico(dto);
+            HistorialMedicoDTO result = historialMedicoService.crearHistorialMedicoDeDeportista(id, dto);
             return ResponseEntity.ok(result);
         } catch (RuntimeException e) {
             return ResponseEntity.status(400).body(e.getMessage());
@@ -289,8 +287,10 @@ public class DeprotistasController {
             @RequestParam(defaultValue = "10") int size) {
         try {
             Pageable pageable = PageRequest.of(page, size);
-            Page<HistorialMedicoDTO> result = historialMedicoService.obtenerHistorialMedicoPorPersona(id, pageable);
+            Page<HistorialMedicoDTO> result = historialMedicoService.obtenerHistorialMedicoPorDeportista(id, pageable);
             return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error al obtener historial médico: " + e.getMessage());
         }

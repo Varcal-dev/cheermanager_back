@@ -12,7 +12,18 @@ import com.varcal.cheermanager.Models.Personas.Deportista;
 @Repository
 public interface DeportistaRepository extends JpaRepository<Deportista, Integer> {
 
-    @Query(value = "SELECT * FROM deportistas", nativeQuery = true)
+    @Query(value = "SELECT d.id, p.id, p.nombre, p.apellidos, p.direccion, p.telefono, " +
+            "p.fecha_nacimiento, p.genero_id, g.genero, " +
+            "d.altura, d.peso, d.fecha_inscripcion, d.contacto_emergencia, " +
+            "d.estado_id, ep.estado, " +
+            "d.nivel_actual_id, n.nombre, " +
+            "d.convenio_id, c.nombre_empresa " +
+            "FROM deportistas d " +
+            "LEFT JOIN personas p ON p.id = d.persona_id " +
+            "LEFT JOIN generos g ON g.id = p.genero_id " +
+            "LEFT JOIN estados_persona ep ON ep.id = d.estado_id " +
+            "LEFT JOIN niveles n ON n.id = d.nivel_actual_id " +
+            "LEFT JOIN convenios c ON c.id = d.convenio_id", nativeQuery = true)
     List<Object[]> obtenerDeportistasConDetalles();
 
     @Query(value = "SELECT DISTINCT d.* FROM deportistas d " +
@@ -20,8 +31,7 @@ public interface DeportistaRepository extends JpaRepository<Deportista, Integer>
             "LEFT JOIN grupo_deportista gg ON d.id = gg.deportista_id " +
             "WHERE (:estadoId IS NULL OR d.estado_id = :estadoId) " +
             "AND (:nivelId IS NULL OR d.nivel_actual_id = :nivelId) " +
-            "AND (:grupoId IS NULL OR gg.grupo_entrenamiento_id = :grupoId)",
-            nativeQuery = true)
+            "AND (:grupoId IS NULL OR gg.grupo_entrenamiento_id = :grupoId)", nativeQuery = true)
     List<Deportista> findByFiltros(Integer estadoId, Integer nivelId, Integer grupoId);
 
     @NonNull

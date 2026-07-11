@@ -45,6 +45,7 @@ The content is organized as follows:
 .mvn/wrapper/maven-wrapper.properties
 ajustes_claudia/AUTH_API_v3_COMPLETE.md
 ajustes_claudia/AUTH_IMPLEMENTATION_V3.md
+ajustes_claudia/Estado_Consolidado_CheerManager.md
 ajustes_claudia/KPIs_y_Dashboards_CheerManager_propuesta.md
 ajustes_claudia/RESUMEN_CABOS_SUELTOS.md
 ajustes_claudia/RESUMEN_CAMBIOS.md
@@ -65,6 +66,7 @@ src/main/java/com/varcal/cheermanager/config/SecurityConfig.java
 src/main/java/com/varcal/cheermanager/Controller/Auth/AuthController.java
 src/main/java/com/varcal/cheermanager/Controller/Auth/PermisoController.java
 src/main/java/com/varcal/cheermanager/Controller/Auth/RolController.java
+src/main/java/com/varcal/cheermanager/Controller/Dashboard/DashboardController.java
 src/main/java/com/varcal/cheermanager/Controller/Evaluaciones/CriterioEvaluacionController.java
 src/main/java/com/varcal/cheermanager/Controller/Evaluaciones/EvaluacionController.java
 src/main/java/com/varcal/cheermanager/Controller/Evaluaciones/ObjetivoController.java
@@ -105,6 +107,15 @@ src/main/java/com/varcal/cheermanager/DTO/Ath/CrearRolConPermisosDTO.java
 src/main/java/com/varcal/cheermanager/DTO/Ath/RolConConteoDTO.java
 src/main/java/com/varcal/cheermanager/DTO/Ath/UsuarioDTO.java
 src/main/java/com/varcal/cheermanager/DTO/auxi/AsignacionInvalidaException.java
+src/main/java/com/varcal/cheermanager/DTO/Dashboard/ResumenAdministracionDTO.java
+src/main/java/com/varcal/cheermanager/DTO/Dashboard/ResumenEvaluacionDTO.java
+src/main/java/com/varcal/cheermanager/DTO/Dashboard/ResumenEventosDTO.java
+src/main/java/com/varcal/cheermanager/DTO/Dashboard/ResumenFinanzasDTO.java
+src/main/java/com/varcal/cheermanager/DTO/Dashboard/ResumenHorariosDTO.java
+src/main/java/com/varcal/cheermanager/DTO/Dashboard/ResumenInicioDTO.java
+src/main/java/com/varcal/cheermanager/DTO/Dashboard/ResumenOrganizacionDTO.java
+src/main/java/com/varcal/cheermanager/DTO/Dashboard/ResumenPersonasDTO.java
+src/main/java/com/varcal/cheermanager/DTO/Dashboard/ResumenTiendaDTO.java
 src/main/java/com/varcal/cheermanager/DTO/Evaluaciones/CriterioEvaluacionDTO.java
 src/main/java/com/varcal/cheermanager/DTO/Evaluaciones/CriterioEvaluacionResponseDTO.java
 src/main/java/com/varcal/cheermanager/DTO/Evaluaciones/EvaluacionDTO.java
@@ -157,6 +168,7 @@ src/main/java/com/varcal/cheermanager/DTO/Org_dep/InscripcionDetalleDto.java
 src/main/java/com/varcal/cheermanager/DTO/Org_dep/InscripcionDto.java
 src/main/java/com/varcal/cheermanager/DTO/Org_dep/InscripcionSimpleDTO.java
 src/main/java/com/varcal/cheermanager/DTO/Org_dep/NivelDetalleDTO.java
+src/main/java/com/varcal/cheermanager/DTO/Persona/ActualizarPerfilDTO.java
 src/main/java/com/varcal/cheermanager/DTO/Persona/AgregarDeportistaRequest.java
 src/main/java/com/varcal/cheermanager/DTO/Persona/AsignacionEntrenadorDTO.java
 src/main/java/com/varcal/cheermanager/DTO/Persona/DeportistaDTO.java
@@ -229,7 +241,6 @@ src/main/java/com/varcal/cheermanager/Models/Org_dep/EstadoCategoriaNivel.java
 src/main/java/com/varcal/cheermanager/Models/Org_dep/GrupoEntrenamiento.java
 src/main/java/com/varcal/cheermanager/Models/Org_dep/Inscripcion.java
 src/main/java/com/varcal/cheermanager/Models/Org_dep/Nivel.java
-src/main/java/com/varcal/cheermanager/Models/Org_dep/ReglaCategoria.java
 src/main/java/com/varcal/cheermanager/Models/Org_dep/TipoGrupo.java
 src/main/java/com/varcal/cheermanager/Models/Personas/ContactoEmergencia.java
 src/main/java/com/varcal/cheermanager/Models/Personas/Deportista.java
@@ -270,6 +281,7 @@ src/main/java/com/varcal/cheermanager/repository/Financiero/PlanInscripcionRepos
 src/main/java/com/varcal/cheermanager/repository/Financiero/PlanPagoRepository.java
 src/main/java/com/varcal/cheermanager/repository/Financiero/TipoPagoRepository.java
 src/main/java/com/varcal/cheermanager/repository/Financiero/TipoPlanPagoRepository.java
+src/main/java/com/varcal/cheermanager/repository/Funcionalidad/AuditoriaRepository.java
 src/main/java/com/varcal/cheermanager/repository/Funcionalidad/LogAccesoRepository.java
 src/main/java/com/varcal/cheermanager/repository/Historiales/HistorialMedicoRepository.java
 src/main/java/com/varcal/cheermanager/repository/Historiales/HistorialNivelDeportistaRepository.java
@@ -287,11 +299,11 @@ src/main/java/com/varcal/cheermanager/repository/Org_dep/CategoriaNivelRepositor
 src/main/java/com/varcal/cheermanager/repository/Org_dep/DeportistaPerteneceGrupoRepository.java
 src/main/java/com/varcal/cheermanager/repository/Org_dep/DiaSemanaRepository.java
 src/main/java/com/varcal/cheermanager/repository/Org_dep/DivisionRepository.java
+src/main/java/com/varcal/cheermanager/repository/Org_dep/EntrenadorGrupoRepository.java
 src/main/java/com/varcal/cheermanager/repository/Org_dep/EstadoCategoriaNivelRepository.java
 src/main/java/com/varcal/cheermanager/repository/Org_dep/GrupoEntrenamientoRepository.java
 src/main/java/com/varcal/cheermanager/repository/Org_dep/InscripcionRepository.java
 src/main/java/com/varcal/cheermanager/repository/Org_dep/NivelRepository.java
-src/main/java/com/varcal/cheermanager/repository/Org_dep/ReglaCategoriaRepository.java
 src/main/java/com/varcal/cheermanager/repository/Org_dep/TipoGrupoRepository.java
 src/main/java/com/varcal/cheermanager/repository/Personas/DeportistaRepository.java
 src/main/java/com/varcal/cheermanager/repository/Personas/EntrenadorRepository.java
@@ -306,6 +318,15 @@ src/main/java/com/varcal/cheermanager/Service/Auth/AuthService.java
 src/main/java/com/varcal/cheermanager/Service/Auth/PermisoService.java
 src/main/java/com/varcal/cheermanager/Service/Auth/RolService.java
 src/main/java/com/varcal/cheermanager/Service/Auth/UsuarioService.java
+src/main/java/com/varcal/cheermanager/Service/Dashboard/DashboardAdministracionService.java
+src/main/java/com/varcal/cheermanager/Service/Dashboard/DashboardEvaluacionService.java
+src/main/java/com/varcal/cheermanager/Service/Dashboard/DashboardEventosService.java
+src/main/java/com/varcal/cheermanager/Service/Dashboard/DashboardFinanzasService.java
+src/main/java/com/varcal/cheermanager/Service/Dashboard/DashboardHorariosService.java
+src/main/java/com/varcal/cheermanager/Service/Dashboard/DashboardInicioService.java
+src/main/java/com/varcal/cheermanager/Service/Dashboard/DashboardOrganizacionService.java
+src/main/java/com/varcal/cheermanager/Service/Dashboard/DashboardPersonasService.java
+src/main/java/com/varcal/cheermanager/Service/Dashboard/DashboardTiendaService.java
 src/main/java/com/varcal/cheermanager/Service/Evaluaciones/CriterioEvaluacionService.java
 src/main/java/com/varcal/cheermanager/Service/Evaluaciones/EvaluacionService.java
 src/main/java/com/varcal/cheermanager/Service/Evaluaciones/ObjetivoService.java
@@ -347,6 +368,7 @@ src/main/java/com/varcal/cheermanager/Service/Org_dep/NivelService.java
 src/main/java/com/varcal/cheermanager/Service/Persona/GeneroService.java
 src/main/java/com/varcal/cheermanager/Service/Persona/HistorialMedicoService.java
 src/main/java/com/varcal/cheermanager/Service/Persona/PersonaService.java
+src/main/java/com/varcal/cheermanager/Utils/AuthenticatedUserUtil.java
 src/main/java/com/varcal/cheermanager/Utils/PasswordHashTest.java
 src/main/java/com/varcal/cheermanager/Utils/RequiresPermission.java
 src/main/java/com/varcal/cheermanager/Utils/UsernameUtils.java
@@ -357,1089 +379,1588 @@ src/test/java/com/varcal/cheermanager/CheermanagerApplicationTests.java
 <files>
 This section contains the contents of the repository's files.
 
-<file path="src/main/java/com/varcal/cheermanager/Controller/Inventario/CategoriaProductoController.java">
-package com.varcal.cheermanager.Controller.Inventario;
+<file path="ajustes_claudia/Estado_Consolidado_CheerManager.md">
+# CheerManager — Estado consolidado (verificado contra tu proyecto real)
 
-import java.util.List;
+## ✅ Módulo Eventos — 100% completo y verificado
+
+5 entidades (`TipoEvento`, `Evento`, `GrupoEvento`, `PremioEvento`, `ResultadoCompetencia`), con las 4 capas cada una. Verifiqué en tu código:
+- Permisos granulares correctos en los 3 controllers que construimos juntos (`crear_evento`, `modificar_evento`, `eliminar_evento`, `asignar_grupo_evento`, `registrar_resultado_competencia`) — no quedó nada colgado del `modificar_evento` genérico que usé al principio.
+- `EvaluacionRutina.eventoOficial` conectado — la progresión de puntaje evento-a-evento funciona.
+- `ResultadoCompetencia.premio` como FK real (ya no el `Integer` suelto original).
+
+**Nada pendiente acá.**
+
+## ✅ Módulo Inventario — 100% completo y verificado
+
+6 entidades (`CategoriaProducto`, `Producto`, `ProductoVariante`, `MovimientoInventario`, `Venta`, `DetalleVenta`), 4 capas cada una. Verifiqué:
+- `DetalleVenta.venta` (el bug del huérfano original, que apuntaba a `Factura` y nunca a `Venta`) — corregido.
+- `Venta` con comprador flexible (`persona` o `nombreCompradorExterno`) — presente.
+- `MovimientoInventarioDTO` y `VentaDTO` **ya no tienen** `usuarioId` — se resuelve solo vía `AuthenticatedUserUtil`.
+
+**Pendiente, ya documentado, no urgente:** `anular_venta`/`modificar_venta` no tienen lógica de negocio todavía (anular una venta debería generar movimientos de entrada compensatorios, no un DELETE).
+
+## ✅ Deuda técnica transversal — resuelta
+
+- `UserRepository`: se quitó el método pegado por error que devolvía `ProductoVariante` en vez de `Usuario`. Confirmé que ya no está.
+- `AuthenticatedUserUtil`: presente y en uso por `MovimientoInventarioService`.
+- `CategoriaNivel`: ahora mapea `añoNacimientoMin/Max` y `cantidadMin/Max` — confirmé que las 4 columnas están.
+- `ReglaCategoria`/`ReglaCategoriaRepository`: confirmé que **ya no aparecen** en tu proyecto — se borraron correctamente.
+- `EntrenadorGrupoRepository` (la tabla puente `grupo_entrenador` que no tenía JPA): presente y en uso.
+
+## 🟡 Dashboards — 3 de 9 construidos
+
+| Dashboard | Estado |
+|---|---|
+| `ver_dash_horarios` | Código correcto, pero el archivo en tu proyecto está desactualizado (ver arriba — es lo único roto ahora mismo) |
+| `ver_dash_evaluacion` | ✅ Completo y correcto en tu proyecto |
+| `ver_dash_personas` | ✅ Completo y correcto — incluye división FEDECOLCHEER real y altas/bajas |
+| `ver_dash_inicio` | 🔴 No iniciado |
+| `ver_dash_organizacion` | 🔴 No iniciado (ya tiene todo el dato disponible: cruce de cantidad mínima por categoría vs. `CategoriaNivel.cantidadMin/Max`, que ahora sí es legible) |
+| `ver_dash_finanzas` | 🔴 No iniciado — dato 100% listo, es el siguiente candidato natural |
+| `ver_dash_eventos` | 🔴 No iniciado — dato 100% listo |
+| `ver_dash_tienda` | 🔴 Bloqueado hasta tener datos reales de ventas en producción (el módulo ya existe, solo falta que se use) |
+| `ver_dash_administracion` | 🔴 No iniciado (depende de que existan los demás) |
+
+---
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Controller/Dashboard/DashboardController.java">
+package com.varcal.cheermanager.Controller.Dashboard;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.varcal.cheermanager.DTO.Inventario.CategoriaProductoDTO;
-import com.varcal.cheermanager.Models.Inventario.CategoriaProducto;
-import com.varcal.cheermanager.Service.Inventario.CategoriaProductoService;
+import com.varcal.cheermanager.DTO.Dashboard.ResumenAdministracionDTO;
+import com.varcal.cheermanager.DTO.Dashboard.ResumenEvaluacionDTO;
+import com.varcal.cheermanager.DTO.Dashboard.ResumenEventosDTO;
+import com.varcal.cheermanager.DTO.Dashboard.ResumenFinanzasDTO;
+import com.varcal.cheermanager.DTO.Dashboard.ResumenHorariosDTO;
+import com.varcal.cheermanager.DTO.Dashboard.ResumenInicioDTO;
+import com.varcal.cheermanager.DTO.Dashboard.ResumenOrganizacionDTO;
+import com.varcal.cheermanager.DTO.Dashboard.ResumenPersonasDTO;
+import com.varcal.cheermanager.DTO.Dashboard.ResumenTiendaDTO;
+import com.varcal.cheermanager.Service.Dashboard.DashboardAdministracionService;
+import com.varcal.cheermanager.Service.Dashboard.DashboardEvaluacionService;
+import com.varcal.cheermanager.Service.Dashboard.DashboardEventosService;
+import com.varcal.cheermanager.Service.Dashboard.DashboardFinanzasService;
+import com.varcal.cheermanager.Service.Dashboard.DashboardHorariosService;
+import com.varcal.cheermanager.Service.Dashboard.DashboardInicioService;
+import com.varcal.cheermanager.Service.Dashboard.DashboardOrganizacionService;
+import com.varcal.cheermanager.Service.Dashboard.DashboardPersonasService;
+import com.varcal.cheermanager.Service.Dashboard.DashboardTiendaService;
 import com.varcal.cheermanager.Utils.RequiresPermission;
 
 @RestController
-@RequestMapping("/api/categorias-producto")
-public class CategoriaProductoController {
+@RequestMapping("/api/dashboard")
+public class DashboardController {
 
     @Autowired
-    private CategoriaProductoService categoriaProductoService;
+    private DashboardHorariosService dashboardHorariosService;
 
-    @GetMapping
-    @RequiresPermission("ver_producto")
-    public ResponseEntity<List<CategoriaProducto>> listar() {
-        return ResponseEntity.ok(categoriaProductoService.listarTodas());
+    @Autowired
+    private DashboardEvaluacionService dashboardEvaluacionService;
+
+    @Autowired
+    private DashboardPersonasService dashboardPersonasService;
+
+    @Autowired
+    private DashboardInicioService dashboardInicioService;
+
+    @Autowired
+    private DashboardOrganizacionService dashboardOrganizacionService;
+
+    @Autowired
+    private DashboardFinanzasService dashboardFinanzasService;
+
+    @Autowired
+    private DashboardEventosService dashboardEventosService;
+
+    @Autowired
+    private DashboardAdministracionService dashboardAdministracionService;
+
+    @Autowired
+    private DashboardTiendaService dashboardTiendaService;
+
+    @GetMapping("/inicio")
+    @RequiresPermission("ver_dash_inicio")
+    public ResponseEntity<ResumenInicioDTO> inicio() {
+        return ResponseEntity.ok(dashboardInicioService.obtenerResumen());
     }
 
-    @GetMapping("/{id}")
-    @RequiresPermission("ver_producto")
-    public ResponseEntity<?> obtener(@PathVariable Integer id) {
+    @GetMapping("/organizacion")
+    @RequiresPermission("ver_dash_organizacion")
+    public ResponseEntity<ResumenOrganizacionDTO> organizacion() {
+        return ResponseEntity.ok(dashboardOrganizacionService.obtenerResumen());
+    }
+
+    // Deportistas + Entrenadores en un solo dashboard (ver_dash_personas ya
+    // los agrupa así en el seed de permisos, no hay ver_dash_entrenadores
+    // separado).
+    @GetMapping("/personas")
+    @RequiresPermission("ver_dash_personas")
+    public ResponseEntity<ResumenPersonasDTO> personas(@RequestParam(defaultValue = "30") int diasAltasBajas) {
+        return ResponseEntity.ok(dashboardPersonasService.obtenerResumen(diasAltasBajas));
+    }
+
+    // ?dias=30 por defecto — configurable porque "asistencia reciente" puede
+    // significar distintas cosas según a quién se le muestre (una semana
+    // para operación diaria, un mes para revisión con dirección técnica).
+    @GetMapping("/horarios")
+    @RequiresPermission("ver_dash_horarios")
+    public ResponseEntity<ResumenHorariosDTO> horarios(@RequestParam(defaultValue = "30") int dias) {
+        return ResponseEntity.ok(dashboardHorariosService.obtenerResumen(dias));
+    }
+
+    @GetMapping("/evaluacion")
+    @RequiresPermission("ver_dash_evaluacion")
+    public ResponseEntity<ResumenEvaluacionDTO> evaluacion() {
+        return ResponseEntity.ok(dashboardEvaluacionService.obtenerResumen());
+    }
+
+    @GetMapping("/evaluacion/progresion/{grupoId}")
+    @RequiresPermission("ver_dash_evaluacion")
+    public ResponseEntity<?> progresionGrupo(@PathVariable Integer grupoId) {
         try {
-            return ResponseEntity.ok(categoriaProductoService.obtenerPorId(id));
+            return ResponseEntity.ok(dashboardEvaluacionService.obtenerProgresion(grupoId));
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }
 
-    @PostMapping
-    @RequiresPermission("crear_producto")
-    public ResponseEntity<?> crear(@RequestBody CategoriaProductoDTO dto) {
-        try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(categoriaProductoService.crear(dto));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(409).body(e.getMessage());
-        }
+    @GetMapping("/finanzas")
+    @RequiresPermission("ver_dash_finanzas")
+    public ResponseEntity<ResumenFinanzasDTO> finanzas() {
+        return ResponseEntity.ok(dashboardFinanzasService.obtenerResumen());
     }
 
-    @PutMapping("/{id}")
-    @RequiresPermission("modificar_producto")
-    public ResponseEntity<?> actualizar(@PathVariable Integer id, @RequestBody CategoriaProductoDTO dto) {
-        try {
-            return ResponseEntity.ok(categoriaProductoService.actualizar(id, dto));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(409).body(e.getMessage());
-        }
+    @GetMapping("/eventos")
+    @RequiresPermission("ver_evento")
+    public ResponseEntity<ResumenEventosDTO> eventos() {
+        return ResponseEntity.ok(dashboardEventosService.obtenerResumen());
     }
 
-    @DeleteMapping("/{id}")
-    @RequiresPermission("eliminar_producto")
-    public ResponseEntity<?> eliminar(@PathVariable Integer id) {
-        try {
-            categoriaProductoService.eliminar(id);
-            return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+    @GetMapping("/administracion")
+    @RequiresPermission("ver_dash_administracion")
+    public ResponseEntity<ResumenAdministracionDTO> administracion() {
+        return ResponseEntity.ok(dashboardAdministracionService.obtenerResumen());
+    }
+
+    @GetMapping("/tienda")
+    @RequiresPermission("ver_dash_tienda")
+    public ResponseEntity<ResumenTiendaDTO> tienda() {
+        return ResponseEntity.ok(dashboardTiendaService.obtenerResumen());
     }
 }
 </file>
 
-<file path="src/main/java/com/varcal/cheermanager/Controller/Inventario/MovimientoInventarioController.java">
-package com.varcal.cheermanager.Controller.Inventario;
+<file path="src/main/java/com/varcal/cheermanager/DTO/Dashboard/ResumenAdministracionDTO.java">
+package com.varcal.cheermanager.DTO.Dashboard;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import lombok.Data;
 
-import com.varcal.cheermanager.DTO.Inventario.MovimientoInventarioDTO;
-import com.varcal.cheermanager.DTO.Inventario.MovimientoInventarioResponseDTO;
-import com.varcal.cheermanager.Service.Inventario.MovimientoInventarioService;
-import com.varcal.cheermanager.Utils.RequiresPermission;
+@Data
+public class ResumenAdministracionDTO {
 
-@RestController
-@RequestMapping("/api/movimientos-inventario")
-public class MovimientoInventarioController {
+    // --- Salud financiera (resumen, el detalle completo vive en /dashboard/finanzas) ---
+    private BigDecimal recaudoMesActual;
+    private BigDecimal carteraPendienteTotal;
 
-    @Autowired
-    private MovimientoInventarioService movimientoInventarioService;
+    // --- Salud operativa ---
+    private Double porcentajeAsistenciaGeneral30Dias;
 
-    @PostMapping
-    @RequiresPermission("registrar_movimiento_inventario")
-    public ResponseEntity<?> registrar(@RequestBody MovimientoInventarioDTO dto) {
-        try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(movimientoInventarioService.registrar(dto));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(409).body(e.getMessage());
-        }
-    }
+    // --- Salud competitiva ---
+    private Double puntajePromedioClub; // promedio del puntaje más reciente de cada grupo con evaluaciones
+    private int gruposConEvaluacionReciente;
 
-    @GetMapping("/variante/{productoVarianteId}")
-    @RequiresPermission("ver_movimiento_inventario")
-    public ResponseEntity<List<MovimientoInventarioResponseDTO>> listarPorVariante(@PathVariable Integer productoVarianteId) {
-        return ResponseEntity.ok(movimientoInventarioService.listarPorVariante(productoVarianteId));
+    // --- Uso del sistema ---
+    private long loginsExitosos7Dias;
+    private long loginsFallidos7Dias;
+    private long usuariosActivos7Dias; // distintos que tuvieron al menos un login exitoso
+
+    // --- Auditoría reciente ---
+    private List<RegistroAuditoriaDTO> auditoriaReciente;
+
+    @Data
+    public static class RegistroAuditoriaDTO {
+        private String usuario;
+        private String tablaAfectada;
+        private String accion;
+        private Integer registroId;
+        private LocalDateTime fecha;
     }
 }
 </file>
 
-<file path="src/main/java/com/varcal/cheermanager/Controller/Inventario/ProductoController.java">
-package com.varcal.cheermanager.Controller.Inventario;
+<file path="src/main/java/com/varcal/cheermanager/DTO/Dashboard/ResumenEvaluacionDTO.java">
+package com.varcal.cheermanager.DTO.Dashboard;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import com.varcal.cheermanager.DTO.Inventario.ProductoDTO;
-import com.varcal.cheermanager.DTO.Inventario.ProductoResponseDTO;
-import com.varcal.cheermanager.Service.Inventario.ProductoService;
-import com.varcal.cheermanager.Utils.RequiresPermission;
-
-@RestController
-@RequestMapping("/api/productos")
-public class ProductoController {
-
-    @Autowired
-    private ProductoService productoService;
-
-    @GetMapping
-    @RequiresPermission("ver_producto")
-    public ResponseEntity<List<ProductoResponseDTO>> listar() {
-        return ResponseEntity.ok(productoService.listarTodos());
-    }
-
-    @GetMapping("/activos")
-    @RequiresPermission("ver_producto")
-    public ResponseEntity<List<ProductoResponseDTO>> listarActivos() {
-        return ResponseEntity.ok(productoService.listarActivos());
-    }
-
-    @GetMapping("/{id}")
-    @RequiresPermission("ver_producto")
-    public ResponseEntity<?> obtener(@PathVariable Integer id) {
-        try {
-            return ResponseEntity.ok(productoService.obtenerPorId(id));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @PostMapping
-    @RequiresPermission("crear_producto")
-    public ResponseEntity<?> crear(@RequestBody ProductoDTO dto) {
-        try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(productoService.crear(dto));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(409).body(e.getMessage());
-        }
-    }
-
-    @PutMapping("/{id}")
-    @RequiresPermission("modificar_producto")
-    public ResponseEntity<?> actualizar(@PathVariable Integer id, @RequestBody ProductoDTO dto) {
-        try {
-            return ResponseEntity.ok(productoService.actualizar(id, dto));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
-        }
-    }
-
-    // No hay borrado físico — desactiva el producto (ver nota en el service).
-    @DeleteMapping("/{id}")
-    @RequiresPermission("eliminar_producto")
-    public ResponseEntity<?> eliminar(@PathVariable Integer id) {
-        try {
-            productoService.eliminar(id);
-            return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-}
-</file>
-
-<file path="src/main/java/com/varcal/cheermanager/Controller/Inventario/ProductoVarianteController.java">
-package com.varcal.cheermanager.Controller.Inventario;
-
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import com.varcal.cheermanager.DTO.Inventario.ProductoVarianteDTO;
-import com.varcal.cheermanager.DTO.Inventario.ProductoVarianteResponseDTO;
-import com.varcal.cheermanager.Service.Inventario.ProductoVarianteService;
-import com.varcal.cheermanager.Utils.RequiresPermission;
-
-@RestController
-@RequestMapping("/api/producto-variantes")
-public class ProductoVarianteController {
-
-    @Autowired
-    private ProductoVarianteService productoVarianteService;
-
-    @GetMapping("/producto/{productoId}")
-    @RequiresPermission("ver_producto")
-    public ResponseEntity<List<ProductoVarianteResponseDTO>> listarPorProducto(@PathVariable Integer productoId) {
-        return ResponseEntity.ok(productoVarianteService.listarPorProducto(productoId));
-    }
-
-    // Umbral configurable por query param para que cada dashboard/reporte
-    // decida qué considera "stock bajo" sin tocar código (ej. ?umbral=5).
-    @GetMapping("/stock-bajo")
-    @RequiresPermission("ver_producto")
-    public ResponseEntity<List<ProductoVarianteResponseDTO>> listarConStockBajo(
-            @RequestParam(defaultValue = "5") int umbral) {
-        return ResponseEntity.ok(productoVarianteService.listarConStockBajo(umbral));
-    }
-
-    @PostMapping
-    @RequiresPermission("crear_producto")
-    public ResponseEntity<?> crear(@RequestBody ProductoVarianteDTO dto) {
-        try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(productoVarianteService.crear(dto));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
-        }
-    }
-
-    @PutMapping("/{id}/precio")
-    @RequiresPermission("modificar_producto")
-    public ResponseEntity<?> actualizarPrecio(@PathVariable Integer id, @RequestBody java.util.Map<String, java.math.BigDecimal> body) {
-        try {
-            return ResponseEntity.ok(productoVarianteService.actualizarPrecio(id, body.get("precioVenta")));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
-        }
-    }
-
-    @DeleteMapping("/{id}")
-    @RequiresPermission("eliminar_producto")
-    public ResponseEntity<?> desactivar(@PathVariable Integer id) {
-        try {
-            productoVarianteService.desactivar(id);
-            return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-}
-</file>
-
-<file path="src/main/java/com/varcal/cheermanager/Controller/Inventario/VentaController.java">
-package com.varcal.cheermanager.Controller.Inventario;
-
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import lombok.Data;
 
-import com.varcal.cheermanager.DTO.Inventario.VentaDTO;
-import com.varcal.cheermanager.DTO.Inventario.VentaResponseDTO;
-import com.varcal.cheermanager.Service.Inventario.VentaService;
-import com.varcal.cheermanager.Utils.RequiresPermission;
+@Data
+public class ResumenEvaluacionDTO {
+    private List<UltimoPuntajeGrupoDTO> ultimosPuntajesPorGrupo;
 
-@RestController
-@RequestMapping("/api/ventas")
-public class VentaController {
+    @Data
+    public static class UltimoPuntajeGrupoDTO {
+        private Integer grupoId;
+        private String nombreGrupo;
+        private String nivel;
+        private LocalDate fecha;
+        private String evento; // texto libre (puede ser simulacro/práctica)
+        private BigDecimal puntajeTotal;
+    }
 
-    @Autowired
-    private VentaService ventaService;
+    // Respuesta separada para GET /api/dashboard/evaluacion/progresion/{grupoId}
+    @Data
+    public static class ProgresionGrupoDTO {
+        private Integer grupoId;
+        private String nombreGrupo;
+        private List<PuntoProgresionDTO> puntos; // ordenados de más antiguo a más reciente
 
-    @PostMapping
-    @RequiresPermission("registrar_venta")
-    public ResponseEntity<?> registrar(@RequestBody VentaDTO dto) {
-        try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(ventaService.registrar(dto));
-        } catch (RuntimeException e) {
-            // 409 cubre tanto "comprador inválido" como "stock insuficiente"
-            // (ambas son conflictos de reglas de negocio, no recursos faltantes).
-            return ResponseEntity.status(409).body(e.getMessage());
+        @Data
+        public static class PuntoProgresionDTO {
+            private LocalDate fecha;
+            private String evento;
+            private Boolean esEventoOficial; // true si eventoOficial (FK) está diligenciado
+            private BigDecimal puntajeTotal;
         }
-    }
-
-    @GetMapping("/{id}")
-    @RequiresPermission("ver_venta")
-    public ResponseEntity<?> obtener(@PathVariable Integer id) {
-        try {
-            return ResponseEntity.ok(ventaService.obtenerPorId(id));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @GetMapping
-    @RequiresPermission("ver_venta")
-    public ResponseEntity<List<VentaResponseDTO>> listarPorRango(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta) {
-        return ResponseEntity.ok(ventaService.listarPorRango(desde, hasta));
-    }
-
-    @GetMapping("/persona/{personaId}")
-    @RequiresPermission("ver_venta")
-    public ResponseEntity<List<VentaResponseDTO>> listarPorPersona(@PathVariable Integer personaId) {
-        return ResponseEntity.ok(ventaService.listarPorPersona(personaId));
     }
 }
 </file>
 
-<file path="src/main/java/com/varcal/cheermanager/DTO/Inventario/CategoriaProductoDTO.java">
-package com.varcal.cheermanager.DTO.Inventario;
+<file path="src/main/java/com/varcal/cheermanager/DTO/Dashboard/ResumenEventosDTO.java">
+package com.varcal.cheermanager.DTO.Dashboard;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
 
 import lombok.Data;
 
 @Data
-public class CategoriaProductoDTO {
-    private String nombre;
-    private String codigo; // 3 letras, ej. ROP, CAL, DIG
-    private String descripcion;
+public class ResumenEventosDTO {
+    private List<ProximoEventoResumenDTO> proximosEventos;
+    private long podiosTemporada; // conteo de resultados con posicion <= 3, todos los eventos con fecha pasada
+    private List<PremioGanadoDTO> premiosGanados;
+
+    @Data
+    public static class ProximoEventoResumenDTO {
+        private Integer eventoId;
+        private String nombre;
+        private LocalDate fecha;
+        private long gruposInscritos;
+    }
+
+    @Data
+    public static class PremioGanadoDTO {
+        private Integer eventoId;
+        private String nombreEvento;
+        private LocalDate fechaEvento;
+        private String nombreGrupo;
+        private Integer posicion;
+        private BigDecimal puntaje;
+        private String descripcionPremio;
+    }
 }
 </file>
 
-<file path="src/main/java/com/varcal/cheermanager/DTO/Inventario/MovimientoInventarioDTO.java">
-package com.varcal.cheermanager.DTO.Inventario;
+<file path="src/main/java/com/varcal/cheermanager/DTO/Dashboard/ResumenFinanzasDTO.java">
+package com.varcal.cheermanager.DTO.Dashboard;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
 
 import lombok.Data;
 
 @Data
-public class MovimientoInventarioDTO {
-    private Integer productoVarianteId;
-    private String tipo; // entrada, salida, ajuste
-    private Integer cantidad;
-    private String motivo;
+public class ResumenFinanzasDTO {
+    private BigDecimal recaudoMesActual;
+    private BigDecimal facturadoMesActual; // referencia de comparación ("proyectado" ~ lo que se facturó este mes)
 
-    // TODO: hoy no encontré en el proyecto un mecanismo para resolver el
-    // usuario autenticado dentro de un Service (no hay uso de
-    // SecurityContextHolder ni @AuthenticationPrincipal en el resto del
-    // código) — se recibe explícito desde el controller mientras tanto.
-    // Cuando exista ese mecanismo, quitar este campo y tomarlo del contexto.
-    private Integer usuarioId;
+    private BigDecimal carteraPendienteTotal;
+    private long facturasConSaldoPendiente;
+
+    private List<MorosidadPorPlanDTO> morosidadPorPlan;
+
+    private BigDecimal ingresoTiendaMesActual; // ventas de Inventario del mes en curso
+    private BigDecimal ingresoConDescuentoMesActual; // suma de facturas del mes con descuento aplicado (referencia, no el monto exacto ahorrado)
+
+    private List<TendenciaMensualDTO> tendenciaUltimos6Meses;
+
+    @Data
+    public static class MorosidadPorPlanDTO {
+        private String nombrePlan; // "Sin plan asociado" para facturas manuales sin inscripción
+        private long totalFacturas;
+        private long facturasConSaldoPendiente;
+        private Double porcentajeMorosidad; // null si el plan no tiene facturas todavía
+    }
+
+    @Data
+    public static class TendenciaMensualDTO {
+        private String mes; // "2026-06"
+        private BigDecimal recaudado;
+    }
 }
 </file>
 
-<file path="src/main/java/com/varcal/cheermanager/DTO/Inventario/MovimientoInventarioResponseDTO.java">
-package com.varcal.cheermanager.DTO.Inventario;
+<file path="src/main/java/com/varcal/cheermanager/DTO/Dashboard/ResumenHorariosDTO.java">
+package com.varcal.cheermanager.DTO.Dashboard;
+
+import java.util.List;
+
+import lombok.Data;
+
+@Data
+public class ResumenHorariosDTO {
+    private int diasAnalizados; // rango usado para el cálculo, ej. 30
+    private Double porcentajeAsistenciaGeneral; // promedio simple entre grupos con datos
+
+    private List<AsistenciaPorGrupoDTO> asistenciaPorGrupo;
+    private List<DeportistaEnRiesgoDTO> deportistasEnRiesgo; // < 70% de asistencia
+
+    @Data
+    public static class AsistenciaPorGrupoDTO {
+        private Integer grupoId;
+        private String nombreGrupo;
+        private long totalRegistros;
+        private long presentes;
+        private Double porcentaje; // null si no hay registros en el rango
+    }
+
+    @Data
+    public static class DeportistaEnRiesgoDTO {
+        private Integer deportistaId;
+        private String nombreCompleto;
+        private Double porcentaje;
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/DTO/Dashboard/ResumenInicioDTO.java">
+package com.varcal.cheermanager.DTO.Dashboard;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
+import lombok.Data;
+
+@Data
+public class ResumenInicioDTO {
+    private int deportistasActivos;
+    private int totalGrupos;
+
+    private ProximoEventoDTO proximoEvento; // null si no hay ninguno agendado
+
+    private BigDecimal carteraPendienteTotal; // suma de (factura.total - pagado) de todas las facturas
+    private long facturasConSaldoPendiente;
+
+    private Double porcentajeAsistenciaUltimos7Dias; // null si no hay registros
+
+    private int alertasCondicionMedicaActiva; // solo conteo, nunca detalle clínico
+
+    @Data
+    public static class ProximoEventoDTO {
+        private Integer eventoId;
+        private String nombre;
+        private LocalDate fecha;
+        private long diasRestantes;
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/DTO/Dashboard/ResumenOrganizacionDTO.java">
+package com.varcal.cheermanager.DTO.Dashboard;
+
+import java.util.List;
+import java.util.Map;
+
+import lombok.Data;
+
+@Data
+public class ResumenOrganizacionDTO {
+    private List<GrupoOcupacionDTO> gruposConOcupacion;
+    private List<GrupoOcupacionDTO> gruposPorDebajoDelMinimo; // subconjunto del anterior, para alertar directo
+    private Map<String, Long> gruposPorNivel; // ej. {"Elite 1": 3, "Novice N1": 2, ...}
+
+    @Data
+    public static class GrupoOcupacionDTO {
+        private Integer grupoId;
+        private String nombreGrupo;
+        private String nivel;
+        private String division;
+        private long deportistasActivos;
+        private long hombres;
+        private long mujeres;
+        private Integer cantidadMinRequerida; // null si la categoría no tiene regla cargada
+        private Integer cantidadMaxSugerida;
+        private Boolean mixto; // true si hay al menos 1 hombre y 1 mujer
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/DTO/Dashboard/ResumenPersonasDTO.java">
+package com.varcal.cheermanager.DTO.Dashboard;
 
 import java.time.LocalDateTime;
-
-import lombok.Data;
-
-@Data
-public class MovimientoInventarioResponseDTO {
-    private Integer id;
-    private Integer productoVarianteId;
-    private String skuVariante;
-    private String nombreProducto;
-    private String tipo;
-    private Integer cantidad;
-    private String motivo;
-    private LocalDateTime fecha;
-    private String usuario;
-}
-</file>
-
-<file path="src/main/java/com/varcal/cheermanager/DTO/Inventario/ProductoDTO.java">
-package com.varcal.cheermanager.DTO.Inventario;
-
-import java.math.BigDecimal;
-
-import lombok.Data;
-
-@Data
-public class ProductoDTO {
-    // "codigo" es solo el segmento COD (3 letras del artículo, ej. CAE) —
-    // el prefijo RAT y la categoría se arman en el service a partir de la
-    // categoría seleccionada, para no depender de que el usuario escriba el
-    // SKU completo a mano y se equivoque de formato.
-    private String codigo;
-    private String nombre;
-    private String descripcion;
-    private Integer categoriaProductoId;
-    private BigDecimal precioMinReferencia;
-    private BigDecimal precioMaxReferencia;
-    private String origen;
-    private String notasProveedor;
-    private Boolean requiereControlStock;
-}
-</file>
-
-<file path="src/main/java/com/varcal/cheermanager/DTO/Inventario/ProductoResponseDTO.java">
-package com.varcal.cheermanager.DTO.Inventario;
-
-import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 import lombok.Data;
 
 @Data
-public class ProductoResponseDTO {
-    private Integer id;
-    private String sku;
-    private String nombre;
-    private String descripcion;
-    private Integer categoriaProductoId;
-    private String categoriaNombre;
-    private BigDecimal precioMinReferencia;
-    private BigDecimal precioMaxReferencia;
-    private String origen;
-    private String notasProveedor;
-    private Boolean requiereControlStock;
-    private Boolean activo;
-    private Integer stockTotal; // suma de stock de todas sus variantes (null si no controla stock)
-    private List<ProductoVarianteResponseDTO> variantes;
-}
-</file>
+public class ResumenPersonasDTO {
 
-<file path="src/main/java/com/varcal/cheermanager/DTO/Inventario/ProductoVarianteDTO.java">
-package com.varcal.cheermanager.DTO.Inventario;
+    // --- Deportistas ---
+    private int totalDeportistas;
+    private Map<String, Long> deportistasPorEstado;    // ej. {"Activo": 42, "Inactivo": 5}
+    private Map<String, Long> deportistasPorGenero;     // ej. {"Femenino": 38, "Masculino": 9}
+    private Map<String, Long> deportistasPorDivision;   // división FEDECOLCHEER real (Tiny/Mini/Youth/...), no rango de edad inventado
+    private int deportistasConCondicionMedicaActiva;    // solo conteo, nunca detalle clínico acá
 
-import java.math.BigDecimal;
+    // --- Altas y bajas (HistorialDeportistaEstado) ---
+    private long altasRecientes;
+    private long bajasRecientes;
+    private List<MovimientoEstadoDTO> movimientosRecientes;
 
-import lombok.Data;
-
-@Data
-public class ProductoVarianteDTO {
-    private Integer productoId;
-    private String talla;   // nullable
-    private String color;   // nullable — para DIG se usa como "tier" (Básico/Competencia/Elite)
-    private BigDecimal precioVenta;
-    private Integer stockInicial; // se ignora si producto.requiereControlStock = false
-}
-</file>
-
-<file path="src/main/java/com/varcal/cheermanager/DTO/Inventario/ProductoVarianteResponseDTO.java">
-package com.varcal.cheermanager.DTO.Inventario;
-
-import java.math.BigDecimal;
-
-import lombok.Data;
-
-@Data
-public class ProductoVarianteResponseDTO {
-    private Integer id;
-    private Integer productoId;
-    private String nombreProducto;
-    private String talla;
-    private String color;
-    private String skuVariante;
-    private BigDecimal precioVenta;
-    private Integer stockActual; // null si el producto no controla stock
-    private Boolean activo;
-}
-</file>
-
-<file path="src/main/java/com/varcal/cheermanager/DTO/Inventario/VentaDTO.java">
-package com.varcal.cheermanager.DTO.Inventario;
-
-import java.util.List;
-
-import lombok.Data;
-
-@Data
-public class VentaDTO {
-    // Exactamente uno de los dos: personaId (comprador del club) o
-    // nombreCompradorExterno (comprador externo). El service rechaza si
-    // vienen ambos o ninguno.
-    private Integer personaId;
-    private String nombreCompradorExterno;
-    private String contactoCompradorExterno;
-
-    private String metodoPago;
-    private Integer facturaId; // opcional, solo si se carga a la cuenta del deportista
-    private Integer usuarioId; // quien registra la venta — ver nota en MovimientoInventarioDTO
-
-    private List<ItemVentaDTO> items;
+    // --- Entrenadores ---
+    private int totalEntrenadores;
+    private List<EntrenadorResumenDTO> entrenadores;
 
     @Data
-    public static class ItemVentaDTO {
-        private Integer productoVarianteId;
-        private Integer cantidad;
+    public static class EntrenadorResumenDTO {
+        private Integer entrenadorId;
+        private String nombreCompleto;
+        private String especializacion;
+        private String estado;
+        private long gruposACargo;
+    }
+
+    @Data
+    public static class MovimientoEstadoDTO {
+        private Integer deportistaId;
+        private String nombreCompleto;
+        private String estadoAnterior; // null si es el primer registro del deportista
+        private String estadoNuevo;
+        private LocalDateTime fechaCambio;
+        private Boolean esAlta; // true si estadoNuevo = "Activo"
+        private String motivo;
     }
 }
 </file>
 
-<file path="src/main/java/com/varcal/cheermanager/DTO/Inventario/VentaResponseDTO.java">
-package com.varcal.cheermanager.DTO.Inventario;
+<file path="src/main/java/com/varcal/cheermanager/DTO/Dashboard/ResumenTiendaDTO.java">
+package com.varcal.cheermanager.DTO.Dashboard;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import lombok.Data;
 
 @Data
-public class VentaResponseDTO {
-    private Integer id;
-    private LocalDate fecha;
-    private BigDecimal total;
-    private String metodoPago;
-    private Integer personaId;
-    private String nombreComprador; // nombre de la Persona, o el externo si aplica
-    private Integer facturaId;
-    private List<DetalleVentaResponseDTO> detalles;
+public class ResumenTiendaDTO {
+    private BigDecimal ingresoMesActual;
+    private long unidadesVendidasMesActual;
+    private long ventasMesActual; // número de transacciones, no de unidades
+
+    private Map<String, BigDecimal> ingresoPorCategoria; // ej. {"Ropa deportiva": 450000, "Digital / Servicios": 80000}
+
+    private List<ProductoMasVendidoDTO> topProductosVendidos; // top 5 del mes, por unidades
+    private List<VarianteStockBajoDTO> variantesConStockBajo;
 
     @Data
-    public static class DetalleVentaResponseDTO {
+    public static class ProductoMasVendidoDTO {
+        private String nombreProducto;
+        private long unidadesVendidas;
+        private BigDecimal ingresoGenerado;
+    }
+
+    @Data
+    public static class VarianteStockBajoDTO {
         private Integer productoVarianteId;
         private String skuVariante;
         private String nombreProducto;
         private String talla;
         private String color;
-        private Integer cantidad;
-        private BigDecimal precioUnitario;
-        private BigDecimal subtotal;
+        private Integer stockActual;
     }
 }
 </file>
 
-<file path="src/main/java/com/varcal/cheermanager/repository/Inventario/CategoriaProductoRepository.java">
-package com.varcal.cheermanager.repository.Inventario;
-
-import java.util.Optional;
-
-import org.springframework.data.jpa.repository.JpaRepository;
-
-import com.varcal.cheermanager.Models.Inventario.CategoriaProducto;
-
-public interface CategoriaProductoRepository extends JpaRepository<CategoriaProducto, Integer> {
-    Optional<CategoriaProducto> findByCodigo(String codigo);
-    Optional<CategoriaProducto> findByNombre(String nombre);
-}
-</file>
-
-<file path="src/main/java/com/varcal/cheermanager/repository/Inventario/MovimientoInventarioRepository.java">
-package com.varcal.cheermanager.repository.Inventario;
-
-import java.util.List;
-
-import org.springframework.data.jpa.repository.JpaRepository;
-
-import com.varcal.cheermanager.Models.Inventario.MovimientoInventario;
-
-public interface MovimientoInventarioRepository extends JpaRepository<MovimientoInventario, Integer> {
-    List<MovimientoInventario> findByProductoVarianteIdOrderByFechaDesc(Integer productoVarianteId);
-}
-</file>
-
-<file path="src/main/java/com/varcal/cheermanager/repository/Inventario/ProductoRepository.java">
-package com.varcal.cheermanager.repository.Inventario;
-
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.data.jpa.repository.JpaRepository;
-
-import com.varcal.cheermanager.Models.Inventario.Producto;
-
-public interface ProductoRepository extends JpaRepository<Producto, Integer> {
-    Optional<Producto> findBySku(String sku);
-    List<Producto> findByCategoriaProductoId(Integer categoriaId);
-    List<Producto> findByActivoTrue();
-    List<Producto> findByRequiereControlStockTrue();
-    boolean existsBySku(String sku);
-}
-</file>
-
-<file path="src/main/java/com/varcal/cheermanager/repository/Inventario/ProductoVarianteRepository.java">
-package com.varcal.cheermanager.repository.Inventario;
-
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-
-import com.varcal.cheermanager.Models.Inventario.ProductoVariante;
-
-public interface ProductoVarianteRepository extends JpaRepository<ProductoVariante, Integer> {
-    List<ProductoVariante> findByProductoId(Integer productoId);
-    Optional<ProductoVariante> findBySkuVariante(String skuVariante);
-    boolean existsBySkuVariante(String skuVariante);
-
-    // Stock bajo: solo tiene sentido para variantes de productos que sí
-    // controlan stock (las de DIG tienen stockActual null y quedan afuera
-    // automáticamente por la comparación numérica).
-    @Query("SELECT v FROM ProductoVariante v WHERE v.producto.requiereControlStock = true " +
-           "AND v.stockActual IS NOT NULL AND v.stockActual <= :umbral AND v.activo = true")
-    List<ProductoVariante> findConStockBajo(int umbral);
-}
-</file>
-
-<file path="src/main/java/com/varcal/cheermanager/repository/Inventario/VentaRepository.java">
-package com.varcal.cheermanager.repository.Inventario;
+<file path="src/main/java/com/varcal/cheermanager/DTO/Persona/ActualizarPerfilDTO.java">
+package com.varcal.cheermanager.DTO.Persona;
 
 import java.time.LocalDate;
-import java.util.List;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import lombok.Data;
 
-import com.varcal.cheermanager.Models.Inventario.Venta;
-
-public interface VentaRepository extends JpaRepository<Venta, Integer> {
-    List<Venta> findByFechaBetweenOrderByFechaDesc(LocalDate desde, LocalDate hasta);
-    List<Venta> findByPersonaIdOrderByFechaDesc(Integer personaId);
+// DTO deliberadamente reducido para el endpoint de auto-servicio
+// (PUT /api/usuario/me): solo los campos que un usuario puede tocar de
+// SU PROPIO perfil. A diferencia de UsuarioDTO, no incluye password,
+// rolId ni personaId — esos siguen siendo exclusivos del endpoint
+// administrativo (PUT /api/usuario/actualizar/{id}, "modificar_usuario").
+@Data
+public class ActualizarPerfilDTO {
+    private String email;
+    private String nombre;
+    private String direccion;
+    private String telefono;
+    private LocalDate fechaNacimiento;
+    private Integer generoId;
 }
 </file>
 
-<file path="src/main/java/com/varcal/cheermanager/Service/Inventario/CategoriaProductoService.java">
-package com.varcal.cheermanager.Service.Inventario;
-
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.varcal.cheermanager.DTO.Inventario.CategoriaProductoDTO;
-import com.varcal.cheermanager.Models.Inventario.CategoriaProducto;
-import com.varcal.cheermanager.repository.Inventario.CategoriaProductoRepository;
-
-@Service
-public class CategoriaProductoService {
-
-    @Autowired
-    private CategoriaProductoRepository categoriaProductoRepository;
-
-    public List<CategoriaProducto> listarTodas() {
-        return categoriaProductoRepository.findAll();
-    }
-
-    public CategoriaProducto obtenerPorId(Integer id) {
-        return categoriaProductoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Categoría de producto no encontrada con ID: " + id));
-    }
-
-    public CategoriaProducto crear(CategoriaProductoDTO dto) {
-        String codigo = validarCodigo(dto.getCodigo());
-
-        categoriaProductoRepository.findByCodigo(codigo).ifPresent(c -> {
-            throw new RuntimeException("Ya existe una categoría con el código '" + codigo + "'");
-        });
-        categoriaProductoRepository.findByNombre(dto.getNombre()).ifPresent(c -> {
-            throw new RuntimeException("Ya existe una categoría llamada '" + dto.getNombre() + "'");
-        });
-
-        CategoriaProducto categoria = new CategoriaProducto();
-        categoria.setNombre(dto.getNombre());
-        categoria.setCodigo(codigo);
-        categoria.setDescripcion(dto.getDescripcion());
-        return categoriaProductoRepository.save(categoria);
-    }
-
-    public CategoriaProducto actualizar(Integer id, CategoriaProductoDTO dto) {
-        CategoriaProducto categoria = obtenerPorId(id);
-        String codigo = validarCodigo(dto.getCodigo());
-
-        categoriaProductoRepository.findByCodigo(codigo)
-                .filter(c -> !c.getId().equals(id))
-                .ifPresent(c -> { throw new RuntimeException("Ya existe otra categoría con el código '" + codigo + "'"); });
-
-        categoria.setNombre(dto.getNombre());
-        categoria.setCodigo(codigo);
-        categoria.setDescripcion(dto.getDescripcion());
-        return categoriaProductoRepository.save(categoria);
-    }
-
-    public void eliminar(Integer id) {
-        if (!categoriaProductoRepository.existsById(id)) {
-            throw new RuntimeException("Categoría de producto no encontrada con ID: " + id);
-        }
-        categoriaProductoRepository.deleteById(id);
-    }
-
-    // El formato del SKU (RAT-[CAT]-...) exige exactamente 3 letras
-    // mayúsculas para el segmento de categoría — se normaliza y valida acá,
-    // en el único lugar donde se crean/editan categorías.
-    private String validarCodigo(String codigo) {
-        if (codigo == null || !codigo.matches("[A-Za-z]{3}")) {
-            throw new RuntimeException("El código de categoría debe tener exactamente 3 letras (ej. ROP, CAL, DIG)");
-        }
-        return codigo.toUpperCase();
-    }
-}
-</file>
-
-<file path="src/main/java/com/varcal/cheermanager/Service/Inventario/MovimientoInventarioService.java">
-package com.varcal.cheermanager.Service.Inventario;
+<file path="src/main/java/com/varcal/cheermanager/repository/Funcionalidad/AuditoriaRepository.java">
+package com.varcal.cheermanager.repository.Funcionalidad;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.varcal.cheermanager.DTO.Inventario.MovimientoInventarioDTO;
-import com.varcal.cheermanager.DTO.Inventario.MovimientoInventarioResponseDTO;
-import com.varcal.cheermanager.Models.Auth.Usuario;
-import com.varcal.cheermanager.Models.Inventario.MovimientoInventario;
-import com.varcal.cheermanager.Models.Inventario.MovimientoInventario.TipoMovimiento;
-import com.varcal.cheermanager.Models.Inventario.ProductoVariante;
-import com.varcal.cheermanager.repository.Auth.UserRepository;
-import com.varcal.cheermanager.repository.Inventario.MovimientoInventarioRepository;
-import com.varcal.cheermanager.repository.Inventario.ProductoVarianteRepository;
+import com.varcal.cheermanager.Models.Funcionalidad.Auditoria;
 
-@Service
-public class MovimientoInventarioService {
-
-    @Autowired
-    private MovimientoInventarioRepository movimientoInventarioRepository;
-
-    @Autowired
-    private ProductoVarianteRepository productoVarianteRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    // Único método del sistema que debe modificar ProductoVariante.stockActual
-    // — cualquier ajuste de stock (venta, compra, conteo físico) pasa por
-    // acá, para que MovimientoInventario sea siempre el registro fiel de por
-    // qué cambió cada unidad.
-    @Transactional
-    public MovimientoInventario registrar(MovimientoInventarioDTO dto) {
-        ProductoVariante variante = productoVarianteRepository.findById(dto.getProductoVarianteId())
-                .orElseThrow(() -> new RuntimeException("Variante no encontrada con ID: " + dto.getProductoVarianteId()));
-
-        if (!Boolean.TRUE.equals(variante.getProducto().getRequiereControlStock())) {
-            throw new RuntimeException(
-                    "'" + variante.getProducto().getNombre() + "' es un artículo digital y no controla stock");
-        }
-
-        if (dto.getCantidad() == null || dto.getCantidad() <= 0) {
-            throw new RuntimeException("La cantidad del movimiento debe ser mayor a cero");
-        }
-
-        TipoMovimiento tipo;
-        try {
-            tipo = TipoMovimiento.valueOf(dto.getTipo());
-        } catch (Exception e) {
-            throw new RuntimeException("Tipo de movimiento inválido. Debe ser: entrada, salida o ajuste");
-        }
-
-        Usuario usuario = userRepository.findById(dto.getUsuarioId())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + dto.getUsuarioId()));
-
-        int stockActual = variante.getStockActual() != null ? variante.getStockActual() : 0;
-        int nuevoStock;
-        switch (tipo) {
-            case entrada -> nuevoStock = stockActual + dto.getCantidad();
-            case salida -> {
-                nuevoStock = stockActual - dto.getCantidad();
-                if (nuevoStock < 0) {
-                    throw new RuntimeException(
-                            "Stock insuficiente: quedan " + stockActual + " unidades de '" + variante.getSkuVariante() + "'");
-                }
-            }
-            // "ajuste" fija el stock al valor exacto informado en `cantidad`
-            // (para cuadrar tras un conteo físico), en vez de sumar/restar.
-            case ajuste -> nuevoStock = dto.getCantidad();
-            default -> throw new RuntimeException("Tipo de movimiento inválido");
-        }
-
-        variante.setStockActual(nuevoStock);
-        productoVarianteRepository.save(variante);
-
-        MovimientoInventario movimiento = new MovimientoInventario();
-        movimiento.setProductoVariante(variante);
-        movimiento.setTipo(tipo);
-        movimiento.setCantidad(dto.getCantidad());
-        movimiento.setMotivo(dto.getMotivo());
-        movimiento.setFecha(LocalDateTime.now());
-        movimiento.setUsuario(usuario);
-        return movimientoInventarioRepository.save(movimiento);
-    }
-
-    public List<MovimientoInventarioResponseDTO> listarPorVariante(Integer productoVarianteId) {
-        return movimientoInventarioRepository.findByProductoVarianteIdOrderByFechaDesc(productoVarianteId).stream()
-                .map(this::toDTO).collect(Collectors.toList());
-    }
-
-    private MovimientoInventarioResponseDTO toDTO(MovimientoInventario m) {
-        MovimientoInventarioResponseDTO dto = new MovimientoInventarioResponseDTO();
-        dto.setId(m.getId());
-        dto.setProductoVarianteId(m.getProductoVariante().getId());
-        dto.setSkuVariante(m.getProductoVariante().getSkuVariante());
-        dto.setNombreProducto(m.getProductoVariante().getProducto().getNombre());
-        dto.setTipo(m.getTipo().name());
-        dto.setCantidad(m.getCantidad());
-        dto.setMotivo(m.getMotivo());
-        dto.setFecha(m.getFecha());
-        dto.setUsuario(m.getUsuario().getUsername());
-        return dto;
-    }
+// Auditoria.java (Model) existía sin ningún Repository — no había forma de
+// leer los registros de auditoría desde código. Se agrega el mínimo para
+// que el dashboard de Administración pueda mostrar actividad reciente.
+public interface AuditoriaRepository extends JpaRepository<Auditoria, Integer> {
+    List<Auditoria> findByFechaAfterOrderByFechaDesc(LocalDateTime desde, Pageable pageable);
 }
 </file>
 
-<file path="src/main/java/com/varcal/cheermanager/Service/Inventario/ProductoService.java">
-package com.varcal.cheermanager.Service.Inventario;
+<file path="src/main/java/com/varcal/cheermanager/repository/Org_dep/EntrenadorGrupoRepository.java">
+package com.varcal.cheermanager.repository.Org_dep;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.Repository;
+import org.springframework.data.repository.query.Param;
 
-import com.varcal.cheermanager.DTO.Inventario.ProductoDTO;
-import com.varcal.cheermanager.DTO.Inventario.ProductoResponseDTO;
-import com.varcal.cheermanager.DTO.Inventario.ProductoVarianteResponseDTO;
-import com.varcal.cheermanager.Models.Inventario.CategoriaProducto;
-import com.varcal.cheermanager.Models.Inventario.Producto;
-import com.varcal.cheermanager.Models.Inventario.ProductoVariante;
-import com.varcal.cheermanager.repository.Inventario.CategoriaProductoRepository;
-import com.varcal.cheermanager.repository.Inventario.ProductoRepository;
+import com.varcal.cheermanager.Models.Personas.Entrenador;
 
-@Service
-public class ProductoService {
+// La tabla puente `grupo_entrenador` (grupo_entrenamiento_id, entrenador_id)
+// existe en el esquema SQL y el stored procedure sp_asignar_entrenador_grupo
+// escribe en ella, pero no tenía ningún Model/Repository JPA — no había
+// forma de leer "qué grupos tiene a cargo un entrenador" desde el código.
+// Se usa Repository<Entrenador, Integer> (marcador, sin los métodos CRUD de
+// JpaRepository) en vez de un @Entity con clave compuesta, porque la tabla
+// no tiene PK propia de un solo campo y no se necesita más que leer.
+public interface EntrenadorGrupoRepository extends Repository<Entrenador, Integer> {
 
-    @Autowired
-    private ProductoRepository productoRepository;
+    @Query(value = "SELECT grupo_entrenamiento_id FROM grupo_entrenador WHERE entrenador_id = :entrenadorId", nativeQuery = true)
+    List<Integer> findGrupoIdsByEntrenadorId(@Param("entrenadorId") Integer entrenadorId);
 
-    @Autowired
-    private CategoriaProductoRepository categoriaProductoRepository;
+    @Query(value = "SELECT entrenador_id FROM grupo_entrenador WHERE grupo_entrenamiento_id = :grupoId", nativeQuery = true)
+    List<Integer> findEntrenadorIdsByGrupoId(@Param("grupoId") Integer grupoId);
 
-    public List<ProductoResponseDTO> listarTodos() {
-        return productoRepository.findAll().stream().map(this::toResponseDTO).collect(Collectors.toList());
-    }
-
-    public List<ProductoResponseDTO> listarActivos() {
-        return productoRepository.findByActivoTrue().stream().map(this::toResponseDTO).collect(Collectors.toList());
-    }
-
-    public ProductoResponseDTO obtenerPorId(Integer id) {
-        return toResponseDTO(buscarOFallar(id));
-    }
-
-    public Producto crear(ProductoDTO dto) {
-        CategoriaProducto categoria = categoriaProductoRepository.findById(dto.getCategoriaProductoId())
-                .orElseThrow(() -> new RuntimeException("Categoría no encontrada con ID: " + dto.getCategoriaProductoId()));
-
-        String codigoArticulo = validarCodigoArticulo(dto.getCodigo());
-        String sku = "RAT-" + categoria.getCodigo() + "-" + codigoArticulo;
-
-        if (productoRepository.existsBySku(sku)) {
-            throw new RuntimeException("Ya existe un producto con el SKU '" + sku + "'");
-        }
-
-        Producto producto = new Producto();
-        producto.setSku(sku);
-        aplicarDatos(producto, dto, categoria);
-        return productoRepository.save(producto);
-    }
-
-    public Producto actualizar(Integer id, ProductoDTO dto) {
-        Producto producto = buscarOFallar(id);
-        CategoriaProducto categoria = categoriaProductoRepository.findById(dto.getCategoriaProductoId())
-                .orElseThrow(() -> new RuntimeException("Categoría no encontrada con ID: " + dto.getCategoriaProductoId()));
-
-        // El SKU no se regenera al editar, aunque cambie de categoría — es un
-        // identificador estable una vez creado (evita romper etiquetas ya
-        // impresas o referencias en ventas históricas).
-        aplicarDatos(producto, dto, categoria);
-        return productoRepository.save(producto);
-    }
-
-    public void desactivar(Integer id) {
-        Producto producto = buscarOFallar(id);
-        producto.setActivo(false);
-        productoRepository.save(producto);
-    }
-
-    // No se hace DELETE físico: un producto con historial de ventas no puede
-    // desaparecer sin dejar huérfanas las ventas pasadas. Se desactiva.
-    public void eliminar(Integer id) {
-        desactivar(id);
-    }
-
-    private void aplicarDatos(Producto producto, ProductoDTO dto, CategoriaProducto categoria) {
-        producto.setNombre(dto.getNombre());
-        producto.setDescripcion(dto.getDescripcion());
-        producto.setCategoriaProducto(categoria);
-        producto.setPrecioMinReferencia(dto.getPrecioMinReferencia());
-        producto.setPrecioMaxReferencia(dto.getPrecioMaxReferencia());
-        producto.setOrigen(dto.getOrigen());
-        producto.setNotasProveedor(dto.getNotasProveedor());
-        producto.setRequiereControlStock(dto.getRequiereControlStock() != null ? dto.getRequiereControlStock() : Boolean.TRUE);
-        producto.setActivo(true);
-    }
-
-    private String validarCodigoArticulo(String codigo) {
-        if (codigo == null || !codigo.matches("[A-Za-z]{3}")) {
-            throw new RuntimeException("El código de artículo debe tener exactamente 3 letras (ej. CAE, ZAP, MON)");
-        }
-        return codigo.toUpperCase();
-    }
-
-    private Producto buscarOFallar(Integer id) {
-        return productoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Producto no encontrado con ID: " + id));
-    }
-
-    private ProductoResponseDTO toResponseDTO(Producto p) {
-        ProductoResponseDTO dto = new ProductoResponseDTO();
-        dto.setId(p.getId());
-        dto.setSku(p.getSku());
-        dto.setNombre(p.getNombre());
-        dto.setDescripcion(p.getDescripcion());
-        dto.setCategoriaProductoId(p.getCategoriaProducto().getId());
-        dto.setCategoriaNombre(p.getCategoriaProducto().getNombre());
-        dto.setPrecioMinReferencia(p.getPrecioMinReferencia());
-        dto.setPrecioMaxReferencia(p.getPrecioMaxReferencia());
-        dto.setOrigen(p.getOrigen());
-        dto.setNotasProveedor(p.getNotasProveedor());
-        dto.setRequiereControlStock(p.getRequiereControlStock());
-        dto.setActivo(p.getActivo());
-
-        List<ProductoVariante> variantes = p.getVariantes();
-        if (variantes != null) {
-            dto.setVariantes(variantes.stream().map(this::toVarianteDTO).collect(Collectors.toList()));
-            if (Boolean.TRUE.equals(p.getRequiereControlStock())) {
-                dto.setStockTotal(variantes.stream()
-                        .mapToInt(v -> v.getStockActual() != null ? v.getStockActual() : 0)
-                        .sum());
-            }
-        }
-        return dto;
-    }
-
-    private ProductoVarianteResponseDTO toVarianteDTO(ProductoVariante v) {
-        ProductoVarianteResponseDTO dto = new ProductoVarianteResponseDTO();
-        dto.setId(v.getId());
-        dto.setProductoId(v.getProducto().getId());
-        dto.setNombreProducto(v.getProducto().getNombre());
-        dto.setTalla(v.getTalla());
-        dto.setColor(v.getColor());
-        dto.setSkuVariante(v.getSkuVariante());
-        dto.setPrecioVenta(v.getPrecioVenta());
-        dto.setStockActual(v.getStockActual());
-        dto.setActivo(v.getActivo());
-        return dto;
-    }
+    @Query(value = "SELECT COUNT(*) FROM grupo_entrenador WHERE entrenador_id = :entrenadorId", nativeQuery = true)
+    long countGruposByEntrenadorId(@Param("entrenadorId") Integer entrenadorId);
 }
 </file>
 
-<file path="src/main/java/com/varcal/cheermanager/Service/Inventario/ProductoVarianteService.java">
-package com.varcal.cheermanager.Service.Inventario;
+<file path="src/main/java/com/varcal/cheermanager/Service/Dashboard/DashboardAdministracionService.java">
+package com.varcal.cheermanager.Service.Dashboard;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.varcal.cheermanager.DTO.Inventario.ProductoVarianteDTO;
-import com.varcal.cheermanager.DTO.Inventario.ProductoVarianteResponseDTO;
-import com.varcal.cheermanager.Models.Inventario.Producto;
-import com.varcal.cheermanager.Models.Inventario.ProductoVariante;
-import com.varcal.cheermanager.repository.Inventario.ProductoRepository;
-import com.varcal.cheermanager.repository.Inventario.ProductoVarianteRepository;
-
-@Service
-public class ProductoVarianteService {
-
-    @Autowired
-    private ProductoVarianteRepository productoVarianteRepository;
-
-    @Autowired
-    private ProductoRepository productoRepository;
-
-    public List<ProductoVarianteResponseDTO> listarPorProducto(Integer productoId) {
-        return productoVarianteRepository.findByProductoId(productoId).stream()
-                .map(this::toDTO).collect(Collectors.toList());
-    }
-
-    public List<ProductoVarianteResponseDTO> listarConStockBajo(int umbral) {
-        return productoVarianteRepository.findConStockBajo(umbral).stream()
-                .map(this::toDTO).collect(Collectors.toList());
-    }
-
-    public ProductoVariante crear(ProductoVarianteDTO dto) {
-        Producto producto = productoRepository.findById(dto.getProductoId())
-                .orElseThrow(() -> new RuntimeException("Producto no encontrado con ID: " + dto.getProductoId()));
-
-        if (dto.getPrecioVenta() == null) {
-            throw new RuntimeException("La variante necesita un precio de venta");
-        }
-
-        ProductoVariante variante = new ProductoVariante();
-        variante.setProducto(producto);
-        variante.setTalla(dto.getTalla());
-        variante.setColor(dto.getColor());
-        variante.setPrecioVenta(dto.getPrecioVenta());
-        variante.setActivo(true);
-
-        // Secuencia 001, 002... por producto, siguiendo el formato oficial
-        // RAT-[CAT]-[COD]-[SEQ] del catálogo. El stock inicial se asigna
-        // directo (no genera un MovimientoInventario retroactivo) — desde
-        // ahí en adelante, todo cambio de stock sí debe pasar por
-        // MovimientoInventarioService para quedar trazado.
-        int siguienteSeq = productoVarianteRepository.findByProductoId(producto.getId()).size() + 1;
-        variante.setSkuVariante(producto.getSku() + "-" + String.format("%03d", siguienteSeq));
-
-        if (Boolean.TRUE.equals(producto.getRequiereControlStock())) {
-            variante.setStockActual(dto.getStockInicial() != null ? dto.getStockInicial() : 0);
-        } else {
-            variante.setStockActual(null); // artículos digitales (DIG): no se controla stock
-        }
-
-        return productoVarianteRepository.save(variante);
-    }
-
-    public ProductoVariante actualizarPrecio(Integer id, java.math.BigDecimal nuevoPrecio) {
-        ProductoVariante variante = buscarOFallar(id);
-        variante.setPrecioVenta(nuevoPrecio);
-        return productoVarianteRepository.save(variante);
-    }
-
-    public void desactivar(Integer id) {
-        ProductoVariante variante = buscarOFallar(id);
-        variante.setActivo(false);
-        productoVarianteRepository.save(variante);
-    }
-
-    private ProductoVariante buscarOFallar(Integer id) {
-        return productoVarianteRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Variante de producto no encontrada con ID: " + id));
-    }
-
-    private ProductoVarianteResponseDTO toDTO(ProductoVariante v) {
-        ProductoVarianteResponseDTO dto = new ProductoVarianteResponseDTO();
-        dto.setId(v.getId());
-        dto.setProductoId(v.getProducto().getId());
-        dto.setNombreProducto(v.getProducto().getNombre());
-        dto.setTalla(v.getTalla());
-        dto.setColor(v.getColor());
-        dto.setSkuVariante(v.getSkuVariante());
-        dto.setPrecioVenta(v.getPrecioVenta());
-        dto.setStockActual(v.getStockActual());
-        dto.setActivo(v.getActivo());
-        return dto;
-    }
-}
-</file>
-
-<file path="src/main/java/com/varcal/cheermanager/Service/Inventario/VentaService.java">
-package com.varcal.cheermanager.Service.Inventario;
-
-import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import com.varcal.cheermanager.DTO.Dashboard.ResumenAdministracionDTO;
+import com.varcal.cheermanager.DTO.Dashboard.ResumenAdministracionDTO.RegistroAuditoriaDTO;
+import com.varcal.cheermanager.DTO.Dashboard.ResumenEvaluacionDTO;
+import com.varcal.cheermanager.DTO.Dashboard.ResumenFinanzasDTO;
+import com.varcal.cheermanager.DTO.Dashboard.ResumenHorariosDTO;
+import com.varcal.cheermanager.Models.Funcionalidad.Auditoria;
+import com.varcal.cheermanager.Models.Funcionalidad.LogAcceso;
+import com.varcal.cheermanager.repository.Funcionalidad.AuditoriaRepository;
+import com.varcal.cheermanager.repository.Funcionalidad.LogAccesoRepository;
+
+@Service
+public class DashboardAdministracionService {
+
+    private static final int VENTANA_DIAS_USO_SISTEMA = 7;
+    private static final int MAX_AUDITORIA_RECIENTE = 20;
+
+    // Se reutilizan los dashboards ya construidos en vez de recalcular la
+    // misma lógica de negocio dos veces — Administración es un agregador,
+    // no una fuente de verdad propia.
+    @Autowired
+    private DashboardFinanzasService dashboardFinanzasService;
+
+    @Autowired
+    private DashboardHorariosService dashboardHorariosService;
+
+    @Autowired
+    private DashboardEvaluacionService dashboardEvaluacionService;
+
+    @Autowired
+    private LogAccesoRepository logAccesoRepository;
+
+    @Autowired
+    private AuditoriaRepository auditoriaRepository;
+
+    public ResumenAdministracionDTO obtenerResumen() {
+        ResumenAdministracionDTO dto = new ResumenAdministracionDTO();
+
+        ResumenFinanzasDTO finanzas = dashboardFinanzasService.obtenerResumen();
+        dto.setRecaudoMesActual(finanzas.getRecaudoMesActual());
+        dto.setCarteraPendienteTotal(finanzas.getCarteraPendienteTotal());
+
+        ResumenHorariosDTO horarios = dashboardHorariosService.obtenerResumen(30);
+        dto.setPorcentajeAsistenciaGeneral30Dias(horarios.getPorcentajeAsistenciaGeneral());
+
+        calcularSaludCompetitiva(dto);
+        calcularUsoDelSistema(dto);
+        dto.setAuditoriaReciente(obtenerAuditoriaReciente());
+
+        return dto;
+    }
+
+    private void calcularSaludCompetitiva(ResumenAdministracionDTO dto) {
+        ResumenEvaluacionDTO evaluacion = dashboardEvaluacionService.obtenerResumen();
+        List<Double> puntajes = evaluacion.getUltimosPuntajesPorGrupo().stream()
+                .map(g -> g.getPuntajeTotal() != null ? g.getPuntajeTotal().doubleValue() : null)
+                .filter(p -> p != null)
+                .collect(Collectors.toList());
+
+        dto.setGruposConEvaluacionReciente(puntajes.size());
+        dto.setPuntajePromedioClub(puntajes.isEmpty() ? null
+                : redondear(puntajes.stream().mapToDouble(Double::doubleValue).average().orElse(0)));
+    }
+
+    private void calcularUsoDelSistema(ResumenAdministracionDTO dto) {
+        LocalDateTime desde = LocalDateTime.now().minusDays(VENTANA_DIAS_USO_SISTEMA);
+        LocalDateTime hasta = LocalDateTime.now();
+
+        // Pageable.unpaged() trae todo sin metadata de paginación — a la
+        // escala de un club, el volumen de logs de 7 días es perfectamente
+        // manejable en memoria.
+        List<LogAcceso> logs = logAccesoRepository
+                .findByFechaBetweenOrderByFechaDesc(desde, hasta, Pageable.unpaged())
+                .getContent();
+
+        dto.setLoginsExitosos7Dias(logs.stream().filter(l -> "LOGIN_EXITOSO".equals(l.getAccion())).count());
+        dto.setLoginsFallidos7Dias(logs.stream().filter(l -> "LOGIN_FALLIDO".equals(l.getAccion())).count());
+
+        Set<Integer> usuariosDistintos = logs.stream()
+                .filter(l -> "LOGIN_EXITOSO".equals(l.getAccion()) && l.getUsuario() != null)
+                .map(l -> l.getUsuario().getId())
+                .collect(Collectors.toSet());
+        dto.setUsuariosActivos7Dias(usuariosDistintos.size());
+    }
+
+    // NOTA: si esto devuelve siempre una lista vacía, es porque no
+    // encontramos en el proyecto ningún Service/Aspect que efectivamente
+    // escriba en la tabla `auditoria` — el Model existe (y ahora también su
+    // Repository), pero nada la está poblando todavía. Eso es un pendiente
+    // aparte, no un bug de este dashboard.
+    private List<RegistroAuditoriaDTO> obtenerAuditoriaReciente() {
+        LocalDateTime desde = LocalDateTime.now().minusDays(30);
+        List<Auditoria> registros = auditoriaRepository.findByFechaAfterOrderByFechaDesc(
+                desde, Pageable.ofSize(MAX_AUDITORIA_RECIENTE));
+
+        return registros.stream().map(a -> {
+            RegistroAuditoriaDTO item = new RegistroAuditoriaDTO();
+            item.setUsuario(a.getUsuario() != null ? a.getUsuario().getUsername() : "Desconocido");
+            item.setTablaAfectada(a.getTablaAfectada());
+            item.setAccion(a.getAccion().name());
+            item.setRegistroId(a.getRegistroId());
+            item.setFecha(a.getFecha());
+            return item;
+        }).collect(Collectors.toList());
+    }
+
+    private double redondear(double valor) {
+        return Math.round(valor * 100.0) / 100.0;
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Service/Dashboard/DashboardEvaluacionService.java">
+package com.varcal.cheermanager.Service.Dashboard;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import com.varcal.cheermanager.DTO.Inventario.MovimientoInventarioDTO;
-import com.varcal.cheermanager.DTO.Inventario.VentaDTO;
-import com.varcal.cheermanager.DTO.Inventario.VentaResponseDTO;
+import com.varcal.cheermanager.DTO.Dashboard.ResumenEvaluacionDTO;
+import com.varcal.cheermanager.DTO.Dashboard.ResumenEvaluacionDTO.ProgresionGrupoDTO;
+import com.varcal.cheermanager.DTO.Dashboard.ResumenEvaluacionDTO.ProgresionGrupoDTO.PuntoProgresionDTO;
+import com.varcal.cheermanager.DTO.Dashboard.ResumenEvaluacionDTO.UltimoPuntajeGrupoDTO;
+import com.varcal.cheermanager.Models.Evaluaciones.Rutina.EvaluacionRutina;
+import com.varcal.cheermanager.Models.Org_dep.GrupoEntrenamiento;
+import com.varcal.cheermanager.repository.Evaluaciones.Rutina.EvaluacionRutinaRepository;
+import com.varcal.cheermanager.repository.Org_dep.GrupoEntrenamientoRepository;
+
+@Service
+public class DashboardEvaluacionService {
+
+    @Autowired
+    private EvaluacionRutinaRepository evaluacionRutinaRepository;
+
+    @Autowired
+    private GrupoEntrenamientoRepository grupoEntrenamientoRepository;
+
+    // Último puntaje registrado por cada grupo que tenga al menos una
+    // evaluación — grupos sin ninguna quedan fuera de la lista (no aparecen
+    // con puntaje 0, que sería engañoso).
+    public ResumenEvaluacionDTO obtenerResumen() {
+        List<UltimoPuntajeGrupoDTO> ultimos = new ArrayList<>();
+
+        for (GrupoEntrenamiento grupo : grupoEntrenamientoRepository.findAll()) {
+            List<EvaluacionRutina> historico = evaluacionRutinaRepository.findByGrupoIdOrderByFechaDesc(grupo.getId());
+            if (historico.isEmpty()) {
+                continue;
+            }
+            EvaluacionRutina masReciente = historico.get(0);
+
+            UltimoPuntajeGrupoDTO dto = new UltimoPuntajeGrupoDTO();
+            dto.setGrupoId(grupo.getId());
+            dto.setNombreGrupo(grupo.getNombre());
+            dto.setNivel(masReciente.getNivel().getNombre());
+            dto.setFecha(masReciente.getFecha());
+            dto.setEvento(masReciente.getEvento());
+            dto.setPuntajeTotal(masReciente.getPuntajeTotal());
+            ultimos.add(dto);
+        }
+
+        ResumenEvaluacionDTO resumen = new ResumenEvaluacionDTO();
+        resumen.setUltimosPuntajesPorGrupo(ultimos);
+        return resumen;
+    }
+
+    // Línea de tiempo completa de un grupo — la base del KPI de "progresión
+    // de puntaje evento-a-evento" que se propuso en el diseño original.
+    public ProgresionGrupoDTO obtenerProgresion(Integer grupoId) {
+        GrupoEntrenamiento grupo = grupoEntrenamientoRepository.findById(grupoId)
+                .orElseThrow(() -> new RuntimeException("Grupo no encontrado con ID: " + grupoId));
+
+        List<EvaluacionRutina> historico = evaluacionRutinaRepository.findByGrupoIdOrderByFechaDesc(grupoId);
+
+        ProgresionGrupoDTO dto = new ProgresionGrupoDTO();
+        dto.setGrupoId(grupo.getId());
+        dto.setNombreGrupo(grupo.getNombre());
+        dto.setPuntos(historico.stream().map(e -> {
+            PuntoProgresionDTO punto = new PuntoProgresionDTO();
+            punto.setFecha(e.getFecha());
+            punto.setEvento(e.getEvento());
+            punto.setEsEventoOficial(e.getEventoOficial() != null);
+            punto.setPuntajeTotal(e.getPuntajeTotal());
+            return punto;
+        }).collect(Collectors.toList()));
+
+        return dto;
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Service/Dashboard/DashboardEventosService.java">
+package com.varcal.cheermanager.Service.Dashboard;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.varcal.cheermanager.DTO.Dashboard.ResumenEventosDTO;
+import com.varcal.cheermanager.DTO.Dashboard.ResumenEventosDTO.PremioGanadoDTO;
+import com.varcal.cheermanager.DTO.Dashboard.ResumenEventosDTO.ProximoEventoResumenDTO;
+import com.varcal.cheermanager.Models.Eventos.Evento;
+import com.varcal.cheermanager.Models.Eventos.ResultadoCompetencia;
+import com.varcal.cheermanager.repository.Eventos.EventoRepository;
+import com.varcal.cheermanager.repository.Eventos.GrupoEventoRepository;
+import com.varcal.cheermanager.repository.Eventos.ResultadoCompetenciaRepository;
+
+@Service
+public class DashboardEventosService {
+
+    private static final int TOP_PODIO = 3;
+
+    @Autowired
+    private EventoRepository eventoRepository;
+
+    @Autowired
+    private GrupoEventoRepository grupoEventoRepository;
+
+    @Autowired
+    private ResultadoCompetenciaRepository resultadoCompetenciaRepository;
+
+    public ResumenEventosDTO obtenerResumen() {
+        ResumenEventosDTO dto = new ResumenEventosDTO();
+
+        dto.setProximosEventos(eventoRepository.findByFechaGreaterThanEqualOrderByFechaAsc(LocalDate.now()).stream()
+                .map(this::toProximoEventoDTO)
+                .collect(Collectors.toList()));
+
+        // Recorre todos los resultados registrados — a la escala de un club
+        // (una temporada tiene decenas de resultados, no miles) esto es
+        // perfectamente aceptable sin necesitar una query de conteo aparte.
+        List<ResultadoCompetencia> todosLosResultados = resultadoCompetenciaRepository.findAll();
+
+        dto.setPodiosTemporada(todosLosResultados.stream()
+                .filter(r -> r.getPosicion() != null && r.getPosicion() <= TOP_PODIO)
+                .count());
+
+        dto.setPremiosGanados(todosLosResultados.stream()
+                .filter(r -> r.getPremio() != null)
+                .map(this::toPremioGanadoDTO)
+                .collect(Collectors.toList()));
+
+        return dto;
+    }
+
+    private ProximoEventoResumenDTO toProximoEventoDTO(Evento e) {
+        ProximoEventoResumenDTO dto = new ProximoEventoResumenDTO();
+        dto.setEventoId(e.getId());
+        dto.setNombre(e.getNombre());
+        dto.setFecha(e.getFecha());
+        dto.setGruposInscritos(grupoEventoRepository.findByEventoId(e.getId()).size());
+        return dto;
+    }
+
+    private PremioGanadoDTO toPremioGanadoDTO(ResultadoCompetencia r) {
+        PremioGanadoDTO dto = new PremioGanadoDTO();
+        dto.setEventoId(r.getEvento().getId());
+        dto.setNombreEvento(r.getEvento().getNombre());
+        dto.setFechaEvento(r.getEvento().getFecha());
+        dto.setNombreGrupo(r.getGrupoEntrenamiento() != null ? r.getGrupoEntrenamiento().getNombre() : null);
+        dto.setPosicion(r.getPosicion());
+        dto.setPuntaje(r.getPuntaje());
+        dto.setDescripcionPremio(r.getPremio().getDescripcion());
+        return dto;
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Service/Dashboard/DashboardFinanzasService.java">
+package com.varcal.cheermanager.Service.Dashboard;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.varcal.cheermanager.DTO.Dashboard.ResumenFinanzasDTO;
+import com.varcal.cheermanager.DTO.Dashboard.ResumenFinanzasDTO.MorosidadPorPlanDTO;
+import com.varcal.cheermanager.DTO.Dashboard.ResumenFinanzasDTO.TendenciaMensualDTO;
 import com.varcal.cheermanager.Models.Financiero.Factura;
+import com.varcal.cheermanager.repository.Financiero.FacturaRepository;
+import com.varcal.cheermanager.repository.Financiero.PagoRepository;
+import com.varcal.cheermanager.repository.Inventario.VentaRepository;
+
+@Service
+public class DashboardFinanzasService {
+
+    private static final DateTimeFormatter FORMATO_MES = DateTimeFormatter.ofPattern("yyyy-MM");
+
+    @Autowired
+    private FacturaRepository facturaRepository;
+
+    @Autowired
+    private PagoRepository pagoRepository;
+
+    @Autowired
+    private VentaRepository ventaRepository;
+
+    public ResumenFinanzasDTO obtenerResumen() {
+        ResumenFinanzasDTO dto = new ResumenFinanzasDTO();
+
+        LocalDate hoy = LocalDate.now();
+        LocalDate inicioMes = hoy.withDayOfMonth(1);
+        LocalDate finMes = hoy.withDayOfMonth(hoy.lengthOfMonth());
+
+        dto.setRecaudoMesActual(pagoRepository.sumarMontoPagadoEnRango(inicioMes, finMes));
+
+        List<Factura> facturas = facturaRepository.findAll();
+        calcularCarteraYFacturadoDelMes(dto, facturas, inicioMes, finMes);
+        dto.setMorosidadPorPlan(calcularMorosidadPorPlan(facturas));
+
+        BigDecimal ventasTienda = ventaRepository.findByFechaBetweenOrderByFechaDesc(inicioMes, finMes).stream()
+                .map(v -> v.getTotal())
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        dto.setIngresoTiendaMesActual(ventasTienda);
+
+        dto.setTendenciaUltimos6Meses(calcularTendencia());
+
+        return dto;
+    }
+
+    // Recorre las facturas una sola vez para calcular en el mismo paso:
+    // cartera pendiente total, cuántas tienen saldo, cuánto se facturó este
+    // mes, y cuánto de lo facturado este mes tiene descuento aplicado.
+    private void calcularCarteraYFacturadoDelMes(ResumenFinanzasDTO dto, List<Factura> facturas,
+            LocalDate inicioMes, LocalDate finMes) {
+        BigDecimal pendienteTotal = BigDecimal.ZERO;
+        long facturasConSaldo = 0;
+        BigDecimal facturadoMes = BigDecimal.ZERO;
+        BigDecimal facturadoConDescuentoMes = BigDecimal.ZERO;
+
+        for (Factura f : facturas) {
+            BigDecimal pagado = pagoRepository.sumarMontoPagadoPorFactura(f.getId());
+            BigDecimal saldo = f.getTotal().subtract(pagado);
+            if (saldo.signum() > 0) {
+                pendienteTotal = pendienteTotal.add(saldo);
+                facturasConSaldo++;
+            }
+
+            boolean esDelMes = !f.getFechaEmision().isBefore(inicioMes) && !f.getFechaEmision().isAfter(finMes);
+            if (esDelMes) {
+                facturadoMes = facturadoMes.add(f.getTotal());
+                if (f.getDescuento() != null) {
+                    facturadoConDescuentoMes = facturadoConDescuentoMes.add(f.getTotal());
+                }
+            }
+        }
+
+        dto.setCarteraPendienteTotal(pendienteTotal);
+        dto.setFacturasConSaldoPendiente(facturasConSaldo);
+        dto.setFacturadoMesActual(facturadoMes);
+        // Nota: esto es "cuánto se facturó a clientes que tenían descuento
+        // aplicado", NO "cuánto se dejó de cobrar por el descuento" — calcular
+        // eso último exigiría reconstruir el precio de lista antes del
+        // descuento, y no hay suficiente info en Factura para hacerlo sin
+        // suponer cómo se aplicó el porcentaje al crearla.
+        dto.setIngresoConDescuentoMesActual(facturadoConDescuentoMes);
+    }
+
+    private List<MorosidadPorPlanDTO> calcularMorosidadPorPlan(List<Factura> facturas) {
+        Map<String, long[]> conteoPorPlan = new HashMap<>(); // [totalFacturas, conSaldoPendiente]
+
+        for (Factura f : facturas) {
+            String nombrePlan = (f.getInscripcion() != null && f.getInscripcion().getPlanPago() != null)
+                    ? f.getInscripcion().getPlanPago().getNombre()
+                    : "Sin plan asociado";
+
+            BigDecimal pagado = pagoRepository.sumarMontoPagadoPorFactura(f.getId());
+            boolean tieneSaldo = f.getTotal().subtract(pagado).signum() > 0;
+
+            long[] contadores = conteoPorPlan.computeIfAbsent(nombrePlan, k -> new long[2]);
+            contadores[0]++;
+            if (tieneSaldo) {
+                contadores[1]++;
+            }
+        }
+
+        List<MorosidadPorPlanDTO> resultado = new ArrayList<>();
+        for (Map.Entry<String, long[]> entry : conteoPorPlan.entrySet()) {
+            MorosidadPorPlanDTO item = new MorosidadPorPlanDTO();
+            item.setNombrePlan(entry.getKey());
+            item.setTotalFacturas(entry.getValue()[0]);
+            item.setFacturasConSaldoPendiente(entry.getValue()[1]);
+            item.setPorcentajeMorosidad(entry.getValue()[0] > 0
+                    ? redondear(entry.getValue()[1] * 100.0 / entry.getValue()[0])
+                    : null);
+            resultado.add(item);
+        }
+        return resultado;
+    }
+
+    // Recaudo mes a mes de los últimos 6 meses completos (incluyendo el
+    // actual) — sirve para ver la tendencia sin necesitar una fecha de
+    // vencimiento de factura, que no existe en el modelo actual.
+    private List<TendenciaMensualDTO> calcularTendencia() {
+        List<TendenciaMensualDTO> tendencia = new ArrayList<>();
+        LocalDate hoy = LocalDate.now();
+
+        for (int i = 5; i >= 0; i--) {
+            LocalDate mesRef = hoy.minusMonths(i);
+            LocalDate inicio = mesRef.withDayOfMonth(1);
+            LocalDate fin = mesRef.withDayOfMonth(mesRef.lengthOfMonth());
+
+            TendenciaMensualDTO item = new TendenciaMensualDTO();
+            item.setMes(inicio.format(FORMATO_MES));
+            item.setRecaudado(pagoRepository.sumarMontoPagadoEnRango(inicio, fin));
+            tendencia.add(item);
+        }
+        return tendencia;
+    }
+
+    private double redondear(double valor) {
+        return Math.round(valor * 100.0) / 100.0;
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Service/Dashboard/DashboardHorariosService.java">
+package com.varcal.cheermanager.Service.Dashboard;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.varcal.cheermanager.DTO.Dashboard.ResumenHorariosDTO;
+import com.varcal.cheermanager.DTO.Dashboard.ResumenHorariosDTO.AsistenciaPorGrupoDTO;
+import com.varcal.cheermanager.DTO.Dashboard.ResumenHorariosDTO.DeportistaEnRiesgoDTO;
+import com.varcal.cheermanager.Models.Org_dep.GrupoEntrenamiento;
+import com.varcal.cheermanager.Models.Personas.Deportista;
+import com.varcal.cheermanager.repository.Horario_Asistencia.AsistenciaRepository;
+import com.varcal.cheermanager.repository.Org_dep.GrupoEntrenamientoRepository;
+import com.varcal.cheermanager.repository.Personas.DeportistaRepository;
+
+@Service
+public class DashboardHorariosService {
+
+    // "Presente" es el nombre literal esperado en la tabla estados_asistencia
+    // — mismo supuesto que ya usa el resto del sistema (ej. % de asistencia
+    // individual) — si el estado se renombra algún día, esto se rompe en
+    // silencio.
+    private static final String ESTADO_PRESENTE = "Presente";
+    private static final double UMBRAL_RIESGO = 70.0;
+
+    @Autowired
+    private AsistenciaRepository asistenciaRepository;
+
+    @Autowired
+    private GrupoEntrenamientoRepository grupoEntrenamientoRepository;
+
+    @Autowired
+    private DeportistaRepository deportistaRepository;
+
+    public ResumenHorariosDTO obtenerResumen(int diasAnalizados) {
+        LocalDate hasta = LocalDate.now();
+        LocalDate desde = hasta.minusDays(diasAnalizados);
+
+        ResumenHorariosDTO resumen = new ResumenHorariosDTO();
+        resumen.setDiasAnalizados(diasAnalizados);
+        resumen.setAsistenciaPorGrupo(calcularAsistenciaPorGrupo(desde, hasta));
+        resumen.setDeportistasEnRiesgo(calcularDeportistasEnRiesgo(desde, hasta));
+
+        long totalGeneral = asistenciaRepository.contarTotalEnRango(desde, hasta);
+        long presentesGeneral = asistenciaRepository.contarPorEstadoEnRango(desde, hasta, ESTADO_PRESENTE);
+        resumen.setPorcentajeAsistenciaGeneral(totalGeneral > 0 ? redondear(presentesGeneral * 100.0 / totalGeneral) : null);
+
+        return resumen;
+    }
+
+    private List<AsistenciaPorGrupoDTO> calcularAsistenciaPorGrupo(LocalDate desde, LocalDate hasta) {
+        List<AsistenciaPorGrupoDTO> resultado = new ArrayList<>();
+
+        for (GrupoEntrenamiento grupo : grupoEntrenamientoRepository.findAll()) {
+            long total = asistenciaRepository.contarTotalPorGrupoEnRango(grupo.getId(), desde, hasta);
+            long presentes = asistenciaRepository.contarPorGrupoYEstadoEnRango(grupo.getId(), desde, hasta, ESTADO_PRESENTE);
+
+            AsistenciaPorGrupoDTO dto = new AsistenciaPorGrupoDTO();
+            dto.setGrupoId(grupo.getId());
+            dto.setNombreGrupo(grupo.getNombre());
+            dto.setTotalRegistros(total);
+            dto.setPresentes(presentes);
+            dto.setPorcentaje(total > 0 ? redondear(presentes * 100.0 / total) : null);
+            resultado.add(dto);
+        }
+
+        // Grupos sin ningún registro en el rango no aportan nada al
+        // dashboard — se omiten en vez de mostrarlos en 0%, que sería
+        // engañoso (no es que no asistieron, es que no hay dato).
+        resultado.removeIf(g -> g.getTotalRegistros() == 0);
+        resultado.sort(Comparator.comparing(AsistenciaPorGrupoDTO::getNombreGrupo));
+        return resultado;
+    }
+
+    // Recorre todos los deportistas — a la escala de un club (decenas a
+    // pocos cientos de atletas) esto es aceptable en memoria; si el club
+    // crece mucho, es candidato a resolverse con una sola query agregada
+    // en vez de N llamadas al repository por deportista.
+    private List<DeportistaEnRiesgoDTO> calcularDeportistasEnRiesgo(LocalDate desde, LocalDate hasta) {
+        List<Deportista> todos = deportistaRepository.findByFiltros(null, null, null);
+        List<DeportistaEnRiesgoDTO> enRiesgo = new ArrayList<>();
+
+        for (Deportista d : todos) {
+            long total = asistenciaRepository.countByDeportistaIdAndFechaBetween(d.getId(), desde, hasta);
+            if (total == 0) {
+                continue; // sin registros en el rango, no hay nada que evaluar todavía
+            }
+
+            long presentes = asistenciaRepository.contarPorDeportistaYEstadoEnRango(d.getId(), desde, hasta, ESTADO_PRESENTE);
+            double porcentaje = presentes * 100.0 / total;
+
+            if (porcentaje < UMBRAL_RIESGO) {
+                DeportistaEnRiesgoDTO item = new DeportistaEnRiesgoDTO();
+                item.setDeportistaId(d.getId());
+                item.setNombreCompleto(d.getPersona().getNombre() + " " + d.getPersona().getApellidos());
+                item.setPorcentaje(redondear(porcentaje));
+                enRiesgo.add(item);
+            }
+        }
+
+        enRiesgo.sort(Comparator.comparing(DeportistaEnRiesgoDTO::getPorcentaje));
+        return enRiesgo;
+    }
+
+    private double redondear(double valor) {
+        return Math.round(valor * 100.0) / 100.0; // 2 decimales
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Service/Dashboard/DashboardInicioService.java">
+package com.varcal.cheermanager.Service.Dashboard;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.varcal.cheermanager.DTO.Dashboard.ResumenInicioDTO;
+import com.varcal.cheermanager.DTO.Dashboard.ResumenInicioDTO.ProximoEventoDTO;
+import com.varcal.cheermanager.Models.Eventos.Evento;
+import com.varcal.cheermanager.Models.Financiero.Factura;
+import com.varcal.cheermanager.Models.Personas.Deportista;
+import com.varcal.cheermanager.Service.Persona.HistorialMedicoService;
+import com.varcal.cheermanager.repository.Eventos.EventoRepository;
+import com.varcal.cheermanager.repository.Financiero.FacturaRepository;
+import com.varcal.cheermanager.repository.Financiero.PagoRepository;
+import com.varcal.cheermanager.repository.Horario_Asistencia.AsistenciaRepository;
+import com.varcal.cheermanager.repository.Org_dep.GrupoEntrenamientoRepository;
+import com.varcal.cheermanager.repository.Personas.DeportistaRepository;
+
+@Service
+public class DashboardInicioService {
+
+    private static final String ESTADO_PRESENTE = "Presente";
+    private static final String ESTADO_ACTIVO = "Activo";
+
+    @Autowired
+    private DeportistaRepository deportistaRepository;
+
+    @Autowired
+    private GrupoEntrenamientoRepository grupoEntrenamientoRepository;
+
+    @Autowired
+    private EventoRepository eventoRepository;
+
+    @Autowired
+    private FacturaRepository facturaRepository;
+
+    @Autowired
+    private PagoRepository pagoRepository;
+
+    @Autowired
+    private AsistenciaRepository asistenciaRepository;
+
+    @Autowired
+    private HistorialMedicoService historialMedicoService;
+
+    public ResumenInicioDTO obtenerResumen() {
+        ResumenInicioDTO dto = new ResumenInicioDTO();
+
+        List<Deportista> deportistas = deportistaRepository.findAll();
+        dto.setDeportistasActivos((int) deportistas.stream()
+                .filter(d -> d.getEstado() != null && ESTADO_ACTIVO.equalsIgnoreCase(d.getEstado().getEstado()))
+                .count());
+
+        dto.setTotalGrupos((int) grupoEntrenamientoRepository.count());
+
+        dto.setProximoEvento(calcularProximoEvento());
+
+        calcularCartera(dto);
+
+        LocalDate hoy = LocalDate.now();
+        LocalDate hace7Dias = hoy.minusDays(7);
+        long total = asistenciaRepository.contarTotalEnRango(hace7Dias, hoy);
+        long presentes = asistenciaRepository.contarPorEstadoEnRango(hace7Dias, hoy, ESTADO_PRESENTE);
+        dto.setPorcentajeAsistenciaUltimos7Dias(total > 0 ? redondear(presentes * 100.0 / total) : null);
+
+        dto.setAlertasCondicionMedicaActiva((int) deportistas.stream()
+                .filter(d -> historialMedicoService.tieneCondicionActiva(d.getPersona().getId()))
+                .count());
+
+        return dto;
+    }
+
+    private ProximoEventoDTO calcularProximoEvento() {
+        List<Evento> proximos = eventoRepository.findByFechaGreaterThanEqualOrderByFechaAsc(LocalDate.now());
+        if (proximos.isEmpty()) {
+            return null;
+        }
+        Evento e = proximos.get(0);
+
+        ProximoEventoDTO dto = new ProximoEventoDTO();
+        dto.setEventoId(e.getId());
+        dto.setNombre(e.getNombre());
+        dto.setFecha(e.getFecha());
+        dto.setDiasRestantes(ChronoUnit.DAYS.between(LocalDate.now(), e.getFecha()));
+        return dto;
+    }
+
+    // Recorre todas las facturas para sumar el saldo pendiente real
+    // (total - pagado), reutilizando PagoRepository.sumarMontoPagadoPorFactura
+    // en vez de duplicar esa lógica — a la escala de un club esto es
+    // aceptable en memoria.
+    private void calcularCartera(ResumenInicioDTO dto) {
+        List<Factura> facturas = facturaRepository.findAll();
+        BigDecimal pendienteTotal = BigDecimal.ZERO;
+        long facturasConSaldo = 0;
+
+        for (Factura f : facturas) {
+            BigDecimal pagado = pagoRepository.sumarMontoPagadoPorFactura(f.getId());
+            BigDecimal saldo = f.getTotal().subtract(pagado);
+            if (saldo.signum() > 0) {
+                pendienteTotal = pendienteTotal.add(saldo);
+                facturasConSaldo++;
+            }
+        }
+
+        dto.setCarteraPendienteTotal(pendienteTotal);
+        dto.setFacturasConSaldoPendiente(facturasConSaldo);
+    }
+
+    private double redondear(double valor) {
+        return Math.round(valor * 100.0) / 100.0;
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Service/Dashboard/DashboardOrganizacionService.java">
+package com.varcal.cheermanager.Service.Dashboard;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.varcal.cheermanager.DTO.Dashboard.ResumenOrganizacionDTO;
+import com.varcal.cheermanager.DTO.Dashboard.ResumenOrganizacionDTO.GrupoOcupacionDTO;
+import com.varcal.cheermanager.Models.Org_dep.CategoriaNivel;
+import com.varcal.cheermanager.Models.Org_dep.DeportistaPerteneceGrupo;
+import com.varcal.cheermanager.Models.Org_dep.GrupoEntrenamiento;
+import com.varcal.cheermanager.Models.Personas.Genero;
+import com.varcal.cheermanager.repository.Org_dep.DeportistaPerteneceGrupoRepository;
+import com.varcal.cheermanager.repository.Org_dep.GrupoEntrenamientoRepository;
+import com.varcal.cheermanager.repository.Personas.GeneroRepository;
+
+@Service
+public class DashboardOrganizacionService {
+
+    private static final String GENERO_MASCULINO = "Masculino";
+
+    @Autowired
+    private GrupoEntrenamientoRepository grupoEntrenamientoRepository;
+
+    @Autowired
+    private DeportistaPerteneceGrupoRepository deportistaPerteneceGrupoRepository;
+
+    @Autowired
+    private GeneroRepository generoRepository;
+
+    public ResumenOrganizacionDTO obtenerResumen() {
+        Map<Integer, String> catalogoGenero = generoRepository.findAll().stream()
+                .collect(Collectors.toMap(Genero::getId, Genero::getGenero));
+
+        List<GrupoOcupacionDTO> ocupacion = new ArrayList<>();
+        Map<String, Long> porNivel = new HashMap<>();
+
+        for (GrupoEntrenamiento grupo : grupoEntrenamientoRepository.findAll()) {
+            GrupoOcupacionDTO item = calcularOcupacion(grupo, catalogoGenero);
+            ocupacion.add(item);
+
+            String etiquetaNivel = grupo.getCategoriaNivel() != null && grupo.getCategoriaNivel().getNivel() != null
+                    ? grupo.getCategoriaNivel().getNivel().getNombre()
+                    : "Sin nivel configurado";
+            porNivel.merge(etiquetaNivel, 1L, Long::sum);
+        }
+
+        ResumenOrganizacionDTO dto = new ResumenOrganizacionDTO();
+        dto.setGruposConOcupacion(ocupacion);
+        // Solo entran los grupos que SÍ tienen una regla de cantidad mínima
+        // cargada (cantidadMinRequerida != null) — sin eso no hay con qué
+        // comparar, y no tendría sentido "alertar" sin una referencia real.
+        dto.setGruposPorDebajoDelMinimo(ocupacion.stream()
+                .filter(g -> g.getCantidadMinRequerida() != null && g.getDeportistasActivos() < g.getCantidadMinRequerida())
+                .collect(Collectors.toList()));
+        dto.setGruposPorNivel(porNivel);
+
+        return dto;
+    }
+
+    private GrupoOcupacionDTO calcularOcupacion(GrupoEntrenamiento grupo, Map<Integer, String> catalogoGenero) {
+        List<DeportistaPerteneceGrupo> activos = deportistaPerteneceGrupoRepository.findByGrupoIdAndFechaFinIsNull(grupo.getId());
+
+        long hombres = 0;
+        long mujeres = 0;
+        for (DeportistaPerteneceGrupo p : activos) {
+            Integer generoId = p.getDeportista().getPersona().getGeneroId();
+            String nombreGenero = generoId != null ? catalogoGenero.get(generoId) : null;
+            if (GENERO_MASCULINO.equalsIgnoreCase(nombreGenero)) {
+                hombres++;
+            } else if (nombreGenero != null) {
+                mujeres++;
+            }
+            // generos "Sin especificar" o desconocidos no se cuentan en
+            // ninguna de las dos columnas, para no distorsionar el dato.
+        }
+
+        GrupoOcupacionDTO dto = new GrupoOcupacionDTO();
+        dto.setGrupoId(grupo.getId());
+        dto.setNombreGrupo(grupo.getNombre());
+        dto.setDeportistasActivos(activos.size());
+        dto.setHombres(hombres);
+        dto.setMujeres(mujeres);
+        dto.setMixto(hombres > 0 && mujeres > 0);
+
+        CategoriaNivel categoria = grupo.getCategoriaNivel();
+        if (categoria != null) {
+            dto.setNivel(categoria.getNivel() != null ? categoria.getNivel().getNombre() : null);
+            dto.setDivision(categoria.getDivision() != null ? categoria.getDivision().getNombre() : null);
+            dto.setCantidadMinRequerida(categoria.getCantidadMin());
+            dto.setCantidadMaxSugerida(categoria.getCantidadMax());
+        }
+
+        return dto;
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Service/Dashboard/DashboardPersonasService.java">
+package com.varcal.cheermanager.Service.Dashboard;
+
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.varcal.cheermanager.DTO.Dashboard.ResumenPersonasDTO;
+import com.varcal.cheermanager.DTO.Dashboard.ResumenPersonasDTO.EntrenadorResumenDTO;
+import com.varcal.cheermanager.DTO.Dashboard.ResumenPersonasDTO.MovimientoEstadoDTO;
+import com.varcal.cheermanager.Models.Org_dep.DeportistaPerteneceGrupo;
+import com.varcal.cheermanager.Models.Personas.Deportista;
+import com.varcal.cheermanager.Models.Personas.Entrenador;
+import com.varcal.cheermanager.Models.Personas.Genero;
+import com.varcal.cheermanager.Models.Personas.HistorialDeportistaEstado;
+import com.varcal.cheermanager.Service.Persona.HistorialMedicoService;
+import com.varcal.cheermanager.repository.Org_dep.DeportistaPerteneceGrupoRepository;
+import com.varcal.cheermanager.repository.Org_dep.EntrenadorGrupoRepository;
+import com.varcal.cheermanager.repository.Personas.DeportistaRepository;
+import com.varcal.cheermanager.repository.Personas.EntrenadorRepository;
+import com.varcal.cheermanager.repository.Personas.GeneroRepository;
+import com.varcal.cheermanager.repository.Personas.HistorialDeportistaEstadoRepository;
+
+@Service
+public class DashboardPersonasService {
+
+    @Autowired
+    private DeportistaRepository deportistaRepository;
+
+    @Autowired
+    private EntrenadorRepository entrenadorRepository;
+
+    @Autowired
+    private EntrenadorGrupoRepository entrenadorGrupoRepository;
+
+    @Autowired
+    private GeneroRepository generoRepository;
+
+    @Autowired
+    private HistorialMedicoService historialMedicoService;
+
+    @Autowired
+    private HistorialDeportistaEstadoRepository historialDeportistaEstadoRepository;
+
+    @Autowired
+    private DeportistaPerteneceGrupoRepository deportistaPerteneceGrupoRepository;
+
+    public ResumenPersonasDTO obtenerResumen(int diasAltasBajas) {
+        ResumenPersonasDTO dto = new ResumenPersonasDTO();
+
+        List<Deportista> deportistas = deportistaRepository.findAll();
+        dto.setTotalDeportistas(deportistas.size());
+        dto.setDeportistasPorEstado(agruparPorEstado(deportistas));
+        dto.setDeportistasPorGenero(agruparPorGenero(deportistas));
+        // Antes era un rango de edad genérico (6-8, 9-11...) inventado por
+        // el sistema. Se reemplaza por la división FEDECOLCHEER real
+        // (Tiny/Mini/Youth/Junior/Senior/Open...) del grupo en el que cada
+        // deportista está inscrito hoy, usando el esquema Division/
+        // CategoriaNivel/GrupoEntrenamiento que ya existía en el proyecto.
+        dto.setDeportistasPorDivision(agruparPorDivision(deportistas));
+        dto.setDeportistasConCondicionMedicaActiva(contarCondicionesActivas(deportistas));
+
+        // Altas y bajas: usa HistorialDeportistaEstado, que ya existía
+        // (Model + Repository) pero no estaba conectado a ningún dashboard.
+        dto.setAltasRecientes(contarMovimientos(diasAltasBajas, true));
+        dto.setBajasRecientes(contarMovimientos(diasAltasBajas, false));
+        dto.setMovimientosRecientes(listarMovimientos(diasAltasBajas));
+
+        List<Entrenador> entrenadores = entrenadorRepository.findAll();
+        dto.setTotalEntrenadores(entrenadores.size());
+        dto.setEntrenadores(entrenadores.stream().map(this::toEntrenadorResumen).collect(Collectors.toList()));
+
+        return dto;
+    }
+
+    private Map<String, Long> agruparPorEstado(List<Deportista> deportistas) {
+        Map<String, Long> conteo = new HashMap<>();
+        for (Deportista d : deportistas) {
+            String estado = d.getEstado() != null ? d.getEstado().getEstado() : "Sin estado";
+            conteo.merge(estado, 1L, Long::sum);
+        }
+        return conteo;
+    }
+
+    private Map<String, Long> agruparPorGenero(List<Deportista> deportistas) {
+        Map<Integer, String> catalogo = generoRepository.findAll().stream()
+                .collect(Collectors.toMap(Genero::getId, Genero::getGenero));
+
+        Map<String, Long> conteo = new HashMap<>();
+        for (Deportista d : deportistas) {
+            Integer generoId = d.getPersona().getGeneroId();
+            String nombre = generoId != null ? catalogo.getOrDefault(generoId, "Desconocido") : "Sin especificar";
+            conteo.merge(nombre, 1L, Long::sum);
+        }
+        return conteo;
+    }
+
+    // Un deportista puede pertenecer a más de un grupo (crossover) — se
+    // cuenta en CADA división de sus grupos activos, no solo en una. Un
+    // deportista sin grupo asignado cae en "Sin grupo asignado".
+    private Map<String, Long> agruparPorDivision(List<Deportista> deportistas) {
+        Map<String, Long> conteo = new HashMap<>();
+
+        for (Deportista d : deportistas) {
+            List<DeportistaPerteneceGrupo> pertenencias = deportistaPerteneceGrupoRepository.findByDeportistaIdAndFechaFinIsNull(d.getId());
+
+            if (pertenencias == null || pertenencias.isEmpty()) {
+                conteo.merge("Sin grupo asignado", 1L, Long::sum);
+                continue;
+            }
+
+            for (DeportistaPerteneceGrupo p : pertenencias) {
+                var categoriaNivel = p.getGrupo().getCategoriaNivel();
+                String etiqueta = categoriaNivel != null && categoriaNivel.getDivision() != null
+                        ? categoriaNivel.getDivision().getNombre()
+                        : "Sin división configurada";
+                conteo.merge(etiqueta, 1L, Long::sum);
+            }
+        }
+        return conteo;
+    }
+
+    private int contarCondicionesActivas(List<Deportista> deportistas) {
+        return (int) deportistas.stream()
+                .filter(d -> historialMedicoService.tieneCondicionActiva(d.getPersona().getId()))
+                .count();
+    }
+
+    private long contarMovimientos(int dias, boolean altas) {
+        LocalDateTime desde = LocalDateTime.now().minusDays(dias);
+        return historialDeportistaEstadoRepository.findAllByOrderByFechaCambioDesc().stream()
+                .filter(h -> h.getFechaCambio().isAfter(desde))
+                .filter(h -> esAlta(h) == altas)
+                .count();
+    }
+
+    private List<MovimientoEstadoDTO> listarMovimientos(int dias) {
+        LocalDateTime desde = LocalDateTime.now().minusDays(dias);
+        return historialDeportistaEstadoRepository.findAllByOrderByFechaCambioDesc().stream()
+                .filter(h -> h.getFechaCambio().isAfter(desde))
+                .map(this::toMovimientoDTO)
+                .collect(Collectors.toList());
+    }
+
+    // "Alta" = el estado nuevo se llama "Activo" (mismo supuesto de texto
+    // literal que ya usa el resto del sistema, ej. HistorialMedicoService,
+    // el % de asistencia, etc.) — cualquier otro estado nuevo se cuenta
+    // como "baja" (Inactivo, Retirado, Suspendido...).
+    private boolean esAlta(HistorialDeportistaEstado h) {
+        return h.getEstadoNuevo() != null && "Activo".equalsIgnoreCase(h.getEstadoNuevo().getEstado());
+    }
+
+    private MovimientoEstadoDTO toMovimientoDTO(HistorialDeportistaEstado h) {
+        MovimientoEstadoDTO dto = new MovimientoEstadoDTO();
+        dto.setDeportistaId(h.getDeportista().getId());
+        dto.setNombreCompleto(h.getDeportista().getPersona().getNombre() + " " + h.getDeportista().getPersona().getApellidos());
+        dto.setEstadoAnterior(h.getEstadoAnterior() != null ? h.getEstadoAnterior().getEstado() : null);
+        dto.setEstadoNuevo(h.getEstadoNuevo() != null ? h.getEstadoNuevo().getEstado() : null);
+        dto.setFechaCambio(h.getFechaCambio());
+        dto.setEsAlta(esAlta(h));
+        dto.setMotivo(h.getMotivoCambio());
+        return dto;
+    }
+
+    private EntrenadorResumenDTO toEntrenadorResumen(Entrenador e) {
+        EntrenadorResumenDTO dto = new EntrenadorResumenDTO();
+        dto.setEntrenadorId(e.getId());
+        dto.setNombreCompleto(e.getPersona().getNombre() + " " + e.getPersona().getApellidos());
+        dto.setEspecializacion(e.getEspecializacion());
+        dto.setEstado(e.getEstado() != null ? e.getEstado().getEstado() : "Sin estado");
+        dto.setGruposACargo(entrenadorGrupoRepository.countGruposByEntrenadorId(e.getId()));
+        return dto;
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Service/Dashboard/DashboardTiendaService.java">
+package com.varcal.cheermanager.Service.Dashboard;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.varcal.cheermanager.DTO.Dashboard.ResumenTiendaDTO;
+import com.varcal.cheermanager.DTO.Dashboard.ResumenTiendaDTO.ProductoMasVendidoDTO;
+import com.varcal.cheermanager.DTO.Dashboard.ResumenTiendaDTO.VarianteStockBajoDTO;
 import com.varcal.cheermanager.Models.Inventario.DetalleVenta;
 import com.varcal.cheermanager.Models.Inventario.ProductoVariante;
 import com.varcal.cheermanager.Models.Inventario.Venta;
-import com.varcal.cheermanager.Models.Personas.Persona;
-import com.varcal.cheermanager.repository.Financiero.FacturaRepository;
 import com.varcal.cheermanager.repository.Inventario.ProductoVarianteRepository;
 import com.varcal.cheermanager.repository.Inventario.VentaRepository;
-import com.varcal.cheermanager.repository.Personas.PersonaRepository;
 
 @Service
-public class VentaService {
+public class DashboardTiendaService {
+
+    private static final int UMBRAL_STOCK_BAJO_DEFECTO = 5;
+    private static final int TOP_PRODUCTOS = 5;
 
     @Autowired
     private VentaRepository ventaRepository;
@@ -1447,148 +1968,90 @@ public class VentaService {
     @Autowired
     private ProductoVarianteRepository productoVarianteRepository;
 
-    @Autowired
-    private PersonaRepository personaRepository;
+    public ResumenTiendaDTO obtenerResumen() {
+        ResumenTiendaDTO dto = new ResumenTiendaDTO();
 
-    @Autowired
-    private FacturaRepository facturaRepository;
+        LocalDate hoy = LocalDate.now();
+        LocalDate inicioMes = hoy.withDayOfMonth(1);
+        LocalDate finMes = hoy.withDayOfMonth(hoy.lengthOfMonth());
 
-    @Autowired
-    private MovimientoInventarioService movimientoInventarioService;
+        List<Venta> ventasDelMes = ventaRepository.findByFechaBetweenOrderByFechaDesc(inicioMes, finMes);
 
-    // Se marca @Transactional porque una venta toca varias tablas (Venta,
-    // N DetalleVenta, N MovimientoInventario, N ProductoVariante.stockActual)
-    // — si falla a mitad de camino (ej. un ítem sin stock), nada debe quedar
-    // guardado a medias.
-    @Transactional
-    public Venta registrar(VentaDTO dto) {
-        validarComprador(dto);
+        dto.setVentasMesActual(ventasDelMes.size());
+        dto.setIngresoMesActual(ventasDelMes.stream().map(Venta::getTotal).reduce(BigDecimal.ZERO, BigDecimal::add));
 
-        if (dto.getItems() == null || dto.getItems().isEmpty()) {
-            throw new RuntimeException("La venta debe tener al menos un ítem");
-        }
+        // Se recorren todas las líneas de detalle de las ventas del mes una
+        // sola vez, acumulando en paralelo: unidades totales, ingreso por
+        // categoría, y ranking por producto — evita recorrer la misma lista
+        // tres veces.
+        long unidadesTotales = 0;
+        Map<String, BigDecimal> ingresoPorCategoria = new HashMap<>();
+        Map<String, long[]> unidadesPorProducto = new HashMap<>(); // [unidades] — usar array para acumular dentro de lambda
+        Map<String, BigDecimal> ingresoPorProducto = new HashMap<>();
 
-        Venta venta = new Venta();
-        venta.setFecha(LocalDate.now());
-        venta.setMetodoPago(dto.getMetodoPago());
+        for (Venta venta : ventasDelMes) {
+            List<DetalleVenta> detalles = venta.getDetalles();
+            if (detalles == null) continue;
 
-        if (dto.getPersonaId() != null) {
-            Persona persona = personaRepository.findById(dto.getPersonaId())
-                    .orElseThrow(() -> new RuntimeException("Persona no encontrada con ID: " + dto.getPersonaId()));
-            venta.setPersona(persona);
-        } else {
-            venta.setNombreCompradorExterno(dto.getNombreCompradorExterno());
-            venta.setContactoCompradorExterno(dto.getContactoCompradorExterno());
-        }
+            for (DetalleVenta d : detalles) {
+                unidadesTotales += d.getCantidad();
 
-        if (dto.getFacturaId() != null) {
-            Factura factura = facturaRepository.findById(dto.getFacturaId())
-                    .orElseThrow(() -> new RuntimeException("Factura no encontrada con ID: " + dto.getFacturaId()));
-            venta.setFactura(factura);
-        }
+                String categoria = d.getProductoVariante().getProducto().getCategoriaProducto().getNombre();
+                ingresoPorCategoria.merge(categoria, d.getSubtotal(), BigDecimal::add);
 
-        List<DetalleVenta> detalles = new ArrayList<>();
-        BigDecimal total = BigDecimal.ZERO;
-
-        for (VentaDTO.ItemVentaDTO item : dto.getItems()) {
-            ProductoVariante variante = productoVarianteRepository.findById(item.getProductoVarianteId())
-                    .orElseThrow(() -> new RuntimeException("Variante no encontrada con ID: " + item.getProductoVarianteId()));
-
-            if (item.getCantidad() == null || item.getCantidad() <= 0) {
-                throw new RuntimeException("Cantidad inválida para '" + variante.getSkuVariante() + "'");
+                String nombreProducto = d.getProductoVariante().getProducto().getNombre();
+                unidadesPorProducto.computeIfAbsent(nombreProducto, k -> new long[1])[0] += d.getCantidad();
+                ingresoPorProducto.merge(nombreProducto, d.getSubtotal(), BigDecimal::add);
             }
-
-            // Descuenta stock (si el producto lo controla) a través del
-            // service de movimientos, para que quede trazado como salida
-            // por venta — no se toca stockActual directo desde acá.
-            if (Boolean.TRUE.equals(variante.getProducto().getRequiereControlStock())) {
-                MovimientoInventarioDTO movDto = new MovimientoInventarioDTO();
-                movDto.setProductoVarianteId(variante.getId());
-                movDto.setTipo("salida");
-                movDto.setCantidad(item.getCantidad());
-                movDto.setMotivo("Venta de tienda");
-                movDto.setUsuarioId(dto.getUsuarioId());
-                movimientoInventarioService.registrar(movDto);
-            }
-
-            BigDecimal subtotal = variante.getPrecioVenta().multiply(BigDecimal.valueOf(item.getCantidad()));
-            total = total.add(subtotal);
-
-            DetalleVenta detalle = new DetalleVenta();
-            detalle.setVenta(venta);
-            detalle.setProductoVariante(variante);
-            detalle.setCantidad(item.getCantidad());
-            detalle.setPrecioUnitario(variante.getPrecioVenta());
-            detalle.setSubtotal(subtotal);
-            detalles.add(detalle);
         }
 
-        venta.setTotal(total);
-        venta.setDetalles(detalles);
-        return ventaRepository.save(venta); // cascade guarda los detalles
-    }
+        dto.setUnidadesVendidasMesActual(unidadesTotales);
+        dto.setIngresoPorCategoria(ingresoPorCategoria);
+        dto.setTopProductosVendidos(construirTopProductos(unidadesPorProducto, ingresoPorProducto));
+        dto.setVariantesConStockBajo(construirStockBajo());
 
-    public List<VentaResponseDTO> listarPorRango(LocalDate desde, LocalDate hasta) {
-        return ventaRepository.findByFechaBetweenOrderByFechaDesc(desde, hasta).stream()
-                .map(this::toResponseDTO).collect(Collectors.toList());
-    }
-
-    public List<VentaResponseDTO> listarPorPersona(Integer personaId) {
-        return ventaRepository.findByPersonaIdOrderByFechaDesc(personaId).stream()
-                .map(this::toResponseDTO).collect(Collectors.toList());
-    }
-
-    public VentaResponseDTO obtenerPorId(Integer id) {
-        return toResponseDTO(ventaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Venta no encontrada con ID: " + id)));
-    }
-
-    // Nota: no hay "eliminar" venta — anular_venta (permiso ya existe en el
-    // seed) debería implementarse como una reversión que genera movimientos
-    // de entrada compensatorios, no un borrado, para no perder el rastro
-    // contable. Se deja pendiente hasta que se defina esa regla de negocio.
-
-    private void validarComprador(VentaDTO dto) {
-        boolean tienePersona = dto.getPersonaId() != null;
-        boolean tieneExterno = dto.getNombreCompradorExterno() != null && !dto.getNombreCompradorExterno().isBlank();
-
-        if (tienePersona == tieneExterno) {
-            throw new RuntimeException(
-                    "La venta debe tener exactamente un comprador: o una persona del club (personaId) o un comprador externo (nombreCompradorExterno), no ambos ni ninguno");
-        }
-    }
-
-    private VentaResponseDTO toResponseDTO(Venta v) {
-        VentaResponseDTO dto = new VentaResponseDTO();
-        dto.setId(v.getId());
-        dto.setFecha(v.getFecha());
-        dto.setTotal(v.getTotal());
-        dto.setMetodoPago(v.getMetodoPago());
-        dto.setFacturaId(v.getFactura() != null ? v.getFactura().getId() : null);
-
-        if (v.getPersona() != null) {
-            dto.setPersonaId(v.getPersona().getId());
-            dto.setNombreComprador(v.getPersona().getNombre() + " " + v.getPersona().getApellidos());
-        } else {
-            dto.setNombreComprador(v.getNombreCompradorExterno());
-        }
-
-        if (v.getDetalles() != null) {
-            dto.setDetalles(v.getDetalles().stream().map(d -> {
-                VentaResponseDTO.DetalleVentaResponseDTO det = new VentaResponseDTO.DetalleVentaResponseDTO();
-                det.setProductoVarianteId(d.getProductoVariante().getId());
-                det.setSkuVariante(d.getProductoVariante().getSkuVariante());
-                det.setNombreProducto(d.getProductoVariante().getProducto().getNombre());
-                det.setTalla(d.getProductoVariante().getTalla());
-                det.setColor(d.getProductoVariante().getColor());
-                det.setCantidad(d.getCantidad());
-                det.setPrecioUnitario(d.getPrecioUnitario());
-                det.setSubtotal(d.getSubtotal());
-                return det;
-            }).collect(Collectors.toList()));
-        }
         return dto;
     }
+
+    private List<ProductoMasVendidoDTO> construirTopProductos(Map<String, long[]> unidadesPorProducto,
+            Map<String, BigDecimal> ingresoPorProducto) {
+        return unidadesPorProducto.entrySet().stream()
+                .map(entry -> {
+                    ProductoMasVendidoDTO item = new ProductoMasVendidoDTO();
+                    item.setNombreProducto(entry.getKey());
+                    item.setUnidadesVendidas(entry.getValue()[0]);
+                    item.setIngresoGenerado(ingresoPorProducto.getOrDefault(entry.getKey(), BigDecimal.ZERO));
+                    return item;
+                })
+                .sorted(Comparator.comparingLong(ProductoMasVendidoDTO::getUnidadesVendidas).reversed())
+                .limit(TOP_PRODUCTOS)
+                .collect(Collectors.toList());
+    }
+
+    private List<VarianteStockBajoDTO> construirStockBajo() {
+        List<ProductoVariante> variantes = productoVarianteRepository.findConStockBajo(UMBRAL_STOCK_BAJO_DEFECTO);
+        List<VarianteStockBajoDTO> resultado = new ArrayList<>();
+
+        for (ProductoVariante v : variantes) {
+            VarianteStockBajoDTO item = new VarianteStockBajoDTO();
+            item.setProductoVarianteId(v.getId());
+            item.setSkuVariante(v.getSkuVariante());
+            item.setNombreProducto(v.getProducto().getNombre());
+            item.setTalla(v.getTalla());
+            item.setColor(v.getColor());
+            item.setStockActual(v.getStockActual());
+            resultado.add(item);
+        }
+        return resultado;
+    }
+
+    // NOTA: "rotación de inventario" (unidades vendidas / stock promedio en
+    // un periodo) quedó fuera a propósito — el sistema no guarda un
+    // histórico de nivel de stock en el tiempo (solo el stock ACTUAL), así
+    // que no hay forma de calcular un "promedio" real sin asumir datos que
+    // no existen. Si se necesita esta métrica, hay que decidir primero cómo
+    // trackear el stock histórico (snapshots periódicos, o derivarlo de
+    // MovimientoInventario acumulado día a día).
 }
 </file>
 
@@ -5623,6 +6086,327 @@ public class HorarioController {
 }
 </file>
 
+<file path="src/main/java/com/varcal/cheermanager/Controller/Inventario/CategoriaProductoController.java">
+package com.varcal.cheermanager.Controller.Inventario;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import com.varcal.cheermanager.DTO.Inventario.CategoriaProductoDTO;
+import com.varcal.cheermanager.Models.Inventario.CategoriaProducto;
+import com.varcal.cheermanager.Service.Inventario.CategoriaProductoService;
+import com.varcal.cheermanager.Utils.RequiresPermission;
+
+@RestController
+@RequestMapping("/api/categorias-producto")
+public class CategoriaProductoController {
+
+    @Autowired
+    private CategoriaProductoService categoriaProductoService;
+
+    @GetMapping
+    @RequiresPermission("ver_producto")
+    public ResponseEntity<List<CategoriaProducto>> listar() {
+        return ResponseEntity.ok(categoriaProductoService.listarTodas());
+    }
+
+    @GetMapping("/{id}")
+    @RequiresPermission("ver_producto")
+    public ResponseEntity<?> obtener(@PathVariable Integer id) {
+        try {
+            return ResponseEntity.ok(categoriaProductoService.obtenerPorId(id));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping
+    @RequiresPermission("crear_producto")
+    public ResponseEntity<?> crear(@RequestBody CategoriaProductoDTO dto) {
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED).body(categoriaProductoService.crear(dto));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(409).body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}")
+    @RequiresPermission("modificar_producto")
+    public ResponseEntity<?> actualizar(@PathVariable Integer id, @RequestBody CategoriaProductoDTO dto) {
+        try {
+            return ResponseEntity.ok(categoriaProductoService.actualizar(id, dto));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(409).body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    @RequiresPermission("eliminar_producto")
+    public ResponseEntity<?> eliminar(@PathVariable Integer id) {
+        try {
+            categoriaProductoService.eliminar(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Controller/Inventario/MovimientoInventarioController.java">
+package com.varcal.cheermanager.Controller.Inventario;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import com.varcal.cheermanager.DTO.Inventario.MovimientoInventarioDTO;
+import com.varcal.cheermanager.DTO.Inventario.MovimientoInventarioResponseDTO;
+import com.varcal.cheermanager.Service.Inventario.MovimientoInventarioService;
+import com.varcal.cheermanager.Utils.RequiresPermission;
+
+@RestController
+@RequestMapping("/api/movimientos-inventario")
+public class MovimientoInventarioController {
+
+    @Autowired
+    private MovimientoInventarioService movimientoInventarioService;
+
+    @PostMapping
+    @RequiresPermission("registrar_movimiento_inventario")
+    public ResponseEntity<?> registrar(@RequestBody MovimientoInventarioDTO dto) {
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED).body(movimientoInventarioService.registrar(dto));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(409).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/variante/{productoVarianteId}")
+    @RequiresPermission("ver_movimiento_inventario")
+    public ResponseEntity<List<MovimientoInventarioResponseDTO>> listarPorVariante(@PathVariable Integer productoVarianteId) {
+        return ResponseEntity.ok(movimientoInventarioService.listarPorVariante(productoVarianteId));
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Controller/Inventario/ProductoController.java">
+package com.varcal.cheermanager.Controller.Inventario;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import com.varcal.cheermanager.DTO.Inventario.ProductoDTO;
+import com.varcal.cheermanager.DTO.Inventario.ProductoResponseDTO;
+import com.varcal.cheermanager.Service.Inventario.ProductoService;
+import com.varcal.cheermanager.Utils.RequiresPermission;
+
+@RestController
+@RequestMapping("/api/productos")
+public class ProductoController {
+
+    @Autowired
+    private ProductoService productoService;
+
+    @GetMapping
+    @RequiresPermission("ver_producto")
+    public ResponseEntity<List<ProductoResponseDTO>> listar() {
+        return ResponseEntity.ok(productoService.listarTodos());
+    }
+
+    @GetMapping("/activos")
+    @RequiresPermission("ver_producto")
+    public ResponseEntity<List<ProductoResponseDTO>> listarActivos() {
+        return ResponseEntity.ok(productoService.listarActivos());
+    }
+
+    @GetMapping("/{id}")
+    @RequiresPermission("ver_producto")
+    public ResponseEntity<?> obtener(@PathVariable Integer id) {
+        try {
+            return ResponseEntity.ok(productoService.obtenerPorId(id));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping
+    @RequiresPermission("crear_producto")
+    public ResponseEntity<?> crear(@RequestBody ProductoDTO dto) {
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED).body(productoService.crear(dto));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(409).body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}")
+    @RequiresPermission("modificar_producto")
+    public ResponseEntity<?> actualizar(@PathVariable Integer id, @RequestBody ProductoDTO dto) {
+        try {
+            return ResponseEntity.ok(productoService.actualizar(id, dto));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(e.getMessage());
+        }
+    }
+
+    // No hay borrado físico — desactiva el producto (ver nota en el service).
+    @DeleteMapping("/{id}")
+    @RequiresPermission("eliminar_producto")
+    public ResponseEntity<?> eliminar(@PathVariable Integer id) {
+        try {
+            productoService.eliminar(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Controller/Inventario/ProductoVarianteController.java">
+package com.varcal.cheermanager.Controller.Inventario;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import com.varcal.cheermanager.DTO.Inventario.ProductoVarianteDTO;
+import com.varcal.cheermanager.DTO.Inventario.ProductoVarianteResponseDTO;
+import com.varcal.cheermanager.Service.Inventario.ProductoVarianteService;
+import com.varcal.cheermanager.Utils.RequiresPermission;
+
+@RestController
+@RequestMapping("/api/producto-variantes")
+public class ProductoVarianteController {
+
+    @Autowired
+    private ProductoVarianteService productoVarianteService;
+
+    @GetMapping("/producto/{productoId}")
+    @RequiresPermission("ver_producto")
+    public ResponseEntity<List<ProductoVarianteResponseDTO>> listarPorProducto(@PathVariable Integer productoId) {
+        return ResponseEntity.ok(productoVarianteService.listarPorProducto(productoId));
+    }
+
+    // Umbral configurable por query param para que cada dashboard/reporte
+    // decida qué considera "stock bajo" sin tocar código (ej. ?umbral=5).
+    @GetMapping("/stock-bajo")
+    @RequiresPermission("ver_producto")
+    public ResponseEntity<List<ProductoVarianteResponseDTO>> listarConStockBajo(
+            @RequestParam(defaultValue = "5") int umbral) {
+        return ResponseEntity.ok(productoVarianteService.listarConStockBajo(umbral));
+    }
+
+    @PostMapping
+    @RequiresPermission("crear_producto")
+    public ResponseEntity<?> crear(@RequestBody ProductoVarianteDTO dto) {
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED).body(productoVarianteService.crear(dto));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}/precio")
+    @RequiresPermission("modificar_producto")
+    public ResponseEntity<?> actualizarPrecio(@PathVariable Integer id, @RequestBody java.util.Map<String, java.math.BigDecimal> body) {
+        try {
+            return ResponseEntity.ok(productoVarianteService.actualizarPrecio(id, body.get("precioVenta")));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    @RequiresPermission("eliminar_producto")
+    public ResponseEntity<?> desactivar(@PathVariable Integer id) {
+        try {
+            productoVarianteService.desactivar(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Controller/Inventario/VentaController.java">
+package com.varcal.cheermanager.Controller.Inventario;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import com.varcal.cheermanager.DTO.Inventario.VentaDTO;
+import com.varcal.cheermanager.DTO.Inventario.VentaResponseDTO;
+import com.varcal.cheermanager.Service.Inventario.VentaService;
+import com.varcal.cheermanager.Utils.RequiresPermission;
+
+@RestController
+@RequestMapping("/api/ventas")
+public class VentaController {
+
+    @Autowired
+    private VentaService ventaService;
+
+    @PostMapping
+    @RequiresPermission("registrar_venta")
+    public ResponseEntity<?> registrar(@RequestBody VentaDTO dto) {
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED).body(ventaService.registrar(dto));
+        } catch (RuntimeException e) {
+            // 409 cubre tanto "comprador inválido" como "stock insuficiente"
+            // (ambas son conflictos de reglas de negocio, no recursos faltantes).
+            return ResponseEntity.status(409).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/{id}")
+    @RequiresPermission("ver_venta")
+    public ResponseEntity<?> obtener(@PathVariable Integer id) {
+        try {
+            return ResponseEntity.ok(ventaService.obtenerPorId(id));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping
+    @RequiresPermission("ver_venta")
+    public ResponseEntity<List<VentaResponseDTO>> listarPorRango(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta) {
+        return ResponseEntity.ok(ventaService.listarPorRango(desde, hasta));
+    }
+
+    @GetMapping("/persona/{personaId}")
+    @RequiresPermission("ver_venta")
+    public ResponseEntity<List<VentaResponseDTO>> listarPorPersona(@PathVariable Integer personaId) {
+        return ResponseEntity.ok(ventaService.listarPorPersona(personaId));
+    }
+}
+</file>
+
 <file path="src/main/java/com/varcal/cheermanager/Controller/Org_dep/NivelController.java">
 package com.varcal.cheermanager.Controller.Org_dep;
 
@@ -6363,6 +7147,207 @@ public class RegistroAsistenciaMasivoDTO {
     public static class RegistroIndividual {
         private Integer deportistaId;
         private Integer estadoAsistenciaId;
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/DTO/Inventario/CategoriaProductoDTO.java">
+package com.varcal.cheermanager.DTO.Inventario;
+
+import lombok.Data;
+
+@Data
+public class CategoriaProductoDTO {
+    private String nombre;
+    private String codigo; // 3 letras, ej. ROP, CAL, DIG
+    private String descripcion;
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/DTO/Inventario/MovimientoInventarioDTO.java">
+package com.varcal.cheermanager.DTO.Inventario;
+
+import lombok.Data;
+
+@Data
+public class MovimientoInventarioDTO {
+    private Integer productoVarianteId;
+    private String tipo; // entrada, salida, ajuste
+    private Integer cantidad;
+    private String motivo;
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/DTO/Inventario/MovimientoInventarioResponseDTO.java">
+package com.varcal.cheermanager.DTO.Inventario;
+
+import java.time.LocalDateTime;
+
+import lombok.Data;
+
+@Data
+public class MovimientoInventarioResponseDTO {
+    private Integer id;
+    private Integer productoVarianteId;
+    private String skuVariante;
+    private String nombreProducto;
+    private String tipo;
+    private Integer cantidad;
+    private String motivo;
+    private LocalDateTime fecha;
+    private String usuario;
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/DTO/Inventario/ProductoDTO.java">
+package com.varcal.cheermanager.DTO.Inventario;
+
+import java.math.BigDecimal;
+
+import lombok.Data;
+
+@Data
+public class ProductoDTO {
+    // "codigo" es solo el segmento COD (3 letras del artículo, ej. CAE) —
+    // el prefijo RAT y la categoría se arman en el service a partir de la
+    // categoría seleccionada, para no depender de que el usuario escriba el
+    // SKU completo a mano y se equivoque de formato.
+    private String codigo;
+    private String nombre;
+    private String descripcion;
+    private Integer categoriaProductoId;
+    private BigDecimal precioMinReferencia;
+    private BigDecimal precioMaxReferencia;
+    private String origen;
+    private String notasProveedor;
+    private Boolean requiereControlStock;
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/DTO/Inventario/ProductoResponseDTO.java">
+package com.varcal.cheermanager.DTO.Inventario;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+import lombok.Data;
+
+@Data
+public class ProductoResponseDTO {
+    private Integer id;
+    private String sku;
+    private String nombre;
+    private String descripcion;
+    private Integer categoriaProductoId;
+    private String categoriaNombre;
+    private BigDecimal precioMinReferencia;
+    private BigDecimal precioMaxReferencia;
+    private String origen;
+    private String notasProveedor;
+    private Boolean requiereControlStock;
+    private Boolean activo;
+    private Integer stockTotal; // suma de stock de todas sus variantes (null si no controla stock)
+    private List<ProductoVarianteResponseDTO> variantes;
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/DTO/Inventario/ProductoVarianteDTO.java">
+package com.varcal.cheermanager.DTO.Inventario;
+
+import java.math.BigDecimal;
+
+import lombok.Data;
+
+@Data
+public class ProductoVarianteDTO {
+    private Integer productoId;
+    private String talla;   // nullable
+    private String color;   // nullable — para DIG se usa como "tier" (Básico/Competencia/Elite)
+    private BigDecimal precioVenta;
+    private Integer stockInicial; // se ignora si producto.requiereControlStock = false
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/DTO/Inventario/ProductoVarianteResponseDTO.java">
+package com.varcal.cheermanager.DTO.Inventario;
+
+import java.math.BigDecimal;
+
+import lombok.Data;
+
+@Data
+public class ProductoVarianteResponseDTO {
+    private Integer id;
+    private Integer productoId;
+    private String nombreProducto;
+    private String talla;
+    private String color;
+    private String skuVariante;
+    private BigDecimal precioVenta;
+    private Integer stockActual; // null si el producto no controla stock
+    private Boolean activo;
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/DTO/Inventario/VentaDTO.java">
+package com.varcal.cheermanager.DTO.Inventario;
+
+import java.util.List;
+
+import lombok.Data;
+
+@Data
+public class VentaDTO {
+    // Exactamente uno de los dos: personaId (comprador del club) o
+    // nombreCompradorExterno (comprador externo). El service rechaza si
+    // vienen ambos o ninguno.
+    private Integer personaId;
+    private String nombreCompradorExterno;
+    private String contactoCompradorExterno;
+
+    private String metodoPago;
+    private Integer facturaId; // opcional, solo si se carga a la cuenta del deportista
+
+    private List<ItemVentaDTO> items;
+
+    @Data
+    public static class ItemVentaDTO {
+        private Integer productoVarianteId;
+        private Integer cantidad;
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/DTO/Inventario/VentaResponseDTO.java">
+package com.varcal.cheermanager.DTO.Inventario;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+
+import lombok.Data;
+
+@Data
+public class VentaResponseDTO {
+    private Integer id;
+    private LocalDate fecha;
+    private BigDecimal total;
+    private String metodoPago;
+    private Integer personaId;
+    private String nombreComprador; // nombre de la Persona, o el externo si aplica
+    private Integer facturaId;
+    private List<DetalleVentaResponseDTO> detalles;
+
+    @Data
+    public static class DetalleVentaResponseDTO {
+        private Integer productoVarianteId;
+        private String skuVariante;
+        private String nombreProducto;
+        private String talla;
+        private String color;
+        private Integer cantidad;
+        private BigDecimal precioUnitario;
+        private BigDecimal subtotal;
     }
 }
 </file>
@@ -8102,50 +9087,6 @@ public class Nivel {
 }
 </file>
 
-<file path="src/main/java/com/varcal/cheermanager/Models/Org_dep/ReglaCategoria.java">
-package com.varcal.cheermanager.Models.Org_dep;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import lombok.Data;
-
-@Data
-@Entity
-@Table(name = "reglas_categoria")
-public class ReglaCategoria {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-
-    @ManyToOne
-    @JoinColumn(name = "categoria_nivel_id", nullable = false)
-    private CategoriaNivel categoriaNivel;
-
-    @Column(nullable = false)
-    private Integer añoAplicacion;
-
-    @Column
-    private Integer añoNacimientoMin;
-
-    @Column
-    private Integer añoNacimientoMax;
-
-    @Column
-    private Integer cantidadMin;
-
-    @Column
-    private Integer cantidadMax;
-
-    // Getters y setters
-}
-</file>
-
 <file path="src/main/java/com/varcal/cheermanager/Models/Personas/ContactoEmergencia.java">
 package com.varcal.cheermanager.Models.Personas;
 
@@ -8631,6 +9572,7 @@ public interface MetodoPagoRepository extends JpaRepository<MetodoPago, Integer>
 package com.varcal.cheermanager.repository.Financiero;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -8646,16 +9588,20 @@ public interface PagoRepository extends JpaRepository<Pago, Integer> {
 
     List<Pago> findByEstado(EstadoPago estado);
 
-    // Suma de los pagos de una factura que están efectivamente en estado
-    // "Pagado". Se usa para saber cuánto le falta a la factura (saldo pendiente).
-    // COALESCE evita que devuelva null cuando la factura no tiene pagos todavía.
     @Query("SELECT COALESCE(SUM(p.monto), 0) FROM Pago p WHERE p.factura.id = :facturaId AND p.estado = 'Pagado'")
     BigDecimal sumarMontoPagadoPorFactura(@Param("facturaId") Integer facturaId);
 
-    // Listado de pagos de todas las facturas de una persona, útil para el
-    // historial financiero de un deportista/entrenador.
     @Query("SELECT p FROM Pago p WHERE p.factura.persona.id = :personaId ORDER BY p.fecha DESC")
     List<Pago> findByPersonaId(@Param("personaId") Integer personaId);
+
+    @Query("SELECT COALESCE(SUM(p.monto), 0) FROM Pago p WHERE p.estado = 'Pagado'")
+    BigDecimal sumarTotalRecaudado();
+
+    // Nuevo: recaudo dentro de un rango de fechas — base del KPI de
+    // "recaudo del mes" y de la tendencia de los últimos meses en el
+    // dashboard de Finanzas.
+    @Query("SELECT COALESCE(SUM(p.monto), 0) FROM Pago p WHERE p.estado = 'Pagado' AND p.fecha BETWEEN :desde AND :hasta")
+    BigDecimal sumarMontoPagadoEnRango(@Param("desde") LocalDate desde, @Param("hasta") LocalDate hasta);
 }
 </file>
 
@@ -8697,8 +9643,6 @@ import com.varcal.cheermanager.Models.Horario_Asistencia.Asistencia;
 
 public interface AsistenciaRepository extends JpaRepository<Asistencia, Integer> {
 
-    // Evita registrar dos veces la asistencia del mismo deportista, en el
-    // mismo horario, el mismo día.
     Optional<Asistencia> findByDeportistaIdAndHorarioIdAndFecha(Integer deportistaId, Integer horarioId, LocalDate fecha);
 
     List<Asistencia> findByHorarioIdAndFecha(Integer horarioId, LocalDate fecha);
@@ -8707,25 +9651,40 @@ public interface AsistenciaRepository extends JpaRepository<Asistencia, Integer>
 
     List<Asistencia> findByDeportistaIdAndFechaBetweenOrderByFechaDesc(Integer deportistaId, LocalDate desde, LocalDate hasta);
 
-    // Asistencias de un grupo completo en una fecha: cruza con
-    // DeportistaPerteneceGrupo a través del deportista, y con
-    // HorarioEntrenamiento a través del horario, para asegurarse de traer
-    // solo lo que realmente corresponde a ese grupo (y no a otro grupo que
-    // por coincidencia comparta el mismo bloque de horario).
     @Query("SELECT a FROM Asistencia a "
             + "JOIN HorarioEntrenamiento he ON he.horario = a.horario "
             + "WHERE he.grupoEntrenamiento.id = :grupoId AND a.fecha = :fecha")
     List<Asistencia> findByGrupoIdAndFecha(@Param("grupoId") Integer grupoId, @Param("fecha") LocalDate fecha);
 
-    // Porcentaje de asistencia de un deportista en un rango: cuenta cuántos
-    // registros tiene con un estado cuyo nombre coincide con el dado (ej.
-    // "Presente"), sobre el total de registros en ese rango.
     @Query("SELECT COUNT(a) FROM Asistencia a WHERE a.deportista.id = :deportistaId "
             + "AND a.fecha BETWEEN :desde AND :hasta AND a.estadoAsistencia.estado = :estado")
     long contarPorDeportistaYEstadoEnRango(@Param("deportistaId") Integer deportistaId,
             @Param("desde") LocalDate desde, @Param("hasta") LocalDate hasta, @Param("estado") String estado);
 
     long countByDeportistaIdAndFechaBetween(Integer deportistaId, LocalDate desde, LocalDate hasta);
+
+    // --- Agregados nuevos para el dashboard de Horarios ---
+
+    // Total de registros de asistencia de un grupo en un rango (base del %).
+    @Query("SELECT COUNT(a) FROM Asistencia a JOIN HorarioEntrenamiento he ON he.horario = a.horario "
+            + "WHERE he.grupoEntrenamiento.id = :grupoId AND a.fecha BETWEEN :desde AND :hasta")
+    long contarTotalPorGrupoEnRango(@Param("grupoId") Integer grupoId,
+            @Param("desde") LocalDate desde, @Param("hasta") LocalDate hasta);
+
+    // Registros con un estado específico (ej. "Presente") de un grupo en un rango.
+    @Query("SELECT COUNT(a) FROM Asistencia a JOIN HorarioEntrenamiento he ON he.horario = a.horario "
+            + "WHERE he.grupoEntrenamiento.id = :grupoId AND a.fecha BETWEEN :desde AND :hasta "
+            + "AND a.estadoAsistencia.estado = :estado")
+    long contarPorGrupoYEstadoEnRango(@Param("grupoId") Integer grupoId,
+            @Param("desde") LocalDate desde, @Param("hasta") LocalDate hasta, @Param("estado") String estado);
+
+    // Igual que las dos anteriores pero sin filtrar por grupo — asistencia
+    // general del club completo, para el resumen del dashboard.
+    @Query("SELECT COUNT(a) FROM Asistencia a WHERE a.fecha BETWEEN :desde AND :hasta")
+    long contarTotalEnRango(@Param("desde") LocalDate desde, @Param("hasta") LocalDate hasta);
+
+    @Query("SELECT COUNT(a) FROM Asistencia a WHERE a.fecha BETWEEN :desde AND :hasta AND a.estadoAsistencia.estado = :estado")
+    long contarPorEstadoEnRango(@Param("desde") LocalDate desde, @Param("hasta") LocalDate hasta, @Param("estado") String estado);
 }
 </file>
 
@@ -8785,6 +9744,95 @@ public interface HorarioRepository extends JpaRepository<Horario, Integer> {
 }
 </file>
 
+<file path="src/main/java/com/varcal/cheermanager/repository/Inventario/CategoriaProductoRepository.java">
+package com.varcal.cheermanager.repository.Inventario;
+
+import java.util.Optional;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.varcal.cheermanager.Models.Inventario.CategoriaProducto;
+
+public interface CategoriaProductoRepository extends JpaRepository<CategoriaProducto, Integer> {
+    Optional<CategoriaProducto> findByCodigo(String codigo);
+    Optional<CategoriaProducto> findByNombre(String nombre);
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/repository/Inventario/MovimientoInventarioRepository.java">
+package com.varcal.cheermanager.repository.Inventario;
+
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.varcal.cheermanager.Models.Inventario.MovimientoInventario;
+
+public interface MovimientoInventarioRepository extends JpaRepository<MovimientoInventario, Integer> {
+    List<MovimientoInventario> findByProductoVarianteIdOrderByFechaDesc(Integer productoVarianteId);
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/repository/Inventario/ProductoRepository.java">
+package com.varcal.cheermanager.repository.Inventario;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.varcal.cheermanager.Models.Inventario.Producto;
+
+public interface ProductoRepository extends JpaRepository<Producto, Integer> {
+    Optional<Producto> findBySku(String sku);
+    List<Producto> findByCategoriaProductoId(Integer categoriaId);
+    List<Producto> findByActivoTrue();
+    List<Producto> findByRequiereControlStockTrue();
+    boolean existsBySku(String sku);
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/repository/Inventario/ProductoVarianteRepository.java">
+package com.varcal.cheermanager.repository.Inventario;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+
+import com.varcal.cheermanager.Models.Inventario.ProductoVariante;
+
+public interface ProductoVarianteRepository extends JpaRepository<ProductoVariante, Integer> {
+    List<ProductoVariante> findByProductoId(Integer productoId);
+    Optional<ProductoVariante> findBySkuVariante(String skuVariante);
+    boolean existsBySkuVariante(String skuVariante);
+
+    // Stock bajo: solo tiene sentido para variantes de productos que sí
+    // controlan stock (las de DIG tienen stockActual null y quedan afuera
+    // automáticamente por la comparación numérica).
+    @Query("SELECT v FROM ProductoVariante v WHERE v.producto.requiereControlStock = true " +
+           "AND v.stockActual IS NOT NULL AND v.stockActual <= :umbral AND v.activo = true")
+    List<ProductoVariante> findConStockBajo(int umbral);
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/repository/Inventario/VentaRepository.java">
+package com.varcal.cheermanager.repository.Inventario;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.varcal.cheermanager.Models.Inventario.Venta;
+
+public interface VentaRepository extends JpaRepository<Venta, Integer> {
+    List<Venta> findByFechaBetweenOrderByFechaDesc(LocalDate desde, LocalDate hasta);
+    List<Venta> findByPersonaIdOrderByFechaDesc(Integer personaId);
+}
+</file>
+
 <file path="src/main/java/com/varcal/cheermanager/repository/Org_dep/DiaSemanaRepository.java">
 package com.varcal.cheermanager.repository.Org_dep;
 
@@ -8826,21 +9874,6 @@ public interface NivelRepository extends JpaRepository<Nivel, Integer> {
     // For example:
     // List<Nivel> findBySomeField(String someField);
 
-}
-</file>
-
-<file path="src/main/java/com/varcal/cheermanager/repository/Org_dep/ReglaCategoriaRepository.java">
-package com.varcal.cheermanager.repository.Org_dep;
-
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
-import com.varcal.cheermanager.Models.Org_dep.ReglaCategoria;
-
-@Repository
-public interface ReglaCategoriaRepository extends JpaRepository<ReglaCategoria, Integer> {
-
-    ReglaCategoria findByCategoriaNivelId(Integer id);
 }
 </file>
 
@@ -11982,6 +13015,622 @@ public class HorarioService {
 }
 </file>
 
+<file path="src/main/java/com/varcal/cheermanager/Service/Inventario/CategoriaProductoService.java">
+package com.varcal.cheermanager.Service.Inventario;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.varcal.cheermanager.DTO.Inventario.CategoriaProductoDTO;
+import com.varcal.cheermanager.Models.Inventario.CategoriaProducto;
+import com.varcal.cheermanager.repository.Inventario.CategoriaProductoRepository;
+
+@Service
+public class CategoriaProductoService {
+
+    @Autowired
+    private CategoriaProductoRepository categoriaProductoRepository;
+
+    public List<CategoriaProducto> listarTodas() {
+        return categoriaProductoRepository.findAll();
+    }
+
+    public CategoriaProducto obtenerPorId(Integer id) {
+        return categoriaProductoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Categoría de producto no encontrada con ID: " + id));
+    }
+
+    public CategoriaProducto crear(CategoriaProductoDTO dto) {
+        String codigo = validarCodigo(dto.getCodigo());
+
+        categoriaProductoRepository.findByCodigo(codigo).ifPresent(c -> {
+            throw new RuntimeException("Ya existe una categoría con el código '" + codigo + "'");
+        });
+        categoriaProductoRepository.findByNombre(dto.getNombre()).ifPresent(c -> {
+            throw new RuntimeException("Ya existe una categoría llamada '" + dto.getNombre() + "'");
+        });
+
+        CategoriaProducto categoria = new CategoriaProducto();
+        categoria.setNombre(dto.getNombre());
+        categoria.setCodigo(codigo);
+        categoria.setDescripcion(dto.getDescripcion());
+        return categoriaProductoRepository.save(categoria);
+    }
+
+    public CategoriaProducto actualizar(Integer id, CategoriaProductoDTO dto) {
+        CategoriaProducto categoria = obtenerPorId(id);
+        String codigo = validarCodigo(dto.getCodigo());
+
+        categoriaProductoRepository.findByCodigo(codigo)
+                .filter(c -> !c.getId().equals(id))
+                .ifPresent(c -> { throw new RuntimeException("Ya existe otra categoría con el código '" + codigo + "'"); });
+
+        categoria.setNombre(dto.getNombre());
+        categoria.setCodigo(codigo);
+        categoria.setDescripcion(dto.getDescripcion());
+        return categoriaProductoRepository.save(categoria);
+    }
+
+    public void eliminar(Integer id) {
+        if (!categoriaProductoRepository.existsById(id)) {
+            throw new RuntimeException("Categoría de producto no encontrada con ID: " + id);
+        }
+        categoriaProductoRepository.deleteById(id);
+    }
+
+    // El formato del SKU (RAT-[CAT]-...) exige exactamente 3 letras
+    // mayúsculas para el segmento de categoría — se normaliza y valida acá,
+    // en el único lugar donde se crean/editan categorías.
+    private String validarCodigo(String codigo) {
+        if (codigo == null || !codigo.matches("[A-Za-z]{3}")) {
+            throw new RuntimeException("El código de categoría debe tener exactamente 3 letras (ej. ROP, CAL, DIG)");
+        }
+        return codigo.toUpperCase();
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Service/Inventario/MovimientoInventarioService.java">
+package com.varcal.cheermanager.Service.Inventario;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.varcal.cheermanager.DTO.Inventario.MovimientoInventarioDTO;
+import com.varcal.cheermanager.DTO.Inventario.MovimientoInventarioResponseDTO;
+import com.varcal.cheermanager.Models.Auth.Usuario;
+import com.varcal.cheermanager.Models.Inventario.MovimientoInventario;
+import com.varcal.cheermanager.Models.Inventario.MovimientoInventario.TipoMovimiento;
+import com.varcal.cheermanager.Models.Inventario.ProductoVariante;
+import com.varcal.cheermanager.Utils.AuthenticatedUserUtil;
+import com.varcal.cheermanager.repository.Auth.UserRepository;
+import com.varcal.cheermanager.repository.Inventario.MovimientoInventarioRepository;
+import com.varcal.cheermanager.repository.Inventario.ProductoVarianteRepository;
+
+@Service
+public class MovimientoInventarioService {
+
+    @Autowired
+    private MovimientoInventarioRepository movimientoInventarioRepository;
+
+    @Autowired
+    private ProductoVarianteRepository productoVarianteRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    // Único método del sistema que debe modificar ProductoVariante.stockActual
+    // — cualquier ajuste de stock (venta, compra, conteo físico) pasa por
+    // acá, para que MovimientoInventario sea siempre el registro fiel de por
+    // qué cambió cada unidad.
+    @Transactional
+    public MovimientoInventario registrar(MovimientoInventarioDTO dto) {
+        ProductoVariante variante = productoVarianteRepository.findById(dto.getProductoVarianteId())
+                .orElseThrow(() -> new RuntimeException("Variante no encontrada con ID: " + dto.getProductoVarianteId()));
+
+        if (!Boolean.TRUE.equals(variante.getProducto().getRequiereControlStock())) {
+            throw new RuntimeException(
+                    "'" + variante.getProducto().getNombre() + "' es un artículo digital y no controla stock");
+        }
+
+        if (dto.getCantidad() == null || dto.getCantidad() <= 0) {
+            throw new RuntimeException("La cantidad del movimiento debe ser mayor a cero");
+        }
+
+        TipoMovimiento tipo;
+        try {
+            tipo = TipoMovimiento.valueOf(dto.getTipo());
+        } catch (Exception e) {
+            throw new RuntimeException("Tipo de movimiento inválido. Debe ser: entrada, salida o ajuste");
+        }
+
+        Usuario usuario = userRepository.findById(AuthenticatedUserUtil.getCurrentUserId())
+                .orElseThrow(() -> new RuntimeException("Usuario autenticado no encontrado en base de datos"));
+
+        int stockActual = variante.getStockActual() != null ? variante.getStockActual() : 0;
+        int nuevoStock;
+        switch (tipo) {
+            case entrada -> nuevoStock = stockActual + dto.getCantidad();
+            case salida -> {
+                nuevoStock = stockActual - dto.getCantidad();
+                if (nuevoStock < 0) {
+                    throw new RuntimeException(
+                            "Stock insuficiente: quedan " + stockActual + " unidades de '" + variante.getSkuVariante() + "'");
+                }
+            }
+            // "ajuste" fija el stock al valor exacto informado en `cantidad`
+            // (para cuadrar tras un conteo físico), en vez de sumar/restar.
+            case ajuste -> nuevoStock = dto.getCantidad();
+            default -> throw new RuntimeException("Tipo de movimiento inválido");
+        }
+
+        variante.setStockActual(nuevoStock);
+        productoVarianteRepository.save(variante);
+
+        MovimientoInventario movimiento = new MovimientoInventario();
+        movimiento.setProductoVariante(variante);
+        movimiento.setTipo(tipo);
+        movimiento.setCantidad(dto.getCantidad());
+        movimiento.setMotivo(dto.getMotivo());
+        movimiento.setFecha(LocalDateTime.now());
+        movimiento.setUsuario(usuario);
+        return movimientoInventarioRepository.save(movimiento);
+    }
+
+    public List<MovimientoInventarioResponseDTO> listarPorVariante(Integer productoVarianteId) {
+        return movimientoInventarioRepository.findByProductoVarianteIdOrderByFechaDesc(productoVarianteId).stream()
+                .map(this::toDTO).collect(Collectors.toList());
+    }
+
+    private MovimientoInventarioResponseDTO toDTO(MovimientoInventario m) {
+        MovimientoInventarioResponseDTO dto = new MovimientoInventarioResponseDTO();
+        dto.setId(m.getId());
+        dto.setProductoVarianteId(m.getProductoVariante().getId());
+        dto.setSkuVariante(m.getProductoVariante().getSkuVariante());
+        dto.setNombreProducto(m.getProductoVariante().getProducto().getNombre());
+        dto.setTipo(m.getTipo().name());
+        dto.setCantidad(m.getCantidad());
+        dto.setMotivo(m.getMotivo());
+        dto.setFecha(m.getFecha());
+        dto.setUsuario(m.getUsuario().getUsername());
+        return dto;
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Service/Inventario/ProductoService.java">
+package com.varcal.cheermanager.Service.Inventario;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.varcal.cheermanager.DTO.Inventario.ProductoDTO;
+import com.varcal.cheermanager.DTO.Inventario.ProductoResponseDTO;
+import com.varcal.cheermanager.DTO.Inventario.ProductoVarianteResponseDTO;
+import com.varcal.cheermanager.Models.Inventario.CategoriaProducto;
+import com.varcal.cheermanager.Models.Inventario.Producto;
+import com.varcal.cheermanager.Models.Inventario.ProductoVariante;
+import com.varcal.cheermanager.repository.Inventario.CategoriaProductoRepository;
+import com.varcal.cheermanager.repository.Inventario.ProductoRepository;
+
+@Service
+public class ProductoService {
+
+    @Autowired
+    private ProductoRepository productoRepository;
+
+    @Autowired
+    private CategoriaProductoRepository categoriaProductoRepository;
+
+    public List<ProductoResponseDTO> listarTodos() {
+        return productoRepository.findAll().stream().map(this::toResponseDTO).collect(Collectors.toList());
+    }
+
+    public List<ProductoResponseDTO> listarActivos() {
+        return productoRepository.findByActivoTrue().stream().map(this::toResponseDTO).collect(Collectors.toList());
+    }
+
+    public ProductoResponseDTO obtenerPorId(Integer id) {
+        return toResponseDTO(buscarOFallar(id));
+    }
+
+    public Producto crear(ProductoDTO dto) {
+        CategoriaProducto categoria = categoriaProductoRepository.findById(dto.getCategoriaProductoId())
+                .orElseThrow(() -> new RuntimeException("Categoría no encontrada con ID: " + dto.getCategoriaProductoId()));
+
+        String codigoArticulo = validarCodigoArticulo(dto.getCodigo());
+        String sku = "RAT-" + categoria.getCodigo() + "-" + codigoArticulo;
+
+        if (productoRepository.existsBySku(sku)) {
+            throw new RuntimeException("Ya existe un producto con el SKU '" + sku + "'");
+        }
+
+        Producto producto = new Producto();
+        producto.setSku(sku);
+        aplicarDatos(producto, dto, categoria);
+        return productoRepository.save(producto);
+    }
+
+    public Producto actualizar(Integer id, ProductoDTO dto) {
+        Producto producto = buscarOFallar(id);
+        CategoriaProducto categoria = categoriaProductoRepository.findById(dto.getCategoriaProductoId())
+                .orElseThrow(() -> new RuntimeException("Categoría no encontrada con ID: " + dto.getCategoriaProductoId()));
+
+        // El SKU no se regenera al editar, aunque cambie de categoría — es un
+        // identificador estable una vez creado (evita romper etiquetas ya
+        // impresas o referencias en ventas históricas).
+        aplicarDatos(producto, dto, categoria);
+        return productoRepository.save(producto);
+    }
+
+    public void desactivar(Integer id) {
+        Producto producto = buscarOFallar(id);
+        producto.setActivo(false);
+        productoRepository.save(producto);
+    }
+
+    // No se hace DELETE físico: un producto con historial de ventas no puede
+    // desaparecer sin dejar huérfanas las ventas pasadas. Se desactiva.
+    public void eliminar(Integer id) {
+        desactivar(id);
+    }
+
+    private void aplicarDatos(Producto producto, ProductoDTO dto, CategoriaProducto categoria) {
+        producto.setNombre(dto.getNombre());
+        producto.setDescripcion(dto.getDescripcion());
+        producto.setCategoriaProducto(categoria);
+        producto.setPrecioMinReferencia(dto.getPrecioMinReferencia());
+        producto.setPrecioMaxReferencia(dto.getPrecioMaxReferencia());
+        producto.setOrigen(dto.getOrigen());
+        producto.setNotasProveedor(dto.getNotasProveedor());
+        producto.setRequiereControlStock(dto.getRequiereControlStock() != null ? dto.getRequiereControlStock() : Boolean.TRUE);
+        producto.setActivo(true);
+    }
+
+    private String validarCodigoArticulo(String codigo) {
+        if (codigo == null || !codigo.matches("[A-Za-z]{3}")) {
+            throw new RuntimeException("El código de artículo debe tener exactamente 3 letras (ej. CAE, ZAP, MON)");
+        }
+        return codigo.toUpperCase();
+    }
+
+    private Producto buscarOFallar(Integer id) {
+        return productoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado con ID: " + id));
+    }
+
+    private ProductoResponseDTO toResponseDTO(Producto p) {
+        ProductoResponseDTO dto = new ProductoResponseDTO();
+        dto.setId(p.getId());
+        dto.setSku(p.getSku());
+        dto.setNombre(p.getNombre());
+        dto.setDescripcion(p.getDescripcion());
+        dto.setCategoriaProductoId(p.getCategoriaProducto().getId());
+        dto.setCategoriaNombre(p.getCategoriaProducto().getNombre());
+        dto.setPrecioMinReferencia(p.getPrecioMinReferencia());
+        dto.setPrecioMaxReferencia(p.getPrecioMaxReferencia());
+        dto.setOrigen(p.getOrigen());
+        dto.setNotasProveedor(p.getNotasProveedor());
+        dto.setRequiereControlStock(p.getRequiereControlStock());
+        dto.setActivo(p.getActivo());
+
+        List<ProductoVariante> variantes = p.getVariantes();
+        if (variantes != null) {
+            dto.setVariantes(variantes.stream().map(this::toVarianteDTO).collect(Collectors.toList()));
+            if (Boolean.TRUE.equals(p.getRequiereControlStock())) {
+                dto.setStockTotal(variantes.stream()
+                        .mapToInt(v -> v.getStockActual() != null ? v.getStockActual() : 0)
+                        .sum());
+            }
+        }
+        return dto;
+    }
+
+    private ProductoVarianteResponseDTO toVarianteDTO(ProductoVariante v) {
+        ProductoVarianteResponseDTO dto = new ProductoVarianteResponseDTO();
+        dto.setId(v.getId());
+        dto.setProductoId(v.getProducto().getId());
+        dto.setNombreProducto(v.getProducto().getNombre());
+        dto.setTalla(v.getTalla());
+        dto.setColor(v.getColor());
+        dto.setSkuVariante(v.getSkuVariante());
+        dto.setPrecioVenta(v.getPrecioVenta());
+        dto.setStockActual(v.getStockActual());
+        dto.setActivo(v.getActivo());
+        return dto;
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Service/Inventario/ProductoVarianteService.java">
+package com.varcal.cheermanager.Service.Inventario;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.varcal.cheermanager.DTO.Inventario.ProductoVarianteDTO;
+import com.varcal.cheermanager.DTO.Inventario.ProductoVarianteResponseDTO;
+import com.varcal.cheermanager.Models.Inventario.Producto;
+import com.varcal.cheermanager.Models.Inventario.ProductoVariante;
+import com.varcal.cheermanager.repository.Inventario.ProductoRepository;
+import com.varcal.cheermanager.repository.Inventario.ProductoVarianteRepository;
+
+@Service
+public class ProductoVarianteService {
+
+    @Autowired
+    private ProductoVarianteRepository productoVarianteRepository;
+
+    @Autowired
+    private ProductoRepository productoRepository;
+
+    public List<ProductoVarianteResponseDTO> listarPorProducto(Integer productoId) {
+        return productoVarianteRepository.findByProductoId(productoId).stream()
+                .map(this::toDTO).collect(Collectors.toList());
+    }
+
+    public List<ProductoVarianteResponseDTO> listarConStockBajo(int umbral) {
+        return productoVarianteRepository.findConStockBajo(umbral).stream()
+                .map(this::toDTO).collect(Collectors.toList());
+    }
+
+    public ProductoVariante crear(ProductoVarianteDTO dto) {
+        Producto producto = productoRepository.findById(dto.getProductoId())
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado con ID: " + dto.getProductoId()));
+
+        if (dto.getPrecioVenta() == null) {
+            throw new RuntimeException("La variante necesita un precio de venta");
+        }
+
+        ProductoVariante variante = new ProductoVariante();
+        variante.setProducto(producto);
+        variante.setTalla(dto.getTalla());
+        variante.setColor(dto.getColor());
+        variante.setPrecioVenta(dto.getPrecioVenta());
+        variante.setActivo(true);
+
+        // Secuencia 001, 002... por producto, siguiendo el formato oficial
+        // RAT-[CAT]-[COD]-[SEQ] del catálogo. El stock inicial se asigna
+        // directo (no genera un MovimientoInventario retroactivo) — desde
+        // ahí en adelante, todo cambio de stock sí debe pasar por
+        // MovimientoInventarioService para quedar trazado.
+        int siguienteSeq = productoVarianteRepository.findByProductoId(producto.getId()).size() + 1;
+        variante.setSkuVariante(producto.getSku() + "-" + String.format("%03d", siguienteSeq));
+
+        if (Boolean.TRUE.equals(producto.getRequiereControlStock())) {
+            variante.setStockActual(dto.getStockInicial() != null ? dto.getStockInicial() : 0);
+        } else {
+            variante.setStockActual(null); // artículos digitales (DIG): no se controla stock
+        }
+
+        return productoVarianteRepository.save(variante);
+    }
+
+    public ProductoVariante actualizarPrecio(Integer id, java.math.BigDecimal nuevoPrecio) {
+        ProductoVariante variante = buscarOFallar(id);
+        variante.setPrecioVenta(nuevoPrecio);
+        return productoVarianteRepository.save(variante);
+    }
+
+    public void desactivar(Integer id) {
+        ProductoVariante variante = buscarOFallar(id);
+        variante.setActivo(false);
+        productoVarianteRepository.save(variante);
+    }
+
+    private ProductoVariante buscarOFallar(Integer id) {
+        return productoVarianteRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Variante de producto no encontrada con ID: " + id));
+    }
+
+    private ProductoVarianteResponseDTO toDTO(ProductoVariante v) {
+        ProductoVarianteResponseDTO dto = new ProductoVarianteResponseDTO();
+        dto.setId(v.getId());
+        dto.setProductoId(v.getProducto().getId());
+        dto.setNombreProducto(v.getProducto().getNombre());
+        dto.setTalla(v.getTalla());
+        dto.setColor(v.getColor());
+        dto.setSkuVariante(v.getSkuVariante());
+        dto.setPrecioVenta(v.getPrecioVenta());
+        dto.setStockActual(v.getStockActual());
+        dto.setActivo(v.getActivo());
+        return dto;
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Service/Inventario/VentaService.java">
+package com.varcal.cheermanager.Service.Inventario;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.varcal.cheermanager.DTO.Inventario.MovimientoInventarioDTO;
+import com.varcal.cheermanager.DTO.Inventario.VentaDTO;
+import com.varcal.cheermanager.DTO.Inventario.VentaResponseDTO;
+import com.varcal.cheermanager.Models.Financiero.Factura;
+import com.varcal.cheermanager.Models.Inventario.DetalleVenta;
+import com.varcal.cheermanager.Models.Inventario.ProductoVariante;
+import com.varcal.cheermanager.Models.Inventario.Venta;
+import com.varcal.cheermanager.Models.Personas.Persona;
+import com.varcal.cheermanager.repository.Financiero.FacturaRepository;
+import com.varcal.cheermanager.repository.Inventario.ProductoVarianteRepository;
+import com.varcal.cheermanager.repository.Inventario.VentaRepository;
+import com.varcal.cheermanager.repository.Personas.PersonaRepository;
+
+@Service
+public class VentaService {
+
+    @Autowired
+    private VentaRepository ventaRepository;
+
+    @Autowired
+    private ProductoVarianteRepository productoVarianteRepository;
+
+    @Autowired
+    private PersonaRepository personaRepository;
+
+    @Autowired
+    private FacturaRepository facturaRepository;
+
+    @Autowired
+    private MovimientoInventarioService movimientoInventarioService;
+
+    // Se marca @Transactional porque una venta toca varias tablas (Venta,
+    // N DetalleVenta, N MovimientoInventario, N ProductoVariante.stockActual)
+    // — si falla a mitad de camino (ej. un ítem sin stock), nada debe quedar
+    // guardado a medias.
+    @Transactional
+    public Venta registrar(VentaDTO dto) {
+        validarComprador(dto);
+
+        if (dto.getItems() == null || dto.getItems().isEmpty()) {
+            throw new RuntimeException("La venta debe tener al menos un ítem");
+        }
+
+        Venta venta = new Venta();
+        venta.setFecha(LocalDate.now());
+        venta.setMetodoPago(dto.getMetodoPago());
+
+        if (dto.getPersonaId() != null) {
+            Persona persona = personaRepository.findById(dto.getPersonaId())
+                    .orElseThrow(() -> new RuntimeException("Persona no encontrada con ID: " + dto.getPersonaId()));
+            venta.setPersona(persona);
+        } else {
+            venta.setNombreCompradorExterno(dto.getNombreCompradorExterno());
+            venta.setContactoCompradorExterno(dto.getContactoCompradorExterno());
+        }
+
+        if (dto.getFacturaId() != null) {
+            Factura factura = facturaRepository.findById(dto.getFacturaId())
+                    .orElseThrow(() -> new RuntimeException("Factura no encontrada con ID: " + dto.getFacturaId()));
+            venta.setFactura(factura);
+        }
+
+        List<DetalleVenta> detalles = new ArrayList<>();
+        BigDecimal total = BigDecimal.ZERO;
+
+        for (VentaDTO.ItemVentaDTO item : dto.getItems()) {
+            ProductoVariante variante = productoVarianteRepository.findById(item.getProductoVarianteId())
+                    .orElseThrow(() -> new RuntimeException("Variante no encontrada con ID: " + item.getProductoVarianteId()));
+
+            if (item.getCantidad() == null || item.getCantidad() <= 0) {
+                throw new RuntimeException("Cantidad inválida para '" + variante.getSkuVariante() + "'");
+            }
+
+            // Descuenta stock (si el producto lo controla) a través del
+            // service de movimientos, para que quede trazado como salida
+            // por venta — no se toca stockActual directo desde acá.
+            if (Boolean.TRUE.equals(variante.getProducto().getRequiereControlStock())) {
+                MovimientoInventarioDTO movDto = new MovimientoInventarioDTO();
+                movDto.setProductoVarianteId(variante.getId());
+                movDto.setTipo("salida");
+                movDto.setCantidad(item.getCantidad());
+                movDto.setMotivo("Venta de tienda");
+                movimientoInventarioService.registrar(movDto);
+            }
+
+            BigDecimal subtotal = variante.getPrecioVenta().multiply(BigDecimal.valueOf(item.getCantidad()));
+            total = total.add(subtotal);
+
+            DetalleVenta detalle = new DetalleVenta();
+            detalle.setVenta(venta);
+            detalle.setProductoVariante(variante);
+            detalle.setCantidad(item.getCantidad());
+            detalle.setPrecioUnitario(variante.getPrecioVenta());
+            detalle.setSubtotal(subtotal);
+            detalles.add(detalle);
+        }
+
+        venta.setTotal(total);
+        venta.setDetalles(detalles);
+        return ventaRepository.save(venta); // cascade guarda los detalles
+    }
+
+    public List<VentaResponseDTO> listarPorRango(LocalDate desde, LocalDate hasta) {
+        return ventaRepository.findByFechaBetweenOrderByFechaDesc(desde, hasta).stream()
+                .map(this::toResponseDTO).collect(Collectors.toList());
+    }
+
+    public List<VentaResponseDTO> listarPorPersona(Integer personaId) {
+        return ventaRepository.findByPersonaIdOrderByFechaDesc(personaId).stream()
+                .map(this::toResponseDTO).collect(Collectors.toList());
+    }
+
+    public VentaResponseDTO obtenerPorId(Integer id) {
+        return toResponseDTO(ventaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Venta no encontrada con ID: " + id)));
+    }
+
+    // Nota: no hay "eliminar" venta — anular_venta (permiso ya existe en el
+    // seed) debería implementarse como una reversión que genera movimientos
+    // de entrada compensatorios, no un borrado, para no perder el rastro
+    // contable. Se deja pendiente hasta que se defina esa regla de negocio.
+
+    private void validarComprador(VentaDTO dto) {
+        boolean tienePersona = dto.getPersonaId() != null;
+        boolean tieneExterno = dto.getNombreCompradorExterno() != null && !dto.getNombreCompradorExterno().isBlank();
+
+        if (tienePersona == tieneExterno) {
+            throw new RuntimeException(
+                    "La venta debe tener exactamente un comprador: o una persona del club (personaId) o un comprador externo (nombreCompradorExterno), no ambos ni ninguno");
+        }
+    }
+
+    private VentaResponseDTO toResponseDTO(Venta v) {
+        VentaResponseDTO dto = new VentaResponseDTO();
+        dto.setId(v.getId());
+        dto.setFecha(v.getFecha());
+        dto.setTotal(v.getTotal());
+        dto.setMetodoPago(v.getMetodoPago());
+        dto.setFacturaId(v.getFactura() != null ? v.getFactura().getId() : null);
+
+        if (v.getPersona() != null) {
+            dto.setPersonaId(v.getPersona().getId());
+            dto.setNombreComprador(v.getPersona().getNombre() + " " + v.getPersona().getApellidos());
+        } else {
+            dto.setNombreComprador(v.getNombreCompradorExterno());
+        }
+
+        if (v.getDetalles() != null) {
+            dto.setDetalles(v.getDetalles().stream().map(d -> {
+                VentaResponseDTO.DetalleVentaResponseDTO det = new VentaResponseDTO.DetalleVentaResponseDTO();
+                det.setProductoVarianteId(d.getProductoVariante().getId());
+                det.setSkuVariante(d.getProductoVariante().getSkuVariante());
+                det.setNombreProducto(d.getProductoVariante().getProducto().getNombre());
+                det.setTalla(d.getProductoVariante().getTalla());
+                det.setColor(d.getProductoVariante().getColor());
+                det.setCantidad(d.getCantidad());
+                det.setPrecioUnitario(d.getPrecioUnitario());
+                det.setSubtotal(d.getSubtotal());
+                return det;
+            }).collect(Collectors.toList()));
+        }
+        return dto;
+    }
+}
+</file>
+
 <file path="src/main/java/com/varcal/cheermanager/Service/Org_dep/DivisionService.java">
 package com.varcal.cheermanager.Service.Org_dep;
 
@@ -12042,6 +13691,50 @@ public class GeneroService {
 
     public List<Genero> listar() {
         return generoRepository.findAll();
+    }
+}
+</file>
+
+<file path="src/main/java/com/varcal/cheermanager/Utils/AuthenticatedUserUtil.java">
+package com.varcal.cheermanager.Utils;
+
+import java.util.Map;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+// JwtTokenFilter ya guarda el userId del token en Authentication.getDetails()
+// como un Map (junto con "token" y "requestDetails") — esta clase es el
+// único punto donde se lee eso, para que ningún Service tenga que conocer
+// la forma interna de ese Map. Disponible en cualquier Service porque
+// SecurityContextHolder usa un ThreadLocal que vive durante todo el request,
+// no solo en el Controller.
+public final class AuthenticatedUserUtil {
+
+    private AuthenticatedUserUtil() {
+    }
+
+    public static Long getCurrentUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("No hay un usuario autenticado en el contexto actual");
+        }
+
+        Object details = authentication.getDetails();
+        if (!(details instanceof Map)) {
+            throw new RuntimeException("No se pudo resolver el usuario autenticado (detalles de sesión inválidos)");
+        }
+
+        Object userId = ((Map<?, ?>) details).get("userId");
+        if (userId == null) {
+            throw new RuntimeException("El token no contiene userId");
+        }
+
+        // Se devuelve Long porque así está tipeado hoy UserRepository
+        // (JpaRepository<Usuario, Long>), aunque Usuario.id sea Integer —
+        // es una inconsistencia preexistente del proyecto, ver nota en
+        // UserRepository. Cuando se unifique, ajustar acá también.
+        return ((Number) userId).longValue();
     }
 }
 </file>
@@ -12973,8 +14666,30 @@ public class CategoriaNivel {
 
     @ManyToOne
     @JoinColumn(name = "estado_categorias_nivel_id", nullable = false)
-    private EstadoCategoriaNivel estadoCategoriaNivel; // Nombre de campo más descriptivo
+    private EstadoCategoriaNivel estadoCategoriaNivel;
 
+    // --- Agregado: estas 4 columnas ya existían en la tabla (el seed V4 las
+    // llena con los datos del PDF FEDECOLCHEER 2026) pero no estaban
+    // mapeadas acá — antes eran invisibles para cualquier código Java,
+    // incluido el cruce por división que se usa en el dashboard de Personas.
+
+    @Column(name = "año_nacimiento_min")
+    private Integer añoNacimientoMin; // null = sin mínimo (ej. divisiones "Open": "Hasta 2011")
+
+    @Column(name = "año_nacimiento_max")
+    private Integer añoNacimientoMax;
+
+    @Column(name = "cantidad_min")
+    private Integer cantidadMin;
+
+    @Column(name = "cantidad_max")
+    private Integer cantidadMax;
+
+    // NOTA (heredada del comentario del seed): la tabla oficial también
+    // exige límites de CANTIDAD DE HOMBRES para "Open Medium" (máx. 8) y
+    // "Open Large" (mín. 9) dentro de Elite 4. No hay columna para esto
+    // todavía (cantidad_hombres_min / cantidad_hombres_max) — si se necesita
+    // validar esa regla en código, hay que agregarla a la tabla y acá.
 }
 </file>
 
@@ -13052,20 +14767,27 @@ public interface ConvenioRepository extends JpaRepository<Convenio, Integer> {
 <file path="src/main/java/com/varcal/cheermanager/repository/Financiero/FacturaRepository.java">
 package com.varcal.cheermanager.repository.Financiero;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import com.varcal.cheermanager.Models.Financiero.Factura;
 
 public interface FacturaRepository extends JpaRepository<Factura, Integer> {
     Optional<Factura> findByNumeroFactura(String numeroFactura);
 
-    // Permite ubicar la factura que se generó automáticamente al crear una
-    // inscripción (una inscripción tiene a lo sumo una factura "de origen").
     Optional<Factura> findByInscripcionId(Integer inscripcionId);
 
     long countByNumeroFacturaStartingWith(String prefijo);
+
+    // Agregado nuevo para el dashboard de Inicio: total facturado del club
+    // completo. El saldo pendiente por factura (total - pagado) se calcula
+    // en el Service cruzando esto con PagoRepository.sumarMontoPagadoPorFactura,
+    // para no duplicar esa lógica en una segunda query.
+    @Query("SELECT COALESCE(SUM(f.total), 0) FROM Factura f")
+    BigDecimal sumarTotalFacturado();
 }
 </file>
 
@@ -14178,6 +15900,12 @@ public interface DeportistaPerteneceGrupoRepository extends JpaRepository<Deport
     // Necesario para que el entrenador sepa a quién pasarle lista al
     // registrar asistencia masiva de un grupo.
     List<DeportistaPerteneceGrupo> findByGrupoIdAndFechaFinIsNull(Integer grupoId);
+
+    // Grupos activos de UN deportista — necesario para el dashboard de
+    // Personas (distribución por división FEDECOLCHEER real, no un rango de
+    // edad inventado). Solo membresías vigentes (fechaFin null), igual
+    // criterio que el método de arriba.
+    List<DeportistaPerteneceGrupo> findByDeportistaIdAndFechaFinIsNull(Integer deportistaId);
 }
 </file>
 
@@ -14283,7 +16011,6 @@ public class PlanPagoService {
 <file path="src/main/java/com/varcal/cheermanager/Service/Org_dep/NivelService.java">
 package com.varcal.cheermanager.Service.Org_dep;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14293,11 +16020,9 @@ import com.varcal.cheermanager.DTO.Org_dep.CategoriaNivelDTO;
 import com.varcal.cheermanager.DTO.Org_dep.NivelDetalleDTO;
 import com.varcal.cheermanager.Models.Org_dep.CategoriaNivel;
 import com.varcal.cheermanager.Models.Org_dep.Nivel;
-import com.varcal.cheermanager.Models.Org_dep.ReglaCategoria;
 import com.varcal.cheermanager.repository.Org_dep.CategoriaNivelRepository;
 import com.varcal.cheermanager.repository.Org_dep.EstadoCategoriaNivelRepository;
 import com.varcal.cheermanager.repository.Org_dep.NivelRepository;
-import com.varcal.cheermanager.repository.Org_dep.ReglaCategoriaRepository;
 
 @Service
 public class NivelService {
@@ -14312,8 +16037,6 @@ public class NivelService {
     @Autowired
     private EstadoCategoriaNivelRepository estadoCategoriaNivelRepository;
 
-    @Autowired
-    private ReglaCategoriaRepository reglaCategoriaRepository;
 
     // Crear nivel
     public Nivel crearNivel(Nivel nivel) {
@@ -14358,34 +16081,6 @@ public class NivelService {
                 catDto.setId(cat.getId());
                 catDto.setNombre(cat.getNombre());
                 catDto.setDivision(cat.getDivision().getNombre());
-
-                // Buscar restricciones
-                ReglaCategoria regla = reglaCategoriaRepository.findByCategoriaNivelId(cat.getId());
-
-                if (regla != null) {
-                    catDto.setAñoAplicacion(regla.getAñoAplicacion());
-                    catDto.setAñoNacimientoMin(regla.getAñoNacimientoMin());
-                    catDto.setAñoNacimientoMax(regla.getAñoNacimientoMax());
-                    catDto.setCantidadMin(regla.getCantidadMin());
-                    catDto.setCantidadMax(regla.getCantidadMax());
-
-                    int currentYear = LocalDate.now().getYear();
-                    String edadMin = regla.getAñoNacimientoMax() != null
-                            ? String.valueOf(currentYear - regla.getAñoNacimientoMax())
-                            : "Sin límite";
-                    String edadMax = regla.getAñoNacimientoMin() != null
-                            ? String.valueOf(currentYear - regla.getAñoNacimientoMin())
-                            : "Sin límite";
-
-                    String restricciones = String.format("Nacidos entre %s y %s. (Edades: %s hasta %s años).",
-                            regla.getAñoNacimientoMin(),
-                            regla.getAñoNacimientoMax() != null ? regla.getAñoNacimientoMax() : "el presente",
-                            edadMin,
-                            edadMax);
-                    catDto.setRestricciones(restricciones);
-                } else {
-                    catDto.setRestricciones("Sin restricciones");
-                }
 
                 return catDto;
             }).toList();
@@ -14991,6 +16686,12 @@ public class LogAcceso {
 		<java.version>24</java.version>
 	</properties>
 	<dependencies>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jdbc</artifactId>
@@ -15408,7 +17109,6 @@ import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.data.repository.query.Param;
 
 import com.varcal.cheermanager.Models.Auth.Usuario;
-import com.varcal.cheermanager.Models.Inventario.ProductoVariante;
 import com.varcal.cheermanager.Models.Personas.Persona;
 
 import java.time.LocalDateTime;
@@ -15428,7 +17128,6 @@ public interface UserRepository extends JpaRepository<Usuario, Long> {
     boolean existsByEmail(String email);
 
     long countByUsernameStartingWith(String base);
-    Optional<ProductoVariante> findById(Integer usuarioId);
 
 }
 </file>
@@ -18104,6 +19803,8 @@ import com.varcal.cheermanager.repository.Auth.UserRepository;
 import com.varcal.cheermanager.repository.Personas.PersonaRepository;
 import com.varcal.cheermanager.DTO.Ath.RolConConteoDTO;
 import com.varcal.cheermanager.DTO.Ath.UsuarioDTO;
+import com.varcal.cheermanager.DTO.Persona.ActualizarPerfilDTO;
+import com.varcal.cheermanager.DTO.Persona.PersonaDTO;
 import com.varcal.cheermanager.Models.Auth.Rol;
 import com.varcal.cheermanager.Models.Auth.Usuario;
 import com.varcal.cheermanager.Models.Personas.Genero;
@@ -18279,6 +19980,61 @@ public class UserController {
         return userRepository.findById((long) userId)
                 .map(user -> ResponseEntity.ok(new UsuarioDTO(user)))
                 .orElseGet(() -> ResponseEntity.status(404).body(null));
+    }
+
+    // Auto-servicio: el propio usuario autenticado edita SU perfil (no requiere
+    // el permiso administrativo "modificar_usuario", que sigue reservado para
+    // que un admin edite a cualquier otro usuario vía PUT /actualizar/{id}).
+    // Solo se tocan: email (con validación de unicidad) y los datos de la
+    // Persona asociada (nombre, direccion, telefono, fechaNacimiento, generoId).
+    // Deliberadamente NO permite cambiar username, rol ni password (eso ya
+    // tiene su propio endpoint: POST /api/change-password).
+    @PutMapping("/me")
+    public ResponseEntity<?> actualizarMiPerfil(@RequestBody ActualizarPerfilDTO dto) {
+        Integer userId = getAuthenticatedUserId();
+        if (userId == null) {
+            return ResponseEntity.status(401).body(Map.of("success", false, "message", "No hay usuario autenticado"));
+        }
+
+        Usuario usuario = userRepository.findById(userId.longValue()).orElse(null);
+        if (usuario == null) {
+            return ResponseEntity.status(404).body(Map.of("success", false, "message", "Usuario no encontrado"));
+        }
+
+        if (usuario.getPersona() == null) {
+            return ResponseEntity.status(400).body(Map.of(
+                    "success", false,
+                    "message", "Tu usuario no tiene una persona asociada. Contacta a un administrador para vincular tus datos."
+            ));
+        }
+
+        if (dto.getNombre() == null || dto.getNombre().isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "El nombre es requerido"));
+        }
+
+        // Email: solo se valida/actualiza si viene y es distinto al actual.
+        if (dto.getEmail() != null && !dto.getEmail().isBlank() && !dto.getEmail().equalsIgnoreCase(usuario.getEmail())) {
+            if (userRepository.existsByEmail(dto.getEmail())) {
+                return ResponseEntity.status(409).body(Map.of("success", false, "message", "Ese email ya está en uso por otro usuario"));
+            }
+            usuario.setEmail(dto.getEmail());
+        }
+
+        try {
+            PersonaDTO personaDTO = new PersonaDTO();
+            personaDTO.setNombre(dto.getNombre());
+            personaDTO.setDireccion(dto.getDireccion());
+            personaDTO.setTelefono(dto.getTelefono());
+            personaDTO.setFechaNacimiento(dto.getFechaNacimiento());
+            personaDTO.setGeneroId(dto.getGeneroId());
+
+            personaService.modificarPersona(usuario.getPersona().getId(), personaDTO);
+            Usuario usuarioActualizado = userRepository.save(usuario);
+
+            return ResponseEntity.ok(new UsuarioDTO(usuarioActualizado));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("success", false, "message", "Error al actualizar el perfil: " + e.getMessage()));
+        }
     }
 
     private Integer getAuthenticatedUserId() {

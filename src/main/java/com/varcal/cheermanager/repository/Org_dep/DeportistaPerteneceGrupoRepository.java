@@ -13,4 +13,10 @@ public interface DeportistaPerteneceGrupoRepository extends JpaRepository<Deport
     // Necesario para que el entrenador sepa a quién pasarle lista al
     // registrar asistencia masiva de un grupo.
     List<DeportistaPerteneceGrupo> findByGrupoIdAndFechaFinIsNull(Integer grupoId);
+
+    // Grupos activos de UN deportista — necesario para el dashboard de
+    // Personas (distribución por división FEDECOLCHEER real, no un rango de
+    // edad inventado). Solo membresías vigentes (fechaFin null), igual
+    // criterio que el método de arriba.
+    List<DeportistaPerteneceGrupo> findByDeportistaIdAndFechaFinIsNull(Integer deportistaId);
 }

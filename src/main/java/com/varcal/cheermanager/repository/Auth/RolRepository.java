@@ -9,17 +9,19 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
 import com.varcal.cheermanager.Models.Auth.Rol;
+import com.varcal.cheermanager.Models.Personas.Persona;
 
 @Repository
 public interface RolRepository extends JpaRepository<Rol, Integer> {
 
     //Optional<Rol> findById(Rol rol2);
-    @NonNull
+   @NonNull
     Optional<Rol> findById(Integer id);
-
 
     @Query(value = "SELECT * FROM vista_roles_usuarios", nativeQuery = true)
     List<Object[]> listarRolesConConteo();
+
+    Optional<Rol> findByNombre(String nombre);
 
     // The findById method is inherited from JpaRepository and does not need to be
     // redefined here.

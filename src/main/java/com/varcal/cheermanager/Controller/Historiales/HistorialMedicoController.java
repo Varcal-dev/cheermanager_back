@@ -1,7 +1,7 @@
 package com.varcal.cheermanager.Controller.Historiales;
 
 import com.varcal.cheermanager.DTO.Persona.HistorialMedicoDTO;
-import com.varcal.cheermanager.Service.Persona.HistorialMedicoService;
+import com.varcal.cheermanager.Service.Historiales.HistorialMedicoService;
 import com.varcal.cheermanager.Utils.RequiresPermission;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;

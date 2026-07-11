@@ -24,6 +24,8 @@ import com.varcal.cheermanager.repository.Auth.UserRepository;
 import com.varcal.cheermanager.repository.Personas.PersonaRepository;
 import com.varcal.cheermanager.DTO.Ath.RolConConteoDTO;
 import com.varcal.cheermanager.DTO.Ath.UsuarioDTO;
+import com.varcal.cheermanager.DTO.Persona.ActualizarPerfilDTO;
+import com.varcal.cheermanager.DTO.Persona.PersonaDTO;
 import com.varcal.cheermanager.Models.Auth.Rol;
 import com.varcal.cheermanager.Models.Auth.Usuario;
 import com.varcal.cheermanager.Models.Personas.Genero;
@@ -199,6 +201,61 @@ public class UserController {
         return userRepository.findById((long) userId)
                 .map(user -> ResponseEntity.ok(new UsuarioDTO(user)))
                 .orElseGet(() -> ResponseEntity.status(404).body(null));
+    }
+
+    // Auto-servicio: el propio usuario autenticado edita SU perfil (no requiere
+    // el permiso administrativo "modificar_usuario", que sigue reservado para
+    // que un admin edite a cualquier otro usuario vía PUT /actualizar/{id}).
+    // Solo se tocan: email (con validación de unicidad) y los datos de la
+    // Persona asociada (nombre, direccion, telefono, fechaNacimiento, generoId).
+    // Deliberadamente NO permite cambiar username, rol ni password (eso ya
+    // tiene su propio endpoint: POST /api/change-password).
+    @PutMapping("/me")
+    public ResponseEntity<?> actualizarMiPerfil(@RequestBody ActualizarPerfilDTO dto) {
+        Integer userId = getAuthenticatedUserId();
+        if (userId == null) {
+            return ResponseEntity.status(401).body(Map.of("success", false, "message", "No hay usuario autenticado"));
+        }
+
+        Usuario usuario = userRepository.findById(userId.longValue()).orElse(null);
+        if (usuario == null) {
+            return ResponseEntity.status(404).body(Map.of("success", false, "message", "Usuario no encontrado"));
+        }
+
+        if (usuario.getPersona() == null) {
+            return ResponseEntity.status(400).body(Map.of(
+                    "success", false,
+                    "message", "Tu usuario no tiene una persona asociada. Contacta a un administrador para vincular tus datos."
+            ));
+        }
+
+        if (dto.getNombre() == null || dto.getNombre().isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "El nombre es requerido"));
+        }
+
+        // Email: solo se valida/actualiza si viene y es distinto al actual.
+        if (dto.getEmail() != null && !dto.getEmail().isBlank() && !dto.getEmail().equalsIgnoreCase(usuario.getEmail())) {
+            if (userRepository.existsByEmail(dto.getEmail())) {
+                return ResponseEntity.status(409).body(Map.of("success", false, "message", "Ese email ya está en uso por otro usuario"));
+            }
+            usuario.setEmail(dto.getEmail());
+        }
+
+        try {
+            PersonaDTO personaDTO = new PersonaDTO();
+            personaDTO.setNombre(dto.getNombre());
+            personaDTO.setDireccion(dto.getDireccion());
+            personaDTO.setTelefono(dto.getTelefono());
+            personaDTO.setFechaNacimiento(dto.getFechaNacimiento());
+            personaDTO.setGeneroId(dto.getGeneroId());
+
+            personaService.modificarPersona(usuario.getPersona().getId(), personaDTO);
+            Usuario usuarioActualizado = userRepository.save(usuario);
+
+            return ResponseEntity.ok(new UsuarioDTO(usuarioActualizado));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("success", false, "message", "Error al actualizar el perfil: " + e.getMessage()));
+        }
     }
 
     private Integer getAuthenticatedUserId() {

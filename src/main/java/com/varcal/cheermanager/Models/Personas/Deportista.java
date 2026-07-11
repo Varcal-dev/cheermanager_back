@@ -47,7 +47,7 @@ public class Deportista {
     @Column(name = "foto_perfil")
     private String fotoPerfil;
 
-    @OneToMany(mappedBy = "deportista", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "deportista", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<DeportistaPerteneceGrupo> historialGrupos;
 
 }

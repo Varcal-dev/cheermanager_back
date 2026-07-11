@@ -83,7 +83,8 @@ public class PersonaService {
 
     // Método para registrar un nuevo usuario ======================================
     // @Transactional: si existsByUsername/existsByEmail o el save fallan luego de
-    // que otra parte del flujo ya guardó datos relacionados, todo debe revertirse junto.
+    // que otra parte del flujo ya guardó datos relacionados, todo debe revertirse
+    // junto.
     @Transactional
     public Usuario registrarUsuario(Persona persona, String username, String email, String password, Integer rolId) {
         // Verificar si el username o email ya existen
@@ -95,8 +96,8 @@ public class PersonaService {
         }
 
         // Obtener el rol correspondiente
-        Rol rol = rolRepository.findById(rolId)
-                .orElseThrow(() -> new RuntimeException("El rol con ID '" + rolId + "' no existe en la base de datos"));
+        Rol rol = rolRepository.findByNombre("DEPORTISTA")
+                .orElseThrow(() -> new RuntimeException("El rol 'DEPORTISTA' no existe en la base de datos"));
 
         // Crear el usuario
         Usuario usuario = new Usuario();
@@ -107,8 +108,10 @@ public class PersonaService {
         usuario.setActivo(true);
         usuario.setPersona(persona);
         usuario.setUltimoAcceso(null); // Inicialmente no hay acceso
-        // Forzamos cambio de contraseña cuando se crea con la contraseña por defecto "0000".
-        // Si en el futuro se permite definir una contraseña real al registrar, ajustar esta bandera.
+        // Forzamos cambio de contraseña cuando se crea con la contraseña por defecto
+        // "0000".
+        // Si en el futuro se permite definir una contraseña real al registrar, ajustar
+        // esta bandera.
         usuario.setRequiereCambioPassword("0000".equals(password));
         return userRepository.save(usuario);
     }
@@ -160,7 +163,8 @@ public class PersonaService {
     // Este método recibe un DTO de Deportista y lo convierte a una entidad
     // Deportista
     // @Transactional: guarda Persona + Deportista + Usuario en tres pasos. Si el
-    // tercero falla (ej. username/email duplicado), los dos primeros deben revertirse
+    // tercero falla (ej. username/email duplicado), los dos primeros deben
+    // revertirse
     // para no dejar una Persona/Deportista huérfanos sin Usuario asociado.
     @Transactional
     public Deportista registrarDeportista(DeportistaDTO deportistaDTO) {
@@ -204,20 +208,25 @@ public class PersonaService {
         }
 
         // Registrar al deportista como usuario
+        // Registrar al deportista como usuario
         String username = generarUsername(
                 deportistaDTO.getNombre(),
                 deportistaDTO.getApellidos());
-        String email = username + "@cheermanager.com"; // Generar un email ficticio o usar uno proporcionado
-        String password = "0000"; // Generar una contraseña por defecto o usar una proporcionada
-        // Integer rolId = 9; // ID del rol para deportista
-        registrarUsuario(personaGuardada, username, email, password, 9);
+        String email = username + "@cheermanager.com";
+        String password = "0000";
+
+        Rol rolDeportista = rolRepository.findByNombre("Deportista")
+                .orElseThrow(() -> new RuntimeException("El rol 'Deportista' no existe en la base de datos"));
+
+        registrarUsuario(personaGuardada, username, email, password, rolDeportista.getId());
 
         return deportistaGuardado;
     }
 
     // Método para modificar un deportista
     // @Transactional: actualiza Persona, registra cambio de estado en el historial
-    // y actualiza Deportista. Las tres operaciones deben aplicarse juntas o no aplicarse.
+    // y actualiza Deportista. Las tres operaciones deben aplicarse juntas o no
+    // aplicarse.
     @Transactional
     public Deportista modificarDeportista(Integer id, DeportistaDTO deportistaDTO) {
         return deportistaRepository.findById(id).map(deportista -> {
@@ -403,7 +412,8 @@ public class PersonaService {
 
             // Permisos del usuario
             List<String> permisos = usuario.getRoles() != null ? usuario.getRoles().stream()
-                    .flatMap(rol -> rol.getPermisos() != null ? rol.getPermisos().stream() : java.util.stream.Stream.empty())
+                    .flatMap(rol -> rol.getPermisos() != null ? rol.getPermisos().stream()
+                            : java.util.stream.Stream.empty())
                     .map(p -> p.getNombre())
                     .distinct()
                     .collect(Collectors.toList()) : List.of();
@@ -492,14 +502,15 @@ public class PersonaService {
         if (numeroDocumento != null && !numeroDocumento.trim().isEmpty()) {
             java.util.Optional<Persona> persona = personaRepository.findByNumeroDocumento(numeroDocumento);
             if (persona.isPresent() && !persona.get().getId().equals(personaId)) {
-                throw new RuntimeException("El documento " + numeroDocumento + " ya está registrado en otro deportista");
+                throw new RuntimeException(
+                        "El documento " + numeroDocumento + " ya está registrado en otro deportista");
             }
         }
     }
 
     // Método para registrar cambios de estado en el historial
     private void registrarCambioEstado(Deportista deportista, EstadoPersona estadoAnterior,
-                                       EstadoPersona estadoNuevo, Integer usuarioId, String motivo) {
+            EstadoPersona estadoNuevo, Integer usuarioId, String motivo) {
         // No registrar si el estado no cambió
         if (estadoAnterior != null && estadoAnterior.getId().equals(estadoNuevo.getId())) {
             return;
@@ -554,7 +565,8 @@ public class PersonaService {
 
     // Método para obtener todo el historial de cambios de estado
     public List<HistorialDeportistaEstadoDTO> obtenerHistorialEstadoGlobal() {
-        List<HistorialDeportistaEstado> historial = historialDeportistaEstadoRepository.findAllByOrderByFechaCambioDesc();
+        List<HistorialDeportistaEstado> historial = historialDeportistaEstadoRepository
+                .findAllByOrderByFechaCambioDesc();
 
         return historial.stream().map(h -> {
             HistorialDeportistaEstadoDTO dto = new HistorialDeportistaEstadoDTO();
@@ -611,15 +623,13 @@ public class PersonaService {
                     true,
                     "Foto guardada exitosamente",
                     archivo.getOriginalFilename(),
-                    "/api/deportistas/" + deportistaId + "/foto"
-            );
+                    "/api/deportistas/" + deportistaId + "/foto");
         } catch (Exception e) {
             return new UploadFotoDTO(
                     false,
                     "Error al guardar la foto: " + e.getMessage(),
                     null,
-                    null
-            );
+                    null);
         }
     }
 
@@ -657,12 +667,14 @@ public class PersonaService {
         Deportista deportista = deportistaRepository.findById(deportistaId)
                 .orElseThrow(() -> new RuntimeException("Deportista no encontrado"));
 
-        // Cambiar estado: obtener la entidad EstadoPersona con ID 2 (Retirado) y setearla
+        // Cambiar estado: obtener la entidad EstadoPersona con ID 2 (Retirado) y
+        // setearla
         EstadoPersona estadoRetirado = estadoPersonaRepository.findById(2)
                 .orElseThrow(() -> new RuntimeException("Estado 'Retirado' no encontrado"));
 
         // Registrar el cambio de estado en el historial
-        registrarCambioEstado(deportista, deportista.getEstado(), estadoRetirado, null, "Deportista eliminado del sistema");
+        registrarCambioEstado(deportista, deportista.getEstado(), estadoRetirado, null,
+                "Deportista eliminado del sistema");
 
         deportista.setEstado(estadoRetirado);
         deportistaRepository.save(deportista);
@@ -712,8 +724,8 @@ public class PersonaService {
                 entrenadorDTO.getApellidos());
         String email = username + "@cheermanager.com"; // Generar un email ficticio o usar uno proporcionado
         String password = "0000"; // Generar una contraseña por defecto o usar una proporcionada
-        Integer rolId = entrenadorDTO.getRolIdE(); // ID del rol para entrenador
-        registrarUsuario(personaGuardada, username, email, password, rolId);
+        Rol rolEntrenador = rolRepository.findByNombre("Entrenador")
+                .orElseThrow(() -> new RuntimeException("El rol 'Entrenador' no existe en la base de datos"));
 
         return entrenadorGuardado;
     }

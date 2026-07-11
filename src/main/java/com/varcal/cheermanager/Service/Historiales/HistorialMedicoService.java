@@ -1,17 +1,21 @@
-package com.varcal.cheermanager.Service.Persona;
+package com.varcal.cheermanager.Service.Historiales;
 
 import com.varcal.cheermanager.DTO.Persona.HistorialMedicoDTO;
 import com.varcal.cheermanager.Models.Historiales.HistorialMedico;
+import com.varcal.cheermanager.Models.Personas.Deportista;
 import com.varcal.cheermanager.Models.Personas.Persona;
 import com.varcal.cheermanager.repository.Historiales.HistorialMedicoRepository;
+import com.varcal.cheermanager.repository.Personas.DeportistaRepository;
 import com.varcal.cheermanager.repository.Personas.PersonaRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.List; 
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class HistorialMedicoService {
@@ -22,14 +26,33 @@ public class HistorialMedicoService {
     @Autowired
     private PersonaRepository personaRepository;
 
+    @Autowired
+    private DeportistaRepository deportistaRepository;
+
+    // --- Métodos pensados para el controller de deportistas: reciben
+    // deportistaId y resuelven personaId internamente, igual que ya hacen
+    // HistorialNivelDeportistaService y HistorialPlanesDeportistaService.
+    // Antes el controller mandaba deportistaId disfrazado de personaId. ---
+
+    public HistorialMedicoDTO crearHistorialMedicoDeDeportista(Integer deportistaId, HistorialMedicoDTO dto) {
+        Deportista deportista = deportistaRepository.findById(deportistaId)
+                .orElseThrow(() -> new RuntimeException("Deportista no encontrado con ID: " + deportistaId));
+        dto.setPersonaId(deportista.getPersona().getId());
+        return crearHistorialMedico(dto);
+    }
+
+    public Page<HistorialMedicoDTO> obtenerHistorialMedicoPorDeportista(Integer deportistaId, Pageable pageable) {
+        Deportista deportista = deportistaRepository.findById(deportistaId)
+                .orElseThrow(() -> new RuntimeException("Deportista no encontrado con ID: " + deportistaId));
+        return obtenerHistorialMedicoPorPersona(deportista.getPersona().getId(), pageable);
+    }
+
     public HistorialMedicoDTO crearHistorialMedico(HistorialMedicoDTO dto) {
-        java.util.Optional<Persona> personaOpt = personaRepository.findById(dto.getPersonaId());
-        if (personaOpt.isEmpty()) {
-            throw new RuntimeException("Persona no encontrada");
-        }
+        Persona persona = personaRepository.findById(dto.getPersonaId())
+                .orElseThrow(() -> new RuntimeException("Persona no encontrada"));
 
         HistorialMedico historial = new HistorialMedico();
-        historial.setPersona(personaOpt.get());
+        historial.setPersona(persona);
         historial.setDescripcion(dto.getDescripcion());
         historial.setFechaRegistro(dto.getFechaRegistro());
         historial.setTipoRegistro(dto.getTipoRegistro());
@@ -40,22 +63,19 @@ public class HistorialMedicoService {
         return convertToDTO(saved);
     }
 
-    public Page<HistorialMedicoDTO> obtenerHistorialMedicoPorPersona(Integer personaId, org.springframework.data.domain.Pageable pageable) {
+    public Page<HistorialMedicoDTO> obtenerHistorialMedicoPorPersona(Integer personaId, Pageable pageable) {
         Page<HistorialMedico> page = historialMedicoRepository.findByPersonaId(personaId, pageable);
         return page.map(this::convertToDTO);
     }
 
-    public java.util.Optional<HistorialMedicoDTO> obtenerHistorialMedicoPorId(Integer id) {
+    public Optional<HistorialMedicoDTO> obtenerHistorialMedicoPorId(Integer id) {
         return historialMedicoRepository.findById(id).map(this::convertToDTO);
     }
 
     public HistorialMedicoDTO actualizarHistorialMedico(Integer id, HistorialMedicoDTO dto) {
-        java.util.Optional<HistorialMedico> opt = historialMedicoRepository.findById(id);
-        if (opt.isEmpty()) {
-            throw new RuntimeException("Historial médico no encontrado");
-        }
+        HistorialMedico historial = historialMedicoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Historial médico no encontrado"));
 
-        HistorialMedico historial = opt.get();
         historial.setDescripcion(dto.getDescripcion());
         historial.setFechaRegistro(dto.getFechaRegistro());
         historial.setTipoRegistro(dto.getTipoRegistro());
@@ -87,7 +107,8 @@ public class HistorialMedicoService {
 
     public boolean tieneCondicionActiva(Integer personaId) {
         LocalDate hace30Dias = LocalDate.now().minusDays(30);
-        List<HistorialMedico> recientes = historialMedicoRepository.findByPersonaIdAndFechaRegistroAfterAndGravedadIsNotNull(personaId, hace30Dias);
+        List<HistorialMedico> recientes = historialMedicoRepository
+                .findByPersonaIdAndFechaRegistroAfterAndGravedadIsNotNull(personaId, hace30Dias);
         return !recientes.isEmpty();
     }
 }
