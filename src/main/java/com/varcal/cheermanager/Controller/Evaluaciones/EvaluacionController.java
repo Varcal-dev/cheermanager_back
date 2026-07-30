@@ -32,19 +32,26 @@ public class EvaluacionController {
         }
     }
 
+    @GetMapping
+    @RequiresPermission("ver_evaluacion")
+    public ResponseEntity<List<EvaluacionResponseDTO>> listarTodas() {
+        return ResponseEntity.ok(evaluacionService.obtenerTodas());
+    }
+
     // El caso de uso real: evaluar a un deportista en varios criterios de una
     // sola sesión. Devuelve 207 si algún criterio del lote falló mientras el
     // resto sí se guardó.
     @PostMapping("/masivo")
     @RequiresPermission("crear_evaluacion")
-    public ResponseEntity<EvaluacionService.ResultadoRegistroMasivo> registrarMasivo(@RequestBody RegistroEvaluacionMasivoDTO dto) {
+    public ResponseEntity<EvaluacionService.ResultadoRegistroMasivo> registrarMasivo(
+            @RequestBody RegistroEvaluacionMasivoDTO dto) {
         EvaluacionService.ResultadoRegistroMasivo resultado = evaluacionService.registrarMasivo(dto);
         HttpStatus status = resultado.getErrores().isEmpty() ? HttpStatus.CREATED : HttpStatus.MULTI_STATUS;
         return ResponseEntity.status(status).body(resultado);
     }
 
     @GetMapping("/deportista/{deportistaId}")
-    @RequiresPermission("ver_evaluaciones")
+    @RequiresPermission("ver_evaluacion")
     public ResponseEntity<?> listarPorDeportista(@PathVariable Integer deportistaId) {
         try {
             return ResponseEntity.ok(evaluacionService.listarPorDeportista(deportistaId));
@@ -54,7 +61,7 @@ public class EvaluacionController {
     }
 
     @GetMapping("/deportista/{deportistaId}/rango")
-    @RequiresPermission("ver_evaluaciones")
+    @RequiresPermission("ver_evaluacion")
     public ResponseEntity<List<EvaluacionResponseDTO>> listarPorRango(
             @PathVariable Integer deportistaId,
             @RequestParam LocalDate desde,
@@ -64,7 +71,7 @@ public class EvaluacionController {
 
     // Para graficar la evolución de un deportista en un criterio específico.
     @GetMapping("/deportista/{deportistaId}/criterio/{criterioId}/progresion")
-    @RequiresPermission("ver_evaluaciones")
+    @RequiresPermission("ver_evaluacion")
     public ResponseEntity<List<EvaluacionResponseDTO>> progresionPorCriterio(
             @PathVariable Integer deportistaId, @PathVariable Integer criterioId) {
         return ResponseEntity.ok(evaluacionService.progresionPorCriterio(deportistaId, criterioId));
@@ -72,14 +79,14 @@ public class EvaluacionController {
 
     // Foto técnica actual: última evaluación en cada criterio de una categoría.
     @GetMapping("/deportista/{deportistaId}/categoria/{categoriaId}/actual")
-    @RequiresPermission("ver_evaluaciones")
+    @RequiresPermission("ver_evaluacion")
     public ResponseEntity<List<EvaluacionResponseDTO>> ultimaEvaluacionPorCategoria(
             @PathVariable Integer deportistaId, @PathVariable Integer categoriaId) {
         return ResponseEntity.ok(evaluacionService.ultimaEvaluacionPorCategoria(deportistaId, categoriaId));
     }
 
     @GetMapping("/deportista/{deportistaId}/criterio/{criterioId}/promedio")
-    @RequiresPermission("ver_evaluaciones")
+    @RequiresPermission("ver_evaluacion")
     public ResponseEntity<Map<String, Object>> promedioPorCriterio(
             @PathVariable Integer deportistaId, @PathVariable Integer criterioId) {
         Double promedio = evaluacionService.promedioPorCriterio(deportistaId, criterioId);

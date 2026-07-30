@@ -33,9 +33,20 @@ public class Inscripcion {
     @JoinColumn(name = "deportista_id")
     private Deportista deportista;
 
+    // Plan de INSCRIPCIÓN (cobro único, ej. matrícula/temporada). Se mantiene
+    // el nombre `planPago` tal cual para no romper el resto del código que ya
+    // lo usa (vistas SQL, DTOs, etc.) — conceptualmente es "el plan de
+    // inscripción", ahora que existe planMensualidad como su contraparte.
     @ManyToOne(optional = false)
     @JoinColumn(name = "plan_pago_id")
     private PlanPago planPago;
+
+    // Nuevo: plan de MENSUALIDAD (cobro recurrente mes a mes). Opcional
+    // porque puede haber inscripciones antiguas o casos especiales (ej.
+    // clínicas/camps de una sola vez) sin mensualidad asociada.
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "plan_mensualidad_id")
+    private PlanPago planMensualidad;
 
     @Column(name = "fecha_inscripcion", nullable = false)
     private LocalDate fechaInscripcion;
@@ -51,4 +62,3 @@ public class Inscripcion {
         Inactiva
     }
 }
-

@@ -30,7 +30,7 @@ public class ObjetivoController {
     }
 
     @GetMapping("/deportista/{deportistaId}")
-    @RequiresPermission("ver_objetivos")
+    @RequiresPermission("ver_objetivo")
     public ResponseEntity<?> listarPorDeportista(@PathVariable Integer deportistaId) {
         try {
             return ResponseEntity.ok(objetivoService.listarPorDeportista(deportistaId));
@@ -40,7 +40,7 @@ public class ObjetivoController {
     }
 
     @GetMapping("/deportista/{deportistaId}/estado/{estadoId}")
-    @RequiresPermission("ver_objetivos")
+    @RequiresPermission("ver_objetivo")
     public ResponseEntity<List<ObjetivoResponseDTO>> listarPorDeportistaYEstado(
             @PathVariable Integer deportistaId, @PathVariable Integer estadoId) {
         return ResponseEntity.ok(objetivoService.listarPorDeportistaYEstado(deportistaId, estadoId));
@@ -49,9 +49,15 @@ public class ObjetivoController {
     // Panel del entrenador: todos los objetivos en un estado dado (ej. "En
     // progreso") sin filtrar por deportista.
     @GetMapping("/estado/{estadoId}")
-    @RequiresPermission("ver_objetivos")
+    @RequiresPermission("ver_objetivo")
     public ResponseEntity<List<ObjetivoResponseDTO>> listarPorEstado(@PathVariable Integer estadoId) {
         return ResponseEntity.ok(objetivoService.listarPorEstado(estadoId));
+    }
+
+    @GetMapping
+    @RequiresPermission("ver_objetivo")
+    public ResponseEntity<List<ObjetivoResponseDTO>> listarTodos() {
+        return ResponseEntity.ok(objetivoService.obtenerTodos());
     }
 
     @PutMapping("/{id}")

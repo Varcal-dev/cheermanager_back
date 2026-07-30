@@ -92,6 +92,16 @@ public class EvaluacionService {
                 .collect(Collectors.toList());
     }
 
+    // Vista general: todas las evaluaciones de todos los deportistas, para el
+// panel /evaluaciones. Sin este método no había forma de mostrar un
+// "general" — solo se podía consultar deportista por deportista.
+public List<EvaluacionResponseDTO> obtenerTodas() {
+    return evaluacionRepository.findAll().stream()
+            .sorted((a, b) -> b.getFecha().compareTo(a.getFecha()))
+            .map(this::toResponseDTO)
+            .collect(Collectors.toList());
+}
+
     // Progresión de un deportista en un criterio específico a lo largo del
     // tiempo (ej. para graficar la evolución de su puntaje en "Flexibilidad").
     public List<EvaluacionResponseDTO> progresionPorCriterio(Integer deportistaId, Integer criterioId) {

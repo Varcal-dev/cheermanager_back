@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.varcal.cheermanager.DTO.Financiero.FacturaDTO;
+import com.varcal.cheermanager.DTO.Financiero.FacturaResponseDTO;
 import com.varcal.cheermanager.Models.Financiero.Factura;
 import com.varcal.cheermanager.Service.Financiero.FacturaService;
 
@@ -32,14 +33,18 @@ public class FacturaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(factura);
     }
 
+    // Antes devolvía List<Factura> (la entidad JPA cruda), lo que arrastraba
+    // factura.inscripcion.deportista.historialGrupos.grupo.deportistas... y
+    // caía en un ciclo infinito de serialización. Ahora devuelve un DTO
+    // plano con solo los campos que el frontend necesita.
     @GetMapping
-    public List<Factura> listar() {
-        return facturaService.listar();
+    public List<FacturaResponseDTO> listar() {
+        return facturaService.listarDTO();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Factura> obtener(@PathVariable Integer id) {
-        return facturaService.buscarPorId(id)
+    public ResponseEntity<FacturaResponseDTO> obtener(@PathVariable Integer id) {
+        return facturaService.buscarDTOPorId(id)
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
     }

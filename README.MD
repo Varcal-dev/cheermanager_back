@@ -1,191 +1,173 @@
-# CheerManager (Backend)
+# CheerManager — Backend
 
-CheerManager es un sistema de gestión para clubes deportivos y academias de cheerleading. Su objetivo es ofrecer un backend completo para manejar:
-- usuarios, roles y permisos
-- personas (deportistas, entrenadores, personal)
-- planes de pago, inscripciones y mensualidades
-- facturación, descuentos y convenios
-- grupos, niveles, categorías, horarios, inscripciones
-- gestión de inventarios y ventas
+API REST desarrollada con **Spring Boot** para la gestión integral de un club deportivo de porrismo (cheerleading): personas, grupos, niveles y categorías, inscripciones, pagos y facturación, horarios y asistencia, evaluaciones, eventos, inventario/ventas, y autenticación con roles y permisos.
 
-## 1. Arquitectura
+Este backend es consumido por el frontend **CheerManager** (Next.js), disponible como proyecto hermano.
 
-- Java + Spring Boot (3.4.5)
-- Maven (wrapper en `.mvn/wrapper`) con Maven 3.9.9
-- JDK: configurado a Java 25 LTS
-- Spring Data JPA con Hibernate 6.2.6
-- MySQL (configuración en `src/main/resources/application.properties`)
-- REST API (`@RestController`) con rutas `api/*`
-- Seguridad: `SecurityConfig` con `SecurityFilterChain` actual que permite todos los requests (dev)
+## Tabla de contenido
 
-## 2. Estructura del proyecto
+- [Stack técnico](#stack-técnico)
+- [Estructura del proyecto](#estructura-del-proyecto)
+- [Módulos funcionales](#módulos-funcionales)
+- [Autenticación y seguridad](#autenticación-y-seguridad)
+- [Requisitos previos](#requisitos-previos)
+- [Configuración](#configuración)
+- [Ejecución local](#ejecución-local)
+- [Endpoints principales](#endpoints-principales)
+- [Base de datos](#base-de-datos)
+- [Notas de desarrollo](#notas-de-desarrollo)
 
-- `src/main/java/com/varcal/cheermanager`
-  - `Controller/` - controladores REST distribuidos en `Auth`, `Financiero`, `Persona`, `Org_dep`
-  - `config/SecurityConfig.java` - configuración Spring Security
-  - `CheermanagerApplication.java` - clase main Spring Boot
-  - `service/` - lógica de negocio (servicios)
-  - `repository/` - repositorios Spring Data
-  - `entity/` - entidades JPA
+## Stack técnico
 
-- `src/main/resources/application.properties` - parámetros de DB, JPA, multipart, upload
+| Componente | Detalle |
+|---|---|
+| Lenguaje | Java 24 |
+| Framework | Spring Boot 3.4.5 |
+| Persistencia | Spring Data JPA / Hibernate (dialect MySQL8) |
+| Base de datos | MySQL 8+ |
+| Seguridad | Spring Security + JWT (`jjwt` 0.11.5) |
+| Build | Maven (con Maven Wrapper `mvnw` / `mvnw.cmd`) |
+| Puerto por defecto | `8081` |
 
-## 3. Endpoints disponibles (lista principal)
+## Estructura del proyecto
 
-### Autenticación
-- POST `/api/login` - login
-- POST `/api/logout` - logout
+```
+src/main/java/com/varcal/cheermanager/
+├── Controller/          # Controladores REST (@RestController), agrupados por dominio
+│   ├── Auth/            # Login, roles, permisos
+│   ├── Dashboard/       # Resúmenes/KPIs para el panel principal
+│   ├── Evaluaciones/    # Evaluaciones, criterios, objetivos, rutinas y rúbricas
+│   ├── Eventos/         # Eventos, grupos en evento, premios, resultados
+│   ├── Financiero/      # Convenios, descuentos, divisiones, facturas, pagos, planes
+│   ├── Funcionalidad/   # Logs de acceso / auditoría
+│   ├── Historiales/     # Historial médico, de niveles y de planes del deportista
+│   ├── Horario_Asistencia/  # Horarios y asistencia
+│   ├── Inventario/      # Categorías, productos, variantes, movimientos, ventas
+│   ├── Org_dep/         # Organización deportiva: niveles, categorías, grupos, inscripciones
+│   └── Persona/         # Personas, deportistas, entrenadores, usuarios
+├── DTO/                 # Objetos de transferencia (request/response), mismo agrupamiento por dominio
+├── Models/              # Entidades JPA
+├── repository/          # Repositorios Spring Data JPA
+├── Service/             # Lógica de negocio
+├── security/            # JwtUtil, JwtTokenFilter, TokenBlacklistService
+├── config/              # SecurityConfig, WebConfig, PermissionInterceptor, DataInitializer
+├── Utils/                # Utilidades comunes
+└── CheermanagerApplication.java
+```
 
-### Usuarios y Roles
-- POST `/api/usuario/registrar`
-- GET `/api/usuario/{id}`
-- GET `/api/usuario/listar`
-- GET `/api/usuario/me`
-- GET `/api/usuario/permisos`
-- GET `/api/usuario/genero/listar`
-- GET `/api/usuario/rol/listar`
-- GET `/api/usuario/rol/listar-con-usuarios`
+También existe una carpeta `ajustes_claudia/` con documentos de seguimiento (resúmenes de cambios, estado consolidado del proyecto, propuestas de KPIs, cabos sueltos pendientes) útiles como bitácora del desarrollo.
 
-- GET `/api/roles`
-- GET `/api/roles/{id}`
-- POST `/api/roles`
-- POST `/api/roles/asignar-permisos`
+## Módulos funcionales
 
-- GET `/api/permisos/listar`
-- GET `/api/permisos/{id}`
-- POST `/api/permisos`
+- **Autenticación y autorización**: login/logout con JWT, blacklist de tokens, roles y permisos, recuperación/cambio de contraseña.
+- **Personas**: gestión de personas, deportistas, entrenadores y usuarios del sistema.
+- **Organización deportiva**: divisiones, niveles, categorías, tipos de grupo, grupos de entrenamiento (con entrenadores y deportistas asignados), inscripciones.
+- **Financiero**: planes de pago (inscripción y mensualidad), tipos de plan, métodos y tipos de pago, pagos, facturas, descuentos y convenios.
+- **Horarios y asistencia**: horarios por grupo/día, registro de asistencia (individual y masivo), estados de asistencia.
+- **Evaluaciones**: evaluaciones por criterio y objetivo, evaluación de rutinas con rúbricas configurables.
+- **Eventos**: eventos, grupos participantes, premios y resultados de competencia.
+- **Historiales**: historial médico, historial de niveles y de planes por deportista.
+- **Inventario y ventas**: categorías de producto, productos y variantes, movimientos de inventario, ventas.
+- **Dashboard**: DTOs de resumen para las distintas secciones (administración, evaluación, eventos, finanzas, horarios, organización, personas, tienda).
+- **Auditoría**: log de accesos (`LogAcceso`).
 
-### Personas y relaciones
-- POST `/api/personas`
-- GET `/api/personas`
-- GET `/api/personas/buscar`
-- GET `/api/personas/estados`
+## Autenticación y seguridad
 
-- POST `/api/entrenadores`
-- GET `/api/entrenadores`
+- `SecurityConfig` configura una cadena de filtros **stateless** (sin sesiones), con CSRF deshabilitado y CORS habilitado para `http://localhost:3000`.
+- Rutas públicas: `/api/login`, `/api/logout`, `/api/refresh-token`, `/api/forgot-password`, `/api/reset-password`. El resto requiere autenticación.
+- `JwtTokenFilter` valida el token JWT en cada petición; `JwtUtil` genera/valida tokens; `TokenBlacklistService` invalida tokens tras logout.
+- `PermissionInterceptor` complementa la autorización a nivel de permisos por rol.
+- Contraseñas hasheadas con `BCryptPasswordEncoder`.
+- `DataInitializer` crea automáticamente un usuario `admin` (rol ADMIN, id=1) si no existe al arrancar la aplicación.
 
-- POST `/api/deportistas`
-- GET `/api/deportistas`
+## Requisitos previos
 
-- GET `/api/persona` (tal vez alias)
+- JDK 24+
+- MySQL 8+ en ejecución
+- Maven (opcional; el proyecto incluye Maven Wrapper)
 
-### Organización de la dependencia
-- GET `/api/categorias-nivel`
-- GET `/api/niveles` + `/api/niveles/detallado` + `/api/niveles/{id}`
-- POST `/api/niveles`
+## Configuración
 
-- GET `/api/inscripciones` + `/api/inscripciones/detalle` + `/api/inscripciones/{id}`
-- POST `/api/inscripciones`
-- GET `/api/inscripciones/simple`
-- GET `/api/inscripciones/inscritos`
-- GET `/api/inscripciones/no-inscritos`
+La configuración vive en `src/main/resources/application.properties`. Los valores por defecto sirven para desarrollo local; en producción **siempre** deben sobreescribirse mediante variables de entorno:
 
-- GET `/api/grupos`, `/api/grupos/{id}`
-- POST `/api/grupos`
-- GET `/api/grupos/con-deportistas`
-- GET `/api/grupos/{grupoId}/verificar-elegibilidad`
-- POST `/api/grupos/{grupoId}/agregar-deportistas`
-- POST `/api/grupos/{grupoId}/asignar-entrenadores`
+| Variable de entorno | Por defecto (dev) | Descripción |
+|---|---|---|
+| `DB_URL` | `jdbc:mysql://localhost:3306/cheermanager_I` | URL de conexión a MySQL |
+| `DB_USERNAME` | `root` | Usuario de la base de datos |
+| `DB_PASSWORD` | `root` | Contraseña de la base de datos |
+| `JWT_SECRET` | (clave de desarrollo embebida) | Secreto para firmar los JWT — **rotar en cualquier entorno real** |
+| `JWT_EXPIRATION_MS` | `86400000` (24h) | Tiempo de expiración del token |
+| `AUTH_MAX_LOGIN_ATTEMPTS` | `5` | Intentos de login antes de bloqueo |
+| `AUTH_LOCK_DURATION_MINUTES` | `30` | Duración del bloqueo por intentos fallidos |
+| `AUTH_RESET_TOKEN_EXPIRATION_MINUTES` | `15` | Expiración del token de reseteo de contraseña |
 
-- GET `/api/tipo-grupos`
+Otros ajustes relevantes:
+- `spring.jpa.hibernate.ddl-auto=update`: **Hibernate es la fuente de verdad del esquema**; cualquier script SQL de referencia debe generarse/validarse contra el esquema real que produce Hibernate, no al revés.
+- `spring.jpa.show-sql=true` y logging de SQL/parámetros en `DEBUG`/`TRACE` para depuración.
+- Subida de archivos: `app.documents.upload-dir=./uploads`, límite `10MB` por archivo/petición.
+- `server.error.include-message=always`: los mensajes de error de negocio (p. ej. validaciones de `PagoService`) se exponen al frontend para mostrarlos en los toasts de error.
 
-### Financiero
-- GET/POST `/api/convenios`
-- GET/POST `/api/divisiones`
-- GET/POST `/api/descuentos`
+## Ejecución local
 
-- GET `/api/facturas`, `/api/facturas/{id}`
-- POST `/api/facturas`
+```bash
+git clone https://github.com/Varcal-dev/cheermanager_back
+cd cheermanager
 
-- GET `/api/planes-inscripcion/listar`
-- GET `/api/planes-inscripcion/{id}`
+# Configurar la base de datos MySQL (crear el schema, p. ej. cheermanager_I)
+# y ajustar variables de entorno o application.properties si es necesario.
 
-- GET `/api/planes-mensualidad`, `/api/planes-mensualidad/{id}`
-- POST `/api/planes-mensualidad`
-- GET `/api/planes-mensualidad/tipos`
+# Compilar y correr tests
+./mvnw clean test-compile
+./mvnw test
 
-## 4. Configuración local y ejecución
+# Levantar la aplicación
+./mvnw spring-boot:run
+```
 
-1. Clonar repo:
-   ```bash
-   git clone https://github.com/Varcal-dev/cheermanager_back
-   cd CheerManager/cheermanager
-   ```
+La API queda disponible en `http://localhost:8081`.
 
-2. Ajustar base de datos en `src/main/resources/application.properties`:
-   ```properties
-   spring.datasource.url=jdbc:mysql://localhost:3306/cheermanager_db
-   spring.datasource.username=root
-   spring.datasource.password=root
-   spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
-   spring.jpa.hibernate.ddl-auto=update
-   spring.jpa.show-sql=true
-   spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
-   ```
+## Endpoints principales
 
-3. Compilar y tests:
-   ```bash
-   .\mvnw clean test-compile
-   .\mvnw test
-   ```
+Todos los endpoints cuelgan de `/api`. Agrupados por dominio (lista no exhaustiva; ver los controladores en `Controller/` para el detalle completo de cada recurso):
 
-4. Ejecutar app:
-   ```bash
-   .\mvnw spring-boot:run
-   ```
+**Autenticación / Usuarios / Roles**
+`POST /api/login` · `POST /api/logout` · `POST /api/usuario/registrar` · `GET /api/usuario/me` · `PUT /api/usuario/me` · `GET /api/usuario/permisos` · `GET /api/usuario/listar` · `GET /api/roles` · `POST /api/roles/asignar-permisos` · `GET /api/permisos/listar`
 
-5. Acceder:
-   - Backend: `http://localhost:8081`
+**Personas**
+`GET|POST /api/personas` · `GET|POST /api/entrenadores` · `GET|POST /api/deportistas`
 
-## 5. Requisitos de entorno
+**Organización deportiva**
+`GET|POST /api/niveles` · `GET /api/categorias-nivel` · `GET|POST /api/grupos` (+ `/con-deportistas`, `/verificar-elegibilidad`, `/agregar-deportistas`, `/asignar-entrenadores`) · `GET|POST /api/inscripciones` (+ `/inscritos`, `/no-inscritos`, `/simple`) · `GET /api/tipo-grupos`
 
-- Java >= 25 (recomendado JDK 25)
-- Maven Wrapper (incluido)
-- MySQL 8+
+**Financiero**
+`GET|POST /api/convenios` · `GET|POST /api/divisiones` · `GET|POST /api/descuentos` · `GET|POST /api/facturas` · `GET|POST /api/pagos` · `GET /api/planes-inscripcion/listar` · `GET|POST /api/planes-mensualidad` (+ `/tipos`)
 
-## 6. Estado actual del desarrollo
+**Horarios y asistencia**
+`GET|POST /api/horarios` · `GET|POST /api/asistencias`
 
-- Funcional endpoints CRUD listos para la mayoría de recursos.
-- Seguridad base inyectada (permitAll) - requiere producción hardening.
-- Ajuste de fields y validaciones (posible trabajo pendiente en entidades/DTOs).
-- El módulo front (`cheermanager_fnt`) consume esta API.
+**Evaluaciones**
+`GET|POST /api/evaluaciones` · `GET|POST /api/objetivos` · `GET|POST /api/criterios-evaluacion` · `GET|POST /api/evaluaciones-rutina` · `GET|POST /api/rubricas`
 
-## 7. Faltantes / mejoras sugeridas
+**Eventos**
+`GET|POST /api/eventos` (+ grupos, premios, resultados de competencia)
 
-1. Seguridad real con JWT y roles/authority en `SecurityConfig`.
-2. Validación y saneamiento de payloads (`@Valid`, DTOs, `@ControllerAdvice`).
-3. Documentación swagger (`springdoc-openapi`).
-4. Pruebas unitarias/integración robustas y coverage.
-5. CI/CD (GitHub Actions): `mvn test`, `mvn verify`, análisis de dependencias.
-6. Manejo de migraciones con Flyway/Liquibase en lugar de `hibernate.ddl-auto=update`.
-7. API versión (e.g., `/api/v1`) y paginación de listados.
+**Historiales**
+`GET /api/historial-medico` · `GET /api/historial-niveles` · `GET /api/historial-planes`
 
-## 8. Dependencias clave
+**Inventario y ventas**
+`GET|POST /api/productos` (+ variantes, categorías) · `GET|POST /api/movimientos-inventario` · `GET|POST /api/ventas`
 
-- Spring Boot Starter Data JPA
-- Spring Boot Starter Web
-- Spring Boot Starter Security
-- Spring Boot Starter Validation
-- MySQL Connector Java
-- Hibernate ORM 6.2.6.Final
-- Lombok
+**Dashboard / Auditoría**
+`GET /api/dashboard/*` (resúmenes por sección) · `GET /api/logs-acceso`
 
-## 9. Upgrade Java realizado
+## Base de datos
 
-- De Java 24 a Java 25 en `pom.xml` (`<java.version>25</java.version>`).
-- `maven-compiler-plugin` con `source=25`, `target=25`, `release=25`.
-- Verificaciones pasadas:
-  - `./mvnw -q clean test-compile` ✅
-  - `./mvnw -q test` ✅
-  - `./mvnw -q verify` ✅
-  - `appmod-validate-cves-for-java` ✅
+- Motor: MySQL 8+, esquema por defecto en desarrollo `cheermanager_I` (ajustable vía `DB_URL`).
+- El esquema real es generado y mantenido por Hibernate (`ddl-auto=update`); cualquier script SQL versionado (data dictionary, script V5, etc.) debe tratarse como documentación derivada del modelo de entidades, no como fuente de verdad.
+- Toda la lógica de consultas y negocio se mantiene versionada en código (servicios/repositorios), evitando vistas o procedimientos almacenados en la base de datos.
 
-## 10. Notas finales
+## Notas de desarrollo
 
-- No hay commits automáticos porque el workspace no es git: `GIT_AVAILABLE=false`.
-- Para producción, actualizar `SecurityFilterChain` y mover credenciales fuera de properties.
-
----
-
-**Autor**: Varcal Tech / GitHub Copilot (Raptor mini)
-**Fecha**: 2026-04-01
+- La seguridad ya usa JWT + roles/permisos (no `permitAll` global); revisar `SecurityConfig` para las rutas exceptuadas.
+- Pendientes conocidos y decisiones de diseño se documentan en `ajustes_claudia/` (p. ej. `RESUMEN_CABOS_SUELTOS.md`, `Estado_Consolidado_CheerManager.md`).
+- Mejoras sugeridas a futuro: documentación OpenAPI/Swagger, versionado de API (`/api/v1`), migraciones formales (Flyway/Liquibase) en lugar de `ddl-auto=update`, mayor cobertura de pruebas, y CI/CD.

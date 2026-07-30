@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.varcal.cheermanager.DTO.Org_dep.CandidatosGrupoResponseDTO;
 import com.varcal.cheermanager.DTO.Org_dep.GrupoConDeportistasDTO;
 import com.varcal.cheermanager.DTO.Org_dep.GrupoEntrenamientoDTO;
 import com.varcal.cheermanager.DTO.Persona.AgregarDeportistaRequest;
@@ -144,6 +145,9 @@ public class GrupoEntrenamientoController {
         }).collect(Collectors.toList());
     }
 
+    // Se mantiene por compatibilidad hacia atrás (por si algún otro cliente
+    // ya lo consume), pero el modal de asignación en /grupos ya no lo usa:
+    // ver /candidatos, que resuelve la lista completa en una sola llamada.
     @GetMapping("/{grupoId}/verificar-elegibilidad")
     public ResponseEntity<Map<String, String>> verificarElegibilidad(
             @PathVariable Integer grupoId,
@@ -155,6 +159,20 @@ public class GrupoEntrenamientoController {
         response.put("resultado", resultado);
 
         return ResponseEntity.ok(response);
+    }
+
+    // Reemplaza al patrón N+1 (un /verificar-elegibilidad por cada
+    // deportista inscrito). Devuelve en una sola llamada quiénes son
+    // elegibles para este grupo y quiénes no, con motivo y el cupo del
+    // grupo ya calculado.
+    @GetMapping("/{grupoId}/candidatos")
+    public ResponseEntity<?> obtenerCandidatos(@PathVariable Integer grupoId) {
+        try {
+            CandidatosGrupoResponseDTO candidatos = grupoEntrenamientoService.obtenerCandidatosGrupo(grupoId);
+            return ResponseEntity.ok(candidatos);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(e.getMessage());
+        }
     }
 
     @PostMapping("/{grupoId}/agregar-deportistas")
@@ -170,13 +188,30 @@ public class GrupoEntrenamientoController {
         }
     }
 
+    // Cierra la membresía activa del deportista en este grupo (fechaFin =
+    // hoy). No la borra: conserva el historial y libera al deportista para
+    // que vuelva a aparecer como candidato de cualquier grupo.
+    @DeleteMapping("/{grupoId}/deportistas/{deportistaId}")
+    public ResponseEntity<?> quitarDeportista(@PathVariable Integer grupoId, @PathVariable Integer deportistaId) {
+        try {
+            String resultado = grupoEntrenamientoService.quitarDeportistaDeGrupo(grupoId, deportistaId);
+            return ResponseEntity.ok(resultado);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     @PostMapping("/{grupoId}/asignar-entrenadores")
     public ResponseEntity<?> asignarEntrenadorAGrupo(
             @PathVariable int grupoId,
             @RequestBody AsignacionEntrenadorDTO dto) {
         dto.setGrupoId(grupoId); // asegúrate de que coincida
-        String respuesta = grupoEntrenamientoService.asignarEntrenadorAGrupo(dto);
-        return ResponseEntity.ok(respuesta);
+        try {
+            String respuesta = grupoEntrenamientoService.asignarEntrenadorAGrupo(dto);
+            return ResponseEntity.ok(respuesta);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
 }

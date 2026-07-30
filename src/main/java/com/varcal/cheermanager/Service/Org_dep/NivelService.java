@@ -26,7 +26,6 @@ public class NivelService {
     @Autowired
     private EstadoCategoriaNivelRepository estadoCategoriaNivelRepository;
 
-
     // Crear nivel
     public Nivel crearNivel(Nivel nivel) {
         return nivelRepository.save(nivel);
@@ -70,14 +69,16 @@ public class NivelService {
                 catDto.setId(cat.getId());
                 catDto.setNombre(cat.getNombre());
                 catDto.setDivision(cat.getDivision().getNombre());
-
+                catDto.setAñoNacimientoMin(cat.getAñoNacimientoMin());
+                catDto.setAñoNacimientoMax(cat.getAñoNacimientoMax());
+                catDto.setCantidadMin(cat.getCantidadMin());
+                catDto.setCantidadMax(cat.getCantidadMax());
                 return catDto;
             }).toList();
 
             dto.setCategorias(categoriasDTO);
             return dto;
         }).toList();
-        
     }
 
 }

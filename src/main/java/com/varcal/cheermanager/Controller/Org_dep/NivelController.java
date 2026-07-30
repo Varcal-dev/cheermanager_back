@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.varcal.cheermanager.DTO.Org_dep.NivelDetalleDTO;
 import com.varcal.cheermanager.Models.Org_dep.Nivel;
 import com.varcal.cheermanager.Service.Org_dep.NivelService;
+import com.varcal.cheermanager.Utils.RequiresPermission;
 
 @RestController
 @RequestMapping("/api/niveles")
@@ -27,6 +28,7 @@ public class NivelController {
 
     // Crear nivel
     @PostMapping
+    @RequiresPermission("crear_nivel")
     public ResponseEntity<Nivel> crearNivel(@RequestBody Nivel nivel) {
         Nivel nivelCreado = nivelService.crearNivel(nivel);
         return ResponseEntity.status(HttpStatus.CREATED).body(nivelCreado);
@@ -34,17 +36,21 @@ public class NivelController {
 
     // Obtener todos los niveles
     @GetMapping
+    @RequiresPermission("ver_nivel")
     public List<Nivel> obtenerTodosLosNiveles() {
         return nivelService.obtenerTodosLosNiveles();
     }
 
     @GetMapping("/detallado")
+    @RequiresPermission("ver_nivel")
     public List<NivelDetalleDTO> obtenerNivelesDetallado() {
+        System.out.println("ENTRÓ AL CONTROLLER");
         return nivelService.obtenerNivelesDetallado();
     }
 
     // Obtener nivel por ID
     @GetMapping("/{id}")
+    @RequiresPermission("ver_nivel")
     public ResponseEntity<Nivel> obtenerNivelPorId(@PathVariable Integer id) {
         try {
             Nivel nivel = nivelService.obtenerNivelPorId(id);
@@ -56,6 +62,7 @@ public class NivelController {
 
     // Actualizar nivel
     @PutMapping("/{id}")
+    @RequiresPermission("modificar_nivel")
     public ResponseEntity<Nivel> actualizarNivel(@PathVariable Integer id, @RequestBody Nivel nivel) {
         try {
             Nivel nivelActualizado = nivelService.actualizarNivel(id, nivel);
@@ -67,6 +74,7 @@ public class NivelController {
 
     // Eliminar nivel
     @DeleteMapping("/{id}")
+    @RequiresPermission("eliminar_nivel")
     public ResponseEntity<Void> eliminarNivel(@PathVariable Integer id) {
         try {
             nivelService.eliminarNivel(id);

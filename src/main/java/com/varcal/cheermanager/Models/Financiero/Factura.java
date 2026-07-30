@@ -46,4 +46,11 @@ public class Factura {
     @ManyToOne
     @JoinColumn(name = "inscripcion_id", nullable = true)
     private Inscripcion inscripcion;
+
+    // Nuevo. Formato "yyyy-MM". Solo se llena en facturas de MENSUALIDAD:
+    // identifica a qué mes corresponde el cobro, para no volver a facturar
+    // el mismo mes dos veces (ver InscripcionService.generarCobrosMensualidad).
+    // Las facturas de inscripción (cobro único) y las manuales quedan null.
+    @Column(name = "periodo", length = 7)
+    private String periodo;
 }

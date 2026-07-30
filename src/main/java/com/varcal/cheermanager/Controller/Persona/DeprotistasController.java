@@ -27,12 +27,15 @@ import com.varcal.cheermanager.Models.Auth.Usuario;
 import com.varcal.cheermanager.Models.Financiero.Convenio;
 import com.varcal.cheermanager.Models.Personas.Deportista;
 import com.varcal.cheermanager.Service.Historiales.HistorialMedicoService;
+import com.varcal.cheermanager.Service.Org_dep.GrupoEntrenamientoService;
 import com.varcal.cheermanager.Service.Persona.PersonaService;
 import com.varcal.cheermanager.Utils.RequiresPermission;
 import com.varcal.cheermanager.repository.Financiero.ConvenioRepository;
 import com.varcal.cheermanager.repository.Personas.DeportistaRepository;
 import com.varcal.cheermanager.DTO.Persona.HistorialMedicoDTO;
 import com.varcal.cheermanager.DTO.Persona.ValidarDocumentoDTO;
+import com.varcal.cheermanager.DTO.Org_dep.GruposElegiblesResponseDTO;
+import com.varcal.cheermanager.Service.Org_dep.GrupoEntrenamientoService;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -52,6 +55,9 @@ public class DeprotistasController {
 
     @Autowired
     private HistorialMedicoService historialMedicoService;
+
+    @Autowired
+    private GrupoEntrenamientoService grupoEntrenamientoService;
 
     // Método para registrar un deportista
     @PostMapping()
@@ -293,6 +299,20 @@ public class DeprotistasController {
             return ResponseEntity.status(404).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error al obtener historial médico: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/{id}/grupos-elegibles")
+    @RequiresPermission("ver_deportista")
+    public ResponseEntity<?> obtenerGruposElegibles(@PathVariable Integer id) {
+        try {
+            GruposElegiblesResponseDTO resultado = grupoEntrenamientoService
+                    .obtenerGruposElegiblesParaDeportista(id);
+            return ResponseEntity.ok(resultado);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error al obtener grupos elegibles: " + e.getMessage());
         }
     }
 

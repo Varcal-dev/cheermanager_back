@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.varcal.cheermanager.Models.Org_dep.CategoriaNivel;
+import com.varcal.cheermanager.Utils.RequiresPermission;
 import com.varcal.cheermanager.repository.Org_dep.CategoriaNivelRepository;
 
 @RestController
@@ -20,6 +21,7 @@ public class CategoriaNivelController {
     }
 
     @GetMapping
+    @RequiresPermission("ver_categoria_nivel")
     public List<CategoriaNivel> listarTodos() {
         return categoriaNivelRepo.findAll();
     }

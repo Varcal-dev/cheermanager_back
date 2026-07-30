@@ -12,16 +12,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.varcal.cheermanager.DTO.Financiero.PlanPagoDTO;
-import com.varcal.cheermanager.DTO.Financiero.PlanPagoResponseDTO;
-import com.varcal.cheermanager.Models.Financiero.PlanPago;
 import com.varcal.cheermanager.Models.Financiero.TipoPlanPago;
 import com.varcal.cheermanager.Service.Financiero.PlanPagoService;
 import com.varcal.cheermanager.Service.Financiero.TipoPlanPagoService;
-import com.varcal.cheermanager.repository.Financiero.PlanPagoRepository;
-import com.varcal.cheermanager.repository.Financiero.TipoPlanPagoRepository;
 
 @RestController
 @RequestMapping("/api/planes-pago")
@@ -30,52 +27,55 @@ public class PlanPagoController {
     private final PlanPagoService planPagoService;
 
     @Autowired
-    private TipoPlanPagoService service;
-
-    @Autowired
-    private PlanPagoRepository planPagoRepository;
-
-    @Autowired
-    private TipoPlanPagoRepository tipoPlanPagoRepository;
+    private TipoPlanPagoService tipoPlanPagoService;
 
     @Autowired
     public PlanPagoController(PlanPagoService planPagoService) {
         this.planPagoService = planPagoService;
     }
 
+    // ?categoria=inscripcion | mensualidad (opcional). Es lo que usan
+    // /planes-inscripcion y /planes-mensualidad en el front para mostrar
+    // cada uno su propia vista del MISMO catálogo (planes_pago), en vez de
+    // que /planes-inscripcion dependiera de la tabla huérfana
+    // planes_inscripcion (retirada — no tenía ninguna FK real).
     @GetMapping
-    public List<PlanPagoResponseDTO> listarTodos() {
-        return planPagoService.listarPlanes();
+    public ResponseEntity<List<PlanPagoDTO>> listarTodos(
+            @RequestParam(required = false) String categoria) {
+        if (categoria == null || categoria.isBlank()) {
+            return ResponseEntity.ok(planPagoService.listarPlanes());
+        }
+        try {
+            TipoPlanPago.Categoria cat = TipoPlanPago.Categoria.valueOf(categoria.toLowerCase());
+            return ResponseEntity.ok(planPagoService.listarPlanesPorCategoria(cat));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @PostMapping
-    public ResponseEntity<PlanPago> crearPlan(@RequestBody PlanPagoDTO dto) {
-        Integer tipoPlanId = Integer.valueOf(dto.getTipoPlan());
-        TipoPlanPago tipo = tipoPlanPagoRepository.findById(tipoPlanId)
-            .orElseThrow(() -> new RuntimeException("Tipo de plan no encontrado"));
-
-        PlanPago plan = new PlanPago();
-        plan.setTipoPlan(tipo);
-        plan.setDescripcion(dto.getDescripcion());
-        plan.setValorMensual(dto.getValorMensual());
-        plan.setFechaVigenciaInicio(dto.getFechaVigenciaInicio());
-        plan.setFechaVigenciaFin(dto.getFechaVigenciaFin());
-        plan.setActivo(dto.getActivo());
-
-        PlanPago creado = planPagoRepository.save(plan);
-        return ResponseEntity.status(HttpStatus.CREATED).body(creado);
+    public ResponseEntity<?> crearPlan(@RequestBody PlanPagoDTO dto) {
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED).body(planPagoService.crearPlan(dto));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PlanPagoResponseDTO> obtenerPorId(@PathVariable Integer id) {
+    public ResponseEntity<PlanPagoDTO> obtenerPorId(@PathVariable Integer id) {
         return ResponseEntity.ok(planPagoService.obtenerPorId(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PlanPagoResponseDTO> actualizar(
+    public ResponseEntity<?> actualizar(
             @PathVariable Integer id,
-            @RequestBody PlanPagoResponseDTO dto) {
-        return ResponseEntity.ok(planPagoService.actualizarPlan(id, dto));
+            @RequestBody PlanPagoDTO dto) {
+        try {
+            return ResponseEntity.ok(planPagoService.actualizarPlan(id, dto));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -85,8 +85,15 @@ public class PlanPagoController {
     }
 
     @GetMapping("/tipos")
-    public ResponseEntity<List<TipoPlanPago>> listar() {
-        List<TipoPlanPago> tipos = service.listarTodos();
-        return ResponseEntity.ok(tipos);
+    public ResponseEntity<?> listarTipos(@RequestParam(required = false) String categoria) {
+        if (categoria == null || categoria.isBlank()) {
+            return ResponseEntity.ok(tipoPlanPagoService.listarTodos());
+        }
+        try {
+            TipoPlanPago.Categoria cat = TipoPlanPago.Categoria.valueOf(categoria.toLowerCase());
+            return ResponseEntity.ok(tipoPlanPagoService.listarPorCategoria(cat));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 }

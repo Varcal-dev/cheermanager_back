@@ -10,4 +10,8 @@ import com.varcal.cheermanager.Models.Financiero.PlanPago;
 @Repository
 public interface PlanPagoRepository extends JpaRepository<PlanPago, Integer> {
     List<PlanPago> findByActivoTrue();
+
+    // Usado para validar el borrado de un TipoPlanPago: si hay planes
+    // usándolo, no se puede eliminar (rompería la FK / dejaría huérfanos).
+    long countByTipoPlanId(Integer tipoPlanId);
 }

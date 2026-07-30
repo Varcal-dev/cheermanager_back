@@ -13,18 +13,4 @@ public interface GrupoEntrenamientoRepository extends JpaRepository<GrupoEntrena
         @Query(value = "SELECT verificar_elegibilidad_deportista_grupo(:deportistaId, :grupoId) AS resultado", nativeQuery = true)
         String verificarElegibilidadDeportista(@Param("deportistaId") Integer deportistaId,
                         @Param("grupoId") Integer grupoId);
-
-        @Procedure(procedureName = "agregar_deportista_a_grupo")
-        String agregarDeportistaAGrupo(
-                        @Param("p_deportista_id") Integer deportistaId,
-                        @Param("p_grupo_id") Integer grupoId,
-                        @Param("p_observaciones") String observaciones);
-
-        @Procedure(procedureName = "sp_asignar_entrenador_grupo")
-        String asignarEntrenadorAGrupo(
-                        @Param("p_entrenador_id") Integer entrenadorId,
-                        @Param("p_grupo_id") Integer grupoId,
-                        @Param("p_fecha_inicio") Date fechaInicio,
-                        @Param("p_fecha_fin") Date fechaFin,
-                        @Param("p_rol") String rol);
 }

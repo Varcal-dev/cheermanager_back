@@ -11,6 +11,12 @@ private Integer deportistaId;
 private String nombreDeportista; 
 private Integer planPagoId;
 private String nombrePlan;
+
+// Nuevo: plan de mensualidad opcional. Si viene con valor, al crear la
+// inscripción se genera también la factura del primer mes de mensualidad
+// (ver InscripcionService.crearInscripcion).
+private Integer planMensualidadId;
+
 private LocalDate fechaInscripcion;
 private LocalDate fechaVencimiento;
 private String estado;

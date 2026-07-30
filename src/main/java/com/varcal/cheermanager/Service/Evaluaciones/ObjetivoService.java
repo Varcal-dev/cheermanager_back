@@ -33,7 +33,8 @@ public class ObjetivoService {
                 .orElseThrow(() -> new RuntimeException("Deportista no encontrado con ID: " + dto.getDeportistaId()));
 
         EstadoObjetivo estado = estadoObjetivoRepository.findById(dto.getEstadoObjetivoId())
-                .orElseThrow(() -> new RuntimeException("Estado de objetivo no encontrado con ID: " + dto.getEstadoObjetivoId()));
+                .orElseThrow(() -> new RuntimeException(
+                        "Estado de objetivo no encontrado con ID: " + dto.getEstadoObjetivoId()));
 
         Objetivo objetivo = new Objetivo();
         objetivo.setDeportista(deportista);
@@ -68,6 +69,16 @@ public class ObjetivoService {
                 .collect(Collectors.toList());
     }
 
+    // Vista general: todos los objetivos de todos los deportistas, para el
+    // panel /objetivos (que hoy ni siquiera existe como página, a pesar de
+    // que el link ya está en el sidebar).
+    public List<ObjetivoResponseDTO> obtenerTodos() {
+        return objetivoRepository.findAll().stream()
+                .sorted((a, b) -> b.getFechaCreacion().compareTo(a.getFechaCreacion()))
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
+    }
+
     public ObjetivoResponseDTO actualizar(Integer id, ObjetivoDTO dto) {
         Objetivo objetivo = objetivoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Objetivo no encontrado con ID: " + id));
@@ -80,7 +91,8 @@ public class ObjetivoService {
         }
         if (dto.getEstadoObjetivoId() != null) {
             EstadoObjetivo estado = estadoObjetivoRepository.findById(dto.getEstadoObjetivoId())
-                    .orElseThrow(() -> new RuntimeException("Estado de objetivo no encontrado con ID: " + dto.getEstadoObjetivoId()));
+                    .orElseThrow(() -> new RuntimeException(
+                            "Estado de objetivo no encontrado con ID: " + dto.getEstadoObjetivoId()));
             objetivo.setEstadoObjetivo(estado);
         }
 
