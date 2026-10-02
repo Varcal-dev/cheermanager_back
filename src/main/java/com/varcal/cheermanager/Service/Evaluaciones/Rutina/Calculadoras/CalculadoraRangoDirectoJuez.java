@@ -71,6 +71,7 @@ public class CalculadoraRangoDirectoJuez implements CalculadoraSubCriterio {
         registro.setPuntajeBase(valor);
         registro.setPuntajeDrivers(BigDecimal.ZERO);
         registro.setPuntajeFinal(valor.setScale(2, RoundingMode.HALF_UP));
+        registro.setDetalleCalculo("Valor asignado directamente por el juez: " + valor);
         return registro;
     }
 }

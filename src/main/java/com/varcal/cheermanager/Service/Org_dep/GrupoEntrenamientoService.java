@@ -6,6 +6,7 @@ import java.time.Period;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,11 @@ import com.varcal.cheermanager.DTO.Org_dep.DeportistaInscritoDTO;
 import com.varcal.cheermanager.DTO.Org_dep.GrupoElegibleDTO;
 import com.varcal.cheermanager.DTO.Org_dep.GruposElegiblesResponseDTO;
 import com.varcal.cheermanager.DTO.Persona.AsignacionEntrenadorDTO;
+import com.varcal.cheermanager.DTO.Persona.AsignacionEntrenadorResponseDTO;
+import com.varcal.cheermanager.DTO.Persona.AsignacionEntrenadorUpdateDTO;
+import com.varcal.cheermanager.DTO.Persona.HorarioEntrenadorResponseDTO;
+import com.varcal.cheermanager.Models.Horario_Asistencia.HorarioEntrenamiento;
+import com.varcal.cheermanager.repository.Horario_Asistencia.HorarioEntrenamientoRepository;
 import com.varcal.cheermanager.Models.Org_dep.CategoriaNivel;
 import com.varcal.cheermanager.Models.Org_dep.DeportistaPerteneceGrupo;
 import com.varcal.cheermanager.Models.Org_dep.GrupoEntrenador;
@@ -46,6 +52,9 @@ public class GrupoEntrenamientoService {
 
     @Autowired
     private GrupoEntrenadorRepository grupoEntrenadorRepository;
+
+    @Autowired
+    private HorarioEntrenamientoRepository horarioEntrenamientoRepository;
 
     @Autowired
     private EntrenadorRepository entrenadorRepository;
@@ -291,5 +300,99 @@ public class GrupoEntrenamientoService {
         deportistaPerteneceGrupoRepository.save(membresia);
 
         return "Deportista removido del grupo correctamente";
+    }
+
+    // ===== Historial de asignaciones entrenador-grupo (panel en entrenadores/page.tsx) =====
+
+    public List<AsignacionEntrenadorResponseDTO> listarAsignacionesPorEntrenador(Integer entrenadorId) {
+        return grupoEntrenadorRepository.findByEntrenadorIdOrderByFechaInicioDesc(entrenadorId).stream()
+                .map(this::toAsignacionResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    // Edita rol y/o fechaFin de una asignación existente. No se permite
+    // reasignar el entrenador o el grupo desde acá — si el entrenador
+    // cambió de grupo, es una asignación nueva, no una edición de esta.
+    public AsignacionEntrenadorResponseDTO actualizarAsignacionEntrenador(Integer asignacionId,
+            AsignacionEntrenadorUpdateDTO dto) {
+        GrupoEntrenador asignacion = grupoEntrenadorRepository.findById(asignacionId)
+                .orElseThrow(() -> new RuntimeException("Asignación no encontrada"));
+
+        if (dto.getRol() != null && !dto.getRol().isBlank()) {
+            asignacion.setRol(dto.getRol());
+        }
+        // fechaFin explícita en null limpia el campo (permite "reabrir" una
+        // asignación que se había cerrado por error); string vacío se trata
+        // igual que null por si el frontend manda "" en vez de omitir el campo.
+        asignacion.setFechaFin(
+                dto.getFechaFin() != null && !dto.getFechaFin().isBlank()
+                        ? LocalDate.parse(dto.getFechaFin())
+                        : null);
+
+        return toAsignacionResponseDTO(grupoEntrenadorRepository.save(asignacion));
+    }
+
+    // Mismo criterio que quitarDeportistaDeGrupo: no se borra el registro,
+    // se cierra con fechaFin = hoy. Conserva el historial de quién entrenó
+    // a quién y cuándo.
+    public String finalizarAsignacionEntrenador(Integer asignacionId) {
+        GrupoEntrenador asignacion = grupoEntrenadorRepository.findById(asignacionId)
+                .orElseThrow(() -> new RuntimeException("Asignación no encontrada"));
+
+        if (asignacion.getFechaFin() != null) {
+            throw new RuntimeException("Esta asignación ya estaba finalizada");
+        }
+
+        asignacion.setFechaFin(LocalDate.now());
+        grupoEntrenadorRepository.save(asignacion);
+
+        return "Asignación finalizada correctamente";
+    }
+
+    private AsignacionEntrenadorResponseDTO toAsignacionResponseDTO(GrupoEntrenador a) {
+        AsignacionEntrenadorResponseDTO dto = new AsignacionEntrenadorResponseDTO();
+        dto.setId(a.getId());
+        dto.setGrupoId(a.getGrupo().getId());
+        dto.setGrupoNombre(a.getGrupo().getNombre());
+        dto.setRol(a.getRol());
+        dto.setFechaInicio(a.getFechaInicio());
+        dto.setFechaFin(a.getFechaFin());
+        return dto;
+    }
+
+    // ===== Panel "Horarios" en entrenadores/page.tsx =====
+    //
+    // No es una entidad propia: es la unión de las asignaciones ACTIVAS de
+    // este entrenador (GrupoEntrenador, fechaFin == null) con los bloques de
+    // horario reales de cada uno de esos grupos (Horario, vía
+    // HorarioEntrenamiento). Un mismo grupo puede tener varios bloques
+    // (ej. lunes y miércoles), así que un entrenador con 1 grupo puede
+    // aparecer con varias filas acá — todas comparten el mismo asignacionId.
+    public List<HorarioEntrenadorResponseDTO> listarHorarioPorEntrenador(Integer entrenadorId) {
+        List<HorarioEntrenadorResponseDTO> resultado = new ArrayList<>();
+
+        List<GrupoEntrenador> activas = grupoEntrenadorRepository.findByEntrenadorIdOrderByFechaInicioDesc(entrenadorId)
+                .stream()
+                .filter(a -> a.getFechaFin() == null)
+                .collect(Collectors.toList());
+
+        for (GrupoEntrenador asignacion : activas) {
+            List<HorarioEntrenamiento> bloques = horarioEntrenamientoRepository
+                    .findByGrupoEntrenamientoId(asignacion.getGrupo().getId());
+
+            for (HorarioEntrenamiento bloque : bloques) {
+                HorarioEntrenadorResponseDTO dto = new HorarioEntrenadorResponseDTO();
+                dto.setAsignacionId(asignacion.getId());
+                dto.setGrupoId(asignacion.getGrupo().getId());
+                dto.setGrupoNombre(asignacion.getGrupo().getNombre());
+                dto.setRol(asignacion.getRol());
+                dto.setDia(bloque.getHorario().getDia().getDia());
+                dto.setHoraInicio(bloque.getHorario().getHoraInicio());
+                dto.setHoraFin(bloque.getHorario().getHoraFin());
+                resultado.add(dto);
+            }
+        }
+
+        return resultado;
     }
 }

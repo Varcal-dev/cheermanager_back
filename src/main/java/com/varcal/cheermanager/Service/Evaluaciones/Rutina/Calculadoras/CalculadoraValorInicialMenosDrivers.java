@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
@@ -33,16 +32,15 @@ import com.varcal.cheermanager.Models.Evaluaciones.Rutina.SubCriterioRubrica;
 //     - Sincronización de Saltos:       no puede descontarse más de 0.1
 //     - Altura de Lanzamientos:         no puede descontarse más de 0.1"
 //   (Regla fija en el código, no configurable, por decisión tuya.)
+//
+// OJO: "Sincronización" también es el nombre de un driver de Elevaciones/
+// Pirámides y de Gimnasia (ver rúbrica oficial, hoja EJECUCIÓN) — esos SÍ
+// usan el tope estándar de 0.3. El tope especial de 0.1 es específico de
+// Sincronización DENTRO de la sub-sección Saltos, así que el match no puede
+// ser solo por nombre de driver — hay que confirmar también a qué
+// sub-criterio de Ejecución pertenece.
 @Component
 public class CalculadoraValorInicialMenosDrivers implements CalculadoraSubCriterio {
-
-    // Drivers cuyo tope de deducción es 0.1 en vez del 0.3 estándar.
-    // Fijo en código porque es una regla puntual de la metodología oficial
-    // (no cambia por nivel ni por temporada ordinaria).
-    private static final Set<String> DRIVERS_CON_TOPE_01 = Set.of(
-            "Sincronizacion",       // En Saltos
-            "Altura"                // En Lanzamientos
-    );
 
     private static final BigDecimal TOPE_STANDARD = new BigDecimal("0.3");
     private static final BigDecimal TOPE_ESPECIAL = new BigDecimal("0.1");
@@ -66,15 +64,23 @@ public class CalculadoraValorInicialMenosDrivers implements CalculadoraSubCriter
                 ? dto.getPuntajeFinalManual()
                 : BigDecimal.ZERO;
 
+        boolean esSubCriterioSaltos = subCriterio.getNombre() != null
+                && subCriterio.getNombre().toLowerCase().contains("salto");
+        boolean esSubCriterioLanzamientos = subCriterio.getNombre() != null
+                && subCriterio.getNombre().toLowerCase().contains("lanzamiento");
+
         BigDecimal totalDeduccion = BigDecimal.ZERO;
         List<RegistroDeduccionDriver> registrosDeduccion = new ArrayList<>();
 
         if (dto.getDeducciones() != null) {
             for (DeduccionDriverDTO ded : dto.getDeducciones()) {
                 BigDecimal deduccionBruta = nivelADeduccion(ded.getNivelDeduccion());
-                BigDecimal topeAplicable = DRIVERS_CON_TOPE_01.contains(ded.getNombreDriver())
-                        ? TOPE_ESPECIAL
-                        : TOPE_STANDARD;
+
+                boolean esTopeEspecial =
+                        (esSubCriterioSaltos && "Sincronizacion".equalsIgnoreCase(ded.getNombreDriver()))
+                        || (esSubCriterioLanzamientos && "Altura".equalsIgnoreCase(ded.getNombreDriver()));
+
+                BigDecimal topeAplicable = esTopeEspecial ? TOPE_ESPECIAL : TOPE_STANDARD;
                 BigDecimal deduccionFinal = deduccionBruta.min(topeAplicable);
 
                 totalDeduccion = totalDeduccion.add(deduccionFinal);
@@ -98,6 +104,12 @@ public class CalculadoraValorInicialMenosDrivers implements CalculadoraSubCriter
         registro.setPuntajeDrivers(totalDeduccion.negate()); // negativo = deducción
         registro.setPuntajeFinal(puntajeFinal.setScale(2, RoundingMode.HALF_UP));
         registro.setDeduccionesDriver(registrosDeduccion);
+
+        String detalle = registrosDeduccion.isEmpty()
+                ? String.format("Valor inicial %.2f, sin deducciones", valorInicial)
+                : String.format("Valor inicial %.2f - %.2f en %d deducción(es)",
+                        valorInicial, totalDeduccion, registrosDeduccion.size());
+        registro.setDetalleCalculo(detalle);
         return registro;
     }
 

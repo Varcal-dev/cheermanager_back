@@ -13,4 +13,9 @@ public interface ConvenioRepository extends JpaRepository<Convenio, Integer> {
 
     @NonNull
     Optional<Convenio> findById(Integer convenioId);
+
+    // Usado por DescuentoService para impedir borrar un descuento que
+    // todavía está referenciado por algún convenio (evita el 500 genérico
+    // de integridad referencial de MySQL y da un mensaje claro al usuario).
+    boolean existsByDescuentoId(Integer descuentoId);
 }

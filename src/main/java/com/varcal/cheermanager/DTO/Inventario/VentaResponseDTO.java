@@ -15,6 +15,7 @@ public class VentaResponseDTO {
     private Integer personaId;
     private String nombreComprador; // nombre de la Persona, o el externo si aplica
     private Integer facturaId;
+    private String numeroFactura; // ej. "FAC-VTA-2026-0001" — null si la venta no generó factura (comprador externo)
     private List<DetalleVentaResponseDTO> detalles;
 
     @Data

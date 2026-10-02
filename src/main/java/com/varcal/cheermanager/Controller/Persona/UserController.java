@@ -150,6 +150,12 @@ public class UserController {
                                 "El rol con ID '" + usuarioDTO.getRolId() + "' no existe en la base de datos"));
                 usuario.setRol(rol);
             }
+            // El DTO ya traía este campo, pero nunca se aplicaba — por eso
+            // "Activar/Desactivar" en el front no tenía forma de funcionar
+            // contra este endpoint.
+            if (usuarioDTO.getActivo() != null) {
+                usuario.setActivo(usuarioDTO.getActivo());
+            }
 
             Usuario usuarioActualizado = userRepository.save(usuario);
             return ResponseEntity.ok(new UsuarioDTO(usuarioActualizado)); // Devolver el usuario actualizado

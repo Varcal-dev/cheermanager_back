@@ -77,11 +77,15 @@ public class CalculadoraEscalonGimnasia implements CalculadoraSubCriterio {
                 .findByNivelIdAndSubCriterioIdOrderByOrdenDesc(nivel.getId(), subCriterio.getId());
 
         BigDecimal puntajeBase = BigDecimal.ZERO;
+        String detalleEscalon = "No alcanza el mínimo requerido";
         for (TopeSeccionNivel escalon : escalones) {
             int umbralGrupo = (escalon.getCondicionGrupoMinimo() == null) ? 0
                     : resolverGrupoNumerico(escalon.getCondicionGrupoMinimo(), tablaConteo);
             if (grupoNumerico >= umbralGrupo) {
                 puntajeBase = escalon.getValorPuntaje();
+                detalleEscalon = escalon.getDescripcionRubrica() != null
+                        ? escalon.getDescripcionRubrica()
+                        : "Escalón " + escalon.getOrden() + " = " + escalon.getValorPuntaje();
                 break;
             }
         }
@@ -96,6 +100,11 @@ public class CalculadoraEscalonGimnasia implements CalculadoraSubCriterio {
         registro.setPuntajeBase(puntajeBase);
         registro.setPuntajeDrivers(puntajeDrivers);
         registro.setPuntajeFinal(puntajeBase.add(puntajeDrivers).setScale(2, RoundingMode.HALF_UP));
+
+        String detalleDrivers = puntajeDrivers.compareTo(BigDecimal.ZERO) > 0
+                ? String.format(" + %.2f de drivers", puntajeDrivers)
+                : "";
+        registro.setDetalleCalculo(detalleEscalon + detalleDrivers);
         return registro;
     }
 

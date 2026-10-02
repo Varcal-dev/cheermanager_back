@@ -79,4 +79,14 @@ public class RegistroSubCriterio {
 
     @OneToMany(mappedBy = "registroSubCriterio", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RegistroDriverSubCriterio> registrosDriver;
+
+    // Transitorio (no se persiste): texto legible armado por la calculadora
+    // explicando qué escalón de la rúbrica se aplicó, para que la pantalla de
+    // revisión pueda mostrar "por qué" salió ese puntaje antes de guardar
+    // (ej. "GRAN PARTE realizó 3 habilidades diferentes -> 4.0"). Se
+    // recalcula cada vez, tanto en /preview como al guardar — no tiene
+    // sentido persistirlo porque quedaría obsoleto si la configuración de la
+    // rúbrica cambia después.
+    @jakarta.persistence.Transient
+    private String detalleCalculo;
 }

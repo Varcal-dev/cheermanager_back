@@ -61,8 +61,8 @@ public class ConvenioController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Convenio> actualizar(@PathVariable Integer id, @RequestBody Convenio convenio) {
-        Convenio actualizado = convenioService.actualizarConvenio(id, convenio);
+    public ResponseEntity<Convenio> actualizar(@PathVariable Integer id, @RequestBody ConvenioDto dto) {
+        Convenio actualizado = convenioService.actualizarConvenio(id, dto);
         return actualizado != null ? ResponseEntity.ok(actualizado) : ResponseEntity.notFound().build();
     }
 

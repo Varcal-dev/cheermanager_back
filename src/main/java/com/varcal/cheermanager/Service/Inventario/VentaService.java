@@ -18,6 +18,7 @@ import com.varcal.cheermanager.Models.Inventario.DetalleVenta;
 import com.varcal.cheermanager.Models.Inventario.ProductoVariante;
 import com.varcal.cheermanager.Models.Inventario.Venta;
 import com.varcal.cheermanager.Models.Personas.Persona;
+import com.varcal.cheermanager.Service.Financiero.FacturaService;
 import com.varcal.cheermanager.repository.Financiero.FacturaRepository;
 import com.varcal.cheermanager.repository.Inventario.ProductoVarianteRepository;
 import com.varcal.cheermanager.repository.Inventario.VentaRepository;
@@ -39,6 +40,9 @@ public class VentaService {
     private FacturaRepository facturaRepository;
 
     @Autowired
+    private FacturaService facturaService;
+
+    @Autowired
     private MovimientoInventarioService movimientoInventarioService;
 
     // Se marca @Transactional porque una venta toca varias tablas (Venta,
@@ -46,7 +50,7 @@ public class VentaService {
     // — si falla a mitad de camino (ej. un ítem sin stock), nada debe quedar
     // guardado a medias.
     @Transactional
-    public Venta registrar(VentaDTO dto) {
+    public VentaResponseDTO registrar(VentaDTO dto) {
         validarComprador(dto);
 
         if (dto.getItems() == null || dto.getItems().isEmpty()) {
@@ -109,7 +113,31 @@ public class VentaService {
 
         venta.setTotal(total);
         venta.setDetalles(detalles);
-        return ventaRepository.save(venta); // cascade guarda los detalles
+        Venta guardada = ventaRepository.save(venta); // cascade guarda los detalles
+
+        // Si el comprador es un deportista del club (persona != null) y la
+        // venta no venía ya ligada a una factura existente (dto.getFacturaId()),
+        // se le genera una factura contable real — así toda venta a un
+        // miembro del club queda con soporte fiscal, sin importar si se pagó
+        // de contado o no. Los compradores externos (nombreCompradorExterno)
+        // nunca tienen Persona, así que nunca pueden tener Factura (el campo
+        // Factura.persona es obligatorio) — para ellos basta el comprobante
+        // imprimible que ya arma el frontend con los datos de la venta.
+        if (guardada.getPersona() != null && guardada.getFactura() == null) {
+            Factura factura = new Factura();
+            factura.setNumeroFactura(facturaService.generarNumeroFacturaVenta());
+            factura.setFechaEmision(guardada.getFecha());
+            factura.setPersona(guardada.getPersona());
+            factura.setDescripcion("Venta de tienda #" + guardada.getId()
+                    + " (" + detalles.size() + (detalles.size() == 1 ? " ítem)" : " ítems)"));
+            factura.setTotal(total);
+            Factura facturaGuardada = facturaRepository.save(factura);
+
+            guardada.setFactura(facturaGuardada);
+            guardada = ventaRepository.save(guardada);
+        }
+
+        return toResponseDTO(guardada);
     }
 
     public List<VentaResponseDTO> listarPorRango(LocalDate desde, LocalDate hasta) {
@@ -149,6 +177,7 @@ public class VentaService {
         dto.setTotal(v.getTotal());
         dto.setMetodoPago(v.getMetodoPago());
         dto.setFacturaId(v.getFactura() != null ? v.getFactura().getId() : null);
+        dto.setNumeroFactura(v.getFactura() != null ? v.getFactura().getNumeroFactura() : null);
 
         if (v.getPersona() != null) {
             dto.setPersonaId(v.getPersona().getId());

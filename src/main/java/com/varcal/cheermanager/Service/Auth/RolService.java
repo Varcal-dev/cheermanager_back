@@ -50,6 +50,10 @@ public class RolService {
         return rolRepository.findById(id)
                 .map(rol -> {
                     rol.setNombre(rolDetails.getNombre());
+                    // Antes solo se actualizaba el nombre — "Editar Rol" en
+                    // el front no tenía forma de guardar cambios en la
+                    // descripción aunque el formulario la mostrara.
+                    rol.setDescripcion(rolDetails.getDescripcion());
                     return rolRepository.save(rol);
                 })
                 .orElse(null);
@@ -60,13 +64,13 @@ public class RolService {
     }
 
     public Rol assignPermissionsToRol(Integer rolId, List<Integer> permisoIds) {
-    Rol rol = rolRepository.findById(rolId)
-        .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
+        Rol rol = rolRepository.findById(rolId)
+                .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
 
-    List<Permiso> permisos = permisoRepository.findAllById(permisoIds);
+        List<Permiso> permisos = permisoRepository.findAllById(permisoIds);
 
-    rol.setPermisos(new HashSet<>(permisos)); 
+        rol.setPermisos(new HashSet<>(permisos));
 
-    return rolRepository.save(rol);
-}
+        return rolRepository.save(rol);
+    }
 }

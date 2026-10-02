@@ -27,7 +27,7 @@ public interface DeportistaRepository extends JpaRepository<Deportista, Integer>
     List<Object[]> obtenerDeportistasConDetalles();
 
     @Query(value = "SELECT DISTINCT d.* FROM deportistas d " +
-            "LEFT JOIN estado_persona ep ON d.estado_id = ep.id " +
+            "LEFT JOIN estados_persona ep ON d.estado_id = ep.id " +
             "LEFT JOIN grupo_deportista gg ON d.id = gg.deportista_id " +
             "WHERE (:estadoId IS NULL OR d.estado_id = :estadoId) " +
             "AND (:nivelId IS NULL OR d.nivel_actual_id = :nivelId) " +

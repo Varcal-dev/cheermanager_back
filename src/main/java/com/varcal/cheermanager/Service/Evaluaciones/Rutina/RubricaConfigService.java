@@ -120,6 +120,13 @@ public class RubricaConfigService {
         return topeDriverRepo.save(tope);
     }
 
+    // Sin @Transactional: es solo lectura, usado por el formulario de
+    // captura para mostrar los valores máximos de cada driver (Grado de
+    // Dificultad / Participación Máxima) como guía mientras se digita.
+    public TopeDriverNivel obtenerTopeDriver(Integer driverId, Integer nivelId) {
+        return topeDriverRepo.findByDriverIdAndNivelId(driverId, nivelId).orElse(null);
+    }
+
     @Transactional
     public EscalonDriverNivel guardarEscalonDriver(EscalonDriverNivel escalon) {
         return escalonDriverRepo.save(escalon);

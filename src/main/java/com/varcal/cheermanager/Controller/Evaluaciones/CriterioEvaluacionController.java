@@ -25,13 +25,13 @@ public class CriterioEvaluacionController {
     private CriterioEvaluacionService criterioEvaluacionService;
 
     @GetMapping
-    @RequiresPermission("ver_evaluaciones")
+    @RequiresPermission("ver_evaluacion")
     public ResponseEntity<List<CriterioEvaluacionResponseDTO>> listar() {
         return ResponseEntity.ok(criterioEvaluacionService.listar());
     }
 
     @GetMapping("/categoria/{categoriaId}")
-    @RequiresPermission("ver_evaluaciones")
+    @RequiresPermission("ver_evaluacion")
     public ResponseEntity<List<CriterioEvaluacionResponseDTO>> listarPorCategoria(
             @PathVariable Integer categoriaId) {
         return ResponseEntity.ok(criterioEvaluacionService.listarPorCategoria(categoriaId));

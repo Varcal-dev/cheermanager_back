@@ -38,14 +38,28 @@ public class EvaluacionRutinaController {
         }
     }
 
+    // Corre el mismo cálculo que registrar() pero no guarda nada — para que
+    // quien está digitando desde papel pueda ver el desglose (incluyendo el
+    // detalleCalculo de cada sub-criterio) y confirmar que cuadra con la
+    // hoja antes de decidir guardar.
+    @PostMapping("/preview")
+    @RequiresPermission("crear_evaluacion_rutina")
+    public ResponseEntity<?> previsualizar(@RequestBody EvaluacionRutinaDTO dto) {
+        try {
+            return ResponseEntity.ok(evaluacionRutinaService.previsualizar(dto));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(400).body(e.getMessage());
+        }
+    }
+
     @GetMapping("/grupo/{grupoId}")
-    @RequiresPermission("ver_evaluaciones")
+    @RequiresPermission("ver_evaluacion")
     public ResponseEntity<List<EvaluacionRutinaResponseDTO>> listarPorGrupo(@PathVariable Integer grupoId) {
         return ResponseEntity.ok(evaluacionRutinaService.listarPorGrupo(grupoId));
     }
 
     @GetMapping("/{id}")
-    @RequiresPermission("ver_evaluaciones")
+    @RequiresPermission("ver_evaluacion")
     public ResponseEntity<?> obtener(@PathVariable Integer id) {
         try {
             return ResponseEntity.ok(evaluacionRutinaService.obtenerPorId(id));

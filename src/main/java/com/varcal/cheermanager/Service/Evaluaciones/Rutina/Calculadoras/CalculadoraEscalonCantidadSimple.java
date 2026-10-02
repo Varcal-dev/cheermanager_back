@@ -85,6 +85,7 @@ public class CalculadoraEscalonCantidadSimple implements CalculadoraSubCriterio 
         registro.setPuntajeBase(puntajeBase);
         registro.setPuntajeDrivers(BigDecimal.ZERO);
         registro.setPuntajeFinal(puntajeBase.setScale(2, RoundingMode.HALF_UP));
+        registro.setDetalleCalculo(detalleEscalon);
         return registro;
     }
 

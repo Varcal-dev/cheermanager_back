@@ -24,7 +24,10 @@ import com.varcal.cheermanager.DTO.Org_dep.GrupoConDeportistasDTO;
 import com.varcal.cheermanager.DTO.Org_dep.GrupoEntrenamientoDTO;
 import com.varcal.cheermanager.DTO.Persona.AgregarDeportistaRequest;
 import com.varcal.cheermanager.DTO.Persona.AsignacionEntrenadorDTO;
+import com.varcal.cheermanager.DTO.Persona.AsignacionEntrenadorResponseDTO;
+import com.varcal.cheermanager.DTO.Persona.AsignacionEntrenadorUpdateDTO;
 import com.varcal.cheermanager.DTO.Persona.DeportistaDTO;
+import com.varcal.cheermanager.DTO.Persona.HorarioEntrenadorResponseDTO;
 import com.varcal.cheermanager.Models.Org_dep.CategoriaNivel;
 import com.varcal.cheermanager.Models.Org_dep.GrupoEntrenamiento;
 import com.varcal.cheermanager.Models.Org_dep.TipoGrupo;
@@ -209,6 +212,48 @@ public class GrupoEntrenamientoController {
         try {
             String respuesta = grupoEntrenamientoService.asignarEntrenadorAGrupo(dto);
             return ResponseEntity.ok(respuesta);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    // ===== Historial de asignaciones entrenador-grupo =====
+    // (panel "Historial de Asignación a Grupos" en entrenadores/page.tsx)
+
+    @GetMapping("/entrenadores/{entrenadorId}/asignaciones")
+    public ResponseEntity<List<AsignacionEntrenadorResponseDTO>> listarAsignacionesDeEntrenador(
+            @PathVariable Integer entrenadorId) {
+        return ResponseEntity.ok(grupoEntrenamientoService.listarAsignacionesPorEntrenador(entrenadorId));
+    }
+
+    // Panel "Horarios" en entrenadores/page.tsx — ver el comentario en
+    // GrupoEntrenamientoService.listarHorarioPorEntrenador() para el porqué
+    // no es una entidad propia.
+    @GetMapping("/entrenadores/{entrenadorId}/horario")
+    public ResponseEntity<List<HorarioEntrenadorResponseDTO>> listarHorarioDeEntrenador(
+            @PathVariable Integer entrenadorId) {
+        return ResponseEntity.ok(grupoEntrenamientoService.listarHorarioPorEntrenador(entrenadorId));
+    }
+
+    @PutMapping("/asignaciones-entrenador/{asignacionId}")
+    public ResponseEntity<?> actualizarAsignacionEntrenador(
+            @PathVariable Integer asignacionId,
+            @RequestBody AsignacionEntrenadorUpdateDTO dto) {
+        try {
+            return ResponseEntity.ok(grupoEntrenamientoService.actualizarAsignacionEntrenador(asignacionId, dto));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    // No borra el registro — cierra la asignación con fechaFin = hoy, igual
+    // que /grupoId/deportistas/deportistaId. Conserva el historial de quién
+    // entrenó a quién y cuándo.
+    @DeleteMapping("/asignaciones-entrenador/{asignacionId}")
+    public ResponseEntity<?> finalizarAsignacionEntrenador(@PathVariable Integer asignacionId) {
+        try {
+            String resultado = grupoEntrenamientoService.finalizarAsignacionEntrenador(asignacionId);
+            return ResponseEntity.ok(resultado);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

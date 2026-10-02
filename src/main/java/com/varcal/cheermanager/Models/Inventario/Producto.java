@@ -44,6 +44,15 @@ public class Producto {
     @Column(name = "precio_max_referencia", precision = 10, scale = 2)
     private BigDecimal precioMaxReferencia;
 
+    // NOTA: existía un campo "cantidadStock" acá que duplicaba la info de
+    // stock, pero nunca lo tocaba ni la venta ni MovimientoInventarioService
+    // (el stock real vive solo en ProductoVariante.stockActual, ver arriba).
+    // Se quitó el mapeo porque daba una falsa sensación de estar fijando el
+    // stock inicial desde el formulario de producto. La columna
+    // "cantidad_stock" puede seguir existiendo en la BD (ddl-auto=update no
+    // la borra sola) — si quieres limpiarla del todo, hazlo con una
+    // migración manual: ALTER TABLE productos DROP COLUMN cantidad_stock.
+
     @Column(name = "origen")
     private String origen; // ej. "Medellín", "Bogotá", "Interno"
 

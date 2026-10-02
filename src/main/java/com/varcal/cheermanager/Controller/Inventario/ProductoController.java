@@ -21,8 +21,9 @@ public class ProductoController {
 
     @GetMapping
     @RequiresPermission("ver_producto")
-    public ResponseEntity<List<ProductoResponseDTO>> listar() {
-        return ResponseEntity.ok(productoService.listarTodos());
+    public ResponseEntity<List<ProductoResponseDTO>> listar(
+            @RequestParam(required = false) String q) {
+        return ResponseEntity.ok(productoService.listarTodos(q));
     }
 
     @GetMapping("/activos")

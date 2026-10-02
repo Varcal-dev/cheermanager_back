@@ -11,6 +11,7 @@ import com.varcal.cheermanager.repository.Personas.PersonaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -68,6 +69,38 @@ public class HistorialMedicoService {
         return page.map(this::convertToDTO);
     }
 
+    // Vista de club completo (todas las personas a la vez), con filtros
+    // combinables. Antes no existía ninguna forma de listar más allá de "por
+    // persona" — la página /historial-medico del front vivía enteramente de
+    // datos de ejemplo por esto.
+    public Page<HistorialMedicoDTO> listarTodos(String tipoRegistro, String gravedad, String q,
+            LocalDate desde, LocalDate hasta, Pageable pageable) {
+
+        Specification<HistorialMedico> spec = Specification.where(null);
+
+        if (tipoRegistro != null && !tipoRegistro.isBlank()) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("tipoRegistro"), tipoRegistro));
+        }
+        if (gravedad != null && !gravedad.isBlank()) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("gravedad"), gravedad));
+        }
+        if (desde != null) {
+            spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("fechaRegistro"), desde));
+        }
+        if (hasta != null) {
+            spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("fechaRegistro"), hasta));
+        }
+        if (q != null && !q.isBlank()) {
+            String like = "%" + q.toLowerCase() + "%";
+            spec = spec.and((root, query, cb) -> cb.or(
+                    cb.like(cb.lower(root.get("persona").get("nombre")), like),
+                    cb.like(cb.lower(root.get("persona").get("apellidos")), like),
+                    cb.like(cb.lower(root.get("descripcion")), like)));
+        }
+
+        return historialMedicoRepository.findAll(spec, pageable).map(this::convertToDTO);
+    }
+
     public Optional<HistorialMedicoDTO> obtenerHistorialMedicoPorId(Integer id) {
         return historialMedicoRepository.findById(id).map(this::convertToDTO);
     }
@@ -97,6 +130,8 @@ public class HistorialMedicoService {
         HistorialMedicoDTO dto = new HistorialMedicoDTO();
         dto.setId(historial.getId());
         dto.setPersonaId(historial.getPersona().getId());
+        dto.setPersonaNombre(historial.getPersona().getNombre());
+        dto.setPersonaApellidos(historial.getPersona().getApellidos());
         dto.setDescripcion(historial.getDescripcion());
         dto.setFechaRegistro(historial.getFechaRegistro());
         dto.setTipoRegistro(historial.getTipoRegistro());

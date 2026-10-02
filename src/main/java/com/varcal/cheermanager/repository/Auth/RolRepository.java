@@ -9,16 +9,22 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
 import com.varcal.cheermanager.Models.Auth.Rol;
-import com.varcal.cheermanager.Models.Personas.Persona;
 
 @Repository
 public interface RolRepository extends JpaRepository<Rol, Integer> {
 
-    //Optional<Rol> findById(Rol rol2);
-   @NonNull
+    // Optional<Rol> findById(Rol rol2);
+    @NonNull
     Optional<Rol> findById(Integer id);
 
-    @Query(value = "SELECT * FROM vista_roles_usuarios", nativeQuery = true)
+    @Query(value = "SELECT \n" + //
+            "        `r`.`id` AS `id`,\n" + //
+            "        `r`.`nombre` AS `nombre`,\n" + //
+            "        COUNT(`u`.`id`) AS `usuarios`\n" + //
+            "    FROM\n" + //
+            "        `cheermanager_db`.`roles` `r`\n" + //
+            "        LEFT JOIN `cheermanager_db`.`usuarios` `u` ON `r`.`id` = `u`.`rol_id`\n" + //
+            "    GROUP BY `r`.`id`, `r`.`nombre`", nativeQuery = true)
     List<Object[]> listarRolesConConteo();
 
     Optional<Rol> findByNombre(String nombre);

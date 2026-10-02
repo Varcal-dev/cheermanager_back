@@ -33,7 +33,7 @@ public class RubricaConfigController {
 
     // ── Niveles ──────────────────────────────────────────────────────────────
     @GetMapping("/niveles")
-    @RequiresPermission("ver_evaluaciones")
+    @RequiresPermission("ver_evaluacion")
     public ResponseEntity<List<NivelCompetencia>> listarNiveles() {
         return ResponseEntity.ok(configService.listarNiveles());
     }
@@ -60,7 +60,7 @@ public class RubricaConfigController {
 
     // ── Sub-criterios ────────────────────────────────────────────────────────
     @GetMapping("/sub-criterios")
-    @RequiresPermission("ver_evaluaciones")
+    @RequiresPermission("ver_evaluacion")
     public ResponseEntity<List<SubCriterioRubrica>> listarSubCriterios() {
         return ResponseEntity.ok(configService.listarSubCriterios());
     }
@@ -73,7 +73,7 @@ public class RubricaConfigController {
 
     // ── Tablas de cantidad ───────────────────────────────────────────────────
     @GetMapping("/tabla-cantidad/{nivelId}")
-    @RequiresPermission("ver_evaluaciones")
+    @RequiresPermission("ver_evaluacion")
     public ResponseEntity<List<TablaCantidadNivel>> listarTablaCantidad(@PathVariable Integer nivelId) {
         return ResponseEntity.ok(configService.listarTablaCantidad(nivelId));
     }
@@ -108,7 +108,7 @@ public class RubricaConfigController {
 
     // ── Topes de sección ─────────────────────────────────────────────────────
     @GetMapping("/topes-seccion")
-    @RequiresPermission("ver_evaluaciones")
+    @RequiresPermission("ver_evaluacion")
     public ResponseEntity<List<TopeSeccionNivel>> listarTopesSeccion(
             @RequestParam Integer nivelId, @RequestParam Integer subCriterioId) {
         return ResponseEntity.ok(configService.listarTopesSeccion(nivelId, subCriterioId));
@@ -144,7 +144,7 @@ public class RubricaConfigController {
 
     // ── Drivers ──────────────────────────────────────────────────────────────
     @GetMapping("/drivers/{subCriterioId}")
-    @RequiresPermission("ver_evaluaciones")
+    @RequiresPermission("ver_evaluacion")
     public ResponseEntity<List<DriverSubCriterio>> listarDrivers(@PathVariable Integer subCriterioId) {
         return ResponseEntity.ok(configService.listarDrivers(subCriterioId));
     }
@@ -153,6 +153,14 @@ public class RubricaConfigController {
     @RequiresPermission("configurar_rubrica")
     public ResponseEntity<?> crearDriver(@RequestBody DriverSubCriterio driver) {
         return ResponseEntity.status(201).body(configService.guardarDriver(driver));
+    }
+
+    @GetMapping("/topes-driver")
+    @RequiresPermission("ver_evaluacion")
+    public ResponseEntity<TopeDriverNivel> obtenerTopeDriver(
+            @RequestParam Integer driverId, @RequestParam Integer nivelId) {
+        TopeDriverNivel tope = configService.obtenerTopeDriver(driverId, nivelId);
+        return tope != null ? ResponseEntity.ok(tope) : ResponseEntity.noContent().build();
     }
 
     @PostMapping("/topes-driver")
@@ -169,7 +177,7 @@ public class RubricaConfigController {
     }
 
     @GetMapping("/escalones-driver")
-    @RequiresPermission("ver_evaluaciones")
+    @RequiresPermission("ver_evaluacion")
     public ResponseEntity<List<EscalonDriverNivel>> listarEscalonesDriver(
             @RequestParam Integer driverId, @RequestParam Integer nivelId) {
         return ResponseEntity.ok(configService.listarEscalonesDriver(driverId, nivelId));

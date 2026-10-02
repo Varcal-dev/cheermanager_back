@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.varcal.cheermanager.DTO.Inventario.ProductoDTO;
 import com.varcal.cheermanager.DTO.Inventario.ProductoResponseDTO;
+import com.varcal.cheermanager.DTO.Inventario.ProductoVarianteDTO;
 import com.varcal.cheermanager.DTO.Inventario.ProductoVarianteResponseDTO;
 import com.varcal.cheermanager.Models.Inventario.CategoriaProducto;
 import com.varcal.cheermanager.Models.Inventario.Producto;
@@ -24,8 +25,21 @@ public class ProductoService {
     @Autowired
     private CategoriaProductoRepository categoriaProductoRepository;
 
+    @Autowired
+    private ProductoVarianteService productoVarianteService;
+
     public List<ProductoResponseDTO> listarTodos() {
         return productoRepository.findAll().stream().map(this::toResponseDTO).collect(Collectors.toList());
+    }
+
+    // Sobrecarga con búsqueda: si "q" viene vacío/nulo se comporta exactamente
+    // igual que listarTodos() (compatibilidad con quien ya llame al método
+    // original). Si trae texto, filtra en la BD por nombre, SKU o categoría.
+    public List<ProductoResponseDTO> listarTodos(String q) {
+        if (q == null || q.isBlank()) {
+            return listarTodos();
+        }
+        return productoRepository.buscar(q.trim()).stream().map(this::toResponseDTO).collect(Collectors.toList());
     }
 
     public List<ProductoResponseDTO> listarActivos() {
@@ -50,7 +64,37 @@ public class ProductoService {
         Producto producto = new Producto();
         producto.setSku(sku);
         aplicarDatos(producto, dto, categoria);
-        return productoRepository.save(producto);
+        producto = productoRepository.save(producto);
+
+        // Todo producto, aunque sea "talla única" (ej. sticker pack), debe
+        // tener al menos UNA ProductoVariante — es el único lugar donde vive
+        // el stock real (ver comentario en ProductoVariante.java). Sin esto,
+        // el producto no aparece para venta (ver ventas/page.tsx) y no
+        // muestra stock en el listado hasta que alguien entre manualmente a
+        // crearle una variante.
+        //
+        // Solo se puede auto-crear si hay un precio de referencia con qué
+        // arrancar (precioVenta es obligatorio en ProductoVariante). Si el
+        // producto se creó sin ningún precio de referencia, se deja sin
+        // variante — el usuario tendrá que crear la primera manualmente
+        // desde el detalle del producto e indicar el precio de venta real.
+        java.math.BigDecimal precioInicial = dto.getPrecioMaxReferencia() != null
+                ? dto.getPrecioMaxReferencia()
+                : dto.getPrecioMinReferencia();
+
+        if (precioInicial != null) {
+            ProductoVarianteDTO varianteDto = new ProductoVarianteDTO();
+            varianteDto.setProductoId(producto.getId());
+            varianteDto.setTalla(null);
+            varianteDto.setColor(null);
+            varianteDto.setPrecioVenta(precioInicial);
+            varianteDto.setStockInicial(0);
+            productoVarianteService.crear(varianteDto);
+        }
+
+        // Se vuelve a leer para que la respuesta (y cualquier toResponseDTO
+        // posterior) incluya la variante recién creada.
+        return buscarOFallar(producto.getId());
     }
 
     public Producto actualizar(Integer id, ProductoDTO dto) {

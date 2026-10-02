@@ -96,7 +96,13 @@ public class DashboardHorariosService {
             if (porcentaje < UMBRAL_RIESGO) {
                 DeportistaEnRiesgoDTO item = new DeportistaEnRiesgoDTO();
                 item.setDeportistaId(d.getId());
-                item.setNombreCompleto(d.getPersona().getNombre() + " " + d.getPersona().getApellidos());
+                // Defensivo: un deportista con persona_id huérfano no debería
+                // tumbar todo el dashboard con un NPE, solo mostrarse como
+                // "Sin datos" para que se note y se corrija en Personas.
+                item.setNombreCompleto(
+                        d.getPersona() != null
+                                ? d.getPersona().getNombre() + " " + d.getPersona().getApellidos()
+                                : "(sin datos de persona)");
                 item.setPorcentaje(redondear(porcentaje));
                 enRiesgo.add(item);
             }

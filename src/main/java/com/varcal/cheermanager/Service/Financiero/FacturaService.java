@@ -1,5 +1,6 @@
 package com.varcal.cheermanager.Service.Financiero;
 
+import java.time.Year;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -61,6 +62,31 @@ public class FacturaService {
 
     public void eliminar(Integer id) {
         facturaRepository.deleteById(id);
+    }
+
+    // Extraído de InscripcionService (que tenía su propia copia privada de
+    // este mismo algoritmo) para que cualquier otro flujo que genere
+    // facturas automáticamente — como VentaService al facturarle una venta
+    // a un deportista del club — pueda reusar la misma convención de
+    // numeración sin duplicar la lógica. Recibe el prefijo completo (ej.
+    // "FAC-2026-" para inscripciones/mensualidades, "FAC-VTA-2026-" para
+    // ventas de tienda) para que las dos series nunca choquen entre sí.
+    public String generarNumeroFactura(String prefijo) {
+        long siguiente = facturaRepository.countByNumeroFacturaStartingWith(prefijo) + 1;
+
+        String numero;
+        do {
+            numero = prefijo + String.format("%04d", siguiente);
+            siguiente++;
+        } while (facturaRepository.findByNumeroFactura(numero).isPresent());
+
+        return numero;
+    }
+
+    // Atajo con el prefijo por defecto ("FAC-VTA-<año>-") para las ventas de
+    // tienda que se facturan automáticamente a un deportista del club.
+    public String generarNumeroFacturaVenta() {
+        return generarNumeroFactura("FAC-VTA-" + Year.now().getValue() + "-");
     }
 
     // ---------- Métodos usados por los Controllers (devuelven DTO plano) ----------

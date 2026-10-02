@@ -7,12 +7,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.varcal.cheermanager.Models.Financiero.Descuento;
+import com.varcal.cheermanager.repository.Financiero.ConvenioRepository;
 import com.varcal.cheermanager.repository.Financiero.DescuentoRepository;
 
 @Service
 public class DescuentoService {
     @Autowired
     private DescuentoRepository repository;
+
+    @Autowired
+    private ConvenioRepository convenioRepository;
 
     public List<Descuento> obtenerTodos() {
         return repository.findAll();
@@ -39,10 +43,22 @@ public class DescuentoService {
     }
 
     public boolean eliminar(Integer id) {
-        if (repository.existsById(id)) {
-            repository.deleteById(id);
-            return true;
+        if (!repository.existsById(id)) {
+            return false;
         }
-        return false;
+
+        // Antes esto dejaba que MySQL rechazara el DELETE por la FK
+        // convenios.descuento_id, lo que Spring traduce en un 500 genérico
+        // de integridad de datos sin mensaje útil. Validamos acá primero
+        // para devolver un mensaje claro que el frontend ya sabe mostrar
+        // en un toast. Si el descuento está en uso, lo correcto es
+        // desactivarlo (activo=false vía actualizar), no borrarlo.
+        if (convenioRepository.existsByDescuentoId(id)) {
+            throw new RuntimeException(
+                    "No se puede eliminar: este descuento está en uso por al menos un convenio. Desactívalo en su lugar.");
+        }
+
+        repository.deleteById(id);
+        return true;
     }
 }

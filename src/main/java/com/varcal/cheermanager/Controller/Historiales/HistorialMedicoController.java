@@ -6,9 +6,11 @@ import com.varcal.cheermanager.Utils.RequiresPermission;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.Map;
 
 @RestController
@@ -17,6 +19,21 @@ public class HistorialMedicoController {
 
     @Autowired
     private HistorialMedicoService historialMedicoService;
+
+    // Vista de club completo: todos los registros, con filtros combinables.
+    // Alimenta la página /historial-medico (antes 100% mock).
+    @GetMapping
+    @RequiresPermission("ver_historial_medico")
+    public ResponseEntity<Page<HistorialMedicoDTO>> listarTodos(
+            @RequestParam(required = false) String tipoRegistro,
+            @RequestParam(required = false) String gravedad,
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta,
+            Pageable pageable) {
+        return ResponseEntity.ok(
+                historialMedicoService.listarTodos(tipoRegistro, gravedad, q, desde, hasta, pageable));
+    }
 
     @PostMapping
     @RequiresPermission("crear_historial_medico")

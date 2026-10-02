@@ -119,6 +119,11 @@ public class CalculadoraEscalonHabilidadesGrupos implements CalculadoraSubCriter
         registro.setPuntajeFinal(puntajeBase.add(puntajeDrivers).setScale(2, RoundingMode.HALF_UP));
         registro.setRegistrosDriver(construirRegistrosDriver(dto, registro));
 
+        String detalleDrivers = puntajeDrivers.compareTo(BigDecimal.ZERO) > 0
+                ? String.format(" + %.2f de drivers (Grado de Dificultad / Participación Máxima)", puntajeDrivers)
+                : "";
+        registro.setDetalleCalculo(detalleEscalon + detalleDrivers);
+
         return registro;
     }
 
