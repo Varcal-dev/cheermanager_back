@@ -1,5 +1,8 @@
 package com.varcal.cheermanager.Controller.Org_dep;
 
+import com.varcal.cheermanager.Utils.RequiresPermission;
+import com.varcal.cheermanager.Utils.SinPermisoEspecifico;
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,11 +28,13 @@ public class TipoGrupoController {
     private TipoGrupoService tipoGrupoService;
 
     @GetMapping
+    @SinPermisoEspecifico("catalogo de lectura")
     public List<TipoGrupo> listarTodos() {
         return tipoGrupoService.obtenerTodos();
     }
 
     @GetMapping("/{id}")
+    @SinPermisoEspecifico("catalogo de lectura")
     public ResponseEntity<?> obtener(@PathVariable Integer id) {
         try {
             return ResponseEntity.ok(tipoGrupoService.obtenerPorId(id));
@@ -39,11 +44,13 @@ public class TipoGrupoController {
     }
 
     @PostMapping
+    @RequiresPermission("gestionar_catalogos")
     public ResponseEntity<TipoGrupo> crear(@RequestBody TipoGrupo tipoGrupo) {
         return ResponseEntity.status(HttpStatus.CREATED).body(tipoGrupoService.crear(tipoGrupo));
     }
 
     @PutMapping("/{id}")
+    @RequiresPermission("gestionar_catalogos")
     public ResponseEntity<?> actualizar(@PathVariable Integer id, @RequestBody TipoGrupo tipoGrupo) {
         try {
             return ResponseEntity.ok(tipoGrupoService.actualizar(id, tipoGrupo));
@@ -53,6 +60,7 @@ public class TipoGrupoController {
     }
 
     @DeleteMapping("/{id}")
+    @RequiresPermission("gestionar_catalogos")
     public ResponseEntity<?> eliminar(@PathVariable Integer id) {
         try {
             tipoGrupoService.eliminar(id);

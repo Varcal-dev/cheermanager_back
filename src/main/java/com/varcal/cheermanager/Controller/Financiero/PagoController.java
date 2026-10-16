@@ -1,5 +1,7 @@
 package com.varcal.cheermanager.Controller.Financiero;
 
+import com.varcal.cheermanager.Utils.RequiresPermission;
+
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -30,35 +32,41 @@ public class PagoController {
     }
 
     @PostMapping
+    @RequiresPermission("registrar_pago")
     public ResponseEntity<PagoResponseDTO> registrar(@RequestBody PagoDTO dto) {
         PagoResponseDTO pago = pagoService.registrarPago(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(pago);
     }
 
     @GetMapping
+    @RequiresPermission("ver_pago")
     public List<PagoResponseDTO> listar() {
         return pagoService.listar();
     }
 
     @GetMapping("/{id}")
+    @RequiresPermission("ver_pago")
     public ResponseEntity<PagoResponseDTO> obtener(@PathVariable Integer id) {
         return ResponseEntity.ok(pagoService.obtenerPorId(id));
     }
 
     // Historial de pagos de una factura específica (ej. pagos parciales de una mensualidad)
     @GetMapping("/factura/{facturaId}")
+    @RequiresPermission("ver_pago")
     public ResponseEntity<List<PagoResponseDTO>> listarPorFactura(@PathVariable Integer facturaId) {
         return ResponseEntity.ok(pagoService.listarPorFactura(facturaId));
     }
 
     // Historial financiero de una persona (todas sus facturas, todos sus pagos)
     @GetMapping("/persona/{personaId}")
+    @RequiresPermission("ver_pago")
     public ResponseEntity<List<PagoResponseDTO>> listarPorPersona(@PathVariable Integer personaId) {
         return ResponseEntity.ok(pagoService.listarPorPersona(personaId));
     }
 
     // Cuánto le falta pagar a una factura en este momento
     @GetMapping("/factura/{facturaId}/saldo")
+    @RequiresPermission("ver_pago")
     public ResponseEntity<Map<String, Object>> saldoPendiente(@PathVariable Integer facturaId) {
         BigDecimal saldo = pagoService.calcularSaldoPendiente(facturaId);
         return ResponseEntity.ok(Map.of("facturaId", facturaId, "saldoPendiente", saldo));
@@ -67,12 +75,14 @@ public class PagoController {
     // Cambiar el estado de un pago ya registrado (ej. de "Pendiente" a "Pagado"
     // cuando se confirma una transferencia)
     @PatchMapping("/{id}/estado")
+    @RequiresPermission("modificar_pago")
     public ResponseEntity<PagoResponseDTO> actualizarEstado(@PathVariable Integer id, @RequestBody Map<String, String> body) {
         String nuevoEstado = body.get("estado");
         return ResponseEntity.ok(pagoService.actualizarEstado(id, nuevoEstado));
     }
 
     @DeleteMapping("/{id}")
+    @RequiresPermission("eliminar_pago")
     public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
         pagoService.eliminar(id);
         return ResponseEntity.noContent().build();

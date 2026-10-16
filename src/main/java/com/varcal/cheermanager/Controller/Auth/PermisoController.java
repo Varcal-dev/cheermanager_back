@@ -1,5 +1,7 @@
 package com.varcal.cheermanager.Controller.Auth;
 
+import com.varcal.cheermanager.Utils.RequiresPermission;
+
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,23 +26,27 @@ public class PermisoController {
     private PermisoService permisoService;
 
     @GetMapping("/listar")
+    @RequiresPermission("ver_permisos")
     public ResponseEntity<Object> listarPermisos() {
         return ResponseEntity.ok(permisoService.listar());
     }
 
     @GetMapping("/{id}")
+    @RequiresPermission("ver_permisos")
     public ResponseEntity<Permiso> obtenerPermisoPorId(@PathVariable Integer id) {
         Optional<Permiso> permiso = permisoService.obtenerPorId(id);
         return permiso.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
+    @RequiresPermission("gestionar_roles")
     public ResponseEntity<Permiso> crearPermiso(@RequestBody Permiso permiso) {
         Permiso nuevoPermiso = permisoService.guardar(permiso);
         return ResponseEntity.ok(nuevoPermiso);
     }
 
     @PutMapping("/{id}")
+    @RequiresPermission("gestionar_roles")
     public ResponseEntity<Permiso> actualizarPermiso(@PathVariable Integer id, @RequestBody Permiso permiso) {
         Optional<Permiso> permisoExistente = permisoService.obtenerPorId(id);
         if (permisoExistente.isPresent()) {
@@ -53,6 +59,7 @@ public class PermisoController {
     }
 
     @DeleteMapping("/{id}")
+    @RequiresPermission("gestionar_roles")
     public ResponseEntity<Void> eliminarPermiso(@PathVariable Integer id) {
         if (permisoService.obtenerPorId(id).isPresent()) {
             permisoService.eliminar(id);

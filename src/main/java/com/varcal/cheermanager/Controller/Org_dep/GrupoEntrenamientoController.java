@@ -1,5 +1,7 @@
 package com.varcal.cheermanager.Controller.Org_dep;
 
+import com.varcal.cheermanager.Utils.RequiresPermission;
+
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -51,11 +53,13 @@ public class GrupoEntrenamientoController {
     private GrupoEntrenamientoService grupoEntrenamientoService;
 
     @GetMapping
+    @RequiresPermission("ver_grupo")
     public List<GrupoEntrenamiento> listar() {
         return grupoRepo.findAll();
     }
 
     @GetMapping("/{id}")
+    @RequiresPermission("ver_grupo")
     public ResponseEntity<GrupoEntrenamiento> obtener(@PathVariable Integer id) {
         return grupoRepo.findById(id)
                 .map(ResponseEntity::ok)
@@ -63,6 +67,7 @@ public class GrupoEntrenamientoController {
     }
 
     @PostMapping
+    @RequiresPermission("crear_grupo")
     public ResponseEntity<?> crear(@RequestBody GrupoEntrenamientoDTO dto) {
         Optional<TipoGrupo> tipo = tipoGrupoRepo.findById(dto.getTipoGrupoId());
         Optional<CategoriaNivel> categoria = categoriaNivelRepo.findById(dto.getCategoriaNivelId());
@@ -80,6 +85,7 @@ public class GrupoEntrenamientoController {
     }
 
     @PutMapping("/{id}")
+    @RequiresPermission("modificar_grupo")
     public ResponseEntity<?> actualizar(@PathVariable Integer id, @RequestBody GrupoEntrenamientoDTO dto) {
         Optional<GrupoEntrenamiento> grupoOpt = grupoRepo.findById(id);
         Optional<TipoGrupo> tipo = tipoGrupoRepo.findById(dto.getTipoGrupoId());
@@ -102,6 +108,7 @@ public class GrupoEntrenamientoController {
     }
 
     @DeleteMapping("/{id}")
+    @RequiresPermission("eliminar_grupo")
     public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
         if (!grupoRepo.existsById(id))
             return ResponseEntity.notFound().build();
@@ -110,6 +117,7 @@ public class GrupoEntrenamientoController {
     }
 
     @GetMapping("/con-deportistas")
+    @RequiresPermission("ver_grupo")
     public List<GrupoConDeportistasDTO> getGruposConDeportistas() {
         List<GrupoEntrenamiento> grupos = grupoRepo.findAll();
 
@@ -152,6 +160,7 @@ public class GrupoEntrenamientoController {
     // ya lo consume), pero el modal de asignación en /grupos ya no lo usa:
     // ver /candidatos, que resuelve la lista completa en una sola llamada.
     @GetMapping("/{grupoId}/verificar-elegibilidad")
+    @RequiresPermission("ver_grupo")
     public ResponseEntity<Map<String, String>> verificarElegibilidad(
             @PathVariable Integer grupoId,
             @RequestParam("deportistaId") Integer deportistaId) {
@@ -169,6 +178,7 @@ public class GrupoEntrenamientoController {
     // elegibles para este grupo y quiénes no, con motivo y el cupo del
     // grupo ya calculado.
     @GetMapping("/{grupoId}/candidatos")
+    @RequiresPermission("ver_grupo")
     public ResponseEntity<?> obtenerCandidatos(@PathVariable Integer grupoId) {
         try {
             CandidatosGrupoResponseDTO candidatos = grupoEntrenamientoService.obtenerCandidatosGrupo(grupoId);
@@ -179,6 +189,7 @@ public class GrupoEntrenamientoController {
     }
 
     @PostMapping("/{grupoId}/agregar-deportistas")
+    @RequiresPermission("modificar_grupo")
     public ResponseEntity<?> agregarDeportistaAGrupo(
             @PathVariable Integer grupoId,
             @RequestBody AgregarDeportistaRequest request) {
@@ -195,6 +206,7 @@ public class GrupoEntrenamientoController {
     // hoy). No la borra: conserva el historial y libera al deportista para
     // que vuelva a aparecer como candidato de cualquier grupo.
     @DeleteMapping("/{grupoId}/deportistas/{deportistaId}")
+    @RequiresPermission("modificar_grupo")
     public ResponseEntity<?> quitarDeportista(@PathVariable Integer grupoId, @PathVariable Integer deportistaId) {
         try {
             String resultado = grupoEntrenamientoService.quitarDeportistaDeGrupo(grupoId, deportistaId);
@@ -205,6 +217,7 @@ public class GrupoEntrenamientoController {
     }
 
     @PostMapping("/{grupoId}/asignar-entrenadores")
+    @RequiresPermission("modificar_grupo")
     public ResponseEntity<?> asignarEntrenadorAGrupo(
             @PathVariable int grupoId,
             @RequestBody AsignacionEntrenadorDTO dto) {
@@ -221,6 +234,7 @@ public class GrupoEntrenamientoController {
     // (panel "Historial de Asignación a Grupos" en entrenadores/page.tsx)
 
     @GetMapping("/entrenadores/{entrenadorId}/asignaciones")
+    @RequiresPermission("ver_grupo")
     public ResponseEntity<List<AsignacionEntrenadorResponseDTO>> listarAsignacionesDeEntrenador(
             @PathVariable Integer entrenadorId) {
         return ResponseEntity.ok(grupoEntrenamientoService.listarAsignacionesPorEntrenador(entrenadorId));
@@ -230,12 +244,14 @@ public class GrupoEntrenamientoController {
     // GrupoEntrenamientoService.listarHorarioPorEntrenador() para el porqué
     // no es una entidad propia.
     @GetMapping("/entrenadores/{entrenadorId}/horario")
+    @RequiresPermission("ver_grupo")
     public ResponseEntity<List<HorarioEntrenadorResponseDTO>> listarHorarioDeEntrenador(
             @PathVariable Integer entrenadorId) {
         return ResponseEntity.ok(grupoEntrenamientoService.listarHorarioPorEntrenador(entrenadorId));
     }
 
     @PutMapping("/asignaciones-entrenador/{asignacionId}")
+    @RequiresPermission("modificar_grupo")
     public ResponseEntity<?> actualizarAsignacionEntrenador(
             @PathVariable Integer asignacionId,
             @RequestBody AsignacionEntrenadorUpdateDTO dto) {
@@ -250,6 +266,7 @@ public class GrupoEntrenamientoController {
     // que /grupoId/deportistas/deportistaId. Conserva el historial de quién
     // entrenó a quién y cuándo.
     @DeleteMapping("/asignaciones-entrenador/{asignacionId}")
+    @RequiresPermission("modificar_grupo")
     public ResponseEntity<?> finalizarAsignacionEntrenador(@PathVariable Integer asignacionId) {
         try {
             String resultado = grupoEntrenamientoService.finalizarAsignacionEntrenador(asignacionId);

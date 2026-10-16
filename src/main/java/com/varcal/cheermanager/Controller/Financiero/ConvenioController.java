@@ -1,5 +1,7 @@
 package com.varcal.cheermanager.Controller.Financiero;
 
+import com.varcal.cheermanager.Utils.RequiresPermission;
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,17 +37,20 @@ public class ConvenioController {
     private ConvenioRepository convenioRepository;
 
     @GetMapping
+    @RequiresPermission("ver_convenio")
     public List<Convenio> listar() {
         return convenioService.listarTodos();
     }
 
     @GetMapping("/{id}")
+    @RequiresPermission("ver_convenio")
     public ResponseEntity<Convenio> obtener(@PathVariable Integer id) {
         Convenio convenio = convenioService.obtenerPorId(id);
         return convenio != null ? ResponseEntity.ok(convenio) : ResponseEntity.notFound().build();
     }
 
     @PostMapping
+    @RequiresPermission("gestionar_convenio")
     public ResponseEntity<Convenio> crearConvenio(@RequestBody ConvenioDto dto) {
         Descuento descuento = descuentoRepository.findById(dto.getDescuentoId())
                 .orElseThrow(() -> new RuntimeException("Descuento no encontrado"));
@@ -61,12 +66,14 @@ public class ConvenioController {
     }
 
     @PutMapping("/{id}")
+    @RequiresPermission("gestionar_convenio")
     public ResponseEntity<Convenio> actualizar(@PathVariable Integer id, @RequestBody ConvenioDto dto) {
         Convenio actualizado = convenioService.actualizarConvenio(id, dto);
         return actualizado != null ? ResponseEntity.ok(actualizado) : ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")
+    @RequiresPermission("gestionar_convenio")
     public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
         convenioService.eliminarConvenio(id);
         return ResponseEntity.noContent().build();

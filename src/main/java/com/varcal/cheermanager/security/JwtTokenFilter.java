@@ -11,6 +11,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
+
+import com.varcal.cheermanager.repository.Auth.UserRepository;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -23,10 +25,13 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final TokenBlacklistService tokenBlacklistService;
+    private final UserRepository userRepository;
 
-    public JwtTokenFilter(JwtUtil jwtUtil, TokenBlacklistService tokenBlacklistService) {
+    public JwtTokenFilter(JwtUtil jwtUtil, TokenBlacklistService tokenBlacklistService,
+            UserRepository userRepository) {
         this.jwtUtil = jwtUtil;
         this.tokenBlacklistService = tokenBlacklistService;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -42,6 +47,13 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 Claims claims = jwtUtil.getClaims(token);
                 String email = claims.getSubject();
                 Long id = jwtUtil.getUserId(token);
+
+                // Un usuario desactivado/eliminado pierde acceso de inmediato, sin esperar
+                // a que expire su token (el @SQLRestriction de Usuario filtra activo=false).
+                if (!userRepository.existsById(id)) {
+                    filterChain.doFilter(request, response);
+                    return;
+                }
                 @SuppressWarnings("unchecked")
                 List<String> permisos = (List<String>) claims.get("permisos");
 

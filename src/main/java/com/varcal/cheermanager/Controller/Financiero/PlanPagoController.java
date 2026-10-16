@@ -1,5 +1,7 @@
 package com.varcal.cheermanager.Controller.Financiero;
 
+import com.varcal.cheermanager.Utils.RequiresPermission;
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +42,7 @@ public class PlanPagoController {
     // que /planes-inscripcion dependiera de la tabla huérfana
     // planes_inscripcion (retirada — no tenía ninguna FK real).
     @GetMapping
+    @RequiresPermission("ver_plan_pago")
     public ResponseEntity<List<PlanPagoDTO>> listarTodos(
             @RequestParam(required = false) String categoria) {
         if (categoria == null || categoria.isBlank()) {
@@ -54,6 +57,7 @@ public class PlanPagoController {
     }
 
     @PostMapping
+    @RequiresPermission("gestionar_plan_pago")
     public ResponseEntity<?> crearPlan(@RequestBody PlanPagoDTO dto) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(planPagoService.crearPlan(dto));
@@ -63,11 +67,13 @@ public class PlanPagoController {
     }
 
     @GetMapping("/{id}")
+    @RequiresPermission("ver_plan_pago")
     public ResponseEntity<PlanPagoDTO> obtenerPorId(@PathVariable Integer id) {
         return ResponseEntity.ok(planPagoService.obtenerPorId(id));
     }
 
     @PutMapping("/{id}")
+    @RequiresPermission("gestionar_plan_pago")
     public ResponseEntity<?> actualizar(
             @PathVariable Integer id,
             @RequestBody PlanPagoDTO dto) {
@@ -79,12 +85,14 @@ public class PlanPagoController {
     }
 
     @DeleteMapping("/{id}")
+    @RequiresPermission("gestionar_plan_pago")
     public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
         planPagoService.eliminarPlan(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/tipos")
+    @RequiresPermission("ver_plan_pago")
     public ResponseEntity<?> listarTipos(@RequestParam(required = false) String categoria) {
         if (categoria == null || categoria.isBlank()) {
             return ResponseEntity.ok(tipoPlanPagoService.listarTodos());

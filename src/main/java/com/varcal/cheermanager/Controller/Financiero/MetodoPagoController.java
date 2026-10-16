@@ -1,5 +1,7 @@
 package com.varcal.cheermanager.Controller.Financiero;
 
+import com.varcal.cheermanager.Utils.SinPermisoEspecifico;
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,7 @@ public class MetodoPagoController {
     private MetodoPagoRepository metodoPagoRepository;
 
     @GetMapping
+    @SinPermisoEspecifico("catalogo de lectura")
     public List<MetodoPago> listar() {
         return metodoPagoRepository.findAll();
     }

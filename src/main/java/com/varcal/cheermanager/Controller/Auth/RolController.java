@@ -1,5 +1,7 @@
 package com.varcal.cheermanager.Controller.Auth;
 
+import com.varcal.cheermanager.Utils.RequiresPermission;
+
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -28,18 +30,21 @@ public class RolController {
     }
 
     @GetMapping
+    @RequiresPermission("ver_roles")
     public ResponseEntity<List<Rol>> getAllRoles() {
         List<Rol> roles = rolService.listar();
         return ResponseEntity.ok(roles);
     }
 
     @GetMapping("/{id}")
+    @RequiresPermission("ver_roles")
     public ResponseEntity<Rol> getRolById(@PathVariable Integer id) {
         Rol rol = rolService.getRolById(id);
         return rol != null ? ResponseEntity.ok(rol) : ResponseEntity.notFound().build();
     }
 
     @GetMapping("/{id}/permisos")
+    @RequiresPermission("ver_roles")
     public ResponseEntity<Object> getPermisosByRol(@PathVariable Integer id) {
         Rol rol = rolService.getRolById(id);
         if (rol == null) {
@@ -49,18 +54,21 @@ public class RolController {
     }
 
     @PostMapping
+    @RequiresPermission("gestionar_roles")
     public ResponseEntity<Rol> createRol(@RequestBody Rol rol) {
         Rol createdRol = rolService.createRol(rol);
         return ResponseEntity.ok(createdRol);
     }
 
     @PutMapping("/{id}")
+    @RequiresPermission("gestionar_roles")
     public ResponseEntity<Rol> modificarRol(@PathVariable Integer id, @RequestBody Rol rolDetails) {
         Rol updatedRol = rolService.modificarRol(id, rolDetails);
         return updatedRol != null ? ResponseEntity.ok(updatedRol) : ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")
+    @RequiresPermission("gestionar_roles")
     public ResponseEntity<Void> deleteRol(@PathVariable Integer id) {
         rolService.deleteRol(id);
         return ResponseEntity.ok().build();
@@ -76,6 +84,7 @@ public class RolController {
      */
 
     @PostMapping("/asignar-permisos")
+    @RequiresPermission("ASIGNAR_PERMISO")
     public ResponseEntity<Rol> asignarPermisosARol(@RequestBody CrearRolConPermisosDTO request) {
         Rol rolActualizado = rolService.assignPermissionsToRol(request.getRolId(), request.getPermisoIds());
         return ResponseEntity.ok(rolActualizado);

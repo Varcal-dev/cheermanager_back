@@ -41,7 +41,8 @@ public class PagoService {
     // el saldo (carrera entre el cálculo y el guardado).
     @Transactional
     public PagoResponseDTO registrarPago(PagoDTO dto) {
-        Factura factura = facturaRepository.findById(dto.getFacturaId())
+        // Lock pesimista sobre la factura: los pagos de una misma factura se procesan en serie.
+        Factura factura = facturaRepository.findByIdForUpdate(dto.getFacturaId())
                 .orElseThrow(() -> new RuntimeException("Factura no encontrada con ID: " + dto.getFacturaId()));
 
         TipoPago tipoPago = tipoPagoRepository.findById(dto.getTipoPagoId())
@@ -130,6 +131,8 @@ public class PagoService {
 
         // Misma validación de sobrepago si se está marcando como "Pagado" ahora.
         if (estado == EstadoPago.Pagado && pago.getEstado() != EstadoPago.Pagado) {
+            // Se bloquea la factura antes de leer el saldo (mismo motivo que registrarPago).
+            facturaRepository.findByIdForUpdate(pago.getFactura().getId());
             BigDecimal yaPagado = pagoRepository.sumarMontoPagadoPorFactura(pago.getFactura().getId());
             BigDecimal nuevoTotalPagado = yaPagado.add(pago.getMonto());
             if (nuevoTotalPagado.compareTo(pago.getFactura().getTotal()) > 0) {

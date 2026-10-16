@@ -1,21 +1,29 @@
 package com.varcal.cheermanager.Controller.Auth;
 
-import com.varcal.cheermanager.Models.Auth.Usuario;
-import com.varcal.cheermanager.Service.Auth.AuthService;
-import com.varcal.cheermanager.Service.Funcionalidad.LogAccesoService;
-import com.varcal.cheermanager.repository.Auth.UserRepository;
-import com.varcal.cheermanager.security.JwtUtil;
-import com.varcal.cheermanager.security.TokenBlacklistService;
-import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.Date;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.varcal.cheermanager.Models.Auth.Usuario;
+import com.varcal.cheermanager.Service.Auth.AuthService;
+import com.varcal.cheermanager.Service.Funcionalidad.LogAccesoService;
+import com.varcal.cheermanager.Utils.SinPermisoEspecifico;
+import com.varcal.cheermanager.repository.Auth.UserRepository;
+import com.varcal.cheermanager.security.JwtUtil;
+import com.varcal.cheermanager.security.TokenBlacklistService;
+
+import jakarta.servlet.http.HttpServletRequest;
+
 @RestController
 @RequestMapping("/api")
+@SinPermisoEspecifico("Endpoints de autenticacion: publicos o solo requieren sesion")
 public class AuthController {
 
     @Autowired
@@ -35,129 +43,90 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
-        String ip = obtenerIp(request);
-        AuthService.LoginResult result = authService.authenticate(loginRequest.getEmail(), loginRequest.getPassword());
+        String ip = request.getRemoteAddr();
+        String email = loginRequest.getEmail();
+        AuthService.LoginResult result = authService.authenticate(email, loginRequest.getPassword());
 
         if (!result.isSuccess()) {
             String code = result.getErrorCode();
-
-            // Registrar el intento fallido. Si el email existe en el sistema,
-            // lo enlazamos al Usuario para poder auditar accesos por persona;
-            // si no existe (ej. alguien probando emails al azar), igual se
-            // registra el intento con el email tal cual fue escrito.
-            Usuario usuarioAsociado = userRepository.findByEmail(loginRequest.getEmail()).orElse(null);
+            Usuario usuarioAsociado = email == null ? null : userRepository.findByEmail(email.trim()).orElse(null);
             String accionLog = "account_locked".equals(code) ? "CUENTA_BLOQUEADA" : "LOGIN_FALLIDO";
-            logAccesoService.registrarAcceso(usuarioAsociado, loginRequest.getEmail(), accionLog, ip, code);
+            logAccesoService.registrarAcceso(usuarioAsociado, email, accionLog, ip, code);
 
-            switch (code) {
-                case "account_locked":
-                    return ResponseEntity.status(423).body(Map.of("success", false, "message", "Cuenta bloqueada por múltiples intentos fallidos"));
-                case "invalid_password":
-                    return ResponseEntity.status(401).body(Map.of("success", false, "message", "Contraseña incorrecta"));
-                case "email_not_found":
-                    return ResponseEntity.status(404).body(Map.of("success", false, "message", "El correo proporcionado no está registrado"));
-                case "invalid_hash":
-                    return ResponseEntity.status(500).body(Map.of("success", false, "message", "Error en el formato del hash de la contraseña"));
-                default:
-                    return ResponseEntity.status(500).body(Map.of("success", false, "message", "Error desconocido"));
+            if ("account_locked".equals(code)) {
+                return ResponseEntity.status(423).body(Map.of("success", false,
+                        "message", "Cuenta bloqueada temporalmente por multiples intentos fallidos. Intenta mas tarde."));
             }
+            // Mismo mensaje para correo inexistente y clave incorrecta.
+            return ResponseEntity.status(401).body(Map.of("success", false, "message", "Correo o contrasena incorrectos"));
         }
 
-        // Login exitoso: registrar el acceso.
-        Usuario usuario = userRepository.findByEmail(loginRequest.getEmail()).orElse(null);
-        logAccesoService.registrarAcceso(usuario, loginRequest.getEmail(), "LOGIN_EXITOSO", ip, null);
+        Usuario usuario = userRepository.findByEmail(email.trim()).orElse(null);
+        logAccesoService.registrarAcceso(usuario, email, "LOGIN_EXITOSO", ip, null);
 
-        // El frontend debe revisar "requiereCambioPassword": si viene en true, debe
-        // redirigir directo a la pantalla de cambio de contraseña antes de dejar
-        // entrar al resto del sistema (típico en deportistas/entrenadores creados
-        // automáticamente con la contraseña por defecto "0000").
+        // El frontend debe revisar "requiereCambioPassword" y forzar el cambio de clave.
         return ResponseEntity.ok(Map.of(
                 "success", true,
                 "token", result.getToken(),
-                "requiereCambioPassword", result.isRequiereCambioPassword()
-        ));
+                "requiereCambioPassword", result.isRequiereCambioPassword()));
     }
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestHeader(value = "Authorization", required = false) String authorizationHeader,
-                                     HttpServletRequest request) {
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            HttpServletRequest request) {
+        String token = bearer(authorizationHeader);
+        if (token == null) {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Token no proporcionado"));
         }
-
-        String token = authorizationHeader.substring(7);
-
         if (!jwtUtil.isTokenValid(token)) {
-            return ResponseEntity.status(400).body(Map.of("success", false, "message", "Token inválido o expirado"));
+            return ResponseEntity.status(400).body(Map.of("success", false, "message", "Token invalido o expirado"));
         }
 
-        Date expiration;
-        try {
-            expiration = jwtUtil.getClaims(token).getExpiration();
-        } catch (Exception e) {
-            return ResponseEntity.status(400).body(Map.of("success", false, "message", "No se pudo obtener expiración del token"));
-        }
+        Date expiration = jwtUtil.getClaims(token).getExpiration();
         tokenBlacklistService.blacklistToken(token, expiration);
 
         try {
             Long userId = jwtUtil.getUserId(token);
             Usuario usuario = userRepository.findById(userId).orElse(null);
             String email = usuario != null ? usuario.getEmail() : jwtUtil.getUserEmail(token);
-            logAccesoService.registrarAcceso(usuario, email, "LOGOUT", obtenerIp(request), null);
+            logAccesoService.registrarAcceso(usuario, email, "LOGOUT", request.getRemoteAddr(), null);
         } catch (Exception e) {
-            // No bloqueamos el logout si por alguna razón el log falla; el
-            // logout (invalidar el token) ya ocurrió arriba y es lo importante.
+            // El logout ya ocurrio; un fallo del log de auditoria no lo revierte.
         }
-
         return ResponseEntity.ok(Map.of("success", true, "message", "Logout exitoso"));
     }
 
     @PostMapping("/refresh-token")
     public ResponseEntity<?> refreshToken(@RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+        String token = bearer(authorizationHeader);
+        if (token == null) {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Token no proporcionado"));
         }
-
-        String token = authorizationHeader.substring(7);
-
-        if (!jwtUtil.isTokenValid(token)) {
-            return ResponseEntity.status(401).body(Map.of("success", false, "message", "Token inválido o expirado"));
+        if (tokenBlacklistService.isBlacklisted(token) || !jwtUtil.isTokenValid(token)) {
+            return ResponseEntity.status(401).body(Map.of("success", false, "message", "Token invalido o expirado"));
         }
 
-        try {
-            Long userId = jwtUtil.getUserId(token);
-            String email = jwtUtil.getUserEmail(token);
-            String rol = jwtUtil.getClaims(token).get("roles", String.class);
-            java.util.List<String> permisos = jwtUtil.getPermisos(token);
-
-            String newToken = jwtUtil.generateToken(userId, email, rol != null ? rol : "", permisos);
-
-            return ResponseEntity.ok(Map.of("success", true, "token", newToken));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("success", false, "message", "Error al generar nuevo token"));
-        }
+        Long userId = jwtUtil.getUserId(token);
+        // Se re-valida al usuario y se recalculan sus permisos (antes se copiaban los del token viejo).
+        return authService.refrescarToken(userId)
+                .map(newToken -> {
+                    // El token anterior queda invalidado.
+                    tokenBlacklistService.blacklistToken(token, jwtUtil.getClaims(token).getExpiration());
+                    return ResponseEntity.ok(Map.of("success", true, "token", newToken));
+                })
+                .orElseGet(() -> ResponseEntity.status(401)
+                        .body(Map.of("success", false, "message", "Usuario no disponible")));
     }
 
+    /** Siempre responde igual, exista o no el correo, y nunca devuelve el token. */
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request) {
         if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Email es requerido"));
         }
-
-        AuthService.PasswordResetResult result = authService.forgotPassword(request.getEmail());
-
-        if (!result.isSuccess()) {
-            if ("email_not_found".equals(result.getErrorCode())) {
-                return ResponseEntity.status(404).body(Map.of("success", false, "message", "El email proporcionado no está registrado"));
-            }
-            return ResponseEntity.status(500).body(Map.of("success", false, "message", "Error al procesar la solicitud"));
-        }
-
-        return ResponseEntity.ok(Map.of(
-                "success", true,
-                "message", "Token de recuperación enviado",
-                "resetToken", result.getResetToken()
-        ));
+        authService.forgotPassword(request.getEmail());
+        return ResponseEntity.ok(Map.of("success", true,
+                "message", "Si el correo esta registrado, recibiras instrucciones para restablecer tu contrasena."));
     }
 
     @PostMapping("/reset-password")
@@ -166,22 +135,19 @@ public class AuthController {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Token es requerido"));
         }
         if (request.getNewPassword() == null || request.getNewPassword().trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Nueva contraseña es requerida"));
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Nueva contrasena es requerida"));
         }
 
         AuthService.PasswordResetResult result = authService.resetPassword(request.getToken(), request.getNewPassword());
-
         if (!result.isSuccess()) {
-            String code = result.getErrorCode();
-            if ("token_expired".equals(code)) {
-                return ResponseEntity.status(401).body(Map.of("success", false, "message", "Token de recuperación expirado"));
-            } else if ("token_not_found".equals(code)) {
-                return ResponseEntity.status(404).body(Map.of("success", false, "message", "Token de recuperación inválido"));
+            if ("weak_password".equals(result.getErrorCode())) {
+                return ResponseEntity.badRequest().body(Map.of("success", false,
+                        "message", "La contrasena debe tener al menos 8 caracteres"));
             }
-            return ResponseEntity.status(500).body(Map.of("success", false, "message", "Error al resetear contraseña"));
+            return ResponseEntity.status(400).body(Map.of("success", false,
+                    "message", "El enlace de recuperacion es invalido o expiro"));
         }
-
-        return ResponseEntity.ok(Map.of("success", true, "message", "Contraseña resetada correctamente"));
+        return ResponseEntity.ok(Map.of("success", true, "message", "Contrasena restablecida correctamente"));
     }
 
     @PostMapping("/change-password")
@@ -189,126 +155,73 @@ public class AuthController {
             @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
             @RequestBody ChangePasswordRequest request) {
 
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+        String token = bearer(authorizationHeader);
+        if (token == null) {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Token no proporcionado"));
         }
-
-        String token = authorizationHeader.substring(7);
-
-        if (!jwtUtil.isTokenValid(token)) {
-            return ResponseEntity.status(401).body(Map.of("success", false, "message", "Token inválido o expirado"));
+        if (tokenBlacklistService.isBlacklisted(token) || !jwtUtil.isTokenValid(token)) {
+            return ResponseEntity.status(401).body(Map.of("success", false, "message", "Token invalido o expirado"));
         }
-
         if (request.getCurrentPassword() == null || request.getCurrentPassword().trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Contraseña actual es requerida"));
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Contrasena actual es requerida"));
         }
         if (request.getNewPassword() == null || request.getNewPassword().trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Nueva contraseña es requerida"));
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Nueva contrasena es requerida"));
         }
 
-        try {
-            Long userId = jwtUtil.getUserId(token);
-            AuthService.PasswordChangeResult result = authService.changePassword(userId, request.getCurrentPassword(), request.getNewPassword());
-
-            if (!result.isSuccess()) {
-                String code = result.getErrorCode();
-                if ("current_password_incorrect".equals(code)) {
-                    return ResponseEntity.status(401).body(Map.of("success", false, "message", "Contraseña actual incorrecta"));
-                } else if ("user_not_found".equals(code)) {
+        AuthService.PasswordChangeResult result = authService.changePassword(
+                jwtUtil.getUserId(token), request.getCurrentPassword(), request.getNewPassword());
+        if (!result.isSuccess()) {
+            switch (result.getErrorCode()) {
+                case "current_password_incorrect":
+                    return ResponseEntity.status(401).body(Map.of("success", false, "message", "Contrasena actual incorrecta"));
+                case "weak_password":
+                    return ResponseEntity.badRequest().body(Map.of("success", false,
+                            "message", "La contrasena debe tener al menos 8 caracteres"));
+                case "user_not_found":
                     return ResponseEntity.status(404).body(Map.of("success", false, "message", "Usuario no encontrado"));
-                }
-                return ResponseEntity.status(500).body(Map.of("success", false, "message", "Error al cambiar contraseña"));
+                default:
+                    return ResponseEntity.status(500).body(Map.of("success", false, "message", "Error al cambiar contrasena"));
             }
-
-            return ResponseEntity.ok(Map.of("success", true, "message", "Contraseña cambiada correctamente"));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("success", false, "message", "Error procesando cambio de contraseña"));
         }
+        return ResponseEntity.ok(Map.of("success", true, "message", "Contrasena cambiada correctamente"));
     }
 
-    // Prioriza X-Forwarded-For (el real cuando hay proxy/load balancer delante,
-    // ej. Railway, Nginx) antes de caer a la IP directa de la conexión.
-    private String obtenerIp(HttpServletRequest request) {
-        String forwarded = request.getHeader("X-Forwarded-For");
-        if (forwarded != null && !forwarded.isBlank()) {
-            return forwarded.split(",")[0].trim();
-        }
-        return request.getRemoteAddr();
+    private static String bearer(String header) {
+        return (header != null && header.startsWith("Bearer ")) ? header.substring(7) : null;
     }
 
-    // Request/Response classes
+    // Request classes
     public static class LoginRequest {
         private String email;
         private String password;
-
-        public String getEmail() {
-            return email;
-        }
-
-        public void setEmail(String email) {
-            this.email = email;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-
-        public void setPassword(String password) {
-            this.password = password;
-        }
+        public String getEmail() { return email; }
+        public void setEmail(String email) { this.email = email; }
+        public String getPassword() { return password; }
+        public void setPassword(String password) { this.password = password; }
     }
 
     public static class ForgotPasswordRequest {
         private String email;
-
-        public String getEmail() {
-            return email;
-        }
-
-        public void setEmail(String email) {
-            this.email = email;
-        }
+        public String getEmail() { return email; }
+        public void setEmail(String email) { this.email = email; }
     }
 
     public static class ResetPasswordRequest {
         private String token;
         private String newPassword;
-
-        public String getToken() {
-            return token;
-        }
-
-        public void setToken(String token) {
-            this.token = token;
-        }
-
-        public String getNewPassword() {
-            return newPassword;
-        }
-
-        public void setNewPassword(String newPassword) {
-            this.newPassword = newPassword;
-        }
+        public String getToken() { return token; }
+        public void setToken(String token) { this.token = token; }
+        public String getNewPassword() { return newPassword; }
+        public void setNewPassword(String newPassword) { this.newPassword = newPassword; }
     }
 
     public static class ChangePasswordRequest {
         private String currentPassword;
         private String newPassword;
-
-        public String getCurrentPassword() {
-            return currentPassword;
-        }
-
-        public void setCurrentPassword(String currentPassword) {
-            this.currentPassword = currentPassword;
-        }
-
-        public String getNewPassword() {
-            return newPassword;
-        }
-
-        public void setNewPassword(String newPassword) {
-            this.newPassword = newPassword;
-        }
+        public String getCurrentPassword() { return currentPassword; }
+        public void setCurrentPassword(String currentPassword) { this.currentPassword = currentPassword; }
+        public String getNewPassword() { return newPassword; }
+        public void setNewPassword(String newPassword) { this.newPassword = newPassword; }
     }
 }

@@ -1,5 +1,7 @@
 package com.varcal.cheermanager.Controller.Eventos;
 
+import com.varcal.cheermanager.Utils.SinPermisoEspecifico;
+
 import java.util.List;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +22,7 @@ public class TipoEventoController {
     }
 
     @GetMapping
+    @SinPermisoEspecifico("catalogo de lectura")
     public List<TipoEvento> listarTodos() {
         return tipoEventoRepo.findAll();
     }

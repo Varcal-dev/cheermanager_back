@@ -1,5 +1,7 @@
 package com.varcal.cheermanager.Controller.Horario_Asistencia;
 
+import com.varcal.cheermanager.Utils.RequiresPermission;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +37,7 @@ public class AsistenciaController {
     private DeportistaPerteneceGrupoRepository deportistaPerteneceGrupoRepository;
 
     @PostMapping
+    @RequiresPermission("registrar_asistencia")
     public ResponseEntity<AsistenciaResponseDTO> registrar(@RequestBody AsistenciaDTO dto) {
         AsistenciaResponseDTO registrada = asistenciaService.registrar(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(registrada);
@@ -44,6 +47,7 @@ public class AsistenciaController {
     // una vez. Devuelve 207 (Multi-Status) si algún deportista del lote falló
     // (ej. ID inexistente) mientras el resto sí se guardó correctamente.
     @PostMapping("/masivo")
+    @RequiresPermission("registrar_asistencia")
     public ResponseEntity<AsistenciaService.ResultadoRegistroMasivo> registrarMasivo(@RequestBody RegistroAsistenciaMasivoDTO dto) {
         AsistenciaService.ResultadoRegistroMasivo resultado = asistenciaService.registrarMasivo(dto);
         HttpStatus status = resultado.getErrores().isEmpty() ? HttpStatus.CREATED : HttpStatus.MULTI_STATUS;
@@ -53,6 +57,7 @@ public class AsistenciaController {
     // Antes de pasar lista: quiénes son los deportistas activos de este
     // grupo, para que el frontend construya el formulario de asistencia.
     @GetMapping("/grupo/{grupoId}/deportistas-activos")
+    @RequiresPermission("ver_asistencia")
     public ResponseEntity<List<Map<String, Object>>> deportistasActivosDelGrupo(@PathVariable Integer grupoId) {
         List<DeportistaPerteneceGrupo> activos = deportistaPerteneceGrupoRepository.findByGrupoIdAndFechaFinIsNull(grupoId);
         List<Map<String, Object>> resultado = activos.stream().map(dpg -> {
@@ -66,6 +71,7 @@ public class AsistenciaController {
 
     // Lista ya tomada de un grupo en una fecha (para revisar o corregir).
     @GetMapping("/grupo/{grupoId}")
+    @RequiresPermission("ver_asistencia")
     public ResponseEntity<List<AsistenciaResponseDTO>> listarPorGrupoYFecha(
             @PathVariable Integer grupoId,
             @RequestParam LocalDate fecha) {
@@ -73,11 +79,13 @@ public class AsistenciaController {
     }
 
     @GetMapping("/deportista/{deportistaId}")
+    @RequiresPermission("ver_asistencia")
     public ResponseEntity<List<AsistenciaResponseDTO>> listarPorDeportista(@PathVariable Integer deportistaId) {
         return ResponseEntity.ok(asistenciaService.listarPorDeportista(deportistaId));
     }
 
     @GetMapping("/deportista/{deportistaId}/rango")
+    @RequiresPermission("ver_asistencia")
     public ResponseEntity<List<AsistenciaResponseDTO>> listarPorDeportistaYRango(
             @PathVariable Integer deportistaId,
             @RequestParam LocalDate desde,
@@ -88,6 +96,7 @@ public class AsistenciaController {
     // % de asistencia de un deportista en un rango (ej. para reportes
     // mensuales o para detectar deportistas con baja asistencia).
     @GetMapping("/deportista/{deportistaId}/porcentaje")
+    @RequiresPermission("ver_asistencia")
     public ResponseEntity<Map<String, Object>> porcentajeAsistencia(
             @PathVariable Integer deportistaId,
             @RequestParam LocalDate desde,
@@ -101,6 +110,7 @@ public class AsistenciaController {
     }
 
     @DeleteMapping("/{id}")
+    @RequiresPermission("eliminar_asistencia")
     public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
         asistenciaService.eliminar(id);
         return ResponseEntity.noContent().build();

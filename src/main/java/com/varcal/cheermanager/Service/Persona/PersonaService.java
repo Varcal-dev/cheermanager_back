@@ -95,9 +95,13 @@ public class PersonaService {
             throw new RuntimeException("El correo electrónico ya está en uso");
         }
 
-        // Obtener el rol correspondiente
-        Rol rol = rolRepository.findByNombre("DEPORTISTA")
-                .orElseThrow(() -> new RuntimeException("El rol 'DEPORTISTA' no existe en la base de datos"));
+        // Rol solicitado (antes se ignoraba rolId y siempre quedaba DEPORTISTA, de modo que
+        // el admin no podia crear usuarios con otro rol). Sin rolId se mantiene el default.
+        Rol rol = (rolId != null)
+                ? rolRepository.findById(rolId)
+                        .orElseThrow(() -> new RuntimeException("El rol con ID '" + rolId + "' no existe"))
+                : rolRepository.findByNombre("Deportista")
+                        .orElseThrow(() -> new RuntimeException("El rol 'Deportista' no existe en la base de datos"));
 
         // Crear el usuario
         Usuario usuario = new Usuario();
@@ -726,6 +730,10 @@ public class PersonaService {
         String password = "0000"; // Generar una contraseña por defecto o usar una proporcionada
         Rol rolEntrenador = rolRepository.findByNombre("Entrenador")
                 .orElseThrow(() -> new RuntimeException("El rol 'Entrenador' no existe en la base de datos"));
+
+        // Antes se calculaban username/email/password/rol pero NUNCA se creaba el usuario:
+        // el entrenador quedaba sin acceso al sistema.
+        registrarUsuario(personaGuardada, username, email, password, rolEntrenador.getId());
 
         return entrenadorGuardado;
     }

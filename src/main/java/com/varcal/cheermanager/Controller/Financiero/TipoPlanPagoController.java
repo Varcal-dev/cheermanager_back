@@ -1,5 +1,7 @@
 package com.varcal.cheermanager.Controller.Financiero;
 
+import com.varcal.cheermanager.Utils.RequiresPermission;
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +36,7 @@ public class TipoPlanPagoController {
     private TipoPlanPagoService service;
 
     @GetMapping
+    @RequiresPermission("ver_plan_pago")
     public ResponseEntity<List<TipoPlanPagoDTO>> listar(
             @RequestParam(required = false) String categoria) {
         if (categoria == null || categoria.isBlank()) {
@@ -48,6 +51,7 @@ public class TipoPlanPagoController {
     }
 
     @GetMapping("/{id}")
+    @RequiresPermission("ver_plan_pago")
     public ResponseEntity<?> obtener(@PathVariable Integer id) {
         try {
             return ResponseEntity.ok(service.obtenerPorId(id));
@@ -57,6 +61,7 @@ public class TipoPlanPagoController {
     }
 
     @PostMapping
+    @RequiresPermission("gestionar_plan_pago")
     public ResponseEntity<?> crear(@RequestBody TipoPlanPagoDTO dto) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(service.crear(dto));
@@ -66,6 +71,7 @@ public class TipoPlanPagoController {
     }
 
     @PutMapping("/{id}")
+    @RequiresPermission("gestionar_plan_pago")
     public ResponseEntity<?> actualizar(@PathVariable Integer id, @RequestBody TipoPlanPagoDTO dto) {
         try {
             return ResponseEntity.ok(service.actualizar(id, dto));
@@ -77,6 +83,7 @@ public class TipoPlanPagoController {
     }
 
     @DeleteMapping("/{id}")
+    @RequiresPermission("gestionar_plan_pago")
     public ResponseEntity<?> eliminar(@PathVariable Integer id) {
         try {
             service.eliminar(id);

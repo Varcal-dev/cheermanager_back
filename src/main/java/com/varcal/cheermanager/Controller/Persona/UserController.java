@@ -1,5 +1,7 @@
 package com.varcal.cheermanager.Controller.Persona;
 
+import com.varcal.cheermanager.Utils.SinPermisoEspecifico;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -99,7 +101,7 @@ public class UserController {
                     usuarioDTO.getPassword(),
                     usuarioDTO.getRolId());
 
-            return ResponseEntity.ok(usuario); // Devolver el usuario registrado
+            return ResponseEntity.ok(new UsuarioDTO(usuario)); // DTO: nunca la entidad (filtraba el hash)
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error al registrar el usuario: " + e.getMessage());
         }
@@ -181,7 +183,7 @@ public class UserController {
     // metodos para permisos ==========================
 
     @GetMapping("/permisos")
-    //@RequiresPermission("ver_permisos")
+    @SinPermisoEspecifico("permisos del propio usuario")
     public ResponseEntity<?> getPermisos() {
         Integer userId = getAuthenticatedUserId();
         if (userId == null) {
@@ -197,6 +199,7 @@ public class UserController {
     }
 
     @GetMapping("/me")
+    @SinPermisoEspecifico("perfil propio")
     public ResponseEntity<?> getCurrentUser() {
         Integer userId = getAuthenticatedUserId();
 
@@ -217,6 +220,7 @@ public class UserController {
     // Deliberadamente NO permite cambiar username, rol ni password (eso ya
     // tiene su propio endpoint: POST /api/change-password).
     @PutMapping("/me")
+    @SinPermisoEspecifico("perfil propio")
     public ResponseEntity<?> actualizarMiPerfil(@RequestBody ActualizarPerfilDTO dto) {
         Integer userId = getAuthenticatedUserId();
         if (userId == null) {
@@ -282,17 +286,19 @@ public class UserController {
     }
 
     @GetMapping("/genero/listar")
+    @SinPermisoEspecifico("catalogo de lectura")
     public ResponseEntity<List<Genero>> listarGeneros() {
         return ResponseEntity.ok(generoService.listar());
     }
 
     @GetMapping("/rol/listar")
-    //@RequiresPermission("ver_roles")
+    @RequiresPermission("ver_roles")
     public ResponseEntity<List<Rol>> listarRoles() {
         return ResponseEntity.ok(rolService.listar());
     }
 
     @GetMapping("/rol/listar-con-usuarios")
+    @RequiresPermission("ver_roles")
     public ResponseEntity<List<RolConConteoDTO>> listarConUsuarios() {
         return ResponseEntity.ok(rolService.listarRolesConConteo());
     }
@@ -306,13 +312,14 @@ public class UserController {
             if (usuarioActualizado == null) {
                 return ResponseEntity.status(404).body("Usuario no encontrado");
             }
-            return ResponseEntity.ok(usuarioActualizado);
+            return ResponseEntity.ok(new UsuarioDTO(usuarioActualizado));
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error al asignar roles: " + e.getMessage());
         }
     }
 
     @GetMapping("/{usuarioId}/roles")
+    @RequiresPermission("ver_usuario")
     public ResponseEntity<?> obtenerRolesUsuario(@PathVariable Integer usuarioId) {
         try {
             Set<Rol> roles = usuarioService.obtenerRoles(usuarioId);
@@ -326,6 +333,7 @@ public class UserController {
     }
 
     @GetMapping("/{usuarioId}/permisos-todos")
+    @RequiresPermission("ver_usuario")
     public ResponseEntity<?> obtenerPermisosUsuario(@PathVariable Integer usuarioId) {
         try {
             Set<String> permisos = usuarioService.obtenerPermisos(usuarioId);

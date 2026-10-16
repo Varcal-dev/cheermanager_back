@@ -22,8 +22,8 @@ public interface RolRepository extends JpaRepository<Rol, Integer> {
             "        `r`.`nombre` AS `nombre`,\n" + //
             "        COUNT(`u`.`id`) AS `usuarios`\n" + //
             "    FROM\n" + //
-            "        `cheermanager_db`.`roles` `r`\n" + //
-            "        LEFT JOIN `cheermanager_db`.`usuarios` `u` ON `r`.`id` = `u`.`rol_id`\n" + //
+            "        `roles` `r`\n" + //
+            "        LEFT JOIN `usuarios` `u` ON `r`.`id` = `u`.`rol_id`\n" + //
             "    GROUP BY `r`.`id`, `r`.`nombre`", nativeQuery = true)
     List<Object[]> listarRolesConConteo();
 

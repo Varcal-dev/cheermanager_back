@@ -135,6 +135,7 @@ public class DeprotistasController {
     }
 
     @PutMapping("/{id}/convenio")
+    @RequiresPermission("modificar_deportista")
     public ResponseEntity<?> asignarConvenio(
             @PathVariable Integer id,
             @RequestBody Integer convenioId) {
@@ -185,7 +186,7 @@ public class DeprotistasController {
     public ResponseEntity<?> obtenerUsuarioVinculado(@PathVariable Integer id) {
         try {
             Usuario usuario = personaService.obtenerUsuarioDeDeportista(id);
-            return ResponseEntity.ok(usuario);
+            return ResponseEntity.ok(new com.varcal.cheermanager.DTO.Ath.UsuarioDTO(usuario));
         } catch (RuntimeException e) {
             return ResponseEntity.status(404).body(e.getMessage());
         } catch (Exception e) {
@@ -194,6 +195,7 @@ public class DeprotistasController {
     }
 
     @PostMapping("/validar-documento")
+    @RequiresPermission("ver_deportista")
     public ResponseEntity<?> validarDocumento(@RequestParam(value = "documento") String numeroDocumento) {
         try {
             ValidarDocumentoDTO resultado = personaService.validarDocumentoUnico(numeroDocumento);

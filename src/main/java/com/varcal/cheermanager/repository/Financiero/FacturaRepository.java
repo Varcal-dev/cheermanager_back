@@ -1,5 +1,11 @@
 package com.varcal.cheermanager.repository.Financiero;
 
+import org.springframework.data.repository.query.Param;
+
+import org.springframework.data.jpa.repository.Lock;
+
+import jakarta.persistence.LockModeType;
+
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
@@ -10,6 +16,13 @@ import org.springframework.data.jpa.repository.Query;
 import com.varcal.cheermanager.Models.Financiero.Factura;
 
 public interface FacturaRepository extends JpaRepository<Factura, Integer> {
+
+    // Bloqueo pesimista (SELECT ... FOR UPDATE): serializa los pagos concurrentes sobre la
+    // MISMA factura. Sin esto, dos pagos simultaneos leen el mismo saldo y ambos pasan la
+    // validacion de sobrepago.
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT f FROM Factura f WHERE f.id = :id")
+    Optional<Factura> findByIdForUpdate(@Param("id") Integer id);
     Optional<Factura> findByNumeroFactura(String numeroFactura);
 
     // Antes era Optional<Factura> (una sola). Cambió a List porque ahora una

@@ -1,5 +1,8 @@
 package com.varcal.cheermanager.Controller.Org_dep;
 
+import com.varcal.cheermanager.Utils.RequiresPermission;
+import com.varcal.cheermanager.Utils.SinPermisoEspecifico;
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,11 +28,13 @@ public class EstadoCategoriaNivelController {
     private EstadoCategoriaNivelService estadoCategoriaNivelService;
 
     @GetMapping
+    @SinPermisoEspecifico("catalogo de lectura")
     public List<EstadoCategoriaNivel> listarTodos() {
         return estadoCategoriaNivelService.obtenerTodos();
     }
 
     @GetMapping("/{id}")
+    @SinPermisoEspecifico("catalogo de lectura")
     public ResponseEntity<?> obtener(@PathVariable Integer id) {
         try {
             return ResponseEntity.ok(estadoCategoriaNivelService.obtenerPorId(id));
@@ -39,11 +44,13 @@ public class EstadoCategoriaNivelController {
     }
 
     @PostMapping
+    @RequiresPermission("gestionar_catalogos")
     public ResponseEntity<EstadoCategoriaNivel> crear(@RequestBody EstadoCategoriaNivel estado) {
         return ResponseEntity.status(HttpStatus.CREATED).body(estadoCategoriaNivelService.crear(estado));
     }
 
     @PutMapping("/{id}")
+    @RequiresPermission("gestionar_catalogos")
     public ResponseEntity<?> actualizar(@PathVariable Integer id, @RequestBody EstadoCategoriaNivel estado) {
         try {
             return ResponseEntity.ok(estadoCategoriaNivelService.actualizar(id, estado));
@@ -53,6 +60,7 @@ public class EstadoCategoriaNivelController {
     }
 
     @DeleteMapping("/{id}")
+    @RequiresPermission("gestionar_catalogos")
     public ResponseEntity<?> eliminar(@PathVariable Integer id) {
         try {
             estadoCategoriaNivelService.eliminar(id);

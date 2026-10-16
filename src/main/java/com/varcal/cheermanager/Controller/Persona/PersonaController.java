@@ -1,5 +1,7 @@
 package com.varcal.cheermanager.Controller.Persona;
 
+import com.varcal.cheermanager.Utils.SinPermisoEspecifico;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -61,6 +63,7 @@ public class PersonaController {
     }
 
     @GetMapping("/buscar")
+    @RequiresPermission("ver_persona")
     public ResponseEntity<List<Persona>> buscarPersonasByNombre(@RequestParam String nombre) {
         List<Persona> personas = personaService.buscarPersonasByNombre(nombre);
         return ResponseEntity.ok(personas);
@@ -80,6 +83,7 @@ public class PersonaController {
     }
 
     @GetMapping("/estados")
+    @SinPermisoEspecifico("catalogo de lectura")
 public ResponseEntity<List<EstadoPersonaDTO>> listarEstadosPersona() {
     List<EstadoPersona> estados = estadoPersonaRepository.findAll();
     List<EstadoPersonaDTO> estadosDTO = estados.stream()

@@ -1,5 +1,7 @@
 package com.varcal.cheermanager.Controller.Financiero;
 
+import com.varcal.cheermanager.Utils.RequiresPermission;
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,11 +25,13 @@ public class DescuentoController {
     private DescuentoService service;
 
     @GetMapping
+    @RequiresPermission("ver_descuento")
     public List<Descuento> listar() {
         return service.obtenerTodos();
     }
 
     @GetMapping("/{id}")
+    @RequiresPermission("ver_descuento")
     public ResponseEntity<Descuento> obtener(@PathVariable Integer id) {
         return service.obtenerPorId(id)
                 .map(ResponseEntity::ok)
@@ -35,11 +39,13 @@ public class DescuentoController {
     }
 
     @PostMapping
+    @RequiresPermission("gestionar_descuento")
     public Descuento crear(@RequestBody Descuento descuento) {
         return service.crear(descuento);
     }
 
     @PutMapping("/{id}")
+    @RequiresPermission("gestionar_descuento")
     public ResponseEntity<Descuento> actualizar(@PathVariable Integer id, @RequestBody Descuento nuevo) {
         return service.actualizar(id, nuevo)
                 .map(ResponseEntity::ok)
@@ -47,6 +53,7 @@ public class DescuentoController {
     }
 
     @DeleteMapping("/{id}")
+    @RequiresPermission("gestionar_descuento")
     public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
         if (service.eliminar(id)) {
             return ResponseEntity.noContent().build();

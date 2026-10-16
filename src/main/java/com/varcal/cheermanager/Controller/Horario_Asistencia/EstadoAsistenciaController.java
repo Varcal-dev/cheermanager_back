@@ -1,5 +1,7 @@
 package com.varcal.cheermanager.Controller.Horario_Asistencia;
 
+import com.varcal.cheermanager.Utils.SinPermisoEspecifico;
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,7 @@ public class EstadoAsistenciaController {
     private EstadoAsistenciaRepository estadoAsistenciaRepository;
 
     @GetMapping
+    @SinPermisoEspecifico("catalogo de lectura")
     public List<EstadoAsistencia> listar() {
         return estadoAsistenciaRepository.findAll();
     }

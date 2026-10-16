@@ -1,5 +1,7 @@
 package com.varcal.cheermanager.Controller.Financiero;
 
+import com.varcal.cheermanager.Utils.RequiresPermission;
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,26 +27,31 @@ public class DivisionController {
     private DivisionService divisionService;
 
     @GetMapping
+    @RequiresPermission("ver_division")
     public List<Division> listar() {
         return divisionService.obtenerTodas();
     }
 
     @GetMapping("/{id}")
+    @RequiresPermission("ver_division")
     public ResponseEntity<Division> obtener(@PathVariable Integer id) {
         return ResponseEntity.ok(divisionService.obtenerPorId(id));
     }
 
     @PostMapping
+    @RequiresPermission("gestionar_division")
     public ResponseEntity<Division> crear(@RequestBody Division division) {
         return ResponseEntity.status(HttpStatus.CREATED).body(divisionService.crear(division));
     }
 
     @PutMapping("/{id}")
+    @RequiresPermission("gestionar_division")
     public ResponseEntity<Division> actualizar(@PathVariable Integer id, @RequestBody Division division) {
         return ResponseEntity.ok(divisionService.actualizar(id, division));
     }
 
     @DeleteMapping("/{id}")
+    @RequiresPermission("gestionar_division")
     public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
         divisionService.eliminar(id);
         return ResponseEntity.noContent().build();

@@ -1,5 +1,7 @@
 package com.varcal.cheermanager.Controller.Financiero;
 
+import com.varcal.cheermanager.Utils.RequiresPermission;
+
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -28,6 +30,7 @@ public class FacturaController {
     }
 
     @PostMapping
+    @RequiresPermission("crear_factura")
     public ResponseEntity<Factura> crear(@RequestBody FacturaDTO dto) {
         Factura factura = facturaService.crearFactura(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(factura);
@@ -38,11 +41,13 @@ public class FacturaController {
     // caía en un ciclo infinito de serialización. Ahora devuelve un DTO
     // plano con solo los campos que el frontend necesita.
     @GetMapping
+    @RequiresPermission("ver_factura")
     public List<FacturaResponseDTO> listar() {
         return facturaService.listarDTO();
     }
 
     @GetMapping("/{id}")
+    @RequiresPermission("ver_factura")
     public ResponseEntity<FacturaResponseDTO> obtener(@PathVariable Integer id) {
         return facturaService.buscarDTOPorId(id)
             .map(ResponseEntity::ok)
@@ -50,6 +55,7 @@ public class FacturaController {
     }
 
     @DeleteMapping("/{id}")
+    @RequiresPermission("eliminar_factura")
     public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
         facturaService.eliminar(id);
         return ResponseEntity.noContent().build();
