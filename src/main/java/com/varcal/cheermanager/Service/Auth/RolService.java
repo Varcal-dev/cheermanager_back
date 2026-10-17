@@ -1,5 +1,11 @@
 package com.varcal.cheermanager.Service.Auth;
 
+import com.varcal.cheermanager.tenant.TenantContext;
+
+import com.varcal.cheermanager.Service.Clubes.RolesPlantilla;
+
+import com.varcal.cheermanager.Models.Clubes.Club;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -43,6 +49,10 @@ public class RolService {
     }
 
     public Rol createRol(Rol rol) {
+        // El body llega como entidad: se ignoran id y permisos (los permisos se asignan SOLO por
+        // assignPermissionsToRol, que valida; asi no se cuela un permiso de plataforma por el body).
+        rol.setId(null);
+        rol.setPermisos(new HashSet<>());
         return rolRepository.save(rol);
     }
 
@@ -68,6 +78,13 @@ public class RolService {
                 .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
 
         List<Permiso> permisos = permisoRepository.findAllById(permisoIds);
+
+        // Escalada de privilegios: un admin de club NO puede darse permisos de plataforma
+        // (gestionar_clubes, catalogos globales, rubrica global).
+        if (TenantContext.get() != Club.PLATAFORMA_ID
+                && permisos.stream().anyMatch(p -> RolesPlantilla.SOLO_PLATAFORMA.contains(p.getNombre()))) {
+            throw new RuntimeException("Hay permisos reservados a la plataforma que no se pueden asignar a un rol de club");
+        }
 
         rol.setPermisos(new HashSet<>(permisos));
 

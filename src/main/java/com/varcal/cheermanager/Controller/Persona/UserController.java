@@ -1,5 +1,7 @@
 package com.varcal.cheermanager.Controller.Persona;
 
+import com.varcal.cheermanager.tenant.TenantLookupRepository;
+
 import com.varcal.cheermanager.Utils.SinPermisoEspecifico;
 
 import org.springframework.security.core.Authentication;
@@ -49,6 +51,8 @@ public class UserController {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private TenantLookupRepository tenantLookup;
     @Autowired
     private PersonaService personaService;
 
@@ -245,7 +249,7 @@ public class UserController {
 
         // Email: solo se valida/actualiza si viene y es distinto al actual.
         if (dto.getEmail() != null && !dto.getEmail().isBlank() && !dto.getEmail().equalsIgnoreCase(usuario.getEmail())) {
-            if (userRepository.existsByEmail(dto.getEmail())) {
+            if (tenantLookup.emailExisteEnAlgunClub(dto.getEmail())) {
                 return ResponseEntity.status(409).body(Map.of("success", false, "message", "Ese email ya está en uso por otro usuario"));
             }
             usuario.setEmail(dto.getEmail());

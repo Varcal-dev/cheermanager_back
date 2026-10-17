@@ -17,12 +17,12 @@ import com.varcal.cheermanager.Models.Personas.Entrenador;
 // no tiene PK propia de un solo campo y no se necesita más que leer.
 public interface EntrenadorGrupoRepository extends Repository<Entrenador, Integer> {
 
-    @Query(value = "SELECT grupo_entrenamiento_id FROM grupo_entrenador WHERE entrenador_id = :entrenadorId", nativeQuery = true)
+    @Query(value = "SELECT grupo_entrenamiento_id FROM grupo_entrenador WHERE entrenador_id = :entrenadorId AND club_id = :#{T(com.varcal.cheermanager.tenant.TenantContext).require()}", nativeQuery = true)
     List<Integer> findGrupoIdsByEntrenadorId(@Param("entrenadorId") Integer entrenadorId);
 
-    @Query(value = "SELECT entrenador_id FROM grupo_entrenador WHERE grupo_entrenamiento_id = :grupoId", nativeQuery = true)
+    @Query(value = "SELECT entrenador_id FROM grupo_entrenador WHERE grupo_entrenamiento_id = :grupoId AND club_id = :#{T(com.varcal.cheermanager.tenant.TenantContext).require()}", nativeQuery = true)
     List<Integer> findEntrenadorIdsByGrupoId(@Param("grupoId") Integer grupoId);
 
-    @Query(value = "SELECT COUNT(*) FROM grupo_entrenador WHERE entrenador_id = :entrenadorId", nativeQuery = true)
+    @Query(value = "SELECT COUNT(*) FROM grupo_entrenador WHERE entrenador_id = :entrenadorId AND club_id = :#{T(com.varcal.cheermanager.tenant.TenantContext).require()}", nativeQuery = true)
     long countGruposByEntrenadorId(@Param("entrenadorId") Integer entrenadorId);
 }

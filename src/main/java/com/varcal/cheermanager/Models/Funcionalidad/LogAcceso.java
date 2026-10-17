@@ -18,6 +18,12 @@ import lombok.Data;
 @Table(name = "log_acceso")
 @Data
 public class LogAcceso {
+    /** Club (tenant): Hibernate lo asigna solo al guardar y filtra por el toda consulta HQL/JPA. */
+    @org.hibernate.annotations.TenantId
+    @jakarta.persistence.Column(name = "club_id", nullable = false, updatable = false)
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private Integer clubId;
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

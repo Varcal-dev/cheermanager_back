@@ -22,6 +22,12 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "auditoria")
 public class Auditoria {
+    /** Club (tenant): Hibernate lo asigna solo al guardar y filtra por el toda consulta HQL/JPA. */
+    @org.hibernate.annotations.TenantId
+    @jakarta.persistence.Column(name = "club_id", nullable = false, updatable = false)
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private Integer clubId;
+
 
     public enum AccionEnum {
         INSERT, UPDATE, DELETE

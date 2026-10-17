@@ -32,10 +32,11 @@ public interface InscripcionRepository extends JpaRepository<Inscripcion, Intege
             FROM inscripciones i
             JOIN deportistas d          ON d.id = i.deportista_id
             JOIN personas p             ON p.id = d.persona_id
-            LEFT JOIN niveles n         ON n.id = d.nivel_actual_id
+            LEFT JOIN niveles n         ON n.id = d.nivel_actual_id AND n.club_id = d.club_id
             JOIN planes_pago pp         ON pp.id = i.plan_pago_id
             LEFT JOIN grupo_deportista gd    ON gd.deportista_id = d.id AND gd.fecha_fin IS NULL
             LEFT JOIN grupos_entrenamiento ge ON ge.id = gd.grupo_entrenamiento_id
+            WHERE i.club_id = :#{T(com.varcal.cheermanager.tenant.TenantContext).require()}
             """, nativeQuery = true)
     List<Object[]> obtenerVistaInscripcionesDetalle();
 
@@ -46,8 +47,9 @@ public interface InscripcionRepository extends JpaRepository<Inscripcion, Intege
                 n.nombre                              AS nivel
             FROM deportistas d
             JOIN personas p     ON p.id = d.persona_id
-            LEFT JOIN niveles n ON n.id = d.nivel_actual_id
-            WHERE NOT EXISTS (
+            LEFT JOIN niveles n ON n.id = d.nivel_actual_id AND n.club_id = d.club_id
+            WHERE d.club_id = :#{T(com.varcal.cheermanager.tenant.TenantContext).require()}
+              AND NOT EXISTS (
                 SELECT 1 FROM inscripciones i
                 WHERE i.deportista_id = d.id AND i.estado = 'Activa'
             )
@@ -75,13 +77,13 @@ public interface InscripcionRepository extends JpaRepository<Inscripcion, Intege
             JOIN deportistas d              ON d.id = i.deportista_id
             JOIN personas p                 ON p.id = d.persona_id
             LEFT JOIN generos gen           ON gen.id = p.genero_id
-            LEFT JOIN niveles n             ON n.id = d.nivel_actual_id
+            LEFT JOIN niveles n             ON n.id = d.nivel_actual_id AND n.club_id = d.club_id
             JOIN planes_pago pp             ON pp.id = i.plan_pago_id
             LEFT JOIN tipos_planes_pago tpp ON tpp.id = pp.tipo_plan_id
             LEFT JOIN estados_persona ep    ON ep.id = d.estado_id
             LEFT JOIN grupo_deportista gd   ON gd.deportista_id = d.id AND gd.fecha_fin IS NULL
             LEFT JOIN grupos_entrenamiento ge ON ge.id = gd.grupo_entrenamiento_id
-            WHERE i.estado = 'Activa'
+            WHERE i.estado = 'Activa' AND i.club_id = :#{T(com.varcal.cheermanager.tenant.TenantContext).require()}
             """, nativeQuery = true)
     List<Object[]> obtenerVistaDeportistasInscritos();
 

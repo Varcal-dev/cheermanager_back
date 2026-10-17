@@ -14,15 +14,21 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "productos")
+@Table(name = "productos", uniqueConstraints = {@jakarta.persistence.UniqueConstraint(name = "uk_producto_club_sku", columnNames = {"club_id", "sku"})})
 public class Producto {
+    /** Club (tenant): Hibernate lo asigna solo al guardar y filtra por el toda consulta HQL/JPA. */
+    @org.hibernate.annotations.TenantId
+    @jakarta.persistence.Column(name = "club_id", nullable = false, updatable = false)
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private Integer clubId;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     // SKU base del artículo, formato RAT-[CAT]-[COD] (sin el SEQ de 3
     // dígitos, ese vive en la variante si aplica). Ej: RAT-ROP-CAE.
-    @Column(name = "sku", nullable = false, unique = true, length = 20)
+    @Column(name = "sku", nullable = false, length = 20)
     private String sku;
 
     @Column(name = "nombre", nullable = false)

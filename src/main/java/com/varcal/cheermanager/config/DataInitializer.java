@@ -1,5 +1,8 @@
 package com.varcal.cheermanager.config;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,17 +11,24 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.varcal.cheermanager.Models.Auth.Permiso;
 import com.varcal.cheermanager.Models.Auth.Rol;
 import com.varcal.cheermanager.Models.Auth.Usuario;
+import com.varcal.cheermanager.Models.Clubes.Club;
+import com.varcal.cheermanager.Service.Clubes.RolesPlantilla;
+import com.varcal.cheermanager.repository.Auth.PermisoRepository;
 import com.varcal.cheermanager.repository.Auth.RolRepository;
 import com.varcal.cheermanager.repository.Auth.UserRepository;
+import com.varcal.cheermanager.repository.Clubes.ClubRepository;
+import com.varcal.cheermanager.tenant.TenantContext;
+import com.varcal.cheermanager.tenant.TenantLookupRepository;
 
 /**
- * Crea el administrador inicial SOLO si:
- *  - no existe ya un usuario con ese username, y
- *  - se definio APP_BOOTSTRAP_ADMIN_PASSWORD (minimo 10 caracteres).
- * Ya no existe una clave por defecto: sin la variable, no se crea nada.
- * El admin queda con "requiereCambioPassword" para forzar su cambio en el primer login.
+ * Arranque de la plataforma:
+ *  1. Si no hay ningun club, crea el club "Plataforma" (id 1).
+ *  2. Asegura los permisos de plataforma y el rol SUPERADMIN en ese club.
+ *  3. Si hay APP_BOOTSTRAP_ADMIN_PASSWORD y el usuario no existe en ningun club, crea el superadmin.
+ * Sin clave por defecto: sin la variable no se crea ningun usuario.
  */
 @Configuration
 public class DataInitializer {
@@ -26,45 +36,71 @@ public class DataInitializer {
     private static final Logger log = LoggerFactory.getLogger(DataInitializer.class);
 
     @Bean
-    CommandLineRunner initAdmin(UserRepository usuarioRepo,
-                                RolRepository rolRepo,
-                                PasswordEncoder passwordEncoder,
-                                @Value("${app.bootstrap.admin-username:admin}") String username,
-                                @Value("${app.bootstrap.admin-email:}") String email,
-                                @Value("${app.bootstrap.admin-password:}") String password) {
+    CommandLineRunner initPlataforma(ClubRepository clubRepo, RolRepository rolRepo, PermisoRepository permisoRepo,
+            UserRepository userRepo, TenantLookupRepository lookup, PasswordEncoder encoder,
+            @Value("${app.bootstrap.admin-username:superadmin}") String username,
+            @Value("${app.bootstrap.admin-email:}") String email,
+            @Value("${app.bootstrap.admin-password:}") String password) {
         return args -> {
-            if (usuarioRepo.existsByUsername(username)) {
+            if (clubRepo.count() == 0) {
+                Club plataforma = new Club();
+                plataforma.setNombre("Plataforma");
+                plataforma.setSlug("plataforma");
+                plataforma = clubRepo.save(plataforma);
+                if (plataforma.getId() != Club.PLATAFORMA_ID) {
+                    throw new IllegalStateException("El club Plataforma debe tener id 1 (quedo " + plataforma.getId()
+                            + "). Usa una base de datos vacia o corre sql/fase1_multiclub.sql.");
+                }
+            }
+            if (!clubRepo.existsById(Club.PLATAFORMA_ID)) {
+                log.warn("No existe el club Plataforma (id 1): corre sql/fase1_multiclub.sql. No se crea superadmin.");
                 return;
             }
-            if (password == null || password.isBlank()) {
-                log.warn("No existe el usuario '{}' y APP_BOOTSTRAP_ADMIN_PASSWORD esta vacio: "
-                        + "no se crea ningun administrador inicial.", username);
-                return;
-            }
-            if (password.length() < 10) {
-                throw new IllegalStateException(
-                        "APP_BOOTSTRAP_ADMIN_PASSWORD debe tener al menos 10 caracteres");
-            }
-            if (email == null || email.isBlank()) {
-                throw new IllegalStateException(
-                        "Define APP_BOOTSTRAP_ADMIN_EMAIL para crear el administrador inicial");
+
+            // Permisos globales de plataforma (se crean si faltan; el resto viene de sql/fase0_permisos.sql)
+            Set<Permiso> deSuperadmin = new HashSet<>();
+            for (String nombre : RolesPlantilla.SOLO_PLATAFORMA) {
+                Permiso p = permisoRepo.findAll().stream().filter(x -> nombre.equals(x.getNombre())).findFirst()
+                        .orElseGet(() -> {
+                            Permiso nuevo = new Permiso();
+                            nuevo.setNombre(nombre);
+                            return permisoRepo.save(nuevo);
+                        });
+                deSuperadmin.add(p);
             }
 
-            Rol adminRol = rolRepo.findByNombre("ADMIN")
-                    .or(() -> rolRepo.findByNombre("Admin"))
-                    .or(() -> rolRepo.findById(1))
-                    .orElseThrow(() -> new IllegalStateException(
-                            "No existe el rol ADMIN: cargalo (sql/fase0_permisos.sql) antes de crear el admin"));
+            TenantContext.runAs(Club.PLATAFORMA_ID, () -> {
+                Rol rol = rolRepo.findByNombre(RolesPlantilla.SUPERADMIN).orElseGet(() -> {
+                    Rol r = new Rol();
+                    r.setNombre(RolesPlantilla.SUPERADMIN);
+                    r.setDescripcion("Administrador de la plataforma");
+                    return r;
+                });
+                rol.setPermisos(deSuperadmin);
+                rol = rolRepo.save(rol);
 
-            Usuario admin = new Usuario();
-            admin.setUsername(username);
-            admin.setEmail(email);
-            admin.setPasswordHash(passwordEncoder.encode(password));
-            admin.setRol(adminRol);
-            admin.setRequiereCambioPassword(true);
-            usuarioRepo.save(admin);
-
-            log.info("Administrador inicial '{}' creado (debe cambiar la clave en el primer login).", username);
+                if (password == null || password.isBlank()) {
+                    return;
+                }
+                if (lookup.usernameExisteEnAlgunClub(username)) {
+                    return; // ya existe (puede estar en cualquier club): no se toca
+                }
+                if (password.length() < 10) {
+                    throw new IllegalStateException("APP_BOOTSTRAP_ADMIN_PASSWORD debe tener al menos 10 caracteres");
+                }
+                if (email == null || email.isBlank() || lookup.emailExisteEnAlgunClub(email)) {
+                    log.warn("Define un APP_BOOTSTRAP_ADMIN_EMAIL unico para crear el superadmin.");
+                    return;
+                }
+                Usuario u = new Usuario();
+                u.setUsername(username);
+                u.setEmail(email);
+                u.setPasswordHash(encoder.encode(password));
+                u.setRol(rol);
+                u.setRequiereCambioPassword(true);
+                userRepo.save(u);
+                log.info("Superadmin '{}' creado en el club Plataforma.", username);
+            });
         };
     }
 }

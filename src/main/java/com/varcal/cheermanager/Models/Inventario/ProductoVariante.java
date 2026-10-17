@@ -14,8 +14,14 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "producto_variantes")
+@Table(name = "producto_variantes", uniqueConstraints = {@jakarta.persistence.UniqueConstraint(name = "uk_productovariante_club_sku_variante", columnNames = {"club_id", "sku_variante"})})
 public class ProductoVariante {
+    /** Club (tenant): Hibernate lo asigna solo al guardar y filtra por el toda consulta HQL/JPA. */
+    @org.hibernate.annotations.TenantId
+    @jakarta.persistence.Column(name = "club_id", nullable = false, updatable = false)
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private Integer clubId;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -35,7 +41,7 @@ public class ProductoVariante {
 
     // SKU completo para etiqueta/código de barras, ej. RAT-ROP-CAE-001-NEG-M.
     // Se genera en el service a partir del SKU del producto + secuencia.
-    @Column(name = "sku_variante", unique = true, length = 40)
+    @Column(name = "sku_variante", length = 40)
     private String skuVariante;
 
     // Precio de venta real (a diferencia del rango de referencia en Producto).

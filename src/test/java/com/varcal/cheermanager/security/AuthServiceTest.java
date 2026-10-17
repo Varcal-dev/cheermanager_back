@@ -73,7 +73,7 @@ class AuthServiceTest {
         usuario.setBloqueadoHasta(LocalDateTime.now().minusMinutes(1));
         when(userRepository.findByEmail("a@b.com")).thenReturn(Optional.of(usuario));
         when(usuarioService.obtenerPermisos(1)).thenReturn(Set.of("ver_deportista"));
-        when(jwtUtil.generateToken(any(), any(), any(), any())).thenReturn("tok");
+        when(jwtUtil.generateToken(any(), any(), any(), any(), any())).thenReturn("tok");
         AuthService.LoginResult r = service.authenticate("a@b.com", "Correcta123");
         assertTrue(r.isSuccess());
         assertFalse(usuario.getBloqueado());

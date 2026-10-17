@@ -13,13 +13,19 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "facturas")
+@Table(name = "facturas", uniqueConstraints = {@jakarta.persistence.UniqueConstraint(name = "uk_factura_club_numero_factura", columnNames = {"club_id", "numero_factura"})})
 public class Factura {
+    /** Club (tenant): Hibernate lo asigna solo al guardar y filtra por el toda consulta HQL/JPA. */
+    @org.hibernate.annotations.TenantId
+    @jakarta.persistence.Column(name = "club_id", nullable = false, updatable = false)
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private Integer clubId;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "numero_factura", unique = true, nullable = false)
+    @Column(name = "numero_factura", nullable = false)
     private String numeroFactura;
 
     @Column(name = "fecha_emision", nullable = false)

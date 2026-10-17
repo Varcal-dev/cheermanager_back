@@ -18,6 +18,11 @@ import com.varcal.cheermanager.Utils.SinPermisoEspecifico;
 import com.varcal.cheermanager.repository.Auth.UserRepository;
 import com.varcal.cheermanager.security.JwtUtil;
 import com.varcal.cheermanager.security.TokenBlacklistService;
+import com.varcal.cheermanager.repository.Clubes.ClubRepository;
+import com.varcal.cheermanager.tenant.TenantContext;
+import com.varcal.cheermanager.tenant.TenantLookupRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -41,34 +46,53 @@ public class AuthController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private TenantLookupRepository tenantLookup;
+
+    @Autowired
+    private ClubRepository clubRepository;
+
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
         String ip = request.getRemoteAddr();
         String email = loginRequest.getEmail();
-        AuthService.LoginResult result = authService.authenticate(email, loginRequest.getPassword());
 
-        if (!result.isSuccess()) {
-            String code = result.getErrorCode();
-            Usuario usuarioAsociado = email == null ? null : userRepository.findByEmail(email.trim()).orElse(null);
-            String accionLog = "account_locked".equals(code) ? "CUENTA_BLOQUEADA" : "LOGIN_FALLIDO";
-            logAccesoService.registrarAcceso(usuarioAsociado, email, accionLog, ip, code);
+        // 1) En que club esta este correo (consulta sin filtro de club, solo devuelve el id).
+        //    Si el club esta suspendido se trata igual que un correo inexistente.
+        Integer clubId = tenantLookup.clubIdPorEmail(email)
+                .filter(clubRepository::existsByIdAndActivoTrue).orElse(null);
 
-            if ("account_locked".equals(code)) {
-                return ResponseEntity.status(423).body(Map.of("success", false,
-                        "message", "Cuenta bloqueada temporalmente por multiples intentos fallidos. Intenta mas tarde."));
-            }
-            // Mismo mensaje para correo inexistente y clave incorrecta.
+        if (clubId == null) {
+            authService.credencialesInvalidasSinClub(loginRequest.getPassword());
+            log.warn("Login fallido (correo sin club activo) desde {}", ip);
             return ResponseEntity.status(401).body(Map.of("success", false, "message", "Correo o contrasena incorrectos"));
         }
 
-        Usuario usuario = userRepository.findByEmail(email.trim()).orElse(null);
-        logAccesoService.registrarAcceso(usuario, email, "LOGIN_EXITOSO", ip, null);
+        // 2) Todo lo demas corre con el tenant de ese club.
+        return TenantContext.<ResponseEntity<?>>runAs(clubId, () -> {
+            AuthService.LoginResult result = authService.authenticate(email, loginRequest.getPassword());
+            Usuario usuario = userRepository.findByEmail(email.trim()).orElse(null);
 
-        // El frontend debe revisar "requiereCambioPassword" y forzar el cambio de clave.
-        return ResponseEntity.ok(Map.of(
-                "success", true,
-                "token", result.getToken(),
-                "requiereCambioPassword", result.isRequiereCambioPassword()));
+            if (!result.isSuccess()) {
+                String code = result.getErrorCode();
+                String accionLog = "account_locked".equals(code) ? "CUENTA_BLOQUEADA" : "LOGIN_FALLIDO";
+                logAccesoService.registrarAcceso(usuario, email, accionLog, ip, code);
+
+                if ("account_locked".equals(code)) {
+                    return ResponseEntity.status(423).body(Map.of("success", false,
+                            "message", "Cuenta bloqueada temporalmente por multiples intentos fallidos. Intenta mas tarde."));
+                }
+                return ResponseEntity.status(401).body(Map.of("success", false, "message", "Correo o contrasena incorrectos"));
+            }
+
+            logAccesoService.registrarAcceso(usuario, email, "LOGIN_EXITOSO", ip, null);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "token", result.getToken(),
+                    "requiereCambioPassword", result.isRequiereCambioPassword()));
+        });
     }
 
     @PostMapping("/logout")
@@ -124,7 +148,10 @@ public class AuthController {
         if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Email es requerido"));
         }
-        authService.forgotPassword(request.getEmail());
+        // Se resuelve el club del correo; si no existe/esta suspendido no se hace nada (misma respuesta).
+        tenantLookup.clubIdPorEmail(request.getEmail())
+                .filter(clubRepository::existsByIdAndActivoTrue)
+                .ifPresent(clubId -> TenantContext.runAs(clubId, () -> authService.forgotPassword(request.getEmail())));
         return ResponseEntity.ok(Map.of("success", true,
                 "message", "Si el correo esta registrado, recibiras instrucciones para restablecer tu contrasena."));
     }
@@ -138,7 +165,14 @@ public class AuthController {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Nueva contrasena es requerida"));
         }
 
-        AuthService.PasswordResetResult result = authService.resetPassword(request.getToken(), request.getNewPassword());
+        Integer clubId = tenantLookup.clubIdPorTokenReset(AuthService.sha256(request.getToken()))
+                .filter(clubRepository::existsByIdAndActivoTrue).orElse(null);
+        if (clubId == null) {
+            return ResponseEntity.status(400).body(Map.of("success", false,
+                    "message", "El enlace de recuperacion es invalido o expiro"));
+        }
+        AuthService.PasswordResetResult result = TenantContext.runAs(clubId,
+                () -> authService.resetPassword(request.getToken(), request.getNewPassword()));
         if (!result.isSuccess()) {
             if ("weak_password".equals(result.getErrorCode())) {
                 return ResponseEntity.badRequest().body(Map.of("success", false,

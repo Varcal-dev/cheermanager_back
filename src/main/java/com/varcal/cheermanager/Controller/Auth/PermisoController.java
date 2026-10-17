@@ -39,14 +39,14 @@ public class PermisoController {
     }
 
     @PostMapping
-    @RequiresPermission("gestionar_roles")
+    @RequiresPermission("gestionar_catalogos")
     public ResponseEntity<Permiso> crearPermiso(@RequestBody Permiso permiso) {
         Permiso nuevoPermiso = permisoService.guardar(permiso);
         return ResponseEntity.ok(nuevoPermiso);
     }
 
     @PutMapping("/{id}")
-    @RequiresPermission("gestionar_roles")
+    @RequiresPermission("gestionar_catalogos")
     public ResponseEntity<Permiso> actualizarPermiso(@PathVariable Integer id, @RequestBody Permiso permiso) {
         Optional<Permiso> permisoExistente = permisoService.obtenerPorId(id);
         if (permisoExistente.isPresent()) {
@@ -59,7 +59,7 @@ public class PermisoController {
     }
 
     @DeleteMapping("/{id}")
-    @RequiresPermission("gestionar_roles")
+    @RequiresPermission("gestionar_catalogos")
     public ResponseEntity<Void> eliminarPermiso(@PathVariable Integer id) {
         if (permisoService.obtenerPorId(id).isPresent()) {
             permisoService.eliminar(id);

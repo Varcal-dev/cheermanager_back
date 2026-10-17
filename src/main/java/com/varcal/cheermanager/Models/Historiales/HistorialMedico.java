@@ -21,6 +21,12 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "historial_medico")
 public class HistorialMedico {
+    /** Club (tenant): Hibernate lo asigna solo al guardar y filtra por el toda consulta HQL/JPA. */
+    @org.hibernate.annotations.TenantId
+    @jakarta.persistence.Column(name = "club_id", nullable = false, updatable = false)
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private Integer clubId;
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

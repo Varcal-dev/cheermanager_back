@@ -77,6 +77,12 @@ public class GrupoEntrenamientoService {
     // obtenerCandidatosGrupo, que resuelve todo en una sola llamada y con
     // motivo estructurado en vez de un string suelto.
     public String verificarElegibilidadDeportista(Integer grupoId, Integer deportistaId) {
+        // La funcion de BD lee por id sin filtro de club: primero se comprueba (con filtro) que
+        // grupo y deportista pertenezcan al club actual.
+        grupoEntrenamientoRepository.findById(grupoId)
+                .orElseThrow(() -> new RuntimeException("Grupo no encontrado"));
+        deportistaRepository.findById(deportistaId)
+                .orElseThrow(() -> new RuntimeException("Deportista no encontrado"));
         return grupoEntrenamientoRepository.verificarElegibilidadDeportista(deportistaId, grupoId);
     }
 

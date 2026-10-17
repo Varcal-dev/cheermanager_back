@@ -17,14 +17,8 @@ public interface RolRepository extends JpaRepository<Rol, Integer> {
     @NonNull
     Optional<Rol> findById(Integer id);
 
-    @Query(value = "SELECT \n" + //
-            "        `r`.`id` AS `id`,\n" + //
-            "        `r`.`nombre` AS `nombre`,\n" + //
-            "        COUNT(`u`.`id`) AS `usuarios`\n" + //
-            "    FROM\n" + //
-            "        `roles` `r`\n" + //
-            "        LEFT JOIN `usuarios` `u` ON `r`.`id` = `u`.`rol_id`\n" + //
-            "    GROUP BY `r`.`id`, `r`.`nombre`", nativeQuery = true)
+    // JPQL (no nativa): Hibernate agrega el filtro de club a Rol y a Usuario automaticamente.
+    @Query("SELECT r.id, r.nombre, COUNT(u.id) FROM Rol r LEFT JOIN Usuario u ON u.rol = r GROUP BY r.id, r.nombre")
     List<Object[]> listarRolesConConteo();
 
     Optional<Rol> findByNombre(String nombre);

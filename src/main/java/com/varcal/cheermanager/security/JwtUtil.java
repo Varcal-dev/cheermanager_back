@@ -36,7 +36,7 @@ public class JwtUtil {
         }
     }
 
-    public String generateToken(Long userId, String email, String rol, List<String> permisos) {
+    public String generateToken(Long userId, String email, String rol, List<String> permisos, Integer clubId) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
 
@@ -45,6 +45,7 @@ public class JwtUtil {
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .claim("userId", userId)
+                .claim("clubId", clubId)
                 .claim("roles", rol)
                 .claim("permisos", permisos)
                 .signWith(key, SignatureAlgorithm.HS256)
@@ -71,6 +72,12 @@ public class JwtUtil {
     public Long getUserId(String token) {
         Claims claims = getClaims(token);
         return ((Number) claims.get("userId")).longValue();
+    }
+
+    /** Club (tenant) del token; null si es un token anterior a la Fase 1 (se rechaza en el filtro). */
+    public Integer getClubId(String token) {
+        Object v = getClaims(token).get("clubId");
+        return v instanceof Number n ? n.intValue() : null;
     }
 
     public String getUserEmail(String token) {

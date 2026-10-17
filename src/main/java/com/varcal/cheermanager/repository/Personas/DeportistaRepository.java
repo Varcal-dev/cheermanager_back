@@ -22,14 +22,16 @@ public interface DeportistaRepository extends JpaRepository<Deportista, Integer>
             "LEFT JOIN personas p ON p.id = d.persona_id " +
             "LEFT JOIN generos g ON g.id = p.genero_id " +
             "LEFT JOIN estados_persona ep ON ep.id = d.estado_id " +
-            "LEFT JOIN niveles n ON n.id = d.nivel_actual_id " +
-            "LEFT JOIN convenios c ON c.id = d.convenio_id", nativeQuery = true)
+            "LEFT JOIN niveles n ON n.id = d.nivel_actual_id AND n.club_id = d.club_id " +
+            "LEFT JOIN convenios c ON c.id = d.convenio_id AND c.club_id = d.club_id " +
+            "WHERE d.club_id = :#{T(com.varcal.cheermanager.tenant.TenantContext).require()}", nativeQuery = true)
     List<Object[]> obtenerDeportistasConDetalles();
 
     @Query(value = "SELECT DISTINCT d.* FROM deportistas d " +
             "LEFT JOIN estados_persona ep ON d.estado_id = ep.id " +
             "LEFT JOIN grupo_deportista gg ON d.id = gg.deportista_id " +
-            "WHERE (:estadoId IS NULL OR d.estado_id = :estadoId) " +
+            "WHERE d.club_id = :#{T(com.varcal.cheermanager.tenant.TenantContext).require()} " +
+            "AND (:estadoId IS NULL OR d.estado_id = :estadoId) " +
             "AND (:nivelId IS NULL OR d.nivel_actual_id = :nivelId) " +
             "AND (:grupoId IS NULL OR gg.grupo_entrenamiento_id = :grupoId)", nativeQuery = true)
     List<Deportista> findByFiltros(Integer estadoId, Integer nivelId, Integer grupoId);

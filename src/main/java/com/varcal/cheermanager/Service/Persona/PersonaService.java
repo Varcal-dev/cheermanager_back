@@ -1,5 +1,7 @@
 package com.varcal.cheermanager.Service.Persona;
 
+import com.varcal.cheermanager.tenant.TenantLookupRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
@@ -68,6 +70,9 @@ public class PersonaService {
     @Autowired
     private HistorialNivelDeportistaService historialNivelDeportistaService;
 
+    @Autowired
+    private TenantLookupRepository tenantLookup;
+
     public String generarUsername(String nombre, String apellidos) {
 
         String primerNombre = UsernameUtils.primerToken(nombre);
@@ -76,7 +81,7 @@ public class PersonaService {
         String base = UsernameUtils.normalizar(primerNombre)
                 + "." + UsernameUtils.normalizar(primerApellido);
 
-        long count = userRepository.countByUsernameStartingWith(base);
+        long count = tenantLookup.contarUsernamesConPrefijo(base); // global: el username es unico entre clubes
         String username = base + "_" + (count + 1);
         return username;
     }
@@ -88,10 +93,10 @@ public class PersonaService {
     @Transactional
     public Usuario registrarUsuario(Persona persona, String username, String email, String password, Integer rolId) {
         // Verificar si el username o email ya existen
-        if (userRepository.existsByUsername(username)) {
+        if (tenantLookup.usernameExisteEnAlgunClub(username)) {
             throw new RuntimeException("El nombre de usuario ya está en uso");
         }
-        if (userRepository.existsByEmail(email)) {
+        if (tenantLookup.emailExisteEnAlgunClub(email)) {
             throw new RuntimeException("El correo electrónico ya está en uso");
         }
 

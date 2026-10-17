@@ -112,6 +112,14 @@ public class AuthService {
         return LoginResult.ok(emitirToken(user), requiereCambio);
     }
 
+    /** Login rechazado porque el correo no pertenece a ningun club activo: mismo tiempo y mismo error. */
+    public LoginResult credencialesInvalidasSinClub(String password) {
+        if (password != null) {
+            BCrypt.checkpw(password, DUMMY_HASH);
+        }
+        return LoginResult.fail("invalid_credentials");
+    }
+
     /** Emite un JWT con los permisos ACTUALES del usuario (login y refresh). */
     @Transactional(readOnly = true)
     public String emitirToken(Usuario user) {
@@ -124,7 +132,7 @@ public class AuthService {
         } else if (user.getRoles() != null && !user.getRoles().isEmpty()) {
             rolNombre = user.getRoles().stream().map(Rol::getNombre).collect(Collectors.joining(", "));
         }
-        return jwtUtil.generateToken(user.getId().longValue(), user.getEmail(), rolNombre, permisosList);
+        return jwtUtil.generateToken(user.getId().longValue(), user.getEmail(), rolNombre, permisosList, user.getClubId());
     }
 
     /** Refresh: solo si el usuario sigue existiendo/activo (el @SQLRestriction lo garantiza). */
@@ -212,7 +220,7 @@ public class AuthService {
         return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
     }
 
-    static String sha256(String value) {
+    public static String sha256(String value) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             return HexFormat.of().formatHex(md.digest(value.getBytes(StandardCharsets.UTF_8)));
