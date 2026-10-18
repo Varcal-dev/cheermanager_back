@@ -66,10 +66,11 @@ public class DeprotistasController {
         try {
             Deportista deportista = personaService.registrarDeportista(deportistaDTO);
             return ResponseEntity.ok(deportista);
+        } catch (RuntimeException e) {
+            // Validaciones de negocio (documento repetido, nivel/convenio que no existen en este club...)
+            return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
-            e.printStackTrace(); // 🔥 CLAVE
-            return ResponseEntity.status(500)
-                    .body("Error al registrar el deportista: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al registrar el deportista");
         }
     }
 

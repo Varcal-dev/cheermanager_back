@@ -1,5 +1,6 @@
 package com.varcal.cheermanager.Controller.Persona;
 
+import com.varcal.cheermanager.tenant.ReferenciasClub;
 import com.varcal.cheermanager.tenant.TenantLookupRepository;
 
 import com.varcal.cheermanager.Utils.SinPermisoEspecifico;
@@ -52,6 +53,9 @@ public class UserController {
     @Autowired
     private UserRepository userRepository;
     @Autowired
+    private ReferenciasClub referencias;
+
+    @Autowired
     private TenantLookupRepository tenantLookup;
     @Autowired
     private PersonaService personaService;
@@ -92,6 +96,7 @@ public class UserController {
                 persona.setDireccion(usuarioDTO.getDireccion());
                 persona.setTelefono(usuarioDTO.getTelefono());
                 persona.setFechaNacimiento(usuarioDTO.getFechaNacimiento());
+                referencias.exigirGenero(usuarioDTO.getGeneroId());
                 persona.setGeneroId(usuarioDTO.getGeneroId());
                 persona = personaRepository.save(persona);
             }
@@ -320,6 +325,15 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error al asignar roles: " + e.getMessage());
         }
+    }
+
+    /** Genera una clave temporal (se muestra una sola vez). Reemplaza la antigua clave por defecto "0000". */
+    @PostMapping("/{usuarioId}/clave-temporal")
+    @RequiresPermission("restablecer_clave_usuario")
+    public ResponseEntity<?> claveTemporal(@PathVariable Integer usuarioId) {
+        String clave = personaService.restablecerClaveTemporal(usuarioId.longValue());
+        return ResponseEntity.ok(java.util.Map.of("claveTemporal", clave,
+                "aviso", "Entregala por un canal privado. Debera cambiarla al ingresar."));
     }
 
     @GetMapping("/{usuarioId}/roles")

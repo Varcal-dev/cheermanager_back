@@ -21,7 +21,11 @@ import com.varcal.cheermanager.Models.Clubes.Club;
 import com.varcal.cheermanager.repository.Auth.PermisoRepository;
 import com.varcal.cheermanager.repository.Auth.RolRepository;
 import com.varcal.cheermanager.repository.Auth.UserRepository;
+import com.varcal.cheermanager.Models.Org_dep.Division;
+import com.varcal.cheermanager.Models.Org_dep.Nivel;
 import com.varcal.cheermanager.repository.Clubes.ClubRepository;
+import com.varcal.cheermanager.repository.Org_dep.DivisionRepository;
+import com.varcal.cheermanager.repository.Org_dep.NivelRepository;
 import com.varcal.cheermanager.tenant.TenantContext;
 import com.varcal.cheermanager.tenant.TenantLookupRepository;
 
@@ -36,7 +40,7 @@ import com.varcal.cheermanager.tenant.TenantLookupRepository;
 public class ClubService {
 
     public record CrearClubRequest(String nombre, String slug, String adminUsername, String adminEmail,
-            String adminPassword) {
+            String adminPassword, Boolean cargarPlantilla) {
     }
 
     private final ClubRepository clubRepository;
@@ -46,11 +50,16 @@ public class ClubService {
     private final TenantLookupRepository lookup;
     private final PasswordEncoder passwordEncoder;
     private final TransactionTemplate txNueva;
+    private final NivelRepository nivelRepository;
+    private final DivisionRepository divisionRepository;
 
     public ClubService(ClubRepository clubRepository, RolRepository rolRepository,
             PermisoRepository permisoRepository, UserRepository userRepository,
             TenantLookupRepository lookup, PasswordEncoder passwordEncoder,
-            PlatformTransactionManager txManager) {
+            PlatformTransactionManager txManager, NivelRepository nivelRepository,
+            DivisionRepository divisionRepository) {
+        this.nivelRepository = nivelRepository;
+        this.divisionRepository = divisionRepository;
         this.clubRepository = clubRepository;
         this.rolRepository = rolRepository;
         this.permisoRepository = permisoRepository;
@@ -122,6 +131,21 @@ public class ClubService {
         u.setRol(admin);
         u.setRequiereCambioPassword(true);
         userRepository.save(u);
+
+        // Plantilla inicial EDITABLE (por defecto si): evita que el club arranque con pantallas vacias.
+        // Son nombres genericos de ejemplo; cada club los renombra o borra segun su federacion/liga.
+        if (!Boolean.FALSE.equals(req.cargarPlantilla())) {
+            for (int i = 1; i <= 6; i++) {
+                Nivel n = new Nivel();
+                n.setNombre("Nivel " + i);
+                nivelRepository.save(n);
+            }
+            for (String nombre : List.of("Tiny", "Mini", "Youth", "Junior", "Senior")) {
+                Division d = new Division();
+                d.setNombre(nombre);
+                divisionRepository.save(d);
+            }
+        }
     }
 
     private Rol nuevoRol(String nombre, String descripcion, Set<Permiso> permisos) {

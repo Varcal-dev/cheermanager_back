@@ -54,6 +54,11 @@ public class Inscripcion {
     @JoinColumn(name = "plan_mensualidad_id")
     private PlanPago planMensualidad;
 
+    /** Temporada activa al momento de inscribir (opcional: inscripciones antiguas no la tienen). */
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "temporada_id")
+    private Temporada temporada;
+
     @Column(name = "fecha_inscripcion", nullable = false)
     private LocalDate fechaInscripcion;
 

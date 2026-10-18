@@ -1,0 +1,44 @@
+# Produccion sencilla en un VPS: MySQL + API. El frontend se publica aparte (Vercel u otro).
+# Uso:  cp .env.example .env  (editar valores)  &&  docker compose up -d --build
+services:
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?define DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: cheermanager
+      MYSQL_USER: ${DB_USERNAME:?define DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?define DB_PASSWORD}
+      TZ: America/Bogota
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+    volumes:
+      - dbdata:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    # No se publica el puerto 3306: solo la API lo alcanza por la red interna.
+
+  api:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:mysql://db:3306/cheermanager?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Bogota
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET:?define JWT_SECRET}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:?define CORS_ALLOWED_ORIGINS}
+      FRONTEND_RESET_URL: ${FRONTEND_RESET_URL}
+      APP_BOOTSTRAP_ADMIN_USERNAME: ${APP_BOOTSTRAP_ADMIN_USERNAME:-superadmin}
+      APP_BOOTSTRAP_ADMIN_EMAIL: ${APP_BOOTSTRAP_ADMIN_EMAIL}
+      APP_BOOTSTRAP_ADMIN_PASSWORD: ${APP_BOOTSTRAP_ADMIN_PASSWORD}
+      CONSENTIMIENTOS_EXIGIR_SALUD: ${CONSENTIMIENTOS_EXIGIR_SALUD:-false}
+    ports:
+      - "127.0.0.1:8081:8081"   # solo local: pon delante Caddy/Nginx con HTTPS
+
+volumes:
+  dbdata:

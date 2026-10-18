@@ -30,6 +30,6 @@ public final class RolesPlantilla {
             "ver_grupo", "ver_horario", "ver_asistencia", "registrar_asistencia",
             "ver_evaluacion", "crear_evaluacion", "crear_evaluacion_rutina",
             "ver_objetivo", "ver_objetivos", "crear_objetivo", "modificar_objetivo",
-            "ver_nivel", "ver_categoria_nivel", "ver_evento",
+            "ver_nivel", "ver_categoria_nivel", "ver_evento", "ver_acudientes", "ver_temporadas",
             "ver_dash_inicio", "ver_dash_horarios", "ver_dash_evaluacion");
 }

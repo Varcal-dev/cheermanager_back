@@ -1,5 +1,7 @@
 package com.varcal.cheermanager.Service.Persona;
 
+import com.varcal.cheermanager.Utils.ClaveTemporal;
+import com.varcal.cheermanager.tenant.ReferenciasClub;
 import com.varcal.cheermanager.tenant.TenantLookupRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +73,11 @@ public class PersonaService {
     private HistorialNivelDeportistaService historialNivelDeportistaService;
 
     @Autowired
+    private ReferenciasClub referencias;
+
+    @Autowired
     private TenantLookupRepository tenantLookup;
+
 
     public String generarUsername(String nombre, String apellidos) {
 
@@ -92,6 +98,13 @@ public class PersonaService {
     // junto.
     @Transactional
     public Usuario registrarUsuario(Persona persona, String username, String email, String password, Integer rolId) {
+        return registrarUsuario(persona, username, email, password, rolId, false);
+    }
+
+    /** requiereCambioPassword=true cuando la clave es temporal (autogenerada): obliga a cambiarla en el primer ingreso. */
+    @Transactional
+    public Usuario registrarUsuario(Persona persona, String username, String email, String password, Integer rolId,
+            boolean requiereCambioPassword) {
         // Verificar si el username o email ya existen
         if (tenantLookup.usernameExisteEnAlgunClub(username)) {
             throw new RuntimeException("El nombre de usuario ya está en uso");
@@ -121,8 +134,29 @@ public class PersonaService {
         // "0000".
         // Si en el futuro se permite definir una contraseña real al registrar, ajustar
         // esta bandera.
-        usuario.setRequiereCambioPassword("0000".equals(password));
+        usuario.setRequiereCambioPassword(requiereCambioPassword);
         return userRepository.save(usuario);
+    }
+
+    /**
+     * El admin del club genera una clave temporal para un usuario de SU club (userRepository esta filtrado por club).
+     * Devuelve la clave UNA sola vez; el usuario debera cambiarla al ingresar. Desbloquea la cuenta.
+     * Las sesiones ya abiertas siguen validas hasta que venza su token.
+     */
+    @Transactional
+    public String restablecerClaveTemporal(Long usuarioId) {
+        Usuario u = userRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        String clave = ClaveTemporal.generar();
+        u.setPasswordHash(BCrypt.hashpw(clave, BCrypt.gensalt()));
+        u.setRequiereCambioPassword(true);
+        u.setBloqueado(false);
+        u.setBloqueadoHasta(null);
+        u.setIntentosFallidos(0);
+        u.setTokenResetPassword(null);
+        u.setTokenResetPasswordExpiracion(null);
+        userRepository.save(u);
+        return clave;
     }
 
     // Método para registrar una nueva persona
@@ -135,6 +169,7 @@ public class PersonaService {
         persona.setDireccion(personaDTO.getDireccion());
         persona.setTelefono(personaDTO.getTelefono());
         persona.setFechaNacimiento(personaDTO.getFechaNacimiento());
+        referencias.exigirGenero(personaDTO.getGeneroId());
         persona.setGeneroId(personaDTO.getGeneroId());
 
         // Guardar la persona en la base de datos
@@ -147,6 +182,7 @@ public class PersonaService {
             persona.setDireccion(personaDTO.getDireccion());
             persona.setTelefono(personaDTO.getTelefono());
             persona.setFechaNacimiento(personaDTO.getFechaNacimiento());
+            referencias.exigirGenero(personaDTO.getGeneroId());
             persona.setGeneroId(personaDTO.getGeneroId());
             return personaRepository.save(persona);
         }).orElseThrow(() -> new RuntimeException("Persona no encontrada con el ID: " + id));
@@ -189,6 +225,7 @@ public class PersonaService {
         persona.setDireccion(deportistaDTO.getDireccion());
         persona.setTelefono(deportistaDTO.getTelefono());
         persona.setFechaNacimiento(deportistaDTO.getFechaNacimiento());
+        referencias.exigirGenero(deportistaDTO.getGeneroId());
         persona.setGeneroId(deportistaDTO.getGeneroId());
         Persona personaGuardada = personaRepository.save(persona);
 
@@ -200,6 +237,8 @@ public class PersonaService {
         deportista.setEstado(estado);
         deportista.setAltura(deportistaDTO.getAltura());
         deportista.setPeso(deportistaDTO.getPeso());
+        referencias.exigirNivel(deportistaDTO.getNivelActualId());
+        referencias.exigirConvenio(deportistaDTO.getConvenioId());
         deportista.setNivelActualId(deportistaDTO.getNivelActualId());
         deportista.setFechaRegistro(LocalDate.now());
         deportista.setContactoEmergencia(deportistaDTO.getContactoEmergencia());
@@ -222,12 +261,14 @@ public class PersonaService {
                 deportistaDTO.getNombre(),
                 deportistaDTO.getApellidos());
         String email = username + "@cheermanager.com";
-        String password = "0000";
+        // Clave aleatoria que nadie conoce: antes era "0000" para todos (cualquiera que adivinara el usuario entraba).
+        // El admin entrega una clave temporal con POST /api/usuario/{id}/clave-temporal.
+        String password = ClaveTemporal.generar();
 
         Rol rolDeportista = rolRepository.findByNombre("Deportista")
                 .orElseThrow(() -> new RuntimeException("El rol 'Deportista' no existe en la base de datos"));
 
-        registrarUsuario(personaGuardada, username, email, password, rolDeportista.getId());
+        registrarUsuario(personaGuardada, username, email, password, rolDeportista.getId(), true);
 
         return deportistaGuardado;
     }
@@ -253,6 +294,7 @@ public class PersonaService {
             persona.setDireccion(deportistaDTO.getDireccion());
             persona.setTelefono(deportistaDTO.getTelefono());
             persona.setFechaNacimiento(deportistaDTO.getFechaNacimiento());
+            referencias.exigirGenero(deportistaDTO.getGeneroId());
             persona.setGeneroId(deportistaDTO.getGeneroId());
             personaRepository.save(persona);
 
@@ -273,6 +315,8 @@ public class PersonaService {
             Integer nivelNuevoId = deportistaDTO.getNivelActualId();
             boolean huboCambioDeNivel = nivelNuevoId != null && !nivelNuevoId.equals(nivelAnteriorId);
 
+            referencias.exigirNivel(nivelNuevoId);
+            referencias.exigirConvenio(deportistaDTO.getConvenioId());
             deportista.setEstado(estado);
             deportista.setAltura(deportistaDTO.getAltura());
             deportista.setPeso(deportistaDTO.getPeso());
@@ -711,6 +755,7 @@ public class PersonaService {
         persona.setDireccion(entrenadorDTO.getDireccion());
         persona.setTelefono(entrenadorDTO.getTelefono());
         persona.setFechaNacimiento(entrenadorDTO.getFechaNacimiento());
+        referencias.exigirGenero(entrenadorDTO.getGeneroId());
         persona.setGeneroId(entrenadorDTO.getGeneroId());
         Persona personaGuardada = personaRepository.save(persona);
 
@@ -732,13 +777,13 @@ public class PersonaService {
                 entrenadorDTO.getNombre(),
                 entrenadorDTO.getApellidos());
         String email = username + "@cheermanager.com"; // Generar un email ficticio o usar uno proporcionado
-        String password = "0000"; // Generar una contraseña por defecto o usar una proporcionada
+        String password = ClaveTemporal.generar(); // aleatoria; el admin entrega una temporal con /clave-temporal
         Rol rolEntrenador = rolRepository.findByNombre("Entrenador")
                 .orElseThrow(() -> new RuntimeException("El rol 'Entrenador' no existe en la base de datos"));
 
         // Antes se calculaban username/email/password/rol pero NUNCA se creaba el usuario:
         // el entrenador quedaba sin acceso al sistema.
-        registrarUsuario(personaGuardada, username, email, password, rolEntrenador.getId());
+        registrarUsuario(personaGuardada, username, email, password, rolEntrenador.getId(), true);
 
         return entrenadorGuardado;
     }
@@ -773,6 +818,7 @@ public class PersonaService {
             }
 
             if (dto.getGeneroId() != null) {
+                referencias.exigirGenero(dto.getGeneroId());
                 persona.setGeneroId(dto.getGeneroId());
             }
 

@@ -12,6 +12,7 @@ import com.varcal.cheermanager.Models.Historiales.HistorialNivelDeportista;
 import com.varcal.cheermanager.Models.Personas.Deportista;
 import com.varcal.cheermanager.repository.Historiales.HistorialNivelDeportistaRepository;
 import com.varcal.cheermanager.repository.Personas.DeportistaRepository;
+import com.varcal.cheermanager.tenant.ReferenciasClub;
 
 @Service
 public class HistorialNivelDeportistaService {
@@ -22,11 +23,19 @@ public class HistorialNivelDeportistaService {
     @Autowired
     private DeportistaRepository deportistaRepository;
 
+    @Autowired
+    private ReferenciasClub referencias;
+
     // Pensado para llamarse tanto desde un endpoint manual como desde otro
     // service (ej. PersonaService cuando cambie nivelActualId) sin duplicar lógica.
     public HistorialNivelDeportista registrarCambio(Integer deportistaId, Integer nivelId, LocalDate fechaCambio, String motivo) {
         Deportista deportista = deportistaRepository.findById(deportistaId)
                 .orElseThrow(() -> new RuntimeException("Deportista no encontrado con ID: " + deportistaId));
+
+        if (nivelId == null) {
+            throw new RuntimeException("El nivel es obligatorio");
+        }
+        referencias.exigirNivel(nivelId);
 
         HistorialNivelDeportista historial = new HistorialNivelDeportista();
         historial.setDeportista(deportista);

@@ -31,6 +31,7 @@ import com.varcal.cheermanager.repository.Financiero.FacturaRepository;
 import com.varcal.cheermanager.repository.Financiero.PagoRepository;
 import com.varcal.cheermanager.repository.Financiero.PlanPagoRepository;
 import com.varcal.cheermanager.repository.Org_dep.InscripcionRepository;
+import com.varcal.cheermanager.repository.Org_dep.TemporadaRepository;
 import com.varcal.cheermanager.repository.Personas.DeportistaRepository;
 
 @Service
@@ -38,6 +39,9 @@ public class InscripcionService {
 
     @Autowired
     private InscripcionRepository inscripcionRepository;
+
+    @Autowired
+    private TemporadaRepository temporadaRepository;
 
     @Autowired
     private DeportistaRepository deportistaRepository;
@@ -85,6 +89,8 @@ public class InscripcionService {
         inscripcion.setFechaInscripcion(dto.getFechaInscripcion());
         inscripcion.setFechaVencimiento(dto.getFechaVencimiento());
         inscripcion.setEstado(Inscripcion.EstadoInscripcion.valueOf(dto.getEstado()));
+        // Queda asociada a la temporada activa del club (si hay una).
+        temporadaRepository.findFirstByActivaTrue().ifPresent(inscripcion::setTemporada);
 
         // Plan de mensualidad (opcional). Si se indica, la inscripción queda
         // vinculada a él para que el proceso mensual de facturación (más

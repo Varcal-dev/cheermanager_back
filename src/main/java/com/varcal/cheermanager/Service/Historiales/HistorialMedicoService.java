@@ -4,6 +4,7 @@ import com.varcal.cheermanager.DTO.Persona.HistorialMedicoDTO;
 import com.varcal.cheermanager.Models.Historiales.HistorialMedico;
 import com.varcal.cheermanager.Models.Personas.Deportista;
 import com.varcal.cheermanager.Models.Personas.Persona;
+import com.varcal.cheermanager.Service.Consentimientos.ConsentimientoService;
 import com.varcal.cheermanager.repository.Historiales.HistorialMedicoRepository;
 import com.varcal.cheermanager.repository.Personas.DeportistaRepository;
 import com.varcal.cheermanager.repository.Personas.PersonaRepository;
@@ -26,6 +27,9 @@ public class HistorialMedicoService {
 
     @Autowired
     private PersonaRepository personaRepository;
+
+    @Autowired
+    private ConsentimientoService consentimientoService;
 
     @Autowired
     private DeportistaRepository deportistaRepository;
@@ -51,6 +55,9 @@ public class HistorialMedicoService {
     public HistorialMedicoDTO crearHistorialMedico(HistorialMedicoDTO dto) {
         Persona persona = personaRepository.findById(dto.getPersonaId())
                 .orElseThrow(() -> new RuntimeException("Persona no encontrada"));
+
+        // Datos sensibles de salud (Ley 1581): con app.consentimientos.exigir-salud=true exige autorizacion vigente.
+        consentimientoService.exigirConsentimientoSalud(persona.getId());
 
         HistorialMedico historial = new HistorialMedico();
         historial.setPersona(persona);
