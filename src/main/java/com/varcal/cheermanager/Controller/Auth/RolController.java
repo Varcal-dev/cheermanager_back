@@ -84,7 +84,7 @@ public class RolController {
      */
 
     @PostMapping("/asignar-permisos")
-    @RequiresPermission("ASIGNAR_PERMISO")
+    @RequiresPermission("asignar_permiso")
     public ResponseEntity<Rol> asignarPermisosARol(@RequestBody CrearRolConPermisosDTO request) {
         Rol rolActualizado = rolService.assignPermissionsToRol(request.getRolId(), request.getPermisoIds());
         return ResponseEntity.ok(rolActualizado);

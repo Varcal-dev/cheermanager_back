@@ -314,7 +314,7 @@ public class UserController {
 
     // Métodos para multi-rol support
     @PostMapping("/{usuarioId}/asignar-roles")
-    @RequiresPermission("ASIGNAR_PERMISO")
+    @RequiresPermission("asignar_permiso")
     public ResponseEntity<?> asignarRoles(@PathVariable Integer usuarioId, @RequestBody Set<Integer> rolIds) {
         try {
             Usuario usuarioActualizado = usuarioService.asignarRoles(usuarioId, rolIds);

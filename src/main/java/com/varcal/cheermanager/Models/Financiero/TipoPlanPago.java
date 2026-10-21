@@ -28,7 +28,7 @@ public class TipoPlanPago {
     private String nombre;
     
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "varchar(50)")
     private Categoria categoria;
     
     @Column(name = "duracion_meses", nullable = false)

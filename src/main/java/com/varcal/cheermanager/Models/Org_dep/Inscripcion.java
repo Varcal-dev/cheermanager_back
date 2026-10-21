@@ -65,6 +65,8 @@ public class Inscripcion {
     @Column(name = "fecha_vencimiento")
     private LocalDate fechaVencimiento;
 
+    // columnDefinition: la columna es varchar(50); sin esto Hibernate 6.x espera un ENUM nativo de MySQL al validar.
+    @Column(name = "estado", columnDefinition = "varchar(50)")
     @Enumerated(EnumType.STRING)
     private EstadoInscripcion estado;
 

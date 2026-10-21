@@ -77,13 +77,26 @@ public class GrupoEntrenamientoService {
     // obtenerCandidatosGrupo, que resuelve todo en una sola llamada y con
     // motivo estructurado en vez de un string suelto.
     public String verificarElegibilidadDeportista(Integer grupoId, Integer deportistaId) {
-        // La funcion de BD lee por id sin filtro de club: primero se comprueba (con filtro) que
-        // grupo y deportista pertenezcan al club actual.
-        grupoEntrenamientoRepository.findById(grupoId)
+        // Antes llamaba a una funcion de MySQL (verificar_elegibilidad_deportista_grupo) que no estaba en los
+        // scripts del proyecto: una base nueva fallaba con "FUNCTION does not exist". Ahora se calcula aqui,
+        // con las mismas reglas que /candidatos (cupo y rango de ano de nacimiento de la categoria).
+        GrupoEntrenamiento grupo = grupoEntrenamientoRepository.findById(grupoId)
                 .orElseThrow(() -> new RuntimeException("Grupo no encontrado"));
-        deportistaRepository.findById(deportistaId)
+        Deportista deportista = deportistaRepository.findById(deportistaId)
                 .orElseThrow(() -> new RuntimeException("Deportista no encontrado"));
-        return grupoEntrenamientoRepository.verificarElegibilidadDeportista(deportistaId, grupoId);
+
+        if (deportistaPerteneceGrupoRepository.existsByDeportistaIdAndFechaFinIsNull(deportistaId)) {
+            return "El deportista ya pertenece activamente a un grupo";
+        }
+        CategoriaNivel categoria = grupo.getCategoriaNivel();
+        Integer cupoMaximo = categoria != null ? categoria.getCantidadMax() : null;
+        int cupoActual = deportistaPerteneceGrupoRepository.findByGrupoIdAndFechaFinIsNull(grupoId).size();
+        boolean lleno = cupoMaximo != null && cupoActual >= cupoMaximo;
+        java.time.LocalDate nac = deportista.getPersona().getFechaNacimiento();
+        String motivo = calcularMotivoNoElegible(nac != null ? nac.getYear() : null,
+                categoria != null ? categoria.getAñoNacimientoMin() : null,
+                categoria != null ? categoria.getAñoNacimientoMax() : null, lleno, cupoActual, cupoMaximo);
+        return motivo == null ? "Elegible" : motivo;
     }
 
     public String agregarDeportistaAGrupo(Integer deportistaId, Integer grupoId, String observaciones) {

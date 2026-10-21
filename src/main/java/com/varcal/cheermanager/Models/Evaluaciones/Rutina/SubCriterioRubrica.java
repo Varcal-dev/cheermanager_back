@@ -45,7 +45,7 @@ public class SubCriterioRubrica {
     private String seccion;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "tipo_calculo", nullable = false)
+    @Column(name = "tipo_calculo", nullable = false, columnDefinition = "varchar(50)")
     private TipoCalculoSubCriterio tipoCalculo;
 
     public enum TipoCalculoSubCriterio {

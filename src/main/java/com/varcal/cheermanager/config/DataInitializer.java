@@ -57,26 +57,28 @@ public class DataInitializer {
                 return;
             }
 
-            // Permisos globales de plataforma (se crean si faltan; el resto viene de sql/fase0_permisos.sql)
-            Set<Permiso> deSuperadmin = new HashSet<>();
+            // Permisos globales de plataforma (se crean si faltan; el resto viene del script de datos / migracion V2)
             for (String nombre : RolesPlantilla.SOLO_PLATAFORMA) {
-                Permiso p = permisoRepo.findAll().stream().filter(x -> nombre.equals(x.getNombre())).findFirst()
-                        .orElseGet(() -> {
-                            Permiso nuevo = new Permiso();
-                            nuevo.setNombre(nombre);
-                            return permisoRepo.save(nuevo);
-                        });
-                deSuperadmin.add(p);
+                if (permisoRepo.findAll().stream().noneMatch(x -> nombre.equals(x.getNombre()))) {
+                    Permiso nuevo = new Permiso();
+                    nuevo.setNombre(nombre);
+                    permisoRepo.save(nuevo);
+                }
             }
 
             TenantContext.runAs(Club.PLATAFORMA_ID, () -> {
+                // El Super Administrador tiene TODOS los permisos (igual que el script de datos). Si el rol ya existe
+                // NO se le quita nada: solo se le agregan los permisos que falten (p. ej. los de una version nueva).
                 Rol rol = rolRepo.findByNombre(RolesPlantilla.SUPERADMIN).orElseGet(() -> {
                     Rol r = new Rol();
                     r.setNombre(RolesPlantilla.SUPERADMIN);
-                    r.setDescripcion("Administrador de la plataforma");
+                    r.setDescripcion("Administrador global del sistema, configuracion, seguridad y permisos");
+                    r.setPermisos(new HashSet<>());
                     return r;
                 });
-                rol.setPermisos(deSuperadmin);
+                Set<Permiso> permisos = rol.getPermisos() == null ? new HashSet<>() : new HashSet<>(rol.getPermisos());
+                permisos.addAll(permisoRepo.findAll());
+                rol.setPermisos(permisos);
                 rol = rolRepo.save(rol);
 
                 if (password == null || password.isBlank()) {

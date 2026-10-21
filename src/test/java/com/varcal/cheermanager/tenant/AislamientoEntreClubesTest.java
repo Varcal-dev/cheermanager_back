@@ -47,7 +47,7 @@ class AislamientoEntreClubesTest {
 
     @BeforeEach
     void permisosBase() {
-        for (String n : List.of("ver_nivel", "crear_nivel", "modificar_nivel", "eliminar_nivel", "ASIGNAR_PERMISO",
+        for (String n : List.of("ver_nivel", "crear_nivel", "modificar_nivel", "eliminar_nivel", "asignar_permiso",
                 "ver_roles", "gestionar_roles", "crear_deportista", "ver_deportista",
                 "ver_acudientes", "gestionar_acudientes", "ver_temporadas", "gestionar_temporadas",
                 "ver_consentimientos", "gestionar_consentimientos", "ver_onboarding", "restablecer_clave_usuario")) {

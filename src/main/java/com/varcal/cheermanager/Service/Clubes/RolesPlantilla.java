@@ -11,14 +11,18 @@ public final class RolesPlantilla {
     private RolesPlantilla() {
     }
 
-    public static final String ADMIN = "ADMIN";
+    /** Nombres IGUALES a los del script de datos (roles de Ratels): un club nuevo usa los mismos. */
+    public static final String ADMIN = "Administrador";
     public static final String ENTRENADOR = "Entrenador";
     public static final String DEPORTISTA = "Deportista";
-    public static final String SUPERADMIN = "SUPERADMIN";
+    public static final String SUPERADMIN = "Super Administrador";
 
     /** Permisos que SOLO tiene la plataforma (catalogos globales, rubrica global, gestion de clubes). */
     public static final Set<String> SOLO_PLATAFORMA = Set.of(
-            "gestionar_clubes", "gestionar_catalogos", "configurar_rubrica");
+            "gestionar_clubes", "gestionar_catalogos", "configurar_rubrica",
+            // reservados al Super Administrador segun el script de datos (hoy sin endpoint que los use)
+            "administrar_roles", "administrar_permisos", "configurar_sistema", "gestionar_parametros",
+            "importar_datos", "exportar_datos", "ver_dashboard_global", "ver_logs_sistema");
 
     /**
      * Entrenador: opera el dia a dia (asistencia, evaluaciones, consulta de atletas/grupos).

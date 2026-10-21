@@ -37,7 +37,7 @@ public class Pago {
     @Column(name = "fecha", nullable = false)
     private LocalDate fecha;
 
-    @Column(name = "estado", nullable = false)
+    @Column(name = "estado", nullable = false, columnDefinition = "varchar(50)")
     @Enumerated(EnumType.STRING)
     private EstadoPago estado;
 

@@ -44,7 +44,7 @@ public class Auditoria {
     @Column(name = "tabla_afectada", nullable = false, length = 50)
     private String tablaAfectada;
 
-    @Column(name = "accion", nullable = false)
+    @Column(name = "accion", nullable = false, columnDefinition = "varchar(50)")
     @Enumerated(EnumType.STRING)
     private AccionEnum accion;
 

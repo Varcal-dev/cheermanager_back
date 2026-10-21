@@ -44,7 +44,7 @@ public class MovimientoInventario {
     @JoinColumn(name = "producto_variante_id", nullable = false)
     private ProductoVariante productoVariante;
 
-    @Column(name = "tipo", nullable = false)
+    @Column(name = "tipo", nullable = false, columnDefinition = "varchar(50)")
     @Enumerated(EnumType.STRING)
     private TipoMovimiento tipo;
 
