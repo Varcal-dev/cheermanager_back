@@ -39,4 +39,6 @@ public interface DeportistaRepository extends JpaRepository<Deportista, Integer>
     @NonNull
     Optional<Deportista> findById(Integer id);
 
+    Optional<Deportista> findByPersonaId(Integer personaId);
+
 }

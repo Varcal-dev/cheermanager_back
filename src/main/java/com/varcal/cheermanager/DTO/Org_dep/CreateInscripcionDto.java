@@ -12,4 +12,3 @@ private LocalDate fechaInscripcion;
 private LocalDate fechaVencimiento;
 private String estado; // Activa o Inactiva
 }
-

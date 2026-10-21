@@ -5,7 +5,14 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.varcal.cheermanager.Models.Auth.Rol;
+import com.varcal.cheermanager.Models.Auth.Usuario;
 import com.varcal.cheermanager.Models.Personas.Acudiente;
+import com.varcal.cheermanager.Service.Clubes.RolesPlantilla;
+import com.varcal.cheermanager.Utils.ClaveTemporal;
+import com.varcal.cheermanager.repository.Auth.RolRepository;
+import com.varcal.cheermanager.repository.Auth.UserRepository;
+import com.varcal.cheermanager.tenant.TenantLookupRepository;
 import com.varcal.cheermanager.Models.Personas.Deportista;
 import com.varcal.cheermanager.Models.Personas.DeportistaAcudiente;
 import com.varcal.cheermanager.repository.Consentimientos.ConsentimientoRepository;
@@ -25,12 +32,13 @@ public class AcudienteService {
     }
 
     public record VinculoResponse(Integer vinculoId, Integer acudienteId, String nombre, String apellidos,
-            String telefono, String email, String parentesco, boolean principal, boolean autorizaRecoger) {
+            String telefono, String email, String parentesco, boolean principal, boolean autorizaRecoger,
+            boolean tieneAcceso) {
         static VinculoResponse de(DeportistaAcudiente v) {
             Acudiente a = v.getAcudiente();
             return new VinculoResponse(v.getId(), a.getId(), a.getNombre(), a.getApellidos(), a.getTelefono(),
                     a.getEmail(), v.getParentesco(), Boolean.TRUE.equals(v.getPrincipal()),
-                    Boolean.TRUE.equals(v.getAutorizaRecoger()));
+                    Boolean.TRUE.equals(v.getAutorizaRecoger()), a.getUsuarioId() != null);
         }
     }
 
@@ -38,9 +46,19 @@ public class AcudienteService {
     private final DeportistaAcudienteRepository vinculoRepository;
     private final DeportistaRepository deportistaRepository;
     private final ConsentimientoRepository consentimientoRepository;
+    private final UserRepository userRepository;
+    private final RolRepository rolRepository;
+    private final TenantLookupRepository tenantLookup;
+
+    public record AccesoAcudiente(String username, String claveTemporal) {
+    }
 
     public AcudienteService(AcudienteRepository acudienteRepository, DeportistaAcudienteRepository vinculoRepository,
-            DeportistaRepository deportistaRepository, ConsentimientoRepository consentimientoRepository) {
+            DeportistaRepository deportistaRepository, ConsentimientoRepository consentimientoRepository,
+            UserRepository userRepository, RolRepository rolRepository, TenantLookupRepository tenantLookup) {
+        this.userRepository = userRepository;
+        this.rolRepository = rolRepository;
+        this.tenantLookup = tenantLookup;
         this.acudienteRepository = acudienteRepository;
         this.vinculoRepository = vinculoRepository;
         this.deportistaRepository = deportistaRepository;
@@ -92,7 +110,47 @@ public class AcudienteService {
             throw new RuntimeException("No se puede eliminar: el acudiente firmo consentimientos que se deben conservar");
         }
         vinculoRepository.deleteByAcudienteId(id);
+        Integer usuarioId = a.getUsuarioId();
         acudienteRepository.delete(a);
+        if (usuarioId != null) { // el acudiente ya no existe: su acceso al portal se desactiva
+            userRepository.findById(usuarioId.longValue()).ifPresent(userRepository::delete);
+        }
+    }
+
+    /**
+     * Crea el usuario del portal del acudiente (rol "Acudiente", solo lectura). El usuario es su correo; la clave
+     * temporal se devuelve UNA vez y el sistema le exige cambiarla al ingresar.
+     */
+    @Transactional
+    public AccesoAcudiente crearAcceso(Integer id) {
+        Acudiente a = obtener(id);
+        if (a.getUsuarioId() != null) {
+            throw new RuntimeException("El acudiente ya tiene acceso al portal; usa 'restablecer clave' si la olvido");
+        }
+        String email = limpio(a.getEmail());
+        if (email == null) {
+            throw new RuntimeException("El acudiente necesita un correo electronico para crear su acceso");
+        }
+        if (vinculoRepository.countByAcudienteId(id) == 0) {
+            throw new RuntimeException("Vincula primero al acudiente con al menos un deportista");
+        }
+        if (tenantLookup.usernameExisteEnAlgunClub(email) || tenantLookup.emailExisteEnAlgunClub(email)) {
+            throw new RuntimeException("Ese correo ya esta en uso por otro usuario");
+        }
+        Rol rol = rolRepository.findByNombre(RolesPlantilla.ACUDIENTE)
+                .orElseThrow(() -> new RuntimeException("El club no tiene el rol 'Acudiente'"));
+        String clave = ClaveTemporal.generar();
+        Usuario u = new Usuario();
+        u.setUsername(email);
+        u.setEmail(email);
+        u.setPasswordHash(new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder().encode(clave));
+        u.setRol(rol);
+        u.setActivo(true);
+        u.setRequiereCambioPassword(true);
+        u = userRepository.save(u);
+        a.setUsuarioId(u.getId());
+        acudienteRepository.save(a);
+        return new AccesoAcudiente(email, clave);
     }
 
     public List<VinculoResponse> listarDeDeportista(Integer deportistaId) {

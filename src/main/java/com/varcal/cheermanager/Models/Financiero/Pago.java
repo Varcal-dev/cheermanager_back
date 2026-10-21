@@ -43,4 +43,15 @@ public class Pago {
 
     @Column(name = "monto", precision = 10, scale = 2, nullable = false)
     private BigDecimal monto;
+
+    // Anulacion (estado = Anulado): el pago no se borra, queda con motivo, fecha y usuario.
+    @Column(name = "fecha_anulacion")
+    private java.time.LocalDateTime fechaAnulacion;
+
+    @Column(name = "motivo_anulacion", length = 300)
+    private String motivoAnulacion;
+
+    @Column(name = "anulado_por_usuario_id")
+    private Integer anuladoPorUsuarioId;
+
 }

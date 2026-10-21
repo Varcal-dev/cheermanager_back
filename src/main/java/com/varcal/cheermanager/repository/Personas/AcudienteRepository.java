@@ -8,4 +8,6 @@ import com.varcal.cheermanager.Models.Personas.Acudiente;
 
 public interface AcudienteRepository extends JpaRepository<Acudiente, Integer> {
     Optional<Acudiente> findByNumeroDocumento(String numeroDocumento);
+
+    Optional<Acudiente> findByUsuarioId(Integer usuarioId);
 }

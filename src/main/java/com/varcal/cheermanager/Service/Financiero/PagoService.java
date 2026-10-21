@@ -51,6 +51,10 @@ public class PagoService {
         MetodoPago metodoPago = metodoPagoRepository.findById(dto.getMetodoPagoId())
                 .orElseThrow(() -> new RuntimeException("Método de pago no encontrado con ID: " + dto.getMetodoPagoId()));
 
+        if (Boolean.TRUE.equals(factura.getAnulada())) {
+            throw new RuntimeException("La factura " + factura.getNumeroFactura() + " esta anulada: no admite pagos");
+        }
+
         if (dto.getMonto() == null || dto.getMonto().compareTo(BigDecimal.ZERO) <= 0) {
             throw new RuntimeException("El monto del pago debe ser mayor a cero");
         }
@@ -61,6 +65,11 @@ public class PagoService {
         } catch (IllegalArgumentException | NullPointerException e) {
             throw new RuntimeException("Estado de pago inválido: " + dto.getEstado()
                     + ". Valores permitidos: Pagado, Pendiente, Vencido");
+        }
+
+        // "Anulado" solo se alcanza por anular(): exige motivo y deja trazabilidad.
+        if (estado == EstadoPago.Anulado) {
+            throw new RuntimeException("Un pago no se registra como Anulado. Registralo y luego anulalo con su motivo.");
         }
 
         // Si el pago se registra como "Pagado", no permitir que la suma de pagos
@@ -129,6 +138,13 @@ public class PagoService {
                     + ". Valores permitidos: Pagado, Pendiente, Vencido");
         }
 
+        if (estado == EstadoPago.Anulado) {
+            throw new RuntimeException("Para anular un pago usa la opcion Anular (pide el motivo).");
+        }
+        if (pago.getEstado() == EstadoPago.Anulado) {
+            throw new RuntimeException("El pago esta anulado y ya no se puede modificar.");
+        }
+
         // Misma validación de sobrepago si se está marcando como "Pagado" ahora.
         if (estado == EstadoPago.Pagado && pago.getEstado() != EstadoPago.Pagado) {
             // Se bloquea la factura antes de leer el saldo (mismo motivo que registrarPago).
@@ -148,11 +164,23 @@ public class PagoService {
         return toResponseDTO(guardado);
     }
 
-    public void eliminar(Integer id) {
-        if (!pagoRepository.existsById(id)) {
-            throw new RuntimeException("Pago no encontrado con ID: " + id);
+    // Los pagos NO se borran: se anulan con motivo (queda fecha y usuario) y dejan de sumar al saldo.
+    @Transactional
+    public PagoResponseDTO anular(Integer id, String motivo) {
+        String m = FacturaService.validarMotivo(motivo);
+        Pago pago = pagoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Pago no encontrado con ID: " + id));
+        if (pago.getEstado() == EstadoPago.Anulado) {
+            throw new RuntimeException("El pago ya esta anulado");
         }
-        pagoRepository.deleteById(id);
+        // Mismo bloqueo que registrarPago: serializa contra otros movimientos de la factura.
+        facturaRepository.findByIdForUpdate(pago.getFactura().getId());
+
+        pago.setEstado(EstadoPago.Anulado);
+        pago.setMotivoAnulacion(m);
+        pago.setFechaAnulacion(java.time.LocalDateTime.now());
+        pago.setAnuladoPorUsuarioId(FacturaService.usuarioActualId());
+        return toResponseDTO(pagoRepository.save(pago));
     }
 
     // Saldo pendiente de una factura: total de la factura menos lo ya pagado
@@ -186,7 +214,10 @@ public class PagoService {
 
         BigDecimal yaPagado = pagoRepository.sumarMontoPagadoPorFactura(factura.getId());
         dto.setSaldoPendienteFactura(factura.getTotal().subtract(yaPagado));
+        dto.setMotivoAnulacion(pago.getMotivoAnulacion());
+        dto.setFechaAnulacion(pago.getFechaAnulacion());
 
         return dto;
+
     }
 }

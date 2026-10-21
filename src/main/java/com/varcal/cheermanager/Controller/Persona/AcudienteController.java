@@ -46,6 +46,12 @@ public class AcudienteController {
         return service.actualizar(id, req);
     }
 
+    @PostMapping("/{id}/acceso")
+    @RequiresPermission("gestionar_acudientes")
+    public ResponseEntity<AcudienteService.AccesoAcudiente> crearAcceso(@PathVariable Integer id) {
+        return ResponseEntity.status(201).body(service.crearAcceso(id));
+    }
+
     @DeleteMapping("/{id}")
     @RequiresPermission("gestionar_acudientes")
     public ResponseEntity<Void> eliminar(@PathVariable Integer id) {

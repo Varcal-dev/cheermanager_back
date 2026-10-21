@@ -20,4 +20,7 @@ private Integer planMensualidadId;
 private LocalDate fechaInscripcion;
 private LocalDate fechaVencimiento;
 private String estado;
+
+// Opcional: temporada a la que pertenece la inscripcion (renovaciones/solicitudes). Sin valor = temporada activa.
+private Integer temporadaId;
 }

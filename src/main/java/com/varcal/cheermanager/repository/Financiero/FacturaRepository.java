@@ -7,7 +7,9 @@ import org.springframework.data.jpa.repository.Lock;
 import jakarta.persistence.LockModeType;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
+
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -43,6 +45,18 @@ public interface FacturaRepository extends JpaRepository<Factura, Integer> {
     // completo. El saldo pendiente por factura (total - pagado) se calcula
     // en el Service cruzando esto con PagoRepository.sumarMontoPagadoPorFactura,
     // para no duplicar esa lógica en una segunda query.
-    @Query("SELECT COALESCE(SUM(f.total), 0) FROM Factura f")
+    @Query("SELECT COALESCE(SUM(f.total), 0) FROM Factura f WHERE f.anulada = false")
     BigDecimal sumarTotalFacturado();
+
+    // Facturas vigentes (las anuladas no cuentan en cartera ni en los dashboards).
+    List<Factura> findByAnuladaFalse();
+
+    List<Factura> findByPersonaIdOrderByFechaEmisionDesc(Integer personaId);
+
+    // Cartera en mora: vigentes, ya vencidas (fecha_vencimiento < hoy) y con saldo > 0.
+    @Query("SELECT f FROM Factura f WHERE f.anulada = false AND f.fechaVencimiento < :hoy "
+            + "AND f.total > (SELECT COALESCE(SUM(p.monto), 0) FROM Pago p WHERE p.factura = f AND p.estado = 'Pagado') "
+            + "ORDER BY f.fechaVencimiento ASC")
+    List<Factura> findEnMora(@Param("hoy") LocalDate hoy);
+
 }

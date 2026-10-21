@@ -29,7 +29,20 @@ public class TenantLookupRepository {
         return primerEntero("SELECT club_id FROM usuarios WHERE token_reset_password = ?1 AND activo = true", tokenHash);
     }
 
+    /** Ids de los clubes reales activos (excluye el club "Plataforma", id 1). Para procesos programados. */
+    @SuppressWarnings("unchecked")
+    public java.util.List<Integer> idsClubesActivos() {
+        java.util.List<Object> rows = em.createNativeQuery("SELECT id FROM clubes WHERE activo = true AND id <> 1 ORDER BY id")
+                .getResultList();
+        java.util.List<Integer> ids = new java.util.ArrayList<>();
+        for (Object r : rows) {
+            ids.add(((Number) r).intValue());
+        }
+        return ids;
+    }
+
     public boolean existeUsuarioEnAlgunClub(String username, String email) {
+
         Number n = (Number) em.createNativeQuery(
                 "SELECT COUNT(*) FROM usuarios WHERE username = ?1 OR email = ?2")
                 .setParameter(1, username).setParameter(2, email).getSingleResult();

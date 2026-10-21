@@ -95,7 +95,8 @@ public class DashboardInicioService {
     // en vez de duplicar esa lógica — a la escala de un club esto es
     // aceptable en memoria.
     private void calcularCartera(ResumenInicioDTO dto) {
-        List<Factura> facturas = facturaRepository.findAll();
+        List<Factura> facturas = facturaRepository.findByAnuladaFalse();
+
         BigDecimal pendienteTotal = BigDecimal.ZERO;
         long facturasConSaldo = 0;
 

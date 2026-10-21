@@ -23,6 +23,19 @@ public class FacturaResponseDTO {
     private BigDecimal total;
     private Integer inscripcionId; // solo el id, nunca el objeto Inscripcion completo
 
+    // --- Cartera (calculada en el servidor; el frontend ya no la deduce) ---
+    private LocalDate fechaVencimiento;
+    private String concepto;
+    private Integer eventoId;
+    private Boolean anulada;
+    private String motivoAnulacion;
+    private BigDecimal totalPagado;     // suma de pagos en estado "Pagado"
+    private BigDecimal saldoPendiente;  // total - totalPagado (0 si esta anulada)
+    /** PAGADA | ABONO_PARCIAL | PENDIENTE | EN_MORA | ANULADA */
+    private String estadoCuenta;
+    private Long diasMora;              // solo si EN_MORA
+
+
     @Data
     public static class PersonaResumenDTO {
         private Integer id;

@@ -59,4 +59,30 @@ public class Factura {
     // Las facturas de inscripción (cobro único) y las manuales quedan null.
     @Column(name = "periodo", length = 7)
     private String periodo;
+
+    /** Fecha limite de pago: emision + 10 dias. Pasada esa fecha, con saldo pendiente, esta EN MORA. */
+    @Column(name = "fecha_vencimiento")
+    private LocalDate fechaVencimiento;
+
+    /** INSCRIPCION, MENSUALIDAD, TIENDA, UNIFORME, COMPETENCIA, EVENTO u OTRO. */
+    @Column(name = "concepto", length = 30)
+    private String concepto;
+
+    /** Evento al que se liga un cobro manual (opcional). */
+    @Column(name = "evento_id")
+    private Integer eventoId;
+
+    /** Las facturas no se borran: se anulan (no cuentan en cartera ni en recaudo). */
+    @Column(name = "anulada", nullable = false)
+    private Boolean anulada = false;
+
+    @Column(name = "fecha_anulacion")
+    private java.time.LocalDateTime fechaAnulacion;
+
+    @Column(name = "motivo_anulacion", length = 300)
+    private String motivoAnulacion;
+
+    @Column(name = "anulada_por_usuario_id")
+    private Integer anuladaPorUsuarioId;
+
 }

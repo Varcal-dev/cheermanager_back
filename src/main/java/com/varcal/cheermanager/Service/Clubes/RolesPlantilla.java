@@ -15,6 +15,9 @@ public final class RolesPlantilla {
     public static final String ADMIN = "Administrador";
     public static final String ENTRENADOR = "Entrenador";
     public static final String DEPORTISTA = "Deportista";
+    public static final String ACUDIENTE = "Acudiente";
+    /** Acceso al portal de solo lectura (cada usuario ve unicamente lo suyo / de sus deportistas). */
+    public static final String PERMISO_PORTAL = "acceder_portal";
     public static final String SUPERADMIN = "Super Administrador";
 
     /** Permisos que SOLO tiene la plataforma (catalogos globales, rubrica global, gestion de clubes). */

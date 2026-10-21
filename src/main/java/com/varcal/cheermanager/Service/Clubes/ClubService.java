@@ -115,6 +115,7 @@ public class ClubService {
 
         Set<Permiso> deAdmin = permisos.values().stream()
                 .filter(p -> !RolesPlantilla.SOLO_PLATAFORMA.contains(p.getNombre()))
+                .filter(p -> !RolesPlantilla.PERMISO_PORTAL.equals(p.getNombre()))
                 .collect(Collectors.toCollection(HashSet::new));
         Set<Permiso> deEntrenador = RolesPlantilla.ENTRENADOR_PERMISOS.stream()
                 .map(permisos::get).filter(p -> p != null)
@@ -122,7 +123,13 @@ public class ClubService {
 
         Rol admin = nuevoRol(RolesPlantilla.ADMIN, "Administrador del club", deAdmin);
         nuevoRol(RolesPlantilla.ENTRENADOR, "Entrenador", deEntrenador);
-        nuevoRol(RolesPlantilla.DEPORTISTA, "Deportista", new HashSet<>());
+        Set<Permiso> deportistaPortal = new HashSet<>();
+        Permiso portal = permisos.get(RolesPlantilla.PERMISO_PORTAL);
+        if (portal != null) {
+            deportistaPortal.add(portal);
+        }
+        nuevoRol(RolesPlantilla.DEPORTISTA, "Deportista", new HashSet<>(deportistaPortal));
+        nuevoRol(RolesPlantilla.ACUDIENTE, "Padre, madre o tutor (portal de solo lectura)", deportistaPortal);
 
         Usuario u = new Usuario();
         u.setUsername(req.adminUsername().trim());

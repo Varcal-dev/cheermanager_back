@@ -7,4 +7,4 @@ import com.varcal.cheermanager.Models.Org_dep.TipoGrupo;
 public interface TipoGrupoRepository extends JpaRepository<TipoGrupo, Integer>{
 
     
-} 
+}

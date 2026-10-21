@@ -20,6 +20,9 @@ public interface DeportistaAcudienteRepository extends JpaRepository<DeportistaA
             + "AND da.deportista.persona.id = :personaId")
     boolean acudienteDePersona(@Param("acudienteId") Integer acudienteId, @Param("personaId") Integer personaId);
 
+    @Query("SELECT da.deportista FROM DeportistaAcudiente da WHERE da.acudiente.id = :acudienteId")
+    List<com.varcal.cheermanager.Models.Personas.Deportista> deportistasDeAcudiente(@Param("acudienteId") Integer acudienteId);
+
     long countByAcudienteId(Integer acudienteId);
 
     void deleteByAcudienteId(Integer acudienteId);

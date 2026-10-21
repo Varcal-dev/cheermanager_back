@@ -40,7 +40,9 @@ class PermisosContraMigracionesTest {
 
     /** Nombres declarados en `INSERT IGNORE INTO permisos (nombre) VALUES ... ;` de V2. */
     private static Set<String> permisosDeLosDatos() throws Exception {
-        String sql = leer("db/migration/V2__datos_iniciales.sql");
+        // V2 (catalogo inicial) + migraciones posteriores que agregan permisos (V6: acceder_portal).
+        String sql = leer("db/migration/V2__datos_iniciales.sql") + "\n"
+                + leer("db/migration/V6__portal_acudiente_deportista_y_solicitudes.sql");
         Set<String> nombres = new HashSet<>();
         Matcher bloque = Pattern.compile("INSERT\\s+IGNORE\\s+INTO\\s+permisos\\s*\\(nombre\\)\\s*VALUES(.*?);",
                 Pattern.CASE_INSENSITIVE | Pattern.DOTALL).matcher(sql);

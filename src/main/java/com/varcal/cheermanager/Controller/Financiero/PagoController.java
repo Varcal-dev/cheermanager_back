@@ -81,10 +81,11 @@ public class PagoController {
         return ResponseEntity.ok(pagoService.actualizarEstado(id, nuevoEstado));
     }
 
-    @DeleteMapping("/{id}")
-    @RequiresPermission("eliminar_pago")
-    public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
-        pagoService.eliminar(id);
-        return ResponseEntity.noContent().build();
+    // Los pagos no se borran: se anulan con motivo (queda fecha y usuario).
+    @PatchMapping("/{id}/anular")
+    @RequiresPermission("anular_pago")
+    public ResponseEntity<PagoResponseDTO> anular(@PathVariable Integer id, @RequestBody Map<String, String> body) {
+        return ResponseEntity.ok(pagoService.anular(id, body.get("motivo")));
     }
+
 }

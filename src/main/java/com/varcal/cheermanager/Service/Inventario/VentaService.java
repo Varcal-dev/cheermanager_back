@@ -131,7 +131,10 @@ public class VentaService {
             factura.setDescripcion("Venta de tienda #" + guardada.getId()
                     + " (" + detalles.size() + (detalles.size() == 1 ? " ítem)" : " ítems)"));
             factura.setTotal(total);
+            factura.setConcepto("TIENDA");
+            factura.setFechaVencimiento(FacturaService.calcularVencimiento(guardada.getFecha()));
             Factura facturaGuardada = facturaRepository.save(factura);
+
 
             guardada.setFactura(facturaGuardada);
             guardada = ventaRepository.save(guardada);

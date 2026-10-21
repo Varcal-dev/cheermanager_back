@@ -42,7 +42,8 @@ public class DashboardFinanzasService {
 
         dto.setRecaudoMesActual(pagoRepository.sumarMontoPagadoEnRango(inicioMes, finMes));
 
-        List<Factura> facturas = facturaRepository.findAll();
+        List<Factura> facturas = facturaRepository.findByAnuladaFalse();
+
         calcularCarteraYFacturadoDelMes(dto, facturas, inicioMes, finMes);
         dto.setMorosidadPorPlan(calcularMorosidadPorPlan(facturas));
 

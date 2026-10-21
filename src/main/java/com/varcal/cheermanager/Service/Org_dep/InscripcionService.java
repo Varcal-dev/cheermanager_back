@@ -24,8 +24,11 @@ import com.varcal.cheermanager.Models.Financiero.EstadoPago;
 import com.varcal.cheermanager.Models.Financiero.Factura;
 import com.varcal.cheermanager.Models.Financiero.PlanPago;
 import com.varcal.cheermanager.Models.Org_dep.Inscripcion;
+import com.varcal.cheermanager.Models.Org_dep.Temporada;
 import com.varcal.cheermanager.Models.Personas.Deportista;
+import com.varcal.cheermanager.Service.Financiero.FacturaService;
 import com.varcal.cheermanager.Service.Historiales.HistorialPlanesDeportistaService;
+import com.varcal.cheermanager.Utils.CalendarioHabil;
 import com.varcal.cheermanager.repository.Financiero.ConvenioRepository;
 import com.varcal.cheermanager.repository.Financiero.FacturaRepository;
 import com.varcal.cheermanager.repository.Financiero.PagoRepository;
@@ -61,6 +64,9 @@ public class InscripcionService {
     @Autowired
     private HistorialPlanesDeportistaService historialPlanesDeportistaService;
 
+    @Autowired
+    private FacturaService facturaService;
+
     public List<Object[]> obtenerDetalleInscripciones() {
         return inscripcionRepository.obtenerVistaInscripcionesDetalle();
     }
@@ -89,8 +95,13 @@ public class InscripcionService {
         inscripcion.setFechaInscripcion(dto.getFechaInscripcion());
         inscripcion.setFechaVencimiento(dto.getFechaVencimiento());
         inscripcion.setEstado(Inscripcion.EstadoInscripcion.valueOf(dto.getEstado()));
-        // Queda asociada a la temporada activa del club (si hay una).
-        temporadaRepository.findFirstByActivaTrue().ifPresent(inscripcion::setTemporada);
+        // Temporada: la indicada (renovacion/solicitud) o, por defecto, la activa del club (si hay una).
+        if (dto.getTemporadaId() != null) {
+            inscripcion.setTemporada(temporadaRepository.findById(dto.getTemporadaId())
+                    .orElseThrow(() -> new RuntimeException("Temporada no encontrada")));
+        } else {
+            temporadaRepository.findFirstByActivaTrue().ifPresent(inscripcion::setTemporada);
+        }
 
         // Plan de mensualidad (opcional). Si se indica, la inscripción queda
         // vinculada a él para que el proceso mensual de facturación (más
@@ -111,9 +122,17 @@ public class InscripcionService {
         // facturado desde ya, para no dejarlo sin cobrar hasta que corra el
         // primer proceso mensual.
         if (guardada.getPlanMensualidad() != null) {
-            String periodoActual = YearMonth.from(guardada.getFechaInscripcion()).toString();
-            generarFacturaParaPlan(guardada, guardada.getPlanMensualidad(), guardada.getFechaInscripcion(),
-                    periodoActual, "Mensualidad");
+            // Si la temporada empieza en un mes POSTERIOR, la primera mensualidad es la de ese mes y se
+            // emite su primer dia habil (no se cobran meses anteriores al inicio de la temporada).
+            LocalDate fechaMens = guardada.getFechaInscripcion();
+            YearMonth periodoMens = YearMonth.from(fechaMens);
+            Temporada t = guardada.getTemporada();
+            if (t != null && YearMonth.from(t.getFechaInicio()).isAfter(periodoMens)) {
+                periodoMens = YearMonth.from(t.getFechaInicio());
+                fechaMens = CalendarioHabil.primerDiaHabil(periodoMens);
+            }
+            generarFacturaParaPlan(guardada, guardada.getPlanMensualidad(), fechaMens,
+                    periodoMens.toString(), "Mensualidad");
         }
 
         return guardada;
@@ -136,6 +155,8 @@ public class InscripcionService {
         factura.setTotal(calculo.total);
         factura.setInscripcion(inscripcion);
         factura.setPeriodo(periodo);
+        factura.setConcepto(periodo == null ? "INSCRIPCION" : "MENSUALIDAD");
+        factura.setFechaVencimiento(FacturaService.calcularVencimiento(fechaEmision));
 
         return facturaRepository.save(factura);
     }
@@ -161,7 +182,9 @@ public class InscripcionService {
             throw new RuntimeException("Formato de período inválido. Usa yyyy-MM, ej: 2026-08");
         }
 
-        LocalDate fechaEmision = periodoParseado.atDay(1);
+        // Regla de negocio: la mensualidad se emite el PRIMER DIA HABIL del mes (lunes a viernes,
+        // sin festivos de Colombia) y vence a los 10 dias.
+        LocalDate fechaEmision = CalendarioHabil.primerDiaHabil(periodoParseado);
         String periodoStr = periodoParseado.toString();
 
         List<Inscripcion> inscripcionesConMensualidad = inscripcionRepository
@@ -171,6 +194,24 @@ public class InscripcionService {
         resumen.setPeriodo(periodoStr);
 
         for (Inscripcion inscripcion : inscripcionesConMensualidad) {
+            // Inscripciones posteriores al periodo no se cobran hacia atras.
+            if (YearMonth.from(inscripcion.getFechaInscripcion()).isAfter(periodoParseado)) {
+                continue;
+            }
+            // La temporada aun no ha empezado en ese mes (inscripcion anticipada a la nueva temporada).
+            Temporada tInsc = inscripcion.getTemporada();
+            if (tInsc != null && YearMonth.from(tInsc.getFechaInicio()).isAfter(periodoParseado)) {
+                continue;
+            }
+            // La membresia ya vencio (fin de temporada): no se cobran meses posteriores. Si el club
+            // renueva, la nueva inscripcion (otra temporada) es la que factura.
+            if (inscripcion.getFechaVencimiento() != null
+                    && inscripcion.getFechaVencimiento().isBefore(periodoParseado.atDay(1))) {
+                continue;
+            }
+
+            // Una factura ANULADA de ese periodo tambien cuenta como "ya facturado": si no, el
+            // proceso la volveria a crear cada vez que corre.
             boolean yaFacturado = facturaRepository
                     .findByInscripcionIdAndPeriodo(inscripcion.getId(), periodoStr)
                     .isPresent();
@@ -401,21 +442,21 @@ public class InscripcionService {
         }
 
         List<Factura> facturas = facturaRepository.findByInscripcionId(id);
+        Integer usuarioId = FacturaService.usuarioActualId();
         for (Factura factura : facturas) {
             boolean tienePagos = !pagoRepository.findByFacturaId(factura.getId()).isEmpty();
 
-            if (tienePagos) {
-                // La factura ya tiene pagos (confirmados o pendientes)
-                // asociados: no la borramos para no perder ese historial
-                // financiero. Se desvincula de la inscripción (que va a
-                // desaparecer) pero la factura y sus pagos quedan intactos.
-                factura.setInscripcion(null);
-                facturaRepository.save(factura);
-            } else {
-                // Sin pagos: es seguro eliminar la factura junto con la inscripción.
-                facturaRepository.delete(factura);
+            if (!tienePagos && !Boolean.TRUE.equals(factura.getAnulada())) {
+                // Las facturas no se borran: sin pagos, se ANULA (queda el rastro con motivo).
+                facturaService.marcarAnulada(factura, "Inscripción #" + id + " eliminada",
+                        usuarioId, java.time.LocalDateTime.now());
             }
+            // Con pagos (confirmados o pendientes) se conserva tal cual: el historial financiero
+            // no se toca. En ambos casos se desvincula de la inscripción que va a desaparecer.
+            factura.setInscripcion(null);
+            facturaRepository.save(factura);
         }
+
 
         inscripcionRepository.deleteById(id);
     }

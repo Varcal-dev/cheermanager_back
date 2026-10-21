@@ -5,4 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.varcal.cheermanager.Models.Personas.EstadoPersona;
 
 public interface EstadoPersonaRepository extends JpaRepository<EstadoPersona, Integer> {
+    java.util.Optional<EstadoPersona> findByEstado(String estado);
+
 }

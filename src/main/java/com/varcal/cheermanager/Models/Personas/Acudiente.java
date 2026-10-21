@@ -44,4 +44,8 @@ public class Acudiente {
 
     @Column(name = "direccion", length = 200)
     private String direccion;
+
+    /** Usuario con el que el acudiente entra al portal (null = sin acceso). */
+    @Column(name = "usuario_id")
+    private Integer usuarioId;
 }

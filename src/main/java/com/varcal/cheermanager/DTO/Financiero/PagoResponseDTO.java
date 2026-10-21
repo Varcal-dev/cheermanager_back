@@ -27,4 +27,9 @@ public class PagoResponseDTO {
     // Saldo restante de la factura DESPUÉS de aplicar este pago (y los demás
     // pagos "Pagado" que ya tenía). Le ahorra al frontend tener que calcularlo.
     private BigDecimal saldoPendienteFactura;
+
+    // Solo si el pago esta Anulado
+    private String motivoAnulacion;
+    private java.time.LocalDateTime fechaAnulacion;
+
 }

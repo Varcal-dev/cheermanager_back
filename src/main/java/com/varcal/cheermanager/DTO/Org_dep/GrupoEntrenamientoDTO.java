@@ -12,4 +12,3 @@ public class GrupoEntrenamientoDTO {
 
     // Getters y setters
 }
-

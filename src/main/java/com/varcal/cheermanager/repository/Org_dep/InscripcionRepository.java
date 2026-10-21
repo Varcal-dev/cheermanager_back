@@ -12,6 +12,10 @@ import com.varcal.cheermanager.Models.Org_dep.Inscripcion;
 public interface InscripcionRepository extends JpaRepository<Inscripcion, Integer> {
     List<Inscripcion> findByDeportistaId(Long deportistaId);
 
+    // Version con Integer (el id de Deportista es Integer): usada al retirar un deportista.
+    List<Inscripcion> findByDeportistaIdAndEstado(Integer deportistaId, Inscripcion.EstadoInscripcion estado);
+
+
     // Usado por el proceso mensual de facturación: todas las inscripciones
     // activas que tengan un plan de mensualidad asignado (las que no lo
     // tienen simplemente no generan cobro recurrente).

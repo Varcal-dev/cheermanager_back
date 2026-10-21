@@ -34,6 +34,10 @@ import com.varcal.cheermanager.repository.Personas.PersonaRepository;
 import com.varcal.cheermanager.repository.Personas.EntrenadorRepository;
 import com.varcal.cheermanager.repository.Personas.EstadoPersonaRepository;
 import com.varcal.cheermanager.repository.Personas.HistorialDeportistaEstadoRepository;
+import com.varcal.cheermanager.repository.Org_dep.DeportistaPerteneceGrupoRepository;
+import com.varcal.cheermanager.repository.Org_dep.InscripcionRepository;
+import com.varcal.cheermanager.Models.Org_dep.DeportistaPerteneceGrupo;
+import com.varcal.cheermanager.Models.Org_dep.Inscripcion;
 import com.varcal.cheermanager.Service.File.FileStorageService;
 import com.varcal.cheermanager.Service.Historiales.HistorialNivelDeportistaService;
 
@@ -78,6 +82,20 @@ public class PersonaService {
     @Autowired
     private TenantLookupRepository tenantLookup;
 
+    @Autowired
+    private InscripcionRepository inscripcionRepository;
+
+    @Autowired
+    private DeportistaPerteneceGrupoRepository deportistaPerteneceGrupoRepository;
+
+    /**
+     * Estado "Retirado" buscado por NOMBRE (el catalogo estados_persona es global y sus ids no
+     * son un contrato: antes se usaba findById(2), que en el seed es "Inactivo").
+     */
+    private EstadoPersona estadoRetirado() {
+        return estadoPersonaRepository.findByEstado("Retirado")
+                .orElseThrow(() -> new RuntimeException("Estado 'Retirado' no encontrado en el catalogo estados_persona"));
+    }
 
     public String generarUsername(String nombre, String apellidos) {
 
@@ -720,24 +738,35 @@ public class PersonaService {
         Deportista deportista = deportistaRepository.findById(deportistaId)
                 .orElseThrow(() -> new RuntimeException("Deportista no encontrado"));
 
-        // Cambiar estado: obtener la entidad EstadoPersona con ID 2 (Retirado) y
-        // setearla
-        EstadoPersona estadoRetirado = estadoPersonaRepository.findById(2)
-                .orElseThrow(() -> new RuntimeException("Estado 'Retirado' no encontrado"));
+        EstadoPersona estadoRetirado = estadoRetirado();
 
         // Registrar el cambio de estado en el historial
         registrarCambioEstado(deportista, deportista.getEstado(), estadoRetirado, null,
-                "Deportista eliminado del sistema");
+                "Deportista retirado del club");
 
         deportista.setEstado(estadoRetirado);
         deportistaRepository.save(deportista);
 
-        // Desactivar usuario
-        Usuario usuario = userRepository.findByPersona(deportista.getPersona())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        // Regla de negocio: al retirar se CIERRA la inscripcion (deja de generar cobros mensuales)
+        // y se SACA del grupo (membresia con fechaFin = hoy, se conserva el historial).
+        // Las facturas ya emitidas se dejan tal cual: la deuda pendiente sigue visible en cartera.
+        for (Inscripcion inscripcion : inscripcionRepository.findByDeportistaIdAndEstado(
+                deportista.getId(), Inscripcion.EstadoInscripcion.Activa)) {
+            inscripcion.setEstado(Inscripcion.EstadoInscripcion.Inactiva);
+            inscripcionRepository.save(inscripcion);
+        }
+        LocalDate hoy = LocalDate.now();
+        for (DeportistaPerteneceGrupo membresia : deportistaPerteneceGrupoRepository
+                .findByDeportistaIdAndFechaFinIsNull(deportista.getId())) {
+            membresia.setFechaFin(hoy);
+            deportistaPerteneceGrupoRepository.save(membresia);
+        }
 
-        usuario.setActivo(false);
-        userRepository.save(usuario);
+        // Desactivar usuario (si lo tiene: no todos los deportistas tienen usuario)
+        userRepository.findByPersona(deportista.getPersona()).ifPresent(usuario -> {
+            usuario.setActivo(false);
+            userRepository.save(usuario);
+        });
     }
 
     // Método para registrar un entrenador
@@ -850,19 +879,15 @@ public class PersonaService {
         Entrenador entrenador = entrenadorRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Entrenador no encontrado"));
 
-        // Cambiar estado: obtener la entidad EstadoPersona con ID 2 (Retirado) y
-        // setearla
-        EstadoPersona estadoRetirado = estadoPersonaRepository.findById(2)
-                .orElseThrow(() -> new RuntimeException("Estado 'Retirado' no encontrado"));
-        entrenador.setEstado(estadoRetirado);
+        entrenador.setEstado(estadoRetirado());
         entrenadorRepository.save(entrenador);
 
-        // Desactivar usuario
-        Usuario usuario = userRepository.findByPersona(entrenador.getPersona())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
-        usuario.setActivo(false);
-        userRepository.save(usuario);
+        // Desactivar usuario (si lo tiene)
+        userRepository.findByPersona(entrenador.getPersona()).ifPresent(usuario -> {
+            usuario.setActivo(false);
+            userRepository.save(usuario);
+        });
     }
+
 
 }
