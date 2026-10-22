@@ -1,173 +1,237 @@
 # CheerManager — Backend
 
-API REST desarrollada con **Spring Boot** para la gestión integral de un club deportivo de porrismo (cheerleading): personas, grupos, niveles y categorías, inscripciones, pagos y facturación, horarios y asistencia, evaluaciones, eventos, inventario/ventas, y autenticación con roles y permisos.
+API REST (Spring Boot) de **CheerManager**, plataforma **multi-club** para gestionar clubes de porrismo (cheerleading): atletas y acudientes, temporadas, grupos y horarios, inscripciones, facturación y pagos, asistencia, evaluaciones (incluida la rúbrica FEDECOLCHEER / IASF), eventos y competencias, tienda e inventario, portal de solo lectura para deportistas y acudientes, consentimientos de datos (Ley 1581 de 2012) y dashboards.
 
-Este backend es consumido por el frontend **CheerManager** (Next.js), disponible como proyecto hermano.
+Lo consume el frontend **CheerManager Front** (Next.js), proyecto hermano.
 
-## Tabla de contenido
+## Contenido
 
-- [Stack técnico](#stack-técnico)
-- [Estructura del proyecto](#estructura-del-proyecto)
-- [Módulos funcionales](#módulos-funcionales)
-- [Autenticación y seguridad](#autenticación-y-seguridad)
-- [Requisitos previos](#requisitos-previos)
-- [Configuración](#configuración)
+- [Stack](#stack)
+- [Arquitectura](#arquitectura)
+- [Multi-club (tenant)](#multi-club-tenant)
+- [Seguridad y permisos](#seguridad-y-permisos)
+- [Flujos de negocio y su estado](#flujos-de-negocio-y-su-estado)
+- [Reglas de negocio clave](#reglas-de-negocio-clave)
+- [Endpoints por dominio](#endpoints-por-dominio)
+- [Configuración (variables de entorno)](#configuración-variables-de-entorno)
 - [Ejecución local](#ejecución-local)
-- [Endpoints principales](#endpoints-principales)
-- [Base de datos](#base-de-datos)
-- [Notas de desarrollo](#notas-de-desarrollo)
+- [Base de datos y migraciones](#base-de-datos-y-migraciones)
+- [Despliegue y operación](#despliegue-y-operación)
+- [Pruebas](#pruebas)
+- [Pendientes conocidos](#pendientes-conocidos)
 
-## Stack técnico
+## Stack
 
 | Componente | Detalle |
 |---|---|
-| Lenguaje | Java 24 |
-| Framework | Spring Boot 3.4.5 |
-| Persistencia | Spring Data JPA / Hibernate (dialect MySQL8) |
-| Base de datos | MySQL 8+ |
-| Seguridad | Spring Security + JWT (`jjwt` 0.11.5) |
-| Build | Maven (con Maven Wrapper `mvnw` / `mvnw.cmd`) |
-| Puerto por defecto | `8081` |
+| Lenguaje | Java 21 (`pom.xml` y `Dockerfile` alineados) |
+| Framework | Spring Boot 3.4.5 (Web, Data JPA, Security, Validation, AOP, Mail, Actuator) |
+| Base de datos | MySQL 8 |
+| Migraciones | Flyway (`V1`–`V6` en `src/main/resources/db/migration`) |
+| Seguridad | Spring Security + JWT (`jjwt` 0.11.5), BCrypt |
+| Build | Maven (`mvnw` / `mvnw.cmd`) |
+| Contenedores | `Dockerfile` (multi-etapa, usuario no root) + `docker-compose.yml` (MySQL + API) |
+| Pruebas | JUnit 5, Spring Security Test, H2 y Testcontainers/MySQL real |
+| Puerto | `8081` (variable `PORT`) |
 
-## Estructura del proyecto
+## Arquitectura
 
 ```
 src/main/java/com/varcal/cheermanager/
-├── Controller/          # Controladores REST (@RestController), agrupados por dominio
-│   ├── Auth/            # Login, roles, permisos
-│   ├── Dashboard/       # Resúmenes/KPIs para el panel principal
-│   ├── Evaluaciones/    # Evaluaciones, criterios, objetivos, rutinas y rúbricas
-│   ├── Eventos/         # Eventos, grupos en evento, premios, resultados
-│   ├── Financiero/      # Convenios, descuentos, divisiones, facturas, pagos, planes
-│   ├── Funcionalidad/   # Logs de acceso / auditoría
-│   ├── Historiales/     # Historial médico, de niveles y de planes del deportista
-│   ├── Horario_Asistencia/  # Horarios y asistencia
-│   ├── Inventario/      # Categorías, productos, variantes, movimientos, ventas
-│   ├── Org_dep/         # Organización deportiva: niveles, categorías, grupos, inscripciones
-│   └── Persona/         # Personas, deportistas, entrenadores, usuarios
-├── DTO/                 # Objetos de transferencia (request/response), mismo agrupamiento por dominio
-├── Models/              # Entidades JPA
-├── repository/          # Repositorios Spring Data JPA
-├── Service/             # Lógica de negocio
-├── security/            # JwtUtil, JwtTokenFilter, TokenBlacklistService
-├── config/              # SecurityConfig, WebConfig, PermissionInterceptor, DataInitializer
-├── Utils/                # Utilidades comunes
-└── CheermanagerApplication.java
+├── Controller/    # REST por dominio: Auth, Clubes, Consentimientos, Dashboard, Evaluaciones (+Rutina),
+│                  #   Eventos, Financiero, Funcionalidad, Historiales, Horario_Asistencia, Inventario,
+│                  #   Org_dep, Persona, Portal
+├── DTO/           # Request/response, mismo agrupamiento
+├── Models/        # Entidades JPA (casi todas con club_id / @TenantId)
+├── repository/    # Spring Data JPA
+├── Service/       # Lógica de negocio (+ Evaluaciones/Rutina/Calculadoras, Financiero/FacturacionMensualJob)
+├── security/      # JwtUtil, JwtTokenFilter, TokenBlacklistService
+├── tenant/        # TenantContext, TenantConfig, TenantIdentifierResolver, ReferenciasClub, TenantLookupRepository
+├── config/        # SecurityConfig, WebConfig, PermissionInterceptor, DataInitializer,
+│                  #   GlobalExceptionHandler, RequestIdFilter
+├── aspect/        # AuditoriaAspect (registra save/delete de repositorios)
+└── Utils/         # AuthenticatedUserUtil, CalendarioHabil, ClaveTemporal, @RequiresPermission, ...
+ops/               # backup.sh, restore.sh, probar_esquema.sh, exportar_baseline.sh
+docs/              # GUIA_DESPLIEGUE.md, GUIA_USUARIO_ADMIN_CLUB.md
+ajustes_claudia/   # Bitácora de decisiones y resúmenes de cambios por módulo (histórico)
 ```
 
-También existe una carpeta `ajustes_claudia/` con documentos de seguimiento (resúmenes de cambios, estado consolidado del proyecto, propuestas de KPIs, cabos sueltos pendientes) útiles como bitácora del desarrollo.
+Orden de capas al construir un módulo: **Model → Repository → DTO → Service → Controller**. Los controllers devuelven DTO (`toResponseDTO`), nunca entidades JPA, para evitar problemas de serialización.
 
-## Módulos funcionales
+## Multi-club (tenant)
 
-- **Autenticación y autorización**: login/logout con JWT, blacklist de tokens, roles y permisos, recuperación/cambio de contraseña.
-- **Personas**: gestión de personas, deportistas, entrenadores y usuarios del sistema.
-- **Organización deportiva**: divisiones, niveles, categorías, tipos de grupo, grupos de entrenamiento (con entrenadores y deportistas asignados), inscripciones.
-- **Financiero**: planes de pago (inscripción y mensualidad), tipos de plan, métodos y tipos de pago, pagos, facturas, descuentos y convenios.
-- **Horarios y asistencia**: horarios por grupo/día, registro de asistencia (individual y masivo), estados de asistencia.
-- **Evaluaciones**: evaluaciones por criterio y objetivo, evaluación de rutinas con rúbricas configurables.
-- **Eventos**: eventos, grupos participantes, premios y resultados de competencia.
-- **Historiales**: historial médico, historial de niveles y de planes por deportista.
-- **Inventario y ventas**: categorías de producto, productos y variantes, movimientos de inventario, ventas.
-- **Dashboard**: DTOs de resumen para las distintas secciones (administración, evaluación, eventos, finanzas, horarios, organización, personas, tienda).
-- **Auditoría**: log de accesos (`LogAcceso`).
+- Cada club es un *tenant*. El club del usuario viaja en el claim `clubId` del JWT; `JwtTokenFilter` lo fija en `TenantContext` y Hibernate (`@TenantId` sobre `club_id`) filtra toda lectura y etiqueta toda escritura.
+- El club con id `1` es la **Plataforma** (superadmin). No se puede desactivar.
+- Un club suspendido deja de autenticar (el filtro rechaza tokens de clubes inactivos).
+- Catálogos globales (compartidos): permisos, estados de persona, géneros y similares.
+- Las llaves foráneas del esquema son compuestas `(club_id, id)` para que un registro de un club no pueda apuntar a otro.
+- Procesos automáticos (facturación mensual) recorren los clubes activos con `TenantContext.runAs(clubId, ...)`.
+- Prueba clave: `AislamientoEntreClubesTest` (dos clubes, API real).
 
-## Autenticación y seguridad
+Alta de un club: `POST /api/clubes` (solo superadmin) crea el club, los roles plantilla (**Administrador, Entrenador, Deportista, Acudiente**), el usuario administrador (con cambio de clave obligatorio) y, opcionalmente, una plantilla editable de Niveles 1–6 y divisiones Tiny/Mini/Youth/Junior/Senior.
 
-- `SecurityConfig` configura una cadena de filtros **stateless** (sin sesiones), con CSRF deshabilitado y CORS habilitado para `http://localhost:3000`.
-- Rutas públicas: `/api/login`, `/api/logout`, `/api/refresh-token`, `/api/forgot-password`, `/api/reset-password`. El resto requiere autenticación.
-- `JwtTokenFilter` valida el token JWT en cada petición; `JwtUtil` genera/valida tokens; `TokenBlacklistService` invalida tokens tras logout.
-- `PermissionInterceptor` complementa la autorización a nivel de permisos por rol.
-- Contraseñas hasheadas con `BCryptPasswordEncoder`.
-- `DataInitializer` crea automáticamente un usuario `admin` (rol ADMIN, id=1) si no existe al arrancar la aplicación.
+## Seguridad y permisos
 
-## Requisitos previos
+- Stateless: JWT en `Authorization: Bearer`, expiración por defecto 8 h, *blacklist* tras logout, `refresh-token`.
+- Login por **correo**; bloqueo por intentos fallidos (5 intentos → 15 min por defecto); respuestas indistinguibles entre correo inexistente y clave incorrecta (anti-enumeración).
+- Recuperación de clave: `forgot-password` nunca devuelve el token; lo entrega `PasswordResetNotifier` por correo (SMTP) o, sin SMTP, lo escribe en el log del servidor (solo desarrollo).
+- Clave temporal: un administrador con `restablecer_clave_usuario` puede generar una; la persona debe cambiarla al entrar (`requiereCambioPassword`).
+- Autorización por **permisos granulares** con `@RequiresPermission("...")` (o `@SinPermisoEspecifico("motivo")` en catálogos/endpoints propios). `PermisosArquitecturaTest` y `PermisosContraMigracionesTest` fallan si un endpoint queda sin declarar o usa un permiso inexistente en las migraciones.
+- `AuthenticatedUserUtil` entrega el usuario actual desde el contexto de seguridad; los DTO ya no reciben `usuarioId`.
+- Portal (`acceder_portal`): cada consulta valida que el deportista pertenezca al usuario (propio o a cargo como acudiente); el permiso por sí solo no da acceso a datos ajenos.
+- Errores: `GlobalExceptionHandler` produce `message` controlado; `server.error.include-*` está en `never`. Cada petición lleva un `X-Request-Id` que aparece en los logs (`[rid]`).
+- Auditoría: `AuditoriaAspect` registra altas/bajas de repositorios; `LogAcceso` registra login/logout/bloqueos.
 
-- JDK 24+
-- MySQL 8+ en ejecución
-- Maven (opcional; el proyecto incluye Maven Wrapper)
+## Flujos de negocio y su estado
 
-## Configuración
+Leyenda: ✅ completo · 🟡 completo en el back, con observaciones · ❌ falta.
 
-La configuración vive en `src/main/resources/application.properties`. Los valores por defecto sirven para desarrollo local; en producción **siempre** deben sobreescribirse mediante variables de entorno:
+| # | Flujo | Estado | Notas |
+|---|---|---|---|
+| 1 | Acceso y sesión (login, logout, refresh, recuperar/cambiar clave, clave temporal) | ✅ | Sin SMTP la recuperación solo escribe el enlace en el log: configurar correo antes de producción. |
+| 2 | Alta y suspensión de clubes (plataforma) | ✅ | Sin edición de nombre/slug de un club ya creado. |
+| 3 | Onboarding del club (`/api/onboarding`) | ✅ | 9 pasos calculados con datos reales del club. |
+| 4 | Usuarios, roles y permisos por club | ✅ | Permisos y catálogos globales solo los gestiona la plataforma (`gestionar_catalogos`). |
+| 5 | Personas: deportistas, entrenadores, acudientes, foto, convenio, historial de estado | ✅ | Retiro cierra inscripción, saca del grupo y desactiva usuario. |
+| 6 | Reactivación de un deportista retirado | ❌ | No hay flujo: la inscripción queda inactiva y el usuario desactivado; hoy solo se cambia el estado editando al deportista. |
+| 7 | Consentimientos (Ley 1581) y exigencia para historial médico | 🟡 | `CONSENTIMIENTOS_EXIGIR_SALUD=false` por defecto; activarlo cuando `/api/consentimientos/pendientes` esté en cero. |
+| 8 | Organización: niveles, divisiones, categorías, temporadas, grupos, horarios | 🟡 | Categorías por nivel y criterios de evaluación son de solo lectura (sin CRUD). |
+| 9 | Matrícula (inscripción + factura de inscripción + primera mensualidad) | ✅ | Descuentos de plan y convenio se combinan de forma multiplicativa. |
+| 10 | Renovación de temporada por solicitud (portal → aprobar/rechazar) | ✅ | Aprobar crea la inscripción y sus facturas. |
+| 11 | Facturación mensual automática y cartera en mora | ✅ | Cron diario 6:00 (Bogotá), primer día hábil con festivos de Colombia, idempotente, vence a 10 días. Sin recordatorios/notificaciones de mora. |
+| 12 | Facturas manuales (UNIFORME, COMPETENCIA, EVENTO, OTRO) y anulación con motivo | ✅ | Facturas y pagos no se borran. |
+| 13 | Pagos (registro, cambio de estado, anulación, saldo) | ✅ | Lock pesimista: no se puede pagar de más ni siquiera con registros simultáneos. Sin conciliación bancaria. |
+| 14 | Descuentos, convenios, planes y tipos de plan | ✅ | |
+| 15 | Asistencia (individual y masiva, % por deportista, riesgo) | ✅ | Registro masivo tolera fallos parciales (HTTP 207). |
+| 16 | Evaluaciones de habilidades y objetivos | 🟡 | Individual, masiva, progresión y promedios. Criterios solo lectura. |
+| 17 | Evaluación de rutina (rúbrica FEDECOLCHEER/IASF 2026) | ✅ | Vista previa, registro, historial por grupo y configuración de rúbrica (solo plataforma). |
+| 18 | Eventos: grupos participantes, premios, resultados | 🟡 | El cobro de inscripción a un evento es manual por deportista (factura `EVENTO`); no hay generación masiva por evento. |
+| 19 | Tienda: productos, variantes, movimientos, ventas | 🟡 | La venta a un miembro genera factura `TIENDA` **sin pago asociado**: una venta de contado quedará pendiente y pasará a mora a los 10 días. Falta anular venta. |
+| 20 | Portal de deportista/acudiente (solo lectura) | ✅ | Facturas, pagos, asistencias, evaluaciones, objetivos, rutinas y solicitudes de temporada. |
+| 21 | Dashboards (inicio, organización, personas, horarios, evaluación, finanzas, eventos, tienda, administración) | ✅ | 9 servicios, uno por permiso `ver_dash_*`. |
+| 22 | Auditoría y logs de acceso | 🟡 | Hay endpoints de `logs-acceso` sin consumidor en el front. |
+| 23 | Operación: migraciones, respaldos, despliegue, logs, pruebas | ✅ | Ver [Despliegue y operación](#despliegue-y-operación). |
 
-| Variable de entorno | Por defecto (dev) | Descripción |
-|---|---|---|
-| `DB_URL` | `jdbc:mysql://localhost:3306/cheermanager_I` | URL de conexión a MySQL |
-| `DB_USERNAME` | `root` | Usuario de la base de datos |
-| `DB_PASSWORD` | `root` | Contraseña de la base de datos |
-| `JWT_SECRET` | (clave de desarrollo embebida) | Secreto para firmar los JWT — **rotar en cualquier entorno real** |
-| `JWT_EXPIRATION_MS` | `86400000` (24h) | Tiempo de expiración del token |
-| `AUTH_MAX_LOGIN_ATTEMPTS` | `5` | Intentos de login antes de bloqueo |
-| `AUTH_LOCK_DURATION_MINUTES` | `30` | Duración del bloqueo por intentos fallidos |
-| `AUTH_RESET_TOKEN_EXPIRATION_MINUTES` | `15` | Expiración del token de reseteo de contraseña |
+## Reglas de negocio clave
 
-Otros ajustes relevantes:
-- `spring.jpa.hibernate.ddl-auto=update`: **Hibernate es la fuente de verdad del esquema**; cualquier script SQL de referencia debe generarse/validarse contra el esquema real que produce Hibernate, no al revés.
-- `spring.jpa.show-sql=true` y logging de SQL/parámetros en `DEBUG`/`TRACE` para depuración.
-- Subida de archivos: `app.documents.upload-dir=./uploads`, límite `10MB` por archivo/petición.
-- `server.error.include-message=always`: los mensajes de error de negocio (p. ej. validaciones de `PagoService`) se exponen al frontend para mostrarlos en los toasts de error.
+- **Factura mensual**: se emite el primer día hábil del mes (lunes a viernes, sin festivos de Colombia) y vence a los 10 días; después está **EN MORA**. Estados de cuenta: `PENDIENTE`, `ABONO_PARCIAL`, `PAGADA`, `EN_MORA`, `ANULADA`.
+- **Idempotencia**: no se factura dos veces el mismo periodo; una factura anulada de un periodo cuenta como "ya facturado". No se cobran meses anteriores a la inscripción, anteriores al inicio de la temporada ni posteriores a su fin.
+- **Descuentos**: el del plan y el del convenio vigente se aplican en cadena (no se suman los porcentajes).
+- **Cambio de plan**: recalcula la factura de inscripción, pero se **rechaza** si ya tiene pagos confirmados; las mensualidades ya emitidas no cambian.
+- **Eliminar inscripción**: las facturas sin pagos se anulan; las que tienen pagos se conservan.
+- **Retiro de un deportista**: estado "Retirado" (con historial), inscripciones activas → inactivas, membresías de grupo cerradas (`fechaFin = hoy`), usuario desactivado; las facturas pendientes se dejan visibles en cartera.
+- **Pagos y facturas no se borran**: se anulan con motivo (mínimo 5 caracteres), fecha y usuario. Una factura con pagos confirmados exige anular primero esos pagos.
+- **Grupos**: elegibilidad por año de nacimiento y cupo máximo de la categoría; quitar de un grupo cierra la membresía, no la borra.
+- **Temporadas**: solo una activa por club; las inscripciones nuevas se asocian a ella.
+- **Inventario**: el stock solo cambia por movimientos; SKU `RAT-[CAT]-[COD]-[SEQ]`; productos digitales con `requiereControlStock=false`.
+- **Rúbrica de rutinas**: los topes de 0,1 por deducción (sincronización de saltos y altura de lanzamientos) están fijos en código; el resto de escalones y topes por nivel (N1–N4.2) son configurables.
+- **Consentimientos**: son evidencia, solo se agregan y se revocan, nunca se editan ni se borran.
+
+## Endpoints por dominio
+
+Todos cuelgan de `/api`. Resumen (el detalle y el permiso de cada uno están en los controllers):
+
+| Dominio | Rutas principales |
+|---|---|
+| Auth | `POST /login` · `/logout` · `/refresh-token` · `/forgot-password` · `/reset-password` · `/change-password` |
+| Usuarios / Roles | `/usuario/*` (`registrar`, `listar`, `me`, `permisos`, `{id}/asignar-roles`, `{id}/clave-temporal`) · `/roles` · `/permisos` |
+| Clubes | `/clubes` (+ `PATCH /{id}/activo`) · `/onboarding` |
+| Personas | `/personas` · `/deportistas` (+ `foto`, `convenio`, `usuario`, `historial-estado`, `grupos-elegibles`, `validar-documento`) · `/entrenadores` · `/acudientes` (+ `deportista/{id}`, `{id}/acceso`) |
+| Consentimientos | `/consentimientos` (+ `persona/{id}`, `pendientes`, `{id}/revocar`) |
+| Organización | `/niveles` · `/categorias-nivel` · `/temporadas` (+ `activa`, `activar`, `cerrar`) · `/grupos` (+ `candidatos`, `agregar-deportistas`, `asignar-entrenadores`) · `/inscripciones` (+ `detalle`, `generar-cobros-mensualidad`, `{id}/facturas`) · `/solicitudes-inscripcion` |
+| Horarios y asistencia | `/horarios` (+ `asignar-grupo`) · `/asistencias` (+ `masivo`, `grupo/{id}`, `deportista/{id}/porcentaje`) |
+| Financiero | `/planes-pago` · `/tipos-planes-pago` · `/descuentos` · `/convenios` · `/divisiones` · `/facturas` (+ `mora`, `{id}/anular`) · `/pagos` (+ `factura/{id}/saldo`, `{id}/estado`, `{id}/anular`) · catálogos `/metodos-pago`, `/tipos-pago` |
+| Evaluaciones | `/evaluaciones` (+ `masivo`, progresión, promedio) · `/objetivos` · `/criterios-evaluacion` · `/estados-objetivo` · `/evaluaciones-rutina` (+ `preview`, `grupo/{id}`) · `/rubrica-config/*` |
+| Eventos | `/eventos` (+ `proximos`, `historial`) · `/grupos-evento` · `/premios-evento` · `/resultados-competencia` · `/tipos-evento` |
+| Tienda | `/categorias-producto` · `/productos` · `/producto-variantes` · `/movimientos-inventario` · `/ventas` |
+| Historiales | `/historial-medico` · `/historial-nivel` · `/historial-planes` |
+| Portal | `/portal/yo` · `/portal/deportistas/{id}/{facturas,pagos,asistencias,evaluaciones,objetivos,rutinas,solicitudes}` · `/portal/temporadas-abiertas` · `/portal/solicitudes/{id}/cancelar` |
+| Dashboard / Auditoría | `/dashboard/*` · `/auditoria` · `/logs-acceso/*` |
+| Salud | `GET /actuator/health` |
+
+## Configuración (variables de entorno)
+
+Los secretos **no tienen valor por defecto**: si falta una obligatoria, la app no arranca.
+
+| Variable | Obligatoria | Por defecto | Descripción |
+|---|---|---|---|
+| `DB_URL` / `DB_USERNAME` / `DB_PASSWORD` | Sí | — | Conexión a MySQL |
+| `JWT_SECRET` | Sí | — | Mínimo 32 bytes (`openssl rand -base64 64`) |
+| `JWT_EXPIRATION_MS` | No | `28800000` (8 h) | Vigencia del token |
+| `CORS_ALLOWED_ORIGINS` | No | `http://localhost:3000` | Orígenes del frontend, separados por coma |
+| `FRONTEND_RESET_URL` | No | `http://localhost:3000/reset-password` | Base del enlace de recuperación |
+| `APP_BOOTSTRAP_ADMIN_USERNAME` / `_EMAIL` / `_PASSWORD` | Para crear el superadmin | `superadmin` / vacío / vacío | Se crea solo si no existe y la clave tiene ≥ 10 caracteres |
+| `AUTH_MAX_LOGIN_ATTEMPTS` / `AUTH_LOCK_DURATION_MINUTES` | No | `5` / `15` | Bloqueo por intentos fallidos |
+| `AUTH_RESET_TOKEN_EXPIRATION_MINUTES` | No | `15` | Vigencia del token de recuperación |
+| `CONSENTIMIENTOS_EXIGIR_SALUD` | No | `false` | Exigir consentimiento `DATOS_SALUD` para historial médico |
+| `FACTURACION_AUTOMATICA` | No | `true` | Cron de facturación mensual (pensado para **una sola instancia**) |
+| `JPA_DDL_AUTO` | No | `validate` | Nunca `update` fuera de tu máquina |
+| `FLYWAY_ENABLED` | No | `true` | |
+| `MAIL_FROM` + `spring.mail.*` | No | `no-reply@cheermanager.local` | SMTP para recuperación de clave |
+| `FORWARD_HEADERS_STRATEGY` | No | `none` | `framework` detrás de Nginx/Caddy/Railway |
+| `UPLOAD_DIR` | No | `./uploads` | Fotos y documentos (máx. 10 MB) |
+| `LOG_LEVEL_ROOT` / `LOG_LEVEL_APP` | No | `INFO` | No subir a `DEBUG` `org.hibernate.SQL` ni Spring Security en producción |
+| `PORT` | No | `8081` | |
+
+Para desarrollo local copia `application-local.properties.example` a `application-local.properties` (ignorado por git) y arranca con el perfil `local`.
 
 ## Ejecución local
 
 ```bash
 git clone https://github.com/Varcal-dev/cheermanager_back
-cd cheermanager
+cd cheermanager_back
 
-# Configurar la base de datos MySQL (crear el schema, p. ej. cheermanager_I)
-# y ajustar variables de entorno o application.properties si es necesario.
+# 1. Crear una base MySQL vacía (Flyway crea el esquema al arrancar)
+# 2. Definir DB_URL, DB_USERNAME, DB_PASSWORD, JWT_SECRET (y el superadmin, si lo quieres)
 
-# Compilar y correr tests
-./mvnw clean test-compile
-./mvnw test
-
-# Levantar la aplicación
-./mvnw spring-boot:run
+./mvnw test                                   # pruebas
+./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
-La API queda disponible en `http://localhost:8081`.
+API en `http://localhost:8081`. Con Docker: `cp .env.example .env && docker compose up -d --build`.
 
-## Endpoints principales
+## Base de datos y migraciones
 
-Todos los endpoints cuelgan de `/api`. Agrupados por dominio (lista no exhaustiva; ver los controladores en `Controller/` para el detalle completo de cada recurso):
+- **Flyway es la fuente de verdad del esquema**; Hibernate solo valida (`ddl-auto=validate`).
+- `V1` esquema base · `V2` datos iniciales (roles, permisos, catálogos) · `V3` alineación con el modelo JPA · `V4` booleanos a `BIT` · `V5` cartera (vencimiento, mora, facturas manuales, anulaciones) · `V6` portal de acudiente/deportista y solicitudes de inscripción.
+- **Nunca edites una migración ya aplicada**: crea la siguiente (`V7`, ...).
+- Una BD preexistente sin historial de Flyway se marca como versión 2 (`baseline-version=2`) y solo aplica `V3` en adelante. Haz respaldo antes.
+- Antes de migrar una base real: `ops/probar_esquema.sh` carga las migraciones en una BD desechable y verifica el aislamiento entre clubes.
 
-**Autenticación / Usuarios / Roles**
-`POST /api/login` · `POST /api/logout` · `POST /api/usuario/registrar` · `GET /api/usuario/me` · `PUT /api/usuario/me` · `GET /api/usuario/permisos` · `GET /api/usuario/listar` · `GET /api/roles` · `POST /api/roles/asignar-permisos` · `GET /api/permisos/listar`
+## Despliegue y operación
 
-**Personas**
-`GET|POST /api/personas` · `GET|POST /api/entrenadores` · `GET|POST /api/deportistas`
+Guía completa en [`docs/GUIA_DESPLIEGUE.md`](docs/GUIA_DESPLIEGUE.md). Resumen:
 
-**Organización deportiva**
-`GET|POST /api/niveles` · `GET /api/categorias-nivel` · `GET|POST /api/grupos` (+ `/con-deportistas`, `/verificar-elegibilidad`, `/agregar-deportistas`, `/asignar-entrenadores`) · `GET|POST /api/inscripciones` (+ `/inscritos`, `/no-inscritos`, `/simple`) · `GET /api/tipo-grupos`
+1. VPS con Docker + HTTPS delante de la API (Caddy o Nginx).
+2. `docker compose up -d --build`: MySQL 8 (puerto 3306 no publicado) + API en `127.0.0.1:8081`.
+3. Entrar como `superadmin`, cambiar la clave y crear el primer club con `POST /api/clubes`.
+4. Respaldos: `ops/backup.sh` (cron diario, con rotación) y `ops/restore.sh`. **Prueba una restauración real.**
+5. Logs: cada línea lleva `[rid]`; el usuario puede reportar el `X-Request-Id` del error.
+6. Salud: `GET /actuator/health`.
 
-**Financiero**
-`GET|POST /api/convenios` · `GET|POST /api/divisiones` · `GET|POST /api/descuentos` · `GET|POST /api/facturas` · `GET|POST /api/pagos` · `GET /api/planes-inscripcion/listar` · `GET|POST /api/planes-mensualidad` (+ `/tipos`)
+Guía para quien administra un club: [`docs/GUIA_USUARIO_ADMIN_CLUB.md`](docs/GUIA_USUARIO_ADMIN_CLUB.md).
 
-**Horarios y asistencia**
-`GET|POST /api/horarios` · `GET|POST /api/asistencias`
+## Pruebas
 
-**Evaluaciones**
-`GET|POST /api/evaluaciones` · `GET|POST /api/objetivos` · `GET|POST /api/criterios-evaluacion` · `GET|POST /api/evaluaciones-rutina` · `GET|POST /api/rubricas`
+| Clase | Qué cubre |
+|---|---|
+| `AislamientoEntreClubesTest`, `ReferenciasClubTest` | Un club nunca ve ni toca datos de otro |
+| `PermisosArquitecturaTest`, `PermisosContraMigracionesTest` | Todo endpoint declara permiso y existe en las migraciones |
+| `AuthServiceTest` | Autenticación |
+| `FacturaEstadoCuentaTest`, `CalendarioHabilTest` | Estados de cuenta, mora y días hábiles |
+| `ConsentimientoServiceTest` | Otorgar, revocar y exigir consentimiento |
+| `MySqlRealIT` | Pruebas de concurrencia contra MySQL real (Testcontainers) |
 
-**Eventos**
-`GET|POST /api/eventos` (+ grupos, premios, resultados de competencia)
+No hay pruebas automatizadas de los módulos de evaluación de rutinas, inventario/ventas ni inscripciones, ni CI configurado.
 
-**Historiales**
-`GET /api/historial-medico` · `GET /api/historial-niveles` · `GET /api/historial-planes`
+## Pendientes conocidos
 
-**Inventario y ventas**
-`GET|POST /api/productos` (+ variantes, categorías) · `GET|POST /api/movimientos-inventario` · `GET|POST /api/ventas`
-
-**Dashboard / Auditoría**
-`GET /api/dashboard/*` (resúmenes por sección) · `GET /api/logs-acceso`
-
-## Base de datos
-
-- Motor: MySQL 8+, esquema por defecto en desarrollo `cheermanager_I` (ajustable vía `DB_URL`).
-- El esquema real es generado y mantenido por Hibernate (`ddl-auto=update`); cualquier script SQL versionado (data dictionary, script V5, etc.) debe tratarse como documentación derivada del modelo de entidades, no como fuente de verdad.
-- Toda la lógica de consultas y negocio se mantiene versionada en código (servicios/repositorios), evitando vistas o procedimientos almacenados en la base de datos.
-
-## Notas de desarrollo
-
-- La seguridad ya usa JWT + roles/permisos (no `permitAll` global); revisar `SecurityConfig` para las rutas exceptuadas.
-- Pendientes conocidos y decisiones de diseño se documentan en `ajustes_claudia/` (p. ej. `RESUMEN_CABOS_SUELTOS.md`, `Estado_Consolidado_CheerManager.md`).
-- Mejoras sugeridas a futuro: documentación OpenAPI/Swagger, versionado de API (`/api/v1`), migraciones formales (Flyway/Liquibase) en lugar de `ddl-auto=update`, mayor cobertura de pruebas, y CI/CD.
+1. **Ventas de contado a miembros**: crear el pago al registrar la venta (o permitir marcarla como pagada) para que no figure en mora.
+2. **Anular venta** (`anular_venta`): reversar con movimientos de entrada compensatorios; hoy no tiene lógica.
+3. **Reactivar deportista retirado**: reabrir estado, usuario e inscripción en un solo flujo.
+4. **SMTP real** y **recordatorios de mora** (la entidad `Notificacion` existe pero no se usa).
+5. **CRUD de criterios de evaluación y de categorías por nivel** para que cada club los personalice.
+6. **Conciliación / cierre de caja** de pagos.
+7. **Facturación de evento por lote** a los deportistas de los grupos participantes.
+8. Diferido a propósito: unificar tipos `Long`/`Integer` en repositorios (limpieza aparte, para no romper en cascada).
+9. Calidad: OpenAPI/Swagger, CI/CD, más pruebas (rutinas, inventario, inscripciones), y registro de seguimiento de `ajustes_claudia/` a un `CHANGELOG`.
