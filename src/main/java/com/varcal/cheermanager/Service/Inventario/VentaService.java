@@ -13,13 +13,20 @@ import org.springframework.transaction.annotation.Transactional;
 import com.varcal.cheermanager.DTO.Inventario.MovimientoInventarioDTO;
 import com.varcal.cheermanager.DTO.Inventario.VentaDTO;
 import com.varcal.cheermanager.DTO.Inventario.VentaResponseDTO;
+import com.varcal.cheermanager.DTO.Financiero.PagoDTO;
+import com.varcal.cheermanager.DTO.Financiero.PagoResponseDTO;
 import com.varcal.cheermanager.Models.Financiero.Factura;
+import com.varcal.cheermanager.Models.Financiero.MetodoPago;
+import com.varcal.cheermanager.Models.Financiero.TipoPago;
 import com.varcal.cheermanager.Models.Inventario.DetalleVenta;
 import com.varcal.cheermanager.Models.Inventario.ProductoVariante;
 import com.varcal.cheermanager.Models.Inventario.Venta;
 import com.varcal.cheermanager.Models.Personas.Persona;
 import com.varcal.cheermanager.Service.Financiero.FacturaService;
+import com.varcal.cheermanager.Service.Financiero.PagoService;
 import com.varcal.cheermanager.repository.Financiero.FacturaRepository;
+import com.varcal.cheermanager.repository.Financiero.MetodoPagoRepository;
+import com.varcal.cheermanager.repository.Financiero.TipoPagoRepository;
 import com.varcal.cheermanager.repository.Inventario.ProductoVarianteRepository;
 import com.varcal.cheermanager.repository.Inventario.VentaRepository;
 import com.varcal.cheermanager.repository.Personas.PersonaRepository;
@@ -41,6 +48,18 @@ public class VentaService {
 
     @Autowired
     private FacturaService facturaService;
+
+    @Autowired
+    private PagoService pagoService;
+
+    @Autowired
+    private MetodoPagoRepository metodoPagoRepository;
+
+    @Autowired
+    private TipoPagoRepository tipoPagoRepository;
+
+    /** Tipo de pago del catalogo con el que se registran los cobros de tienda. */
+    private static final String TIPO_PAGO_TIENDA = "Producto de tienda";
 
     @Autowired
     private MovimientoInventarioService movimientoInventarioService;
@@ -138,9 +157,50 @@ public class VentaService {
 
             guardada.setFactura(facturaGuardada);
             guardada = ventaRepository.save(guardada);
+
+            // Venta de contado (por defecto): se registra el pago para que la factura quede PAGADA y no
+            // pase a mora a los 10 dias. Con pagada=false se deja a cuenta (factura pendiente).
+            if (!Boolean.FALSE.equals(dto.getPagada())) {
+                registrarPagoDeContado(facturaGuardada, dto.getMetodoPago(), total, guardada.getFecha());
+            }
         }
 
         return toResponseDTO(guardada);
+    }
+
+    /**
+     * Registra el pago "Pagado" de una venta de contado reutilizando PagoService (mismas reglas: lock de
+     * la factura, sin sobrepago). Corre dentro de la transaccion de registrar(): si algo falla, la venta,
+     * los movimientos de inventario y la factura se revierten juntos.
+     */
+    private void registrarPagoDeContado(Factura factura, String metodoNombre, BigDecimal monto, LocalDate fecha) {
+        MetodoPago metodo = buscarMetodoPago(metodoNombre);
+        TipoPago tipo = tipoPagoRepository.findAll().stream()
+                .filter(t -> TIPO_PAGO_TIENDA.equalsIgnoreCase(t.getTipo()))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException(
+                        "No existe el tipo de pago '" + TIPO_PAGO_TIENDA + "' en el catalogo"));
+
+        PagoDTO pago = new PagoDTO();
+        pago.setFacturaId(factura.getId());
+        pago.setTipoPagoId(tipo.getId());
+        pago.setMetodoPagoId(metodo.getId());
+        pago.setFecha(fecha);
+        pago.setEstado("Pagado");
+        pago.setMonto(monto);
+        pagoService.registrarPago(pago);
+    }
+
+    /** Coincide por nombre exacto o por prefijo: "Transferencia" -> "Transferencia bancaria", "Tarjeta" -> "Tarjeta de credito/debito". */
+    private MetodoPago buscarMetodoPago(String nombre) {
+        if (nombre == null || nombre.isBlank()) {
+            throw new RuntimeException("Indica el metodo de pago de la venta");
+        }
+        String buscado = nombre.trim().toLowerCase();
+        List<MetodoPago> todos = metodoPagoRepository.findAll();
+        return todos.stream().filter(m -> m.getMetodo().equalsIgnoreCase(buscado)).findFirst()
+                .or(() -> todos.stream().filter(m -> m.getMetodo().toLowerCase().startsWith(buscado)).findFirst())
+                .orElseThrow(() -> new RuntimeException("Metodo de pago no reconocido: " + nombre));
     }
 
     public List<VentaResponseDTO> listarPorRango(LocalDate desde, LocalDate hasta) {
@@ -158,10 +218,61 @@ public class VentaService {
                 .orElseThrow(() -> new RuntimeException("Venta no encontrada con ID: " + id)));
     }
 
-    // Nota: no hay "eliminar" venta — anular_venta (permiso ya existe en el
-    // seed) debería implementarse como una reversión que genera movimientos
-    // de entrada compensatorios, no un borrado, para no perder el rastro
-    // contable. Se deja pendiente hasta que se defina esa regla de negocio.
+    // No hay "eliminar" venta: se ANULA (permiso anular_venta). La anulacion reversa todo lo que la venta
+    // hizo, sin borrar nada, para no perder el rastro contable:
+    //  - stock: un movimiento de ENTRADA por cada linea de productos que controlan stock;
+    //  - cobro: si la venta creo su propia factura de tienda, se anulan sus pagos y la factura;
+    //    si la venta se cargo a una factura ya existente (facturaId), esa factura NO se toca.
+    // Todo en una sola transaccion: o se reversa completo o no se reversa nada.
+    @Transactional
+    public VentaResponseDTO anular(Integer id, String motivo) {
+        String m = FacturaService.validarMotivo(motivo);
+        // Lock: dos anulaciones simultaneas no pueden devolver el stock dos veces.
+        Venta venta = ventaRepository.findByIdForUpdate(id)
+                .orElseThrow(() -> new RuntimeException("Venta no encontrada con ID: " + id));
+        if (Boolean.TRUE.equals(venta.getAnulada())) {
+            throw new RuntimeException("La venta #" + id + " ya esta anulada");
+        }
+
+        Factura factura = venta.getFactura();
+        if (esFacturaPropia(venta, factura) && !Boolean.TRUE.equals(factura.getAnulada())) {
+            String motivoCobro = "Venta #" + id + " anulada: " + m;
+            for (PagoResponseDTO p : pagoService.listarPorFactura(factura.getId())) {
+                if (!"Anulado".equals(p.getEstado())) {
+                    pagoService.anular(p.getId(), motivoCobro);
+                }
+            }
+            facturaService.anular(factura.getId(), motivoCobro);
+        }
+
+        if (venta.getDetalles() != null) {
+            for (DetalleVenta d : venta.getDetalles()) {
+                ProductoVariante variante = d.getProductoVariante();
+                if (Boolean.TRUE.equals(variante.getProducto().getRequiereControlStock())) {
+                    MovimientoInventarioDTO mov = new MovimientoInventarioDTO();
+                    mov.setProductoVarianteId(variante.getId());
+                    mov.setTipo("entrada");
+                    mov.setCantidad(d.getCantidad());
+                    mov.setMotivo("Anulación de venta #" + id);
+                    movimientoInventarioService.registrar(mov);
+                }
+            }
+        }
+
+        venta.setAnulada(true);
+        venta.setMotivoAnulacion(m);
+        venta.setFechaAnulacion(java.time.LocalDateTime.now());
+        venta.setAnuladaPorUsuarioId(FacturaService.usuarioActualId());
+        return toResponseDTO(ventaRepository.save(venta));
+    }
+
+    /** La factura la creo esta venta (concepto TIENDA y descripcion "Venta de tienda #<id> (...)"), no es una cuenta ajena. */
+    private boolean esFacturaPropia(Venta venta, Factura factura) {
+        return factura != null
+                && "TIENDA".equals(factura.getConcepto())
+                && factura.getDescripcion() != null
+                && factura.getDescripcion().startsWith("Venta de tienda #" + venta.getId() + " (");
+    }
 
     private void validarComprador(VentaDTO dto) {
         boolean tienePersona = dto.getPersonaId() != null;
@@ -181,6 +292,9 @@ public class VentaService {
         dto.setMetodoPago(v.getMetodoPago());
         dto.setFacturaId(v.getFactura() != null ? v.getFactura().getId() : null);
         dto.setNumeroFactura(v.getFactura() != null ? v.getFactura().getNumeroFactura() : null);
+        dto.setAnulada(Boolean.TRUE.equals(v.getAnulada()));
+        dto.setMotivoAnulacion(v.getMotivoAnulacion());
+        dto.setFechaAnulacion(v.getFechaAnulacion());
 
         if (v.getPersona() != null) {
             dto.setPersonaId(v.getPersona().getId());

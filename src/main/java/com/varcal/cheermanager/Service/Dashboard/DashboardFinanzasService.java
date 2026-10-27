@@ -47,7 +47,7 @@ public class DashboardFinanzasService {
         calcularCarteraYFacturadoDelMes(dto, facturas, inicioMes, finMes);
         dto.setMorosidadPorPlan(calcularMorosidadPorPlan(facturas));
 
-        BigDecimal ventasTienda = ventaRepository.findByFechaBetweenOrderByFechaDesc(inicioMes, finMes).stream()
+        BigDecimal ventasTienda = ventaRepository.findByFechaBetweenAndAnuladaFalseOrderByFechaDesc(inicioMes, finMes).stream()
                 .map(v -> v.getTotal())
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         dto.setIngresoTiendaMesActual(ventasTienda);

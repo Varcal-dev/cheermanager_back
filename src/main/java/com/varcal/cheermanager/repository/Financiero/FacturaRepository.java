@@ -59,4 +59,9 @@ public interface FacturaRepository extends JpaRepository<Factura, Integer> {
             + "ORDER BY f.fechaVencimiento ASC")
     List<Factura> findEnMora(@Param("hoy") LocalDate hoy);
 
+
+    // Personas que ya tienen un cobro VIGENTE de este evento (para no cobrar dos veces en lote).
+    @Query("SELECT DISTINCT f.persona.id FROM Factura f WHERE f.eventoId = :eventoId "
+            + "AND f.concepto = 'EVENTO' AND f.anulada = false")
+    List<Integer> findPersonaIdsConCobroDeEvento(@Param("eventoId") Integer eventoId);
 }

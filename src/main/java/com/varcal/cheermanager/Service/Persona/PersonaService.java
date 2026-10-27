@@ -322,6 +322,18 @@ public class PersonaService {
                     .orElseThrow(() -> new RuntimeException("Estado no encontrado"));
 
             if (!estado.getId().equals(estadoAnterior.getId())) {
+                // Entrar o salir de "Retirado" tiene efectos (inscripcion, grupo, usuario) que solo aplican
+                // eliminarDeportista y reactivarDeportista: cambiarlo a mano dejaria datos incoherentes
+                // (p. ej. "Retirado" con inscripcion activa que sigue facturando).
+                Integer idRetirado = estadoRetirado().getId();
+                if (estado.getId().equals(idRetirado)) {
+                    throw new RuntimeException(
+                            "Para retirar a un deportista usa la opcion Retirar: cierra su inscripcion, lo saca del grupo y desactiva su usuario");
+                }
+                if (estadoAnterior.getId().equals(idRetirado)) {
+                    throw new RuntimeException(
+                            "Para volver a activar a un deportista retirado usa la opcion Reactivar");
+                }
                 registrarCambioEstado(deportista, estadoAnterior, estado, null, null);
             }
 
@@ -767,6 +779,48 @@ public class PersonaService {
             usuario.setActivo(false);
             userRepository.save(usuario);
         });
+    }
+
+    /** Resultado de reactivar a un deportista retirado. */
+    public record ReactivacionResultado(Integer deportistaId, String estado, boolean usuarioReactivado,
+            boolean requiereMatricula) {
+    }
+
+    /**
+     * Reactivacion de un deportista RETIRADO (el retiro fue por error o vuelve al club).
+     *  - Estado -> "Activo", con registro en el historial de estados (y el motivo, si se indica).
+     *  - Su usuario (si tenia) se vuelve a activar; conserva su clave.
+     *  - NO se reabre la inscripcion ni se devuelve al grupo: el retiro cerro la inscripcion y la membresia
+     *    del grupo (con historial) y una inscripcion implica cobros, asi que se hace con una matricula nueva
+     *    (asistente de Inscripciones o solicitud desde el portal). Las facturas del retiro siguen como estaban.
+     */
+    @Transactional
+    public ReactivacionResultado reactivarDeportista(Integer deportistaId, String motivo) {
+        Deportista deportista = deportistaRepository.findById(deportistaId)
+                .orElseThrow(() -> new RuntimeException("Deportista no encontrado"));
+
+        EstadoPersona retirado = estadoRetirado();
+        if (deportista.getEstado() == null || !retirado.getId().equals(deportista.getEstado().getId())) {
+            throw new RuntimeException("Solo se puede reactivar a un deportista en estado Retirado");
+        }
+
+        EstadoPersona activo = estadoPersonaRepository.findByEstado("Activo")
+                .orElseThrow(() -> new RuntimeException("Estado 'Activo' no encontrado en el catalogo estados_persona"));
+
+        String m = (motivo == null || motivo.isBlank()) ? "Deportista reactivado" : "Deportista reactivado: " + motivo.trim();
+        if (m.length() > 255) {
+            m = m.substring(0, 255);
+        }
+        registrarCambioEstado(deportista, deportista.getEstado(), activo, null, m);
+        deportista.setEstado(activo);
+        deportistaRepository.save(deportista);
+
+        int usuarios = userRepository.reactivarPorPersona(deportista.getPersona().getId(),
+                com.varcal.cheermanager.tenant.TenantContext.require());
+
+        boolean tieneInscripcionActiva = !inscripcionRepository
+                .findByDeportistaIdAndEstado(deportista.getId(), Inscripcion.EstadoInscripcion.Activa).isEmpty();
+        return new ReactivacionResultado(deportista.getId(), activo.getEstado(), usuarios > 0, !tieneInscripcionActiva);
     }
 
     // Método para registrar un entrenador

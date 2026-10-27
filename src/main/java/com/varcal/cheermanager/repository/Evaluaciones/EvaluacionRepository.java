@@ -11,6 +11,12 @@ import com.varcal.cheermanager.Models.Evaluaciones.Evaluacion;
 
 public interface EvaluacionRepository extends JpaRepository<Evaluacion, Integer> {
 
+    // Un criterio con evaluaciones registradas no se borra ni cambia de categoria (rompe el historial).
+    boolean existsByCriterioEvaluacionId(Integer criterioId);
+
+    @Query("SELECT DISTINCT e.criterioEvaluacion.id FROM Evaluacion e")
+    List<Integer> findCriterioIdsEnUso();
+
     List<Evaluacion> findByDeportistaIdOrderByFechaDesc(Integer deportistaId);
 
     List<Evaluacion> findByDeportistaIdAndCriterioEvaluacionIdOrderByFechaAsc(Integer deportistaId, Integer criterioId);
@@ -30,4 +36,4 @@ public interface EvaluacionRepository extends JpaRepository<Evaluacion, Integer>
     @Query("SELECT AVG(e.puntajeObtenido) FROM Evaluacion e WHERE e.deportista.id = :deportistaId "
             + "AND e.criterioEvaluacion.id = :criterioId")
     Double promedioPorCriterio(@Param("deportistaId") Integer deportistaId, @Param("criterioId") Integer criterioId);
-}
+}       

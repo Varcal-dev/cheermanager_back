@@ -122,6 +122,23 @@ public class DeprotistasController {
         }
     }
 
+    public record ReactivarRequest(String motivo) {
+    }
+
+    /** Reactiva a un deportista retirado (estado Activo + usuario). La inscripcion se hace con una matricula nueva. */
+    @PatchMapping("/{id}/reactivar")
+    @RequiresPermission("modificar_deportista")
+    public ResponseEntity<?> reactivarDeportista(@PathVariable Integer id,
+            @RequestBody(required = false) ReactivarRequest req) {
+        try {
+            return ResponseEntity.ok(personaService.reactivarDeportista(id, req == null ? null : req.motivo()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(409).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error al reactivar el deportista: " + e.getMessage());
+        }
+    }
+
     @PatchMapping("/{id}")
     @RequiresPermission("eliminar_deportista")
     public ResponseEntity<?> eliminarDeportista(@PathVariable Integer id) {

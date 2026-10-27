@@ -17,6 +17,9 @@ public class VentaResponseDTO {
     private Integer facturaId;
     private String numeroFactura; // ej. "FAC-VTA-2026-0001" — null si la venta no generó factura (comprador externo)
     private List<DetalleVentaResponseDTO> detalles;
+    private Boolean anulada;
+    private String motivoAnulacion;
+    private java.time.LocalDateTime fechaAnulacion;
 
     @Data
     public static class DetalleVentaResponseDTO {

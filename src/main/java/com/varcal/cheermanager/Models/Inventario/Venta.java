@@ -70,4 +70,17 @@ public class Venta {
 
     @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DetalleVenta> detalles;
+
+    // Las ventas no se borran: se anulan con motivo (queda fecha y usuario) y dejan de contar en los reportes.
+    @Column(name = "anulada", nullable = false)
+    private Boolean anulada = false;
+
+    @Column(name = "fecha_anulacion")
+    private java.time.LocalDateTime fechaAnulacion;
+
+    @Column(name = "motivo_anulacion", length = 300)
+    private String motivoAnulacion;
+
+    @Column(name = "anulada_por_usuario_id")
+    private Integer anuladaPorUsuarioId;
 }

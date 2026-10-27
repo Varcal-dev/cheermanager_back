@@ -40,7 +40,7 @@ public class DashboardTiendaService {
         LocalDate inicioMes = hoy.withDayOfMonth(1);
         LocalDate finMes = hoy.withDayOfMonth(hoy.lengthOfMonth());
 
-        List<Venta> ventasDelMes = ventaRepository.findByFechaBetweenOrderByFechaDesc(inicioMes, finMes);
+        List<Venta> ventasDelMes = ventaRepository.findByFechaBetweenAndAnuladaFalseOrderByFechaDesc(inicioMes, finMes);
 
         dto.setVentasMesActual(ventasDelMes.size());
         dto.setIngresoMesActual(ventasDelMes.stream().map(Venta::getTotal).reduce(BigDecimal.ZERO, BigDecimal::add));

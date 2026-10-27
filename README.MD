@@ -88,27 +88,28 @@ Leyenda: ✅ completo · 🟡 completo en el back, con observaciones · ❌ falt
 
 | # | Flujo | Estado | Notas |
 |---|---|---|---|
-| 1 | Acceso y sesión (login, logout, refresh, recuperar/cambiar clave, clave temporal) | ✅ | Sin SMTP la recuperación solo escribe el enlace en el log: configurar correo antes de producción. |
+| 1 | Acceso y sesión (login, logout, refresh, recuperar/cambiar clave, clave temporal) | ✅ | Sin SMTP la recuperación solo escribe el enlace en el log: configurar correo antes de producción (variables `SPRING_MAIL_*`). |
 | 2 | Alta y suspensión de clubes (plataforma) | ✅ | Sin edición de nombre/slug de un club ya creado. |
 | 3 | Onboarding del club (`/api/onboarding`) | ✅ | 9 pasos calculados con datos reales del club. |
 | 4 | Usuarios, roles y permisos por club | ✅ | Permisos y catálogos globales solo los gestiona la plataforma (`gestionar_catalogos`). |
 | 5 | Personas: deportistas, entrenadores, acudientes, foto, convenio, historial de estado | ✅ | Retiro cierra inscripción, saca del grupo y desactiva usuario. |
-| 6 | Reactivación de un deportista retirado | ❌ | No hay flujo: la inscripción queda inactiva y el usuario desactivado; hoy solo se cambia el estado editando al deportista. |
+| 6 | Reactivación de un deportista retirado | 🟡 | `PATCH /api/deportistas/{id}/reactivar`: vuelve a Activo y reactiva su usuario; la inscripción y el grupo se recuperan con una matrícula nueva. La edición del deportista rechaza cambios de estado hacia o desde "Retirado". |
 | 7 | Consentimientos (Ley 1581) y exigencia para historial médico | 🟡 | `CONSENTIMIENTOS_EXIGIR_SALUD=false` por defecto; activarlo cuando `/api/consentimientos/pendientes` esté en cero. |
-| 8 | Organización: niveles, divisiones, categorías, temporadas, grupos, horarios | 🟡 | Categorías por nivel y criterios de evaluación son de solo lectura (sin CRUD). |
+| 8 | Organización: niveles, divisiones, categorías, temporadas, grupos, horarios | 🟡 | Las categorías por nivel siguen de solo lectura (sin CRUD). Los criterios de evaluación ya tienen CRUD. |
 | 9 | Matrícula (inscripción + factura de inscripción + primera mensualidad) | ✅ | Descuentos de plan y convenio se combinan de forma multiplicativa. |
 | 10 | Renovación de temporada por solicitud (portal → aprobar/rechazar) | ✅ | Aprobar crea la inscripción y sus facturas. |
-| 11 | Facturación mensual automática y cartera en mora | ✅ | Cron diario 6:00 (Bogotá), primer día hábil con festivos de Colombia, idempotente, vence a 10 días. Sin recordatorios/notificaciones de mora. |
+| 11 | Facturación mensual automática y cartera en mora | ✅ | Cron diario 6:00 (Bogotá), primer día hábil con festivos de Colombia, idempotente, vence a 10 días. Recordatorios de mora por sistema, correo y WhatsApp (fila 22). |
 | 12 | Facturas manuales (UNIFORME, COMPETENCIA, EVENTO, OTRO) y anulación con motivo | ✅ | Facturas y pagos no se borran. |
 | 13 | Pagos (registro, cambio de estado, anulación, saldo) | ✅ | Lock pesimista: no se puede pagar de más ni siquiera con registros simultáneos. Sin conciliación bancaria. |
 | 14 | Descuentos, convenios, planes y tipos de plan | ✅ | |
 | 15 | Asistencia (individual y masiva, % por deportista, riesgo) | ✅ | Registro masivo tolera fallos parciales (HTTP 207). |
-| 16 | Evaluaciones de habilidades y objetivos | 🟡 | Individual, masiva, progresión y promedios. Criterios solo lectura. |
+| 16 | Evaluaciones de habilidades y objetivos, criterios | ✅ | Individual, masiva, progresión y promedios. CRUD de criterios (`/api/criterios-evaluacion`; permisos `crear_/modificar_/eliminar_criterio_evaluacion`): no repite nombre en una categoría; un criterio con evaluaciones no se borra ni cambia de categoría. |
 | 17 | Evaluación de rutina (rúbrica FEDECOLCHEER/IASF 2026) | ✅ | Vista previa, registro, historial por grupo y configuración de rúbrica (solo plataforma). |
-| 18 | Eventos: grupos participantes, premios, resultados | 🟡 | El cobro de inscripción a un evento es manual por deportista (factura `EVENTO`); no hay generación masiva por evento. |
-| 19 | Tienda: productos, variantes, movimientos, ventas | 🟡 | La venta a un miembro genera factura `TIENDA` **sin pago asociado**: una venta de contado quedará pendiente y pasará a mora a los 10 días. Falta anular venta. |
+| 18 | Eventos: grupos participantes, premios, resultados, **cobro por lote** | ✅ | `POST /api/eventos/{id}/cobro-lote` (permiso `crear_factura`): una factura `EVENTO` por deportista vigente de los grupos inscritos; `simular=true` da vista previa; omite retirados/inactivos y a quien ya tiene cobro vigente (repetir es seguro); transaccional y con el evento bloqueado. |
+| 19 | Tienda: productos, variantes, movimientos, ventas | 🟡 | La venta a un miembro genera factura `TIENDA` y, por defecto, registra el pago `Pagado` (`pagada=false` la deja a cuenta). Se puede anular con motivo: devuelve stock y anula su pago y su factura propia. |
 | 20 | Portal de deportista/acudiente (solo lectura) | ✅ | Facturas, pagos, asistencias, evaluaciones, objetivos, rutinas y solicitudes de temporada. |
 | 21 | Dashboards (inicio, organización, personas, horarios, evaluación, finanzas, eventos, tienda, administración) | ✅ | 9 servicios, uno por permiso `ver_dash_*`. |
+| 22 | Recordatorios de mora (sistema · correo · WhatsApp) | ✅ | `/api/recordatorios-mora` (permiso `gestionar_recordatorios_mora`): vista previa y envío manual eligiendo canales (sistema = estándar), configuración por club y envío automático diario 8:00 (Bogotá). Un mensaje por persona con todas sus facturas; no repite la misma factura por el mismo canal antes de N días (7 por defecto); bitácora en `recordatorios_envios`. Los avisos del sistema van al portal (`/api/portal/notificaciones`). Correo requiere SMTP; WhatsApp usa la API de Meta o, sin ella, enlaces `wa.me`. |
 | 22 | Auditoría y logs de acceso | 🟡 | Hay endpoints de `logs-acceso` sin consumidor en el front. |
 | 23 | Operación: migraciones, respaldos, despliegue, logs, pruebas | ✅ | Ver [Despliegue y operación](#despliegue-y-operación). |
 
@@ -121,8 +122,11 @@ Leyenda: ✅ completo · 🟡 completo en el back, con observaciones · ❌ falt
 - **Eliminar inscripción**: las facturas sin pagos se anulan; las que tienen pagos se conservan.
 - **Retiro de un deportista**: estado "Retirado" (con historial), inscripciones activas → inactivas, membresías de grupo cerradas (`fechaFin = hoy`), usuario desactivado; las facturas pendientes se dejan visibles en cartera.
 - **Pagos y facturas no se borran**: se anulan con motivo (mínimo 5 caracteres), fecha y usuario. Una factura con pagos confirmados exige anular primero esos pagos.
+- **Estado "Retirado"**: solo se entra con Retirar y se sale con Reactivar; `PUT /api/deportistas/{id}` rechaza ese cambio de estado.
+- **Reactivar un deportista**: solo si está Retirado; vuelve a Activo (con historial) y su usuario se reactiva; no se reabre la inscripción ni el grupo.
 - **Grupos**: elegibilidad por año de nacimiento y cupo máximo de la categoría; quitar de un grupo cierra la membresía, no la borra.
 - **Temporadas**: solo una activa por club; las inscripciones nuevas se asocian a ella.
+- **Anular una venta**: motivo obligatorio; devuelve el stock con movimientos de entrada y, si la venta creó su factura de tienda, anula su pago y esa factura (una factura ajena a la que se cargó la venta no se toca). Las ventas anuladas no cuentan en los dashboards.
 - **Inventario**: el stock solo cambia por movimientos; SKU `RAT-[CAT]-[COD]-[SEQ]`; productos digitales con `requiereControlStock=false`.
 - **Rúbrica de rutinas**: los topes de 0,1 por deducción (sincronización de saltos y altura de lanzamientos) están fijos en código; el resto de escalones y topes por nivel (N1–N4.2) son configurables.
 - **Consentimientos**: son evidencia, solo se agregan y se revocan, nunca se editan ni se borran.
@@ -136,14 +140,14 @@ Todos cuelgan de `/api`. Resumen (el detalle y el permiso de cada uno están en 
 | Auth | `POST /login` · `/logout` · `/refresh-token` · `/forgot-password` · `/reset-password` · `/change-password` |
 | Usuarios / Roles | `/usuario/*` (`registrar`, `listar`, `me`, `permisos`, `{id}/asignar-roles`, `{id}/clave-temporal`) · `/roles` · `/permisos` |
 | Clubes | `/clubes` (+ `PATCH /{id}/activo`) · `/onboarding` |
-| Personas | `/personas` · `/deportistas` (+ `foto`, `convenio`, `usuario`, `historial-estado`, `grupos-elegibles`, `validar-documento`) · `/entrenadores` · `/acudientes` (+ `deportista/{id}`, `{id}/acceso`) |
+| Personas | `/personas` · `/deportistas` (+ `foto`, `convenio`, `usuario`, `reactivar`, `historial-estado`, `grupos-elegibles`, `validar-documento`) · `/entrenadores` · `/acudientes` (+ `deportista/{id}`, `{id}/acceso`) |
 | Consentimientos | `/consentimientos` (+ `persona/{id}`, `pendientes`, `{id}/revocar`) |
 | Organización | `/niveles` · `/categorias-nivel` · `/temporadas` (+ `activa`, `activar`, `cerrar`) · `/grupos` (+ `candidatos`, `agregar-deportistas`, `asignar-entrenadores`) · `/inscripciones` (+ `detalle`, `generar-cobros-mensualidad`, `{id}/facturas`) · `/solicitudes-inscripcion` |
 | Horarios y asistencia | `/horarios` (+ `asignar-grupo`) · `/asistencias` (+ `masivo`, `grupo/{id}`, `deportista/{id}/porcentaje`) |
 | Financiero | `/planes-pago` · `/tipos-planes-pago` · `/descuentos` · `/convenios` · `/divisiones` · `/facturas` (+ `mora`, `{id}/anular`) · `/pagos` (+ `factura/{id}/saldo`, `{id}/estado`, `{id}/anular`) · catálogos `/metodos-pago`, `/tipos-pago` |
-| Evaluaciones | `/evaluaciones` (+ `masivo`, progresión, promedio) · `/objetivos` · `/criterios-evaluacion` · `/estados-objetivo` · `/evaluaciones-rutina` (+ `preview`, `grupo/{id}`) · `/rubrica-config/*` |
-| Eventos | `/eventos` (+ `proximos`, `historial`) · `/grupos-evento` · `/premios-evento` · `/resultados-competencia` · `/tipos-evento` |
-| Tienda | `/categorias-producto` · `/productos` · `/producto-variantes` · `/movimientos-inventario` · `/ventas` |
+| Evaluaciones | `/evaluaciones` (+ `masivo`, progresión, promedio) · `/objetivos` · `/criterios-evaluacion` · `/tipos-categoria` · `/estados-objetivo` · `/evaluaciones-rutina` (+ `preview`, `grupo/{id}`) · `/rubrica-config/*` |
+| Eventos | `/eventos` (+ `proximos`, `historial`, `{id}/cobro-lote`) · `/grupos-evento` · `/premios-evento` · `/resultados-competencia` · `/tipos-evento` |
+| Tienda | `/categorias-producto` · `/productos` · `/producto-variantes` · `/movimientos-inventario` · `/ventas` (+ `{id}/anular`) |
 | Historiales | `/historial-medico` · `/historial-nivel` · `/historial-planes` |
 | Portal | `/portal/yo` · `/portal/deportistas/{id}/{facturas,pagos,asistencias,evaluaciones,objetivos,rutinas,solicitudes}` · `/portal/temporadas-abiertas` · `/portal/solicitudes/{id}/cancelar` |
 | Dashboard / Auditoría | `/dashboard/*` · `/auditoria` · `/logs-acceso/*` |
@@ -167,7 +171,9 @@ Los secretos **no tienen valor por defecto**: si falta una obligatoria, la app n
 | `FACTURACION_AUTOMATICA` | No | `true` | Cron de facturación mensual (pensado para **una sola instancia**) |
 | `JPA_DDL_AUTO` | No | `validate` | Nunca `update` fuera de tu máquina |
 | `FLYWAY_ENABLED` | No | `true` | |
-| `MAIL_FROM` + `spring.mail.*` | No | `no-reply@cheermanager.local` | SMTP para recuperación de clave |
+| `MAIL_FROM` + `SPRING_MAIL_HOST/PORT/USERNAME/PASSWORD` (+ `SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH`, `..._STARTTLS_ENABLE`) | No | `no-reply@cheermanager.local` | SMTP: recuperación de clave y recordatorios por correo |
+| `RECORDATORIOS_AUTOMATICOS` | No | `true` | `false` apaga el envío automático diario en todo el servidor |
+| `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_TEMPLATE`, `WHATSAPP_LANGUAGE` | No | plantilla `recordatorio_mora`, idioma `es` | WhatsApp Business Cloud API (plantilla aprobada por Meta con 3 variables: deportista, N.º de facturas, saldo). Sin esto, el canal genera enlaces `wa.me` |
 | `FORWARD_HEADERS_STRATEGY` | No | `none` | `framework` detrás de Nginx/Caddy/Railway |
 | `UPLOAD_DIR` | No | `./uploads` | Fotos y documentos (máx. 10 MB) |
 | `LOG_LEVEL_ROOT` / `LOG_LEVEL_APP` | No | `INFO` | No subir a `DEBUG` `org.hibernate.SQL` ni Spring Security en producción |
@@ -193,7 +199,7 @@ API en `http://localhost:8081`. Con Docker: `cp .env.example .env && docker comp
 ## Base de datos y migraciones
 
 - **Flyway es la fuente de verdad del esquema**; Hibernate solo valida (`ddl-auto=validate`).
-- `V1` esquema base · `V2` datos iniciales (roles, permisos, catálogos) · `V3` alineación con el modelo JPA · `V4` booleanos a `BIT` · `V5` cartera (vencimiento, mora, facturas manuales, anulaciones) · `V6` portal de acudiente/deportista y solicitudes de inscripción.
+- `V1` esquema base · `V2` datos iniciales (roles, permisos, catálogos) · `V3` alineación con el modelo JPA · `V4` booleanos a `BIT` · `V5` cartera (vencimiento, mora, facturas manuales, anulaciones) · `V6` portal de acudiente/deportista y solicitudes de inscripción · `V7` anulación de ventas · `V8` permiso de editar criterios al Director Deportivo · `V9` recordatorios de mora (config, bitácora, permiso `gestionar_recordatorios_mora`).
 - **Nunca edites una migración ya aplicada**: crea la siguiente (`V7`, ...).
 - Una BD preexistente sin historial de Flyway se marca como versión 2 (`baseline-version=2`) y solo aplica `V3` en adelante. Haz respaldo antes.
 - Antes de migrar una base real: `ops/probar_esquema.sh` carga las migraciones en una BD desechable y verifica el aislamiento entre clubes.
@@ -226,12 +232,11 @@ No hay pruebas automatizadas de los módulos de evaluación de rutinas, inventar
 
 ## Pendientes conocidos
 
-1. **Ventas de contado a miembros**: crear el pago al registrar la venta (o permitir marcarla como pagada) para que no figure en mora.
-2. **Anular venta** (`anular_venta`): reversar con movimientos de entrada compensatorios; hoy no tiene lógica.
-3. **Reactivar deportista retirado**: reabrir estado, usuario e inscripción en un solo flujo.
-4. **SMTP real** y **recordatorios de mora** (la entidad `Notificacion` existe pero no se usa).
-5. **CRUD de criterios de evaluación y de categorías por nivel** para que cada club los personalice.
+1. ~~Ventas de contado a miembros sin pago~~ — resuelto (22-oct-2026): `VentaDTO.pagada` y pago automático en `VentaService`.
+2. ~~Anular venta~~ — resuelto (25-oct-2026): `PATCH /api/ventas/{id}/anular`, migración `V7`.
+3. ~~Reactivar deportista retirado~~ — resuelto (25-oct-2026), incluida la protección de la edición contra cambios manuales hacia/desde "Retirado".
+4. ~~SMTP real y recordatorios de mora~~ — resuelto (26-oct-2026): ver fila 22. Pendiente de operación: contratar el SMTP y, si se quiere envío automático por WhatsApp, abrir la cuenta de WhatsApp Business y aprobar la plantilla.
+5. **CRUD de categorías por nivel** para que cada club las personalice.
 6. **Conciliación / cierre de caja** de pagos.
-7. **Facturación de evento por lote** a los deportistas de los grupos participantes.
 8. Diferido a propósito: unificar tipos `Long`/`Integer` en repositorios (limpieza aparte, para no romper en cascada).
 9. Calidad: OpenAPI/Swagger, CI/CD, más pruebas (rutinas, inventario, inscripciones), y registro de seguimiento de `ajustes_claudia/` a un `CHANGELOG`.

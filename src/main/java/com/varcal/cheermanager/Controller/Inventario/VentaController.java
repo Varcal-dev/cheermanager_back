@@ -51,6 +51,20 @@ public class VentaController {
         return ResponseEntity.ok(ventaService.listarPorRango(desde, hasta));
     }
 
+    public record AnularRequest(String motivo) {
+    }
+
+    /** Reversa la venta: stock, pago y factura propia. No se borra nada; queda con motivo, fecha y usuario. */
+    @PatchMapping("/{id}/anular")
+    @RequiresPermission("anular_venta")
+    public ResponseEntity<?> anular(@PathVariable Integer id, @RequestBody AnularRequest req) {
+        try {
+            return ResponseEntity.ok(ventaService.anular(id, req == null ? null : req.motivo()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(409).body(e.getMessage());
+        }
+    }
+
     @GetMapping("/persona/{personaId}")
     @RequiresPermission("ver_venta")
     public ResponseEntity<List<VentaResponseDTO>> listarPorPersona(@PathVariable Integer personaId) {

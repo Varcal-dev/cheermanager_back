@@ -4,6 +4,12 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import jakarta.persistence.LockModeType;
+import java.util.Optional;
 
 import com.varcal.cheermanager.Models.Eventos.Evento;
 
@@ -18,4 +24,10 @@ public interface EventoRepository extends JpaRepository<Evento, Integer> {
     List<Evento> findByTipoEventoIdOrderByFechaDesc(Integer tipoEventoId);
 
     List<Evento> findByFechaBetweenOrderByFechaAsc(LocalDate desde, LocalDate hasta);
+
+    // Bloqueo pesimista: serializa dos "cobrar evento" simultaneos sobre el MISMO evento,
+    // para que no se facture dos veces al mismo deportista.
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT e FROM Evento e WHERE e.id = :id")
+    Optional<Evento> findByIdForUpdate(@Param("id") Integer id);
 }
