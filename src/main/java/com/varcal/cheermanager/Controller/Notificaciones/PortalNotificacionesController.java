@@ -50,7 +50,7 @@ public class PortalNotificacionesController {
     @PatchMapping("/{id}/vista")
     @RequiresPermission("acceder_portal")
     @Transactional
-    public ResponseEntity<Void> marcarVista(@PathVariable Integer id) {
+    public ResponseEntity<Object> marcarVista(@PathVariable Integer id) {
         return repo.findByIdAndUsuarioId(id, usuarioId()).map(n -> {
             n.setVista(true);
             repo.save(n);

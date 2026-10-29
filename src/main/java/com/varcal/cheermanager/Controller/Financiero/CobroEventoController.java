@@ -1,8 +1,4 @@
-package com.varcal.cheermanager.Controller.Financiero;
 
-public class CobroEventoController {
-    
-}
 package com.varcal.cheermanager.Controller.Financiero;
 
 import org.springframework.http.ResponseEntity;

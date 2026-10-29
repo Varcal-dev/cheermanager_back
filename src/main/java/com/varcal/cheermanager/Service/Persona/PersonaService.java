@@ -89,12 +89,14 @@ public class PersonaService {
     private DeportistaPerteneceGrupoRepository deportistaPerteneceGrupoRepository;
 
     /**
-     * Estado "Retirado" buscado por NOMBRE (el catalogo estados_persona es global y sus ids no
+     * Estado "Retirado" buscado por NOMBRE (el catalogo estados_persona es global y
+     * sus ids no
      * son un contrato: antes se usaba findById(2), que en el seed es "Inactivo").
      */
     private EstadoPersona estadoRetirado() {
         return estadoPersonaRepository.findByEstado("Retirado")
-                .orElseThrow(() -> new RuntimeException("Estado 'Retirado' no encontrado en el catalogo estados_persona"));
+                .orElseThrow(
+                        () -> new RuntimeException("Estado 'Retirado' no encontrado en el catalogo estados_persona"));
     }
 
     public String generarUsername(String nombre, String apellidos) {
@@ -119,7 +121,10 @@ public class PersonaService {
         return registrarUsuario(persona, username, email, password, rolId, false);
     }
 
-    /** requiereCambioPassword=true cuando la clave es temporal (autogenerada): obliga a cambiarla en el primer ingreso. */
+    /**
+     * requiereCambioPassword=true cuando la clave es temporal (autogenerada):
+     * obliga a cambiarla en el primer ingreso.
+     */
     @Transactional
     public Usuario registrarUsuario(Persona persona, String username, String email, String password, Integer rolId,
             boolean requiereCambioPassword) {
@@ -131,8 +136,10 @@ public class PersonaService {
             throw new RuntimeException("El correo electrónico ya está en uso");
         }
 
-        // Rol solicitado (antes se ignoraba rolId y siempre quedaba DEPORTISTA, de modo que
-        // el admin no podia crear usuarios con otro rol). Sin rolId se mantiene el default.
+        // Rol solicitado (antes se ignoraba rolId y siempre quedaba DEPORTISTA, de modo
+        // que
+        // el admin no podia crear usuarios con otro rol). Sin rolId se mantiene el
+        // default.
         Rol rol = (rolId != null)
                 ? rolRepository.findById(rolId)
                         .orElseThrow(() -> new RuntimeException("El rol con ID '" + rolId + "' no existe"))
@@ -157,8 +164,10 @@ public class PersonaService {
     }
 
     /**
-     * El admin del club genera una clave temporal para un usuario de SU club (userRepository esta filtrado por club).
-     * Devuelve la clave UNA sola vez; el usuario debera cambiarla al ingresar. Desbloquea la cuenta.
+     * El admin del club genera una clave temporal para un usuario de SU club
+     * (userRepository esta filtrado por club).
+     * Devuelve la clave UNA sola vez; el usuario debera cambiarla al ingresar.
+     * Desbloquea la cuenta.
      * Las sesiones ya abiertas siguen validas hasta que venza su token.
      */
     @Transactional
@@ -279,8 +288,10 @@ public class PersonaService {
                 deportistaDTO.getNombre(),
                 deportistaDTO.getApellidos());
         String email = username + "@cheermanager.com";
-        // Clave aleatoria que nadie conoce: antes era "0000" para todos (cualquiera que adivinara el usuario entraba).
-        // El admin entrega una clave temporal con POST /api/usuario/{id}/clave-temporal.
+        // Clave aleatoria que nadie conoce: antes era "0000" para todos (cualquiera que
+        // adivinara el usuario entraba).
+        // El admin entrega una clave temporal con POST
+        // /api/usuario/{id}/clave-temporal.
         String password = ClaveTemporal.generar();
 
         Rol rolDeportista = rolRepository.findByNombre("Deportista")
@@ -322,8 +333,10 @@ public class PersonaService {
                     .orElseThrow(() -> new RuntimeException("Estado no encontrado"));
 
             if (!estado.getId().equals(estadoAnterior.getId())) {
-                // Entrar o salir de "Retirado" tiene efectos (inscripcion, grupo, usuario) que solo aplican
-                // eliminarDeportista y reactivarDeportista: cambiarlo a mano dejaria datos incoherentes
+                // Entrar o salir de "Retirado" tiene efectos (inscripcion, grupo, usuario) que
+                // solo aplican
+                // eliminarDeportista y reactivarDeportista: cambiarlo a mano dejaria datos
+                // incoherentes
                 // (p. ej. "Retirado" con inscripcion activa que sigue facturando).
                 Integer idRetirado = estadoRetirado().getId();
                 if (estado.getId().equals(idRetirado)) {
@@ -759,9 +772,11 @@ public class PersonaService {
         deportista.setEstado(estadoRetirado);
         deportistaRepository.save(deportista);
 
-        // Regla de negocio: al retirar se CIERRA la inscripcion (deja de generar cobros mensuales)
+        // Regla de negocio: al retirar se CIERRA la inscripcion (deja de generar cobros
+        // mensuales)
         // y se SACA del grupo (membresia con fechaFin = hoy, se conserva el historial).
-        // Las facturas ya emitidas se dejan tal cual: la deuda pendiente sigue visible en cartera.
+        // Las facturas ya emitidas se dejan tal cual: la deuda pendiente sigue visible
+        // en cartera.
         for (Inscripcion inscripcion : inscripcionRepository.findByDeportistaIdAndEstado(
                 deportista.getId(), Inscripcion.EstadoInscripcion.Activa)) {
             inscripcion.setEstado(Inscripcion.EstadoInscripcion.Inactiva);
@@ -787,12 +802,17 @@ public class PersonaService {
     }
 
     /**
-     * Reactivacion de un deportista RETIRADO (el retiro fue por error o vuelve al club).
-     *  - Estado -> "Activo", con registro en el historial de estados (y el motivo, si se indica).
-     *  - Su usuario (si tenia) se vuelve a activar; conserva su clave.
-     *  - NO se reabre la inscripcion ni se devuelve al grupo: el retiro cerro la inscripcion y la membresia
-     *    del grupo (con historial) y una inscripcion implica cobros, asi que se hace con una matricula nueva
-     *    (asistente de Inscripciones o solicitud desde el portal). Las facturas del retiro siguen como estaban.
+     * Reactivacion de un deportista RETIRADO (el retiro fue por error o vuelve al
+     * club).
+     * - Estado -> "Activo", con registro en el historial de estados (y el motivo,
+     * si se indica).
+     * - Su usuario (si tenia) se vuelve a activar; conserva su clave.
+     * - NO se reabre la inscripcion ni se devuelve al grupo: el retiro cerro la
+     * inscripcion y la membresia
+     * del grupo (con historial) y una inscripcion implica cobros, asi que se hace
+     * con una matricula nueva
+     * (asistente de Inscripciones o solicitud desde el portal). Las facturas del
+     * retiro siguen como estaban.
      */
     @Transactional
     public ReactivacionResultado reactivarDeportista(Integer deportistaId, String motivo) {
@@ -805,9 +825,11 @@ public class PersonaService {
         }
 
         EstadoPersona activo = estadoPersonaRepository.findByEstado("Activo")
-                .orElseThrow(() -> new RuntimeException("Estado 'Activo' no encontrado en el catalogo estados_persona"));
+                .orElseThrow(
+                        () -> new RuntimeException("Estado 'Activo' no encontrado en el catalogo estados_persona"));
 
-        String m = (motivo == null || motivo.isBlank()) ? "Deportista reactivado" : "Deportista reactivado: " + motivo.trim();
+        String m = (motivo == null || motivo.isBlank()) ? "Deportista reactivado"
+                : "Deportista reactivado: " + motivo.trim();
         if (m.length() > 255) {
             m = m.substring(0, 255);
         }
@@ -864,7 +886,8 @@ public class PersonaService {
         Rol rolEntrenador = rolRepository.findByNombre("Entrenador")
                 .orElseThrow(() -> new RuntimeException("El rol 'Entrenador' no existe en la base de datos"));
 
-        // Antes se calculaban username/email/password/rol pero NUNCA se creaba el usuario:
+        // Antes se calculaban username/email/password/rol pero NUNCA se creaba el
+        // usuario:
         // el entrenador quedaba sin acceso al sistema.
         registrarUsuario(personaGuardada, username, email, password, rolEntrenador.getId(), true);
 
@@ -911,6 +934,10 @@ public class PersonaService {
                 entrenador.setFechaContratacion(dto.getFechaContratacion());
             }
 
+            if (dto.getEspecializacion() != null) {
+                entrenador.setEspecializacion(dto.getEspecializacion());
+            }
+
             if (dto.getEstadoId() != null) {
                 EstadoPersona estado = estadoPersonaRepository.findById(dto.getEstadoId())
                         .orElseThrow(() -> new RuntimeException("Estado no encontrado"));
@@ -942,6 +969,5 @@ public class PersonaService {
             userRepository.save(usuario);
         });
     }
-
 
 }
