@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -100,8 +101,10 @@ public class DashboardInicioService {
         BigDecimal pendienteTotal = BigDecimal.ZERO;
         long facturasConSaldo = 0;
 
+        Map<Integer, BigDecimal> pagadoPorFactura = pagoRepository.pagadoPorFacturas(
+                facturas.stream().map(Factura::getId).toList());
         for (Factura f : facturas) {
-            BigDecimal pagado = pagoRepository.sumarMontoPagadoPorFactura(f.getId());
+            BigDecimal pagado = pagadoPorFactura.getOrDefault(f.getId(), BigDecimal.ZERO);
             BigDecimal saldo = f.getTotal().subtract(pagado);
             if (saldo.signum() > 0) {
                 pendienteTotal = pendienteTotal.add(saldo);

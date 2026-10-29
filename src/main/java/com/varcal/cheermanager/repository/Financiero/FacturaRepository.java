@@ -12,6 +12,9 @@ import java.util.List;
 
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -51,6 +54,10 @@ public interface FacturaRepository extends JpaRepository<Factura, Integer> {
     // Facturas vigentes (las anuladas no cuentan en cartera ni en los dashboards).
     List<Factura> findByAnuladaFalse();
 
+    // Listado completo trayendo persona y descuento en la MISMA consulta (evita una consulta por factura).
+    @Query("SELECT f FROM Factura f JOIN FETCH f.persona LEFT JOIN FETCH f.descuento")
+    List<Factura> findAllConDetalle();
+
     List<Factura> findByPersonaIdOrderByFechaEmisionDesc(Integer personaId);
 
     // Cartera en mora: vigentes, ya vencidas (fecha_vencimiento < hoy) y con saldo > 0.
@@ -64,4 +71,39 @@ public interface FacturaRepository extends JpaRepository<Factura, Integer> {
     @Query("SELECT DISTINCT f.persona.id FROM Factura f WHERE f.eventoId = :eventoId "
             + "AND f.concepto = 'EVENTO' AND f.anulada = false")
     List<Integer> findPersonaIdsConCobroDeEvento(@Param("eventoId") Integer eventoId);
+
+    // ---- Listado paginado con filtros ------------------------------------------------
+    // El estado de cuenta no se guarda: se deriva de los pagos. Por eso el filtro por estado usa la
+    // misma suma de pagos 'Pagado' como subconsulta, con las MISMAS reglas que FacturaService.construirDTO:
+    //   ANULADA > PAGADA (saldo<=0) > EN_MORA (vencida con saldo) > ABONO_PARCIAL > PENDIENTE.
+    // Los parametros nunca van null (el Service pone valores por defecto) para evitar problemas
+    // de tipado de nulos en Hibernate 6 / MySQL.
+    String PAGADO_SQ = "(SELECT COALESCE(SUM(p.monto), 0) FROM Pago p WHERE p.factura = f AND p.estado = 'Pagado')";
+
+    String FILTRO_PAGINA = " WHERE f.fechaEmision BETWEEN :desde AND :hasta "
+            + "AND (:q = '' OR LOWER(f.numeroFactura) LIKE LOWER(CONCAT('%', :q, '%')) "
+            + "     OR LOWER(f.descripcion) LIKE LOWER(CONCAT('%', :q, '%')) "
+            + "     OR LOWER(CONCAT(pe.nombre, ' ', pe.apellidos)) LIKE LOWER(CONCAT('%', :q, '%'))) "
+            + "AND (:concepto = 'TODOS' OR f.concepto = :concepto) "
+            + "AND (:estado = 'TODOS' "
+            + "  OR (:estado = 'ANULADA' AND f.anulada = true) "
+            + "  OR (f.anulada = false AND ( "
+            + "       (:estado = 'PAGADA' AND f.total <= " + PAGADO_SQ + ") "
+            + "    OR (:estado = 'EN_MORA' AND f.total > " + PAGADO_SQ + " AND f.fechaVencimiento < :hoy) "
+            + "    OR (:estado = 'ABONO_PARCIAL' AND f.total > " + PAGADO_SQ + " AND " + PAGADO_SQ + " > 0 "
+            + "        AND (f.fechaVencimiento IS NULL OR f.fechaVencimiento >= :hoy)) "
+            + "    OR (:estado = 'PENDIENTE' AND f.total > " + PAGADO_SQ + " AND " + PAGADO_SQ + " = 0 "
+            + "        AND (f.fechaVencimiento IS NULL OR f.fechaVencimiento >= :hoy)) "
+            + "  ))) ";
+
+    @Query(value = "SELECT f FROM Factura f JOIN FETCH f.persona pe LEFT JOIN FETCH f.descuento" + FILTRO_PAGINA
+            + "ORDER BY f.fechaEmision DESC, f.id DESC",
+           countQuery = "SELECT COUNT(f) FROM Factura f JOIN f.persona pe" + FILTRO_PAGINA)
+    Page<Factura> buscarPagina(@Param("q") String q,
+                               @Param("estado") String estado,
+                               @Param("concepto") String concepto,
+                               @Param("desde") LocalDate desde,
+                               @Param("hasta") LocalDate hasta,
+                               @Param("hoy") LocalDate hoy,
+                               Pageable pageable);
 }

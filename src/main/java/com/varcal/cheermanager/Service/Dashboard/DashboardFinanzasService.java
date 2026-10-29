@@ -67,8 +67,10 @@ public class DashboardFinanzasService {
         BigDecimal facturadoMes = BigDecimal.ZERO;
         BigDecimal facturadoConDescuentoMes = BigDecimal.ZERO;
 
+        Map<Integer, BigDecimal> pagadoPorFactura = pagoRepository.pagadoPorFacturas(
+                facturas.stream().map(Factura::getId).toList());
         for (Factura f : facturas) {
-            BigDecimal pagado = pagoRepository.sumarMontoPagadoPorFactura(f.getId());
+            BigDecimal pagado = pagadoPorFactura.getOrDefault(f.getId(), BigDecimal.ZERO);
             BigDecimal saldo = f.getTotal().subtract(pagado);
             if (saldo.signum() > 0) {
                 pendienteTotal = pendienteTotal.add(saldo);
@@ -98,12 +100,14 @@ public class DashboardFinanzasService {
     private List<MorosidadPorPlanDTO> calcularMorosidadPorPlan(List<Factura> facturas) {
         Map<String, long[]> conteoPorPlan = new HashMap<>(); // [totalFacturas, conSaldoPendiente]
 
+        Map<Integer, BigDecimal> pagadoPorFactura = pagoRepository.pagadoPorFacturas(
+                facturas.stream().map(Factura::getId).toList());
         for (Factura f : facturas) {
             String nombrePlan = (f.getInscripcion() != null && f.getInscripcion().getPlanPago() != null)
                     ? f.getInscripcion().getPlanPago().getNombre()
                     : "Sin plan asociado";
 
-            BigDecimal pagado = pagoRepository.sumarMontoPagadoPorFactura(f.getId());
+            BigDecimal pagado = pagadoPorFactura.getOrDefault(f.getId(), BigDecimal.ZERO);
             boolean tieneSaldo = f.getTotal().subtract(pagado).signum() > 0;
 
             long[] contadores = conteoPorPlan.computeIfAbsent(nombrePlan, k -> new long[2]);

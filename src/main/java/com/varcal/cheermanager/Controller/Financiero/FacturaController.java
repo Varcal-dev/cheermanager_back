@@ -1,5 +1,6 @@
 package com.varcal.cheermanager.Controller.Financiero;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -9,10 +10,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.varcal.cheermanager.DTO.Comunes.PaginaDTO;
 import com.varcal.cheermanager.DTO.Financiero.FacturaManualDTO;
 import com.varcal.cheermanager.DTO.Financiero.FacturaResponseDTO;
 import com.varcal.cheermanager.Service.Financiero.FacturaService;
@@ -40,6 +44,28 @@ public class FacturaController {
     @RequiresPermission("ver_factura")
     public List<FacturaResponseDTO> listar() {
         return facturaService.listarDTO();
+    }
+
+    // Listado para la pantalla: paginado y con filtros (el listado completo de abajo se conserva
+    // para quien ya lo consuma, pero la pantalla de Facturas ya no lo usa).
+    @GetMapping("/pagina")
+    @RequiresPermission("ver_factura")
+    public PaginaDTO<FacturaResponseDTO> pagina(
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) String estado,
+            @RequestParam(required = false) String concepto,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta,
+            @RequestParam(defaultValue = "0") int pagina,
+            @RequestParam(defaultValue = "20") int tamano) {
+        return facturaService.listarPagina(q, estado, concepto, desde, hasta, pagina, tamano);
+    }
+
+    // Totales de cartera en mora (tarjeta de alerta de la pantalla).
+    @GetMapping("/resumen-cartera")
+    @RequiresPermission("ver_factura")
+    public Map<String, Object> resumenCartera() {
+        return facturaService.resumenCartera();
     }
 
     // Cartera en mora: facturas vencidas con saldo pendiente (las mas antiguas primero).

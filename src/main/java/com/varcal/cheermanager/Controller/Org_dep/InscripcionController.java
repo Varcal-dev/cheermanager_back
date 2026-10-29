@@ -89,9 +89,7 @@ public class InscripcionController {
     public ResponseEntity<?> obtenerFacturas(@PathVariable Integer id) {
         try {
             List<Factura> facturas = inscripcionService.obtenerFacturasDeInscripcion(id);
-            List<FacturaResponseDTO> dtos = facturas.stream()
-                    .map(facturaService::toResponseDTO)
-                    .collect(Collectors.toList());
+            List<FacturaResponseDTO> dtos = facturaService.toResponseDTOs(facturas);
             return ResponseEntity.ok(dtos);
         } catch (RuntimeException e) {
             return ResponseEntity.status(404).body(e.getMessage());

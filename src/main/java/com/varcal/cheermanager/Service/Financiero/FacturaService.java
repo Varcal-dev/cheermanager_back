@@ -5,14 +5,18 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Year;
 import java.time.temporal.ChronoUnit;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.varcal.cheermanager.DTO.Comunes.PaginaDTO;
 import com.varcal.cheermanager.DTO.Financiero.FacturaManualDTO;
 import com.varcal.cheermanager.DTO.Financiero.FacturaResponseDTO;
 import com.varcal.cheermanager.Models.Financiero.EstadoPago;
@@ -192,9 +196,7 @@ public class FacturaService {
     }
 
     public List<FacturaResponseDTO> listarDTO() {
-        return facturaRepository.findAll().stream()
-                .map(this::toResponseDTO)
-                .collect(Collectors.toList());
+        return toResponseDTOs(facturaRepository.findAllConDetalle());
     }
 
     public Optional<FacturaResponseDTO> buscarDTOPorId(Integer id) {
@@ -203,19 +205,72 @@ public class FacturaService {
 
     /** Facturas vencidas con saldo pendiente, las mas antiguas primero. */
     public List<FacturaResponseDTO> listarEnMora() {
-        return facturaRepository.findEnMora(LocalDate.now()).stream()
-                .map(this::toResponseDTO)
-                .collect(Collectors.toList());
+        return toResponseDTOs(facturaRepository.findEnMora(LocalDate.now()));
     }
 
     public List<FacturaResponseDTO> listarPorPersona(Integer personaId) {
-        return facturaRepository.findByPersonaIdOrderByFechaEmisionDesc(personaId).stream()
-                .map(this::toResponseDTO)
+        return toResponseDTOs(facturaRepository.findByPersonaIdOrderByFechaEmisionDesc(personaId));
+    }
+
+    private static final Set<String> ESTADOS_FILTRO =
+            Set.of("TODOS", "PAGADA", "ABONO_PARCIAL", "PENDIENTE", "EN_MORA", "ANULADA");
+
+    /**
+     * Listado paginado con filtros. Todos los filtros son opcionales:
+     * q (numero, descripcion o nombre), estado (TODOS|PAGADA|ABONO_PARCIAL|PENDIENTE|EN_MORA|ANULADA),
+     * concepto (INSCRIPCION|MENSUALIDAD|UNIFORME|...), y rango de fecha de emision.
+     */
+    @Transactional(readOnly = true)
+    public PaginaDTO<FacturaResponseDTO> listarPagina(String q, String estado, String concepto,
+                                                      LocalDate desde, LocalDate hasta,
+                                                      int pagina, int tamano) {
+        String estadoN = (estado == null || estado.isBlank()) ? "TODOS" : estado.trim().toUpperCase();
+        if (!ESTADOS_FILTRO.contains(estadoN)) {
+            throw new IllegalArgumentException("Estado no valido: " + estado);
+        }
+        String conceptoN = (concepto == null || concepto.isBlank()) ? "TODOS" : concepto.trim().toUpperCase();
+        String qN = q == null ? "" : q.trim();
+        LocalDate d = desde != null ? desde : LocalDate.of(1900, 1, 1);
+        LocalDate h = hasta != null ? hasta : LocalDate.of(2999, 12, 31);
+        if (d.isAfter(h)) {
+            throw new IllegalArgumentException("La fecha 'desde' no puede ser posterior a 'hasta'");
+        }
+        int size = Math.min(Math.max(tamano, 1), 100);
+        int page = Math.max(pagina, 0);
+
+        var resultado = facturaRepository.buscarPagina(qN, estadoN, conceptoN, d, h, LocalDate.now(),
+                PageRequest.of(page, size));
+        return PaginaDTO.de(resultado, this::toResponseDTOs);
+    }
+
+    /** Totales de cartera para las tarjetas de arriba (no dependen de la pagina ni de los filtros). */
+    @Transactional(readOnly = true)
+    public Map<String, Object> resumenCartera() {
+        List<FacturaResponseDTO> mora = listarEnMora();
+        BigDecimal totalMora = mora.stream()
+                .map(FacturaResponseDTO::getSaldoPendiente)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        return Map.of("facturasEnMora", mora.size(), "totalEnMora", totalMora);
+    }
+
+    /** Igual que toResponseDTO pero para muchas facturas: UNA consulta de pagos en vez de una por factura. */
+    public List<FacturaResponseDTO> toResponseDTOs(Collection<Factura> facturas) {
+        if (facturas.isEmpty()) {
+            return List.of();
+        }
+        Map<Integer, BigDecimal> pagado = pagoRepository.pagadoPorFacturas(
+                facturas.stream().map(Factura::getId).toList());
+        return facturas.stream()
+                .map(f -> construirDTO(f, pagado.getOrDefault(f.getId(), BigDecimal.ZERO)))
                 .collect(Collectors.toList());
     }
 
     /** Estado de cuenta de una factura (reglas en un solo lugar: lo usan la lista, el portal y los reportes). */
     public FacturaResponseDTO toResponseDTO(Factura factura) {
+        return construirDTO(factura, pagoRepository.sumarMontoPagadoPorFactura(factura.getId()));
+    }
+
+    private FacturaResponseDTO construirDTO(Factura factura, BigDecimal pagado) {
         FacturaResponseDTO dto = new FacturaResponseDTO();
         dto.setId(factura.getId());
         dto.setNumeroFactura(factura.getNumeroFactura());
@@ -251,7 +306,6 @@ public class FacturaService {
             dto.setInscripcionId(factura.getInscripcion().getId());
         }
 
-        BigDecimal pagado = pagoRepository.sumarMontoPagadoPorFactura(factura.getId());
         BigDecimal saldo = factura.getTotal().subtract(pagado);
         dto.setTotalPagado(pagado);
         dto.setSaldoPendiente(anulada ? BigDecimal.ZERO : saldo.max(BigDecimal.ZERO));

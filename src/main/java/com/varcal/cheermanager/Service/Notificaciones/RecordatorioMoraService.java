@@ -189,8 +189,7 @@ public class RecordatorioMoraService {
         }
 
         LocalDate hoy = LocalDate.now(BOGOTA);
-        List<FacturaResponseDTO> enMora = facturaRepository.findEnMora(hoy).stream()
-                .map(facturaService::toResponseDTO)
+        List<FacturaResponseDTO> enMora = facturaService.toResponseDTOs(facturaRepository.findEnMora(hoy)).stream()
                 .filter(f -> req.getFacturaIds() == null || req.getFacturaIds().isEmpty()
                         || req.getFacturaIds().contains(f.getId()))
                 .toList();

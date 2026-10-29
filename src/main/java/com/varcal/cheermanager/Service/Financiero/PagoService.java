@@ -2,6 +2,7 @@ package com.varcal.cheermanager.Service.Financiero;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,9 +98,7 @@ public class PagoService {
     }
 
     public List<PagoResponseDTO> listar() {
-        return pagoRepository.findAll().stream()
-                .map(this::toResponseDTO)
-                .collect(Collectors.toList());
+        return toResponseDTOs(pagoRepository.findAll());
     }
 
     public PagoResponseDTO obtenerPorId(Integer id) {
@@ -112,15 +111,11 @@ public class PagoService {
         if (!facturaRepository.existsById(facturaId)) {
             throw new RuntimeException("Factura no encontrada con ID: " + facturaId);
         }
-        return pagoRepository.findByFacturaId(facturaId).stream()
-                .map(this::toResponseDTO)
-                .collect(Collectors.toList());
+        return toResponseDTOs(pagoRepository.findByFacturaId(facturaId));
     }
 
     public List<PagoResponseDTO> listarPorPersona(Integer personaId) {
-        return pagoRepository.findByPersonaId(personaId).stream()
-                .map(this::toResponseDTO)
-                .collect(Collectors.toList());
+        return toResponseDTOs(pagoRepository.findByPersonaId(personaId));
     }
 
     // @Transactional: lee el pago, valida estado nuevo y guarda; se mantiene
@@ -193,7 +188,23 @@ public class PagoService {
         return factura.getTotal().subtract(yaPagado);
     }
 
+    /** Para listas: UNA consulta de sumas por todas las facturas implicadas, no una por pago. */
+    private List<PagoResponseDTO> toResponseDTOs(List<Pago> pagos) {
+        if (pagos.isEmpty()) {
+            return List.of();
+        }
+        Map<Integer, BigDecimal> pagado = pagoRepository.pagadoPorFacturas(
+                pagos.stream().map(p -> p.getFactura().getId()).toList());
+        return pagos.stream()
+                .map(p -> construirDTO(p, pagado.getOrDefault(p.getFactura().getId(), BigDecimal.ZERO)))
+                .collect(Collectors.toList());
+    }
+
     private PagoResponseDTO toResponseDTO(Pago pago) {
+        return construirDTO(pago, pagoRepository.sumarMontoPagadoPorFactura(pago.getFactura().getId()));
+    }
+
+    private PagoResponseDTO construirDTO(Pago pago, BigDecimal yaPagado) {
         PagoResponseDTO dto = new PagoResponseDTO();
         dto.setId(pago.getId());
 
@@ -212,7 +223,6 @@ public class PagoService {
         dto.setEstado(pago.getEstado().name());
         dto.setMonto(pago.getMonto());
 
-        BigDecimal yaPagado = pagoRepository.sumarMontoPagadoPorFactura(factura.getId());
         dto.setSaldoPendienteFactura(factura.getTotal().subtract(yaPagado));
         dto.setMotivoAnulacion(pago.getMotivoAnulacion());
         dto.setFechaAnulacion(pago.getFechaAnulacion());
