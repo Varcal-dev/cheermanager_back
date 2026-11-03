@@ -14,6 +14,8 @@ public class PagoDTO {
     private LocalDate fecha;
     private String estado;       // "Pagado" | "Pendiente" | "Vencido" — ver enum EstadoPago
     private BigDecimal monto;
+    /** Opcional: comprobante o referencia del banco. */
+    private String referencia;
 
     // Getters y setters (Lombok @Data)
 }

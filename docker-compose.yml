@@ -19,6 +19,11 @@ services:
       timeout: 5s
       retries: 10
     # No se publica el puerto 3306: solo la API lo alcanza por la red interna.
+    logging: &logs
+      driver: json-file
+      options:
+        max-size: "10m"   # sin esto los logs de Docker crecen hasta llenar el disco
+        max-file: "5"
 
   api:
     build: .
@@ -37,6 +42,8 @@ services:
       APP_BOOTSTRAP_ADMIN_EMAIL: ${APP_BOOTSTRAP_ADMIN_EMAIL}
       APP_BOOTSTRAP_ADMIN_PASSWORD: ${APP_BOOTSTRAP_ADMIN_PASSWORD}
       CONSENTIMIENTOS_EXIGIR_SALUD: ${CONSENTIMIENTOS_EXIGIR_SALUD:-false}
+    logging: *logs
+    stop_grace_period: 30s
     ports:
       - "127.0.0.1:8081:8081"   # solo local: pon delante Caddy/Nginx con HTTPS
 

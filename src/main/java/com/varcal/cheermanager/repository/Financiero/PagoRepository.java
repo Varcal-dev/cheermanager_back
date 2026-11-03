@@ -54,4 +54,24 @@ public interface PagoRepository extends JpaRepository<Pago, Integer> {
     // dashboard de Finanzas.
     @Query("SELECT COALESCE(SUM(p.monto), 0) FROM Pago p WHERE p.estado = 'Pagado' AND p.fecha BETWEEN :desde AND :hasta")
     BigDecimal sumarMontoPagadoEnRango(@Param("desde") LocalDate desde, @Param("hasta") LocalDate hasta);
+
+    // ---- Caja (V15): lo recaudado un dia, por metodo y por tipo; pendientes y anulados del dia ----
+    @Query("SELECT p.metodoPago.metodo, COUNT(p), COALESCE(SUM(p.monto), 0) FROM Pago p "
+            + "WHERE p.fecha = :fecha AND p.estado = 'Pagado' GROUP BY p.metodoPago.metodo ORDER BY p.metodoPago.metodo")
+    List<Object[]> resumenPagadoPorMetodo(@Param("fecha") LocalDate fecha);
+
+    @Query("SELECT p.tipoPago.tipo, COUNT(p), COALESCE(SUM(p.monto), 0) FROM Pago p "
+            + "WHERE p.fecha = :fecha AND p.estado = 'Pagado' GROUP BY p.tipoPago.tipo ORDER BY p.tipoPago.tipo")
+    List<Object[]> resumenPagadoPorTipo(@Param("fecha") LocalDate fecha);
+
+    @Query("SELECT COUNT(p), COALESCE(SUM(p.monto), 0) FROM Pago p WHERE p.fecha = :fecha AND p.estado = 'Pendiente'")
+    List<Object[]> resumenPendientes(@Param("fecha") LocalDate fecha);
+
+    @Query("SELECT COUNT(p), COALESCE(SUM(p.monto), 0) FROM Pago p WHERE p.fecha = :fecha AND p.estado = 'Anulado'")
+    List<Object[]> resumenAnulados(@Param("fecha") LocalDate fecha);
+
+    // ---- Conciliacion (V15): pagos confirmados que no son en efectivo ----
+    @Query("SELECT p FROM Pago p WHERE p.estado = 'Pagado' AND p.fecha BETWEEN :desde AND :hasta "
+            + "AND LOWER(p.metodoPago.metodo) <> 'efectivo' ORDER BY p.fecha DESC, p.id DESC")
+    List<Pago> findNoEfectivoPagadosEnRango(@Param("desde") LocalDate desde, @Param("hasta") LocalDate hasta);
 }

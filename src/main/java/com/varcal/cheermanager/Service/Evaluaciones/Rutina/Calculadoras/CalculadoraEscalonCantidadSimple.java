@@ -69,7 +69,11 @@ public class CalculadoraEscalonCantidadSimple implements CalculadoraSubCriterio 
             int umbralGrupo = (escalon.getCondicionGrupoMinimo() == null) ? 0
                     : resolverGrupoNumerico(escalon.getCondicionGrupoMinimo(), tablaConteo);
 
-            if (cumpleHabilidades && grupoNumerico >= umbralGrupo) {
+            boolean cumpleSincronia = escalon.getCondicionSincronizadas() == null
+                    || (dto.getHabilidadesSincronizadas() != null
+                        && dto.getHabilidadesSincronizadas() >= escalon.getCondicionSincronizadas());
+
+            if (cumpleHabilidades && grupoNumerico >= umbralGrupo && cumpleSincronia) {
                 puntajeBase = escalon.getValorPuntaje();
                 detalleEscalon = escalon.getDescripcionRubrica() != null
                         ? escalon.getDescripcionRubrica()
@@ -81,6 +85,7 @@ public class CalculadoraEscalonCantidadSimple implements CalculadoraSubCriterio 
         RegistroSubCriterio registro = new RegistroSubCriterio();
         registro.setSubCriterio(subCriterio);
         registro.setHabilidadesDiferentes(dto.getHabilidadesDiferentes());
+        registro.setHabilidadesSincronizadas(dto.getHabilidadesSincronizadas());
         registro.setGrupoMinimoAlcanzado(dto.getGrupoMinimoAlcanzado());
         registro.setPuntajeBase(puntajeBase);
         registro.setPuntajeDrivers(BigDecimal.ZERO);
@@ -90,13 +95,6 @@ public class CalculadoraEscalonCantidadSimple implements CalculadoraSubCriterio 
     }
 
     private int resolverGrupoNumerico(String clave, TablaCantidadNivel tabla) {
-        if (clave == null) return 0;
-        switch (clave.toUpperCase()) {
-            case "MAYORIA":    return tabla.getMayoria();
-            case "GRAN_PARTE": return tabla.getGranParte();
-            case "MAXIMO":     return tabla.getMaximo();
-            default: throw new RuntimeException(
-                    "Valor de grupo desconocido: " + clave + ". Debe ser MAYORIA, GRAN_PARTE o MAXIMO.");
-        }
+        return GrupoMinimoResolver.resolver(clave, tabla);
     }
 }

@@ -11,4 +11,7 @@ public interface TopeSeccionNivelRepository extends JpaRepository<TopeSeccionNiv
     // Ordenado descendente porque las calculadoras recorren de mayor a menor
     // escalón y se quedan con el primero que cumpla las condiciones.
     List<TopeSeccionNivel> findByNivelIdAndSubCriterioIdOrderByOrdenDesc(Integer nivelId, Integer subCriterioId);
+
+    // S7: todos los escalones de un nivel de una vez (pantalla de configuracion de la rubrica).
+    List<TopeSeccionNivel> findByNivelIdOrderBySubCriterioIdAscOrdenDesc(Integer nivelId);
 }

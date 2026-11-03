@@ -20,6 +20,7 @@ import com.varcal.cheermanager.repository.Financiero.FacturaRepository;
 import com.varcal.cheermanager.repository.Financiero.MetodoPagoRepository;
 import com.varcal.cheermanager.repository.Financiero.PagoRepository;
 import com.varcal.cheermanager.repository.Financiero.TipoPagoRepository;
+import com.varcal.cheermanager.Service.Caja.CajaService;
 
 @Service
 public class PagoService {
@@ -35,6 +36,10 @@ public class PagoService {
 
     @Autowired
     private MetodoPagoRepository metodoPagoRepository;
+
+    // Caja (V15): un dia con cierre CERRADA no admite movimientos de dinero.
+    @Autowired
+    private CajaService cajaService;
 
     // @Transactional: lee el saldo actual de la factura y luego guarda el pago.
     // Ambas operaciones deben verse como una unidad para evitar que dos pagos
@@ -85,7 +90,16 @@ public class PagoService {
             }
         }
 
+        if (dto.getFecha() == null) {
+            throw new RuntimeException("La fecha del pago es obligatoria");
+        }
+        if (estado == EstadoPago.Pagado) {
+            cajaService.exigirDiaAbierto(dto.getFecha());
+        }
         Pago pago = new Pago();
+        pago.setRegistradoPorUsuarioId(FacturaService.usuarioActualId());
+        pago.setCreadoEn(java.time.LocalDateTime.now());
+        pago.setReferencia(recortarReferencia(dto.getReferencia()));
         pago.setFactura(factura);
         pago.setTipoPago(tipoPago);
         pago.setMetodoPago(metodoPago);
@@ -139,6 +153,9 @@ public class PagoService {
         if (pago.getEstado() == EstadoPago.Anulado) {
             throw new RuntimeException("El pago esta anulado y ya no se puede modificar.");
         }
+        if (pago.getEstado() == EstadoPago.Pagado || estado == EstadoPago.Pagado) {
+            cajaService.exigirDiaAbierto(pago.getFecha());
+        }
 
         // Misma validación de sobrepago si se está marcando como "Pagado" ahora.
         if (estado == EstadoPago.Pagado && pago.getEstado() != EstadoPago.Pagado) {
@@ -167,6 +184,9 @@ public class PagoService {
                 .orElseThrow(() -> new RuntimeException("Pago no encontrado con ID: " + id));
         if (pago.getEstado() == EstadoPago.Anulado) {
             throw new RuntimeException("El pago ya esta anulado");
+        }
+        if (pago.getEstado() == EstadoPago.Pagado) {
+            cajaService.exigirDiaAbierto(pago.getFecha());
         }
         // Mismo bloqueo que registrarPago: serializa contra otros movimientos de la factura.
         facturaRepository.findByIdForUpdate(pago.getFactura().getId());

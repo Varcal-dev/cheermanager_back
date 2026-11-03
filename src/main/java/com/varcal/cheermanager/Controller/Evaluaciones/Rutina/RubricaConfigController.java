@@ -3,6 +3,7 @@ package com.varcal.cheermanager.Controller.Evaluaciones.Rutina;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,6 +32,14 @@ public class RubricaConfigController {
     @Autowired
     private RubricaConfigService configService;
 
+    // 400 dato invalido, 409 duplicado o con datos asociados, 404 no encontrado.
+    private static ResponseEntity<String> error(RuntimeException e) {
+        HttpStatus status = e instanceof IllegalArgumentException ? HttpStatus.BAD_REQUEST
+                : e instanceof IllegalStateException ? HttpStatus.CONFLICT
+                : HttpStatus.NOT_FOUND;
+        return ResponseEntity.status(status).body(e.getMessage());
+    }
+
     // ── Niveles ──────────────────────────────────────────────────────────────
     @GetMapping("/niveles")
     @RequiresPermission("ver_evaluacion")
@@ -41,21 +50,34 @@ public class RubricaConfigController {
     @PostMapping("/niveles")
     @RequiresPermission("configurar_rubrica")
     public ResponseEntity<?> crearNivel(@RequestBody NivelCompetencia nivel) {
-        return ResponseEntity.status(201).body(configService.guardarNivel(nivel));
+        try {
+            nivel.setId(null);
+            return ResponseEntity.status(201).body(configService.guardarNivel(nivel));
+        } catch (RuntimeException e) {
+            return error(e);
+        }
     }
 
     @PutMapping("/niveles/{id}")
     @RequiresPermission("configurar_rubrica")
     public ResponseEntity<?> actualizarNivel(@PathVariable Integer id, @RequestBody NivelCompetencia nivel) {
         nivel.setId(id);
-        return ResponseEntity.ok(configService.guardarNivel(nivel));
+        try {
+            return ResponseEntity.ok(configService.guardarNivel(nivel));
+        } catch (RuntimeException e) {
+            return error(e);
+        }
     }
 
     @DeleteMapping("/niveles/{id}")
     @RequiresPermission("configurar_rubrica")
     public ResponseEntity<?> eliminarNivel(@PathVariable Integer id) {
-        configService.eliminarNivel(id);
-        return ResponseEntity.noContent().build();
+        try {
+            configService.eliminarNivel(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return error(e);
+        }
     }
 
     // ── Sub-criterios ────────────────────────────────────────────────────────
@@ -68,7 +90,12 @@ public class RubricaConfigController {
     @PostMapping("/sub-criterios")
     @RequiresPermission("configurar_rubrica")
     public ResponseEntity<?> crearSubCriterio(@RequestBody SubCriterioRubrica sc) {
-        return ResponseEntity.status(201).body(configService.guardarSubCriterio(sc));
+        try {
+            sc.setId(null);
+            return ResponseEntity.status(201).body(configService.guardarSubCriterio(sc));
+        } catch (RuntimeException e) {
+            return error(e);
+        }
     }
 
     // ── Tablas de cantidad ───────────────────────────────────────────────────
@@ -82,9 +109,10 @@ public class RubricaConfigController {
     @RequiresPermission("configurar_rubrica")
     public ResponseEntity<?> crearFilaTablaCantidad(@RequestBody TablaCantidadNivel fila) {
         try {
+            fila.setId(null);
             return ResponseEntity.status(201).body(configService.guardarTablaCantidad(fila));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(400).body(e.getMessage());
+            return error(e);
         }
     }
 
@@ -95,7 +123,7 @@ public class RubricaConfigController {
         try {
             return ResponseEntity.ok(configService.guardarTablaCantidad(fila));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(400).body(e.getMessage());
+            return error(e);
         }
     }
 
@@ -114,13 +142,21 @@ public class RubricaConfigController {
         return ResponseEntity.ok(configService.listarTopesSeccion(nivelId, subCriterioId));
     }
 
+    // S7: todos los escalones de un nivel en una sola llamada.
+    @GetMapping("/topes-seccion/nivel/{nivelId}")
+    @RequiresPermission("ver_evaluacion")
+    public ResponseEntity<List<TopeSeccionNivel>> listarTopesSeccionPorNivel(@PathVariable Integer nivelId) {
+        return ResponseEntity.ok(configService.listarTopesSeccionPorNivel(nivelId));
+    }
+
     @PostMapping("/topes-seccion")
     @RequiresPermission("configurar_rubrica")
     public ResponseEntity<?> crearTopeSeccion(@RequestBody TopeSeccionNivel tope) {
         try {
+            tope.setId(null);
             return ResponseEntity.status(201).body(configService.guardarTopeSeccion(tope));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(400).body(e.getMessage());
+            return error(e);
         }
     }
 
@@ -131,7 +167,7 @@ public class RubricaConfigController {
         try {
             return ResponseEntity.ok(configService.guardarTopeSeccion(tope));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(400).body(e.getMessage());
+            return error(e);
         }
     }
 

@@ -32,4 +32,8 @@ public class PagoResponseDTO {
     private String motivoAnulacion;
     private java.time.LocalDateTime fechaAnulacion;
 
+    private String referencia;
+    private boolean conciliado;
+    private java.time.LocalDateTime conciliadoEn;
+
 }

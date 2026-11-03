@@ -22,10 +22,17 @@ public class EvaluacionRutinaDTO {
 
         // Para tipos ESCALON_*
         private Integer habilidadesDiferentes;
+        // De las habilidades diferentes, cuantas se hicieron sincronizadas/en canon.
+        private Integer habilidadesSincronizadas;
         private String grupoMinimoAlcanzado; // MAYORIA | GRAN_PARTE | MAXIMO
 
         // Para tipo RANGO_DIRECTO_JUEZ
         private BigDecimal puntajeFinalManual;
+
+        // Para RANGO_DIRECTO_JUEZ con varios jueces (Creatividad y Showmanship: promedio de los
+        // jueces de Construccion, Gimnasia y General). Si viene con valores, se promedia y se
+        // ignora puntajeFinalManual.
+        private List<BigDecimal> puntajesJueces;
 
         // Para tipo VALOR_INICIAL_MENOS_DRIVERS
         private List<DeduccionDriverDTO> deducciones;

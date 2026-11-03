@@ -136,9 +136,9 @@ public class CalculadoraEscalonGimnasia implements CalculadoraSubCriterio {
                 for (DriverConstruccionDTO reg : dto.getDriversConstruccion()) {
                     if (!driver.getId().equals(reg.getDriverId())) continue;
                     if (reg.getNumeroHabilidad() == null) continue;
-                    BigDecimal valor = Boolean.TRUE.equals(reg.getEsNivelAlto())
-                            ? tope.getValorNivelAlto()
-                            : tope.getValorNivelBasico();
+                    // La 2da habilidad puede valer distinto (Estatica Elite: 0.4/0.6 en vez de 0.2/0.4).
+                    BigDecimal valor = tope.valorPara(reg.getNumeroHabilidad(),
+                            Boolean.TRUE.equals(reg.getEsNivelAlto()));
                     if (valor != null) sumDriver = sumDriver.add(valor);
                 }
                 if (sumDriver.compareTo(tope.getTopeMaximo()) > 0) {
@@ -172,13 +172,6 @@ public class CalculadoraEscalonGimnasia implements CalculadoraSubCriterio {
     }
 
     private int resolverGrupoNumerico(String clave, TablaCantidadNivel tabla) {
-        if (clave == null) return 0;
-        switch (clave.toUpperCase()) {
-            case "MAYORIA":    return tabla.getMayoria();
-            case "GRAN_PARTE": return tabla.getGranParte();
-            case "MAXIMO":     return tabla.getMaximo();
-            default: throw new RuntimeException(
-                    "Valor de grupo desconocido: " + clave + ". Debe ser MAYORIA, GRAN_PARTE o MAXIMO.");
-        }
+        return GrupoMinimoResolver.resolver(clave, tabla);
     }
 }

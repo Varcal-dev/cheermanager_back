@@ -47,4 +47,23 @@ public class TopeDriverNivel {
     // Para "Participación Máxima": no se usa este campo, ver valoresEscalon en su lugar.
     @Column(name = "valor_nivel_alto", precision = 4, scale = 2)
     private BigDecimal valorNivelAlto;
+
+    // Solo si la SEGUNDA habilidad vale distinto que la primera (Gimnasia Estatica Elite: 1ra 0.2/0.4,
+    // 2da 0.4/0.6). Si son null, todas las habilidades usan valorNivelBasico/valorNivelAlto.
+    @Column(name = "valor_basico_habilidad2", precision = 4, scale = 2)
+    private BigDecimal valorBasicoHabilidad2;
+
+    @Column(name = "valor_alto_habilidad2", precision = 4, scale = 2)
+    private BigDecimal valorAltoHabilidad2;
+
+    /** Valor que suma una habilidad segun su numero (1, 2...) y si fue de nivel alto. */
+    public BigDecimal valorPara(Integer numeroHabilidad, boolean alto) {
+        if (numeroHabilidad != null && numeroHabilidad == 2) {
+            BigDecimal v2 = alto ? valorAltoHabilidad2 : valorBasicoHabilidad2;
+            if (v2 != null) {
+                return v2;
+            }
+        }
+        return alto ? valorNivelAlto : valorNivelBasico;
+    }
 }

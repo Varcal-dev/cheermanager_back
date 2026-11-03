@@ -42,26 +42,43 @@ public class CalculadoraRangoDirectoJuez implements CalculadoraSubCriterio {
     public RegistroSubCriterio calcular(RegistroSubCriterioDTO dto,
             SubCriterioRubrica subCriterio, NivelCompetencia nivel, Integer cantidadAtletas) {
 
-        BigDecimal valor = dto.getPuntajeFinalManual();
+        // Creatividad y Showmanship son el promedio de 3 jueces (Construccion, Gimnasia, General):
+        // si vienen los puntajes por juez, se promedian (cada uno se valida contra el rango).
+        // Si no, se usa el valor unico que ingreso el juez.
+        List<BigDecimal> porJuez = dto.getPuntajesJueces() == null ? List.of()
+                : dto.getPuntajesJueces().stream().filter(java.util.Objects::nonNull).toList();
+        BigDecimal valor;
+        if (!porJuez.isEmpty()) {
+            if (porJuez.size() > 3) {
+                throw new RuntimeException("'" + subCriterio.getNombre() + "' admite como maximo 3 puntajes de juez.");
+            }
+            valor = porJuez.stream().reduce(BigDecimal.ZERO, BigDecimal::add)
+                    .divide(BigDecimal.valueOf(porJuez.size()), 2, RoundingMode.HALF_UP);
+        } else {
+            valor = dto.getPuntajeFinalManual();
+        }
         if (valor == null) {
             throw new RuntimeException("El sub-criterio '" + subCriterio.getNombre()
                     + "' requiere que el juez ingrese el puntaje directamente (puntajeFinalManual).");
         }
 
-        // Validar que esté dentro del rango configurado.
+        // Validar que este dentro del rango configurado (cada puntaje de juez y el promedio).
         List<TopeSeccionNivel> rangos = topeSeccionRepo
                 .findByNivelIdAndSubCriterioIdOrderByOrdenDesc(nivel.getId(), subCriterio.getId());
 
         if (!rangos.isEmpty()) {
-            // Por convención: orden=1 es el valor mínimo, orden=2 es el máximo.
             BigDecimal valorMax = rangos.stream().map(TopeSeccionNivel::getValorPuntaje)
                     .max(BigDecimal::compareTo).orElse(new BigDecimal("99"));
             BigDecimal valorMin = rangos.stream().map(TopeSeccionNivel::getValorPuntaje)
                     .min(BigDecimal::compareTo).orElse(BigDecimal.ZERO);
 
-            if (valor.compareTo(valorMin) < 0 || valor.compareTo(valorMax) > 0) {
-                throw new RuntimeException("El valor " + valor + " para '" + subCriterio.getNombre()
-                        + "' está fuera del rango permitido [" + valorMin + " - " + valorMax + "].");
+            List<BigDecimal> aValidar = new java.util.ArrayList<>(porJuez);
+            aValidar.add(valor);
+            for (BigDecimal v : aValidar) {
+                if (v.compareTo(valorMin) < 0 || v.compareTo(valorMax) > 0) {
+                    throw new RuntimeException("El valor " + v + " para '" + subCriterio.getNombre()
+                            + "' esta fuera del rango permitido [" + valorMin + " - " + valorMax + "].");
+                }
             }
         }
 
@@ -71,7 +88,9 @@ public class CalculadoraRangoDirectoJuez implements CalculadoraSubCriterio {
         registro.setPuntajeBase(valor);
         registro.setPuntajeDrivers(BigDecimal.ZERO);
         registro.setPuntajeFinal(valor.setScale(2, RoundingMode.HALF_UP));
-        registro.setDetalleCalculo("Valor asignado directamente por el juez: " + valor);
+        registro.setDetalleCalculo(porJuez.isEmpty()
+                ? "Valor asignado directamente por el juez: " + valor
+                : "Promedio de " + porJuez.size() + " juez(ces) " + porJuez + " = " + valor);
         return registro;
     }
 }

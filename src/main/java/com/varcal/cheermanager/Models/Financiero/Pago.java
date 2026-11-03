@@ -54,4 +54,24 @@ public class Pago {
     @Column(name = "anulado_por_usuario_id")
     private Integer anuladoPorUsuarioId;
 
+    // Caja y conciliacion (V15). Los pagos anteriores a V15 tienen estos campos en null.
+    /** Usuario que registro el pago. */
+    @Column(name = "registrado_por_usuario_id")
+    private Integer registradoPorUsuarioId;
+
+    /** Momento real del registro (la fecha del pago la elige quien registra; esta no). */
+    @Column(name = "creado_en")
+    private java.time.LocalDateTime creadoEn;
+
+    /** Numero de comprobante o referencia del banco (transferencia, Nequi, PSE, tarjeta). */
+    @Column(name = "referencia", length = 100)
+    private String referencia;
+
+    /** Se llena cuando el pago se cruzo con el extracto del banco. */
+    @Column(name = "conciliado_en")
+    private java.time.LocalDateTime conciliadoEn;
+
+    @Column(name = "conciliado_por_usuario_id")
+    private Integer conciliadoPorUsuarioId;
+
 }

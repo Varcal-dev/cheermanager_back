@@ -1,3 +1,4 @@
+
 package com.varcal.cheermanager.tenant;
 
 import java.util.Optional;
@@ -39,6 +40,18 @@ public class TenantLookupRepository {
             ids.add(((Number) r).intValue());
         }
         return ids;
+    }
+
+    /**
+     * Deportistas ACTIVOS de un club (todos los que no estan en estado Retirado). Cruza clubes a proposito:
+     * lo usa el control de limites del plan y la pantalla de suscripciones del superadmin. Devuelve un conteo.
+     */
+    public long contarDeportistasActivos(int clubId) {
+        Number n = (Number) em.createNativeQuery(
+                "SELECT COUNT(*) FROM deportistas d LEFT JOIN estados_persona ep ON ep.id = d.estado_id "
+                        + "WHERE d.club_id = ?1 AND (ep.estado IS NULL OR ep.estado <> 'Retirado')")
+                .setParameter(1, clubId).getSingleResult();
+        return n.longValue();
     }
 
     public boolean existeUsuarioEnAlgunClub(String username, String email) {

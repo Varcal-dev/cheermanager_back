@@ -1,3 +1,4 @@
+
 package com.varcal.cheermanager.Service.Clubes;
 
 import java.text.Normalizer;
@@ -18,12 +19,14 @@ import com.varcal.cheermanager.Models.Auth.Permiso;
 import com.varcal.cheermanager.Models.Auth.Rol;
 import com.varcal.cheermanager.Models.Auth.Usuario;
 import com.varcal.cheermanager.Models.Clubes.Club;
+import com.varcal.cheermanager.Models.Clubes.PlanSaas;
 import com.varcal.cheermanager.repository.Auth.PermisoRepository;
 import com.varcal.cheermanager.repository.Auth.RolRepository;
 import com.varcal.cheermanager.repository.Auth.UserRepository;
 import com.varcal.cheermanager.Models.Org_dep.Division;
 import com.varcal.cheermanager.Models.Org_dep.Nivel;
 import com.varcal.cheermanager.repository.Clubes.ClubRepository;
+import com.varcal.cheermanager.repository.Clubes.PlanSaasRepository;
 import com.varcal.cheermanager.repository.Org_dep.DivisionRepository;
 import com.varcal.cheermanager.repository.Org_dep.NivelRepository;
 import com.varcal.cheermanager.tenant.TenantContext;
@@ -52,12 +55,14 @@ public class ClubService {
     private final TransactionTemplate txNueva;
     private final NivelRepository nivelRepository;
     private final DivisionRepository divisionRepository;
+    private final PlanSaasRepository planSaasRepository;
 
     public ClubService(ClubRepository clubRepository, RolRepository rolRepository,
             PermisoRepository permisoRepository, UserRepository userRepository,
             TenantLookupRepository lookup, PasswordEncoder passwordEncoder,
             PlatformTransactionManager txManager, NivelRepository nivelRepository,
-            DivisionRepository divisionRepository) {
+            DivisionRepository divisionRepository, PlanSaasRepository planSaasRepository) {
+        this.planSaasRepository = planSaasRepository;
         this.nivelRepository = nivelRepository;
         this.divisionRepository = divisionRepository;
         this.clubRepository = clubRepository;
@@ -95,6 +100,9 @@ public class ClubService {
         Club club = new Club();
         club.setNombre(req.nombre().trim());
         club.setSlug(slug);
+        // Suscripcion: todo club nuevo empieza en prueba (Club.DIAS_PRUEBA dias) con el plan Start.
+        // El superadmin puede cambiar plan, vigencia y limites desde la pantalla de Clubes.
+        club.setPlanId(planSaasRepository.findByCodigo("start").map(PlanSaas::getId).orElse(null));
         club = clubRepository.save(club);
 
         final Integer clubId = club.getId();
@@ -123,6 +131,14 @@ public class ClubService {
 
         Rol admin = nuevoRol(RolesPlantilla.ADMIN, "Administrador del club", deAdmin);
         nuevoRol(RolesPlantilla.ENTRENADOR, "Entrenador", deEntrenador);
+        // Roles operativos de plantilla (mismos nombres y permisos que en Ratels). Un permiso que no exista
+        // en el catalogo se omite en vez de romper el alta (RolesPlantillaTest vigila que no pase).
+        for (RolesPlantilla.RolBase base : RolesPlantilla.ROLES_ADICIONALES) {
+            Set<Permiso> deRol = base.permisos().stream()
+                    .map(permisos::get).filter(p -> p != null)
+                    .collect(Collectors.toCollection(HashSet::new));
+            nuevoRol(base.nombre(), base.descripcion(), deRol);
+        }
         Set<Permiso> deportistaPortal = new HashSet<>();
         Permiso portal = permisos.get(RolesPlantilla.PERMISO_PORTAL);
         if (portal != null) {

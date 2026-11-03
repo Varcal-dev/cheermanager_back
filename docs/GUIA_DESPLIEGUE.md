@@ -27,12 +27,12 @@ Antes de migrar prueba en una copia: `ops/probar_esquema.sh`.
 ## Actualizar versión
 `git pull && docker compose up -d --build`. Las migraciones nuevas corren solas. Regla: **nunca edites una migración ya aplicada**; crea V4, V5…
 
-## Respaldos
-Cron diario: `DB_HOST=... DB_NAME=cheermanager DB_USER=... DB_PASSWORD=... BACKUP_DIR=/var/backups/cheermanager ./ops/backup.sh`
-Restaurar: `ops/restore.sh`. **Prueba una restauración real al menos una vez**; un respaldo sin probar no es un respaldo. Copia los archivos fuera del servidor.
+## Respaldos y vigilancia
+Todo está descrito en **`docs/GUIA_OPERACION.md`**. Resumen: instala `ops/crontab.ejemplo` (respaldo diario, prueba mensual de restauración y vigilante cada 5 minutos), crea `/etc/cheermanager/ops.env` (permisos 600) con la base y los canales de alerta (`ALERTA_TELEGRAM_*` o `ALERTA_WEBHOOK_URL`) y configura `RCLONE_REMOTE` para copiar los respaldos **fuera del servidor**.
+Restaurar a mano: `ops/restore.sh`. Un respaldo que nunca se restauró no es un respaldo: la prueba mensual lo hace sola.
 
 ## Logs
-Cada línea lleva `[rid]`, el id de la petición, que también viaja en la cabecera `X-Request-Id`. Si un usuario reporta un error, pídele ese id y busca `docker compose logs api | grep <rid>`.
+Docker rota los logs solos (10 MB x 5 archivos por servicio, ver `docker-compose.yml`). Cada línea lleva `[rid]`, el id de la petición, que también viaja en la cabecera `X-Request-Id`. Si un usuario reporta un error, pídele ese id y busca `docker compose logs api | grep <rid>`.
 
 ## Variables útiles
 `LOG_LEVEL_APP=DEBUG` (temporal), `CONSENTIMIENTOS_EXIGIR_SALUD=true` (cuando el reporte `/api/consentimientos/pendientes` esté en cero), `JWT_EXPIRATION_MS`.

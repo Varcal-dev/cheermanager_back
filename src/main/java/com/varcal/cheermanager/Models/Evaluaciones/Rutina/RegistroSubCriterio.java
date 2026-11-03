@@ -58,6 +58,10 @@ public class RegistroSubCriterio {
     @Column(name = "habilidades_diferentes")
     private Integer habilidadesDiferentes;
 
+    // De las habilidades diferentes, cuantas se hicieron sincronizadas/en canon.
+    @Column(name = "habilidades_sincronizadas")
+    private Integer habilidadesSincronizadas;
+
     // "MAYORIA" | "GRAN_PARTE" | "MAXIMO" — qué columna de TablaCantidadNivel
     // alcanzó el grupo con esa cantidad de habilidades diferentes.
     @Column(name = "grupo_minimo_alcanzado", length = 20)

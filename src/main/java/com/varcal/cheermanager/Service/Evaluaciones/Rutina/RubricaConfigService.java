@@ -1,6 +1,11 @@
 package com.varcal.cheermanager.Service.Evaluaciones.Rutina;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,6 +18,7 @@ import com.varcal.cheermanager.Models.Evaluaciones.Rutina.SubCriterioRubrica;
 import com.varcal.cheermanager.Models.Evaluaciones.Rutina.TablaCantidadNivel;
 import com.varcal.cheermanager.Models.Evaluaciones.Rutina.TopeDriverNivel;
 import com.varcal.cheermanager.Models.Evaluaciones.Rutina.TopeSeccionNivel;
+import com.varcal.cheermanager.Service.Financiero.FacturaService;
 import com.varcal.cheermanager.repository.Evaluaciones.Rutina.DriverSubCriterioRepository;
 import com.varcal.cheermanager.repository.Evaluaciones.Rutina.EscalonDriverNivelRepository;
 import com.varcal.cheermanager.repository.Evaluaciones.Rutina.NivelCompetenciaRepository;
@@ -23,6 +29,13 @@ import com.varcal.cheermanager.repository.Evaluaciones.Rutina.TopeSeccionNivelRe
 
 @Service
 public class RubricaConfigService {
+
+    private static final Logger log = LoggerFactory.getLogger(RubricaConfigService.class);
+
+    /** La rubrica es global: todo cambio queda en el log con el usuario de plataforma que lo hizo. */
+    private static void auditar(String accion, Object detalle) {
+        log.info("RUBRICA {} por usuario {}: {}", accion, FacturaService.usuarioActualId(), detalle);
+    }
 
     @Autowired private NivelCompetenciaRepository nivelRepo;
     @Autowired private SubCriterioRubricaRepository subCriterioRepo;
@@ -38,14 +51,33 @@ public class RubricaConfigService {
     }
 
     public NivelCompetencia guardarNivel(NivelCompetencia nivel) {
-        return nivelRepo.save(nivel);
+        nivel.setNombre(RubricaValidacion.nombreNivel(nivel.getNombre(), nivel.getModalidad()));
+        nivel.setModalidad(nivel.getModalidad().trim());
+        if (nivel.getActivo() == null) {
+            nivel.setActivo(true);
+        }
+        nivelRepo.findByNombre(nivel.getNombre()).ifPresent(otro -> {
+            if (!otro.getId().equals(nivel.getId())) {
+                throw new IllegalStateException("Ya existe un nivel llamado '" + nivel.getNombre() + "'");
+            }
+        });
+        NivelCompetencia g = nivelRepo.save(nivel);
+        auditar(nivel.getId() == null ? "crea nivel" : "modifica nivel", g.getNombre() + " activo=" + g.getActivo());
+        return g;
     }
 
+    // Un nivel que ya tiene configuracion o evaluaciones (de cualquier club) no se borra: se desactiva.
     public void eliminarNivel(Integer id) {
         if (!nivelRepo.existsById(id)) {
             throw new RuntimeException("Nivel no encontrado con ID: " + id);
         }
-        nivelRepo.deleteById(id);
+        try {
+            nivelRepo.deleteById(id);
+        } catch (DataIntegrityViolationException e) {
+            throw new IllegalStateException(
+                    "El nivel tiene configuracion o evaluaciones asociadas: desactivalo en lugar de eliminarlo");
+        }
+        auditar("elimina nivel", id);
     }
 
     // ── Sub-criterios ────────────────────────────────────────────────────────
@@ -54,7 +86,16 @@ public class RubricaConfigService {
     }
 
     public SubCriterioRubrica guardarSubCriterio(SubCriterioRubrica sc) {
-        return subCriterioRepo.save(sc);
+        RubricaValidacion.subCriterio(sc.getNombre(), sc.getSeccion(), sc.getTipoCalculo());
+        sc.setNombre(sc.getNombre().trim());
+        subCriterioRepo.findAll().stream()
+                .filter(o -> o.getNombre().equalsIgnoreCase(sc.getNombre()) && !o.getId().equals(sc.getId()))
+                .findAny().ifPresent(o -> {
+                    throw new IllegalStateException("Ya existe un sub-criterio llamado '" + sc.getNombre() + "'");
+                });
+        SubCriterioRubrica g = subCriterioRepo.save(sc);
+        auditar(sc.getId() == null ? "crea sub-criterio" : "modifica sub-criterio", g.getNombre());
+        return g;
     }
 
     // ── Tabla de cantidad ────────────────────────────────────────────────────
@@ -65,12 +106,21 @@ public class RubricaConfigService {
     @Transactional
     public TablaCantidadNivel guardarTablaCantidad(TablaCantidadNivel fila) {
         if (fila.getNivel() == null || fila.getNivel().getId() == null) {
-            throw new RuntimeException("La fila de tabla de cantidad debe tener un nivel asociado.");
+            throw new IllegalArgumentException("La fila de tabla de cantidad debe tener un nivel asociado.");
         }
         nivelRepo.findById(fila.getNivel().getId())
                 .orElseThrow(() -> new RuntimeException(
                         "Nivel no encontrado con ID: " + fila.getNivel().getId()));
-        return tablaCantidadRepo.save(fila);
+        List<RubricaValidacion.RangoExistente> otros = tablaCantidadRepo.findByNivelId(fila.getNivel().getId()).stream()
+                .filter(t -> t.getTabla().equals(fila.getTabla()) && !t.getId().equals(fila.getId()))
+                .map(t -> new RubricaValidacion.RangoExistente(t.getId(), t.getRangoMinAtletas(), t.getRangoMaxAtletas()))
+                .collect(Collectors.toList());
+        RubricaValidacion.tablaCantidad(fila.getTabla(), fila.getUnidad(), fila.getRangoMinAtletas(),
+                fila.getRangoMaxAtletas(), fila.getMayoria(), fila.getGranParte(), fila.getMaximo(), otros);
+        TablaCantidadNivel g = tablaCantidadRepo.save(fila);
+        auditar(fila.getId() == null ? "crea fila de tabla de cantidad" : "modifica fila de tabla de cantidad",
+                "nivel " + g.getNivel().getId() + " " + g.getTabla() + " " + g.getRangoMinAtletas() + "-" + g.getRangoMaxAtletas());
+        return g;
     }
 
     public void eliminarTablaCantidad(Integer id) {
@@ -78,6 +128,7 @@ public class RubricaConfigService {
             throw new RuntimeException("Fila de tabla de cantidad no encontrada con ID: " + id);
         }
         tablaCantidadRepo.deleteById(id);
+        auditar("elimina fila de tabla de cantidad", id);
     }
 
     // ── Topes de sección ─────────────────────────────────────────────────────
@@ -87,8 +138,9 @@ public class RubricaConfigService {
 
     @Transactional
     public TopeSeccionNivel guardarTopeSeccion(TopeSeccionNivel tope) {
-        if (tope.getNivel() == null || tope.getNivel().getId() == null) {
-            throw new RuntimeException("El tope de sección debe tener nivel y sub-criterio asociados.");
+        if (tope.getNivel() == null || tope.getNivel().getId() == null
+                || tope.getSubCriterio() == null || tope.getSubCriterio().getId() == null) {
+            throw new IllegalArgumentException("El tope de sección debe tener nivel y sub-criterio asociados.");
         }
         nivelRepo.findById(tope.getNivel().getId())
                 .orElseThrow(() -> new RuntimeException(
@@ -96,7 +148,24 @@ public class RubricaConfigService {
         subCriterioRepo.findById(tope.getSubCriterio().getId())
                 .orElseThrow(() -> new RuntimeException(
                         "Sub-criterio no encontrado con ID: " + tope.getSubCriterio().getId()));
-        return topeSeccionRepo.save(tope);
+        List<Integer> otrosOrdenes = topeSeccionRepo
+                .findByNivelIdAndSubCriterioIdOrderByOrdenDesc(tope.getNivel().getId(), tope.getSubCriterio().getId())
+                .stream().filter(t -> !t.getId().equals(tope.getId())).map(TopeSeccionNivel::getOrden)
+                .collect(Collectors.toList());
+        RubricaValidacion.topeSeccion(tope.getOrden(), tope.getValorPuntaje(), tope.getCondicionHabilidadesDiferentes(),
+                tope.getCondicionGrupoMinimo(), tope.getDescripcionRubrica(), otrosOrdenes);
+        if (tope.getCondicionGrupoMinimo() != null && tope.getCondicionGrupoMinimo().isBlank()) {
+            tope.setCondicionGrupoMinimo(null);
+        }
+        TopeSeccionNivel g = topeSeccionRepo.save(tope);
+        auditar(tope.getId() == null ? "crea escalon" : "modifica escalon",
+                "nivel " + tope.getNivel().getId() + " sub-criterio " + tope.getSubCriterio().getId() + " orden " + g.getOrden()
+                        + " valor " + g.getValorPuntaje());
+        return g;
+    }
+
+    public List<TopeSeccionNivel> listarTopesSeccionPorNivel(Integer nivelId) {
+        return topeSeccionRepo.findByNivelIdOrderBySubCriterioIdAscOrdenDesc(nivelId);
     }
 
     public void eliminarTopeSeccion(Integer id) {
@@ -104,6 +173,7 @@ public class RubricaConfigService {
             throw new RuntimeException("Tope de sección no encontrado con ID: " + id);
         }
         topeSeccionRepo.deleteById(id);
+        auditar("elimina escalon", id);
     }
 
     // ── Drivers ──────────────────────────────────────────────────────────────

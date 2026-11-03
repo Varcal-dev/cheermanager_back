@@ -1,0 +1,58 @@
+name: CI (back)
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-back-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pruebas:
+    name: Compilar y probar (mvn verify)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      - name: Dar permiso al wrapper de Maven
+        run: chmod +x mvnw
+      # Las pruebas con MySQL real (Testcontainers) usan el Docker del runner.
+      - name: mvn verify
+        run: ./mvnw -B -ntp verify
+      - name: Subir informes si fallan las pruebas
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: informes-surefire
+          path: target/surefire-reports
+          retention-days: 7
+
+  imagen:
+    name: Construir la imagen Docker
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: docker build
+        run: docker build -t cheermanager-api:ci .
+
+  scripts:
+    name: Revisar scripts de ops
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Sintaxis de los scripts
+        run: for f in ops/*.sh; do bash -n "$f" && echo "ok $f"; done
+      - name: shellcheck
+        run: shellcheck -S warning ops/*.sh

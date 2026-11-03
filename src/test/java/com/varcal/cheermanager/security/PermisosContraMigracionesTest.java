@@ -1,3 +1,4 @@
+
 package com.varcal.cheermanager.security;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -40,9 +41,16 @@ class PermisosContraMigracionesTest {
 
     /** Nombres declarados en `INSERT IGNORE INTO permisos (nombre) VALUES ... ;` de V2. */
     private static Set<String> permisosDeLosDatos() throws Exception {
-        // V2 (catalogo inicial) + migraciones posteriores que agregan permisos (V6: acceder_portal).
+        // V2 (catalogo inicial) + migraciones posteriores que agregan permisos
+        // (V6: acceder_portal; V9: gestionar_recordatorios_mora).
         String sql = leer("db/migration/V2__datos_iniciales.sql") + "\n"
-                + leer("db/migration/V6__portal_acudiente_deportista_y_solicitudes.sql");
+                + leer("db/migration/V6__portal_acudiente_deportista_y_solicitudes.sql") + "\n"
+                + leer("db/migration/V9__recordatorios_mora.sql") + "\n"
+                + leer("db/migration/V13__permisos_importar_exportar.sql") + "\n"
+                + leer("db/migration/V15__caja_y_conciliacion.sql");
+        // Sin comentarios SQL: V2 tiene un ";" dentro de un comentario ("...concreto; plural = ...") que cortaba el
+        // bloque INSERT y dejaba ~28 permisos reales fuera del catalogo, haciendo fallar esta prueba.
+        sql = sql.replaceAll("(?m)--[^\\n]*", "");
         Set<String> nombres = new HashSet<>();
         Matcher bloque = Pattern.compile("INSERT\\s+IGNORE\\s+INTO\\s+permisos\\s*\\(nombre\\)\\s*VALUES(.*?);",
                 Pattern.CASE_INSENSITIVE | Pattern.DOTALL).matcher(sql);

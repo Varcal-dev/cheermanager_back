@@ -65,6 +65,12 @@ public class TopeSeccionNivel {
     @Column(name = "condicion_grupo_minimo", length = 20)
     private String condicionGrupoMinimo;
 
+    // Cuantas de esas habilidades deben haberse realizado sincronizadas/en canon (null = no se exige).
+    // Distingue, por ejemplo, "4 habilidades diferentes por GRAN PARTE" (3.0, sin sincronia) de
+    // "4 habilidades sincronizadas" (4.5) en Dificultad de Elevaciones.
+    @Column(name = "condicion_sincronizadas")
+    private Integer condicionSincronizadas;
+
     // Texto literal de la rúbrica para este escalón, solo para trazabilidad
     // y auditoría visual (ej. "4 habilidades diferentes Apropiadas del nivel
     // realizadas por GRAN PARTE|MOST del equipo") — no se usa en el cálculo.

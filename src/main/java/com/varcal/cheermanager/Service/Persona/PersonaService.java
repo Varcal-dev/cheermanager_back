@@ -1,3 +1,4 @@
+
 package com.varcal.cheermanager.Service.Persona;
 
 import com.varcal.cheermanager.Utils.ClaveTemporal;
@@ -39,6 +40,7 @@ import com.varcal.cheermanager.repository.Org_dep.InscripcionRepository;
 import com.varcal.cheermanager.Models.Org_dep.DeportistaPerteneceGrupo;
 import com.varcal.cheermanager.Models.Org_dep.Inscripcion;
 import com.varcal.cheermanager.Service.File.FileStorageService;
+import com.varcal.cheermanager.Service.Clubes.SuscripcionService;
 import com.varcal.cheermanager.Service.Historiales.HistorialNivelDeportistaService;
 
 import java.time.LocalDate;
@@ -87,6 +89,10 @@ public class PersonaService {
 
     @Autowired
     private DeportistaPerteneceGrupoRepository deportistaPerteneceGrupoRepository;
+
+    /** Limite de deportistas activos segun el plan del club (V11). */
+    @Autowired
+    private SuscripcionService suscripcionService;
 
     /**
      * Estado "Retirado" buscado por NOMBRE (el catalogo estados_persona es global y
@@ -240,6 +246,9 @@ public class PersonaService {
     // para no dejar una Persona/Deportista huérfanos sin Usuario asociado.
     @Transactional
     public Deportista registrarDeportista(DeportistaDTO deportistaDTO) {
+        // Plan del club: no se pueden registrar mas deportistas activos de los que permite (V11).
+        suscripcionService.exigirCupoDeportista();
+
         // Validar documento único
         validarDocumentoEnRegistro(deportistaDTO.getNumeroDocumento());
 
@@ -823,6 +832,8 @@ public class PersonaService {
         if (deportista.getEstado() == null || !retirado.getId().equals(deportista.getEstado().getId())) {
             throw new RuntimeException("Solo se puede reactivar a un deportista en estado Retirado");
         }
+        // Reactivar suma un deportista activo: tambien cuenta contra el limite del plan (V11).
+        suscripcionService.exigirCupoDeportista();
 
         EstadoPersona activo = estadoPersonaRepository.findByEstado("Activo")
                 .orElseThrow(

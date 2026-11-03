@@ -98,7 +98,12 @@ public class CalculadoraEscalonHabilidadesGrupos implements CalculadoraSubCriter
 
             boolean cumpleGrupo = grupoNumeroBruto >= umbralGrupo;
 
-            if (cumpleHabilidades && cumpleGrupo) {
+            // Sincronia: "de las habilidades diferentes, cuantas se hicieron sincronizadas/en canon".
+            boolean cumpleSincronia = escalon.getCondicionSincronizadas() == null
+                    || (dto.getHabilidadesSincronizadas() != null
+                        && dto.getHabilidadesSincronizadas() >= escalon.getCondicionSincronizadas());
+
+            if (cumpleHabilidades && cumpleGrupo && cumpleSincronia) {
                 puntajeBase = escalon.getValorPuntaje();
                 detalleEscalon = escalon.getDescripcionRubrica() != null
                         ? escalon.getDescripcionRubrica()
@@ -113,6 +118,7 @@ public class CalculadoraEscalonHabilidadesGrupos implements CalculadoraSubCriter
         RegistroSubCriterio registro = new RegistroSubCriterio();
         registro.setSubCriterio(subCriterio);
         registro.setHabilidadesDiferentes(dto.getHabilidadesDiferentes());
+        registro.setHabilidadesSincronizadas(dto.getHabilidadesSincronizadas());
         registro.setGrupoMinimoAlcanzado(dto.getGrupoMinimoAlcanzado());
         registro.setPuntajeBase(puntajeBase);
         registro.setPuntajeDrivers(puntajeDrivers);
@@ -159,14 +165,7 @@ public class CalculadoraEscalonHabilidadesGrupos implements CalculadoraSubCriter
 
     // "MAYORIA" | "GRAN_PARTE" | "MAXIMO" → número de grupos/atletas de la tabla.
     private int resolverGrupoNumerico(String clave, TablaCantidadNivel tabla) {
-        if (clave == null) return 0;
-        switch (clave.toUpperCase()) {
-            case "MAYORIA":    return tabla.getMayoria();
-            case "GRAN_PARTE": return tabla.getGranParte();
-            case "MAXIMO":     return tabla.getMaximo();
-            default: throw new RuntimeException("Valor de grupo desconocido: " + clave
-                    + ". Debe ser MAYORIA, GRAN_PARTE o MAXIMO.");
-        }
+        return GrupoMinimoResolver.resolver(clave, tabla);
     }
 
     private BigDecimal calcularDrivers(RegistroSubCriterioDTO dto,
@@ -195,9 +194,8 @@ public class CalculadoraEscalonHabilidadesGrupos implements CalculadoraSubCriter
                 for (DriverConstruccionDTO reg : dto.getDriversConstruccion()) {
                     if (!driver.getId().equals(reg.getDriverId())) continue;
                     if (reg.getNumeroHabilidad() == null) continue;
-                    BigDecimal valor = Boolean.TRUE.equals(reg.getEsNivelAlto())
-                            ? tope.getValorNivelAlto()
-                            : tope.getValorNivelBasico();
+                    BigDecimal valor = tope.valorPara(reg.getNumeroHabilidad(),
+                            Boolean.TRUE.equals(reg.getEsNivelAlto()));
                     if (valor != null) sumDriver = sumDriver.add(valor);
                 }
                 // Respetar el tope máximo configurado.
