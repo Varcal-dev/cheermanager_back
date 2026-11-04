@@ -250,4 +250,16 @@ public class PagoService {
         return dto;
 
     }
+
+    /** Referencia del comprobante: sin espacios sobrantes, vacia = null y maximo 100 caracteres (largo de la columna). */
+    static String recortarReferencia(String referencia) {
+        if (referencia == null) {
+            return null;
+        }
+        String r = referencia.trim();
+        if (r.isEmpty()) {
+            return null;
+        }
+        return r.length() > 100 ? r.substring(0, 100) : r;
+    }
 }

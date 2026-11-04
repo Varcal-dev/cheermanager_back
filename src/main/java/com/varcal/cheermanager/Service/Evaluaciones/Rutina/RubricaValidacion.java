@@ -11,7 +11,7 @@ import java.util.Set;
 public final class RubricaValidacion {
 
     public static final Set<String> TABLAS = Set.of("Construcciones", "Saltos_Gimnasia");
-    public static final Set<String> GRUPOS_MINIMOS = Set.of("MENOS_MAYORIA", "MAYORIA", "GRAN_PARTE", "MAXIMO");
+    public static final Set<String> GRUPOS_MINIMOS = Set.of("MAYORIA", "GRAN_PARTE", "MAXIMO");
     public static final Set<String> SECCIONES = Set.of("Construcciones", "Gimnasia", "Ejecucion", "General");
     public static final BigDecimal PUNTAJE_MAXIMO_ESCALON = new BigDecimal("10");
 
@@ -82,7 +82,7 @@ public final class RubricaValidacion {
             throw new IllegalArgumentException("Las habilidades diferentes deben ser 1 o mas (o dejarlas vacias)");
         }
         if (grupoMinimo != null && !grupoMinimo.isBlank() && !GRUPOS_MINIMOS.contains(grupoMinimo)) {
-            throw new IllegalArgumentException("El grupo minimo debe ser MENOS_MAYORIA, MAYORIA, GRAN_PARTE o MAXIMO (o quedar vacio)");
+            throw new IllegalArgumentException("El grupo minimo debe ser MAYORIA, GRAN_PARTE o MAXIMO (o quedar vacio)");
         }
         if (descripcion != null && descripcion.length() > 500) {
             throw new IllegalArgumentException("La descripcion no puede pasar de 500 caracteres");

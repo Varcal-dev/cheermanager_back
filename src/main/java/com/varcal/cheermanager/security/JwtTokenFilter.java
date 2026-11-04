@@ -17,6 +17,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.varcal.cheermanager.Models.Clubes.Club;
 import com.varcal.cheermanager.Models.Clubes.VigenciaSuscripcion;
 import com.varcal.cheermanager.Service.Clubes.SuscripcionService;
+import com.varcal.cheermanager.Service.Legal.LegalService;
 import com.varcal.cheermanager.repository.Auth.UserRepository;
 import com.varcal.cheermanager.repository.Clubes.ClubRepository;
 import com.varcal.cheermanager.tenant.TenantContext;
@@ -42,7 +43,10 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
     /** Rutas que siguen funcionando con la suscripcion vencida (cerrar sesion, renovar sesion, cambiar clave, avisos). */
     private static final List<String> RUTAS_EXENTAS = List.of(
-            "/api/logout", "/api/refresh-token", "/api/change-password", "/api/portal/notificaciones");
+            "/api/logout", "/api/refresh-token", "/api/change-password", "/api/portal/notificaciones", "/api/legal");
+
+    static final String MENSAJE_LEGAL_PENDIENTE = "Tu club aún no ha aceptado los Términos y Condiciones y la Política "
+            + "de Tratamiento de Datos vigentes. El administrador del club debe aceptarlos para poder crear o modificar datos.";
 
     static final String MENSAJE_SOLO_LECTURA = "La suscripción de tu club está vencida: puedes consultar la información, "
             + "pero no crear ni modificar datos. Contacta a CheerManager para renovarla.";
@@ -51,9 +55,11 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     private final TokenBlacklistService tokenBlacklistService;
     private final UserRepository userRepository;
     private final ClubRepository clubRepository;
+    private final LegalService legalService;
 
     public JwtTokenFilter(JwtUtil jwtUtil, TokenBlacklistService tokenBlacklistService,
-            UserRepository userRepository, ClubRepository clubRepository) {
+            UserRepository userRepository, ClubRepository clubRepository, LegalService legalService) {
+        this.legalService = legalService;
         this.jwtUtil = jwtUtil;
         this.tokenBlacklistService = tokenBlacklistService;
         this.userRepository = userRepository;
@@ -70,6 +76,13 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 response.setContentType("application/json;charset=UTF-8");
                 response.getWriter().write("{\"success\":false,\"status\":402,\"message\":\""
                         + MENSAJE_SOLO_LECTURA + "\"}");
+                return;
+            }
+            if (esEscritura(request) && !esRutaExenta(request) && legalPendiente()) {
+                response.setStatus(428);
+                response.setContentType("application/json;charset=UTF-8");
+                response.getWriter().write("{\"success\":false,\"status\":428,\"message\":\""
+                        + MENSAJE_LEGAL_PENDIENTE + "\"}");
                 return;
             }
             filterChain.doFilter(request, response);
@@ -127,6 +140,17 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 "requestDetails", new WebAuthenticationDetailsSource().buildDetails(request)));
         SecurityContextHolder.getContext().setAuthentication(authToken);
         return soloLectura;
+    }
+
+    /**
+     * Bloque legal (L1): un club real (no la plataforma) sin aceptar la version vigente de terminos y politica
+     * no puede escribir datos. Solo aplica a peticiones ya autenticadas (con club fijado).
+     */
+    private boolean legalPendiente() {
+        if (!TenantContext.isSet() || TenantContext.get() == Club.PLATAFORMA_ID) {
+            return false;
+        }
+        return !legalService.clubAlDia();
     }
 
     private static boolean esEscritura(HttpServletRequest request) {
