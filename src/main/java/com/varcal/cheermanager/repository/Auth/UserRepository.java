@@ -21,6 +21,18 @@ public interface UserRepository extends JpaRepository<Usuario, Long> {
 
     long countByUsernameStartingWith(String base);
 
+    /** Usuarios DESACTIVADOS de un club. Nativo por el mismo motivo (el @SQLRestriction los oculta): se filtra el club a mano. */
+    @org.springframework.data.jpa.repository.Query(
+            value = "SELECT * FROM usuarios WHERE club_id = :clubId AND activo = false", nativeQuery = true)
+    java.util.List<Usuario> findInactivosDelClub(@Param("clubId") Integer clubId);
+
+    /** Reactiva un usuario desactivado por su id (nativo, ver arriba). Devuelve cuantas filas cambio. */
+    @org.springframework.data.jpa.repository.Modifying(clearAutomatically = true, flushAutomatically = true)
+    @org.springframework.data.jpa.repository.Query(
+            value = "UPDATE usuarios SET activo = true WHERE id = :id AND club_id = :clubId AND activo = false",
+            nativeQuery = true)
+    int reactivarPorId(@Param("id") Long id, @Param("clubId") Integer clubId);
+
     /**
      * Reactiva el usuario desactivado de una persona. Es SQL nativo a proposito: Usuario lleva
      * @SQLRestriction("activo = true"), asi que JPA no "ve" los usuarios desactivados. Al ser nativo

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.varcal.cheermanager.Models.Consentimientos.Consentimiento.Tipo;
 import com.varcal.cheermanager.repository.Consentimientos.ConsentimientoRepository;
 import com.varcal.cheermanager.repository.Financiero.PlanPagoRepository;
+import com.varcal.cheermanager.repository.Financiero.TipoPlanPagoRepository;
 import com.varcal.cheermanager.repository.Org_dep.DivisionRepository;
 import com.varcal.cheermanager.repository.Org_dep.GrupoEntrenamientoRepository;
 import com.varcal.cheermanager.repository.Org_dep.NivelRepository;
@@ -33,6 +34,7 @@ public class OnboardingService {
     private final NivelRepository nivelRepository;
     private final DivisionRepository divisionRepository;
     private final PlanPagoRepository planPagoRepository;
+    private final TipoPlanPagoRepository tipoPlanPagoRepository;
     private final TemporadaRepository temporadaRepository;
     private final EntrenadorRepository entrenadorRepository;
     private final GrupoEntrenamientoRepository grupoRepository;
@@ -41,13 +43,15 @@ public class OnboardingService {
     private final ConsentimientoRepository consentimientoRepository;
 
     public OnboardingService(NivelRepository nivelRepository, DivisionRepository divisionRepository,
-            PlanPagoRepository planPagoRepository, TemporadaRepository temporadaRepository,
+            PlanPagoRepository planPagoRepository, TipoPlanPagoRepository tipoPlanPagoRepository,
+            TemporadaRepository temporadaRepository,
             EntrenadorRepository entrenadorRepository, GrupoEntrenamientoRepository grupoRepository,
             DeportistaRepository deportistaRepository, DeportistaAcudienteRepository vinculoRepository,
             ConsentimientoRepository consentimientoRepository) {
         this.nivelRepository = nivelRepository;
         this.divisionRepository = divisionRepository;
         this.planPagoRepository = planPagoRepository;
+        this.tipoPlanPagoRepository = tipoPlanPagoRepository;
         this.temporadaRepository = temporadaRepository;
         this.entrenadorRepository = entrenadorRepository;
         this.grupoRepository = grupoRepository;
@@ -60,7 +64,14 @@ public class OnboardingService {
         List<Paso> pasos = new ArrayList<>();
         pasos.add(conteo("niveles", "Definir los niveles del club", nivelRepository.count()));
         pasos.add(conteo("divisiones", "Definir las divisiones", divisionRepository.count()));
-        pasos.add(conteo("planes", "Crear al menos un plan de pago", planPagoRepository.count()));
+        // Orden real de trabajo: primero el TIPO de plan (catalogo de duraciones: mensual, trimestral, inscripcion...)
+        // y despues los planes con su valor, que exigen elegir un tipo.
+        long tipos = tipoPlanPagoRepository.count();
+        long planes = planPagoRepository.count();
+        pasos.add(conteo("tiposPlan", "Definir los tipos de plan de pago (mensualidad / inscripción)", tipos));
+        pasos.add(new Paso("planes", "Crear al menos un plan de mensualidad o de inscripción", planes > 0,
+                planes > 0 ? planes + " registrados"
+                        : tipos == 0 ? "Primero define un tipo de plan de pago" : "Sin planes: crea uno con su valor"));
         pasos.add(new Paso("temporada", "Activar la temporada actual", temporadaRepository.findFirstByActivaTrue().isPresent(),
                 temporadaRepository.findFirstByActivaTrue().map(t -> "Activa: " + t.getNombre()).orElse("Sin temporada activa")));
         pasos.add(conteo("entrenadores", "Registrar entrenadores", entrenadorRepository.count()));

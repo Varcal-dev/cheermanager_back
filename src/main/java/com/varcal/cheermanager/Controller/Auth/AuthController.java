@@ -130,6 +130,13 @@ public class AuthController {
             return ResponseEntity.status(401).body(Map.of("success", false, "message", "Token invalido o expirado"));
         }
 
+        // La sesion de soporte (superadmin dentro de un club) dura una hora y NO se renueva: renovarla emitiria un token
+        // normal del administrador, con el permiso de aceptar terminos que la plataforma no debe tener.
+        if (jwtUtil.esTokenSoporte(token)) {
+            return ResponseEntity.status(403).body(Map.of("success", false,
+                    "message", "La sesion de soporte no se renueva: vuelve a entrar desde Plataforma"));
+        }
+
         Long userId = jwtUtil.getUserId(token);
         // Se re-valida al usuario y se recalculan sus permisos (antes se copiaban los del token viejo).
         return authService.refrescarToken(userId)

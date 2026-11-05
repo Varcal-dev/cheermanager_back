@@ -1,4 +1,3 @@
-
 package com.varcal.cheermanager.Service.Clubes;
 
 import java.text.Normalizer;
@@ -23,9 +22,11 @@ import com.varcal.cheermanager.Models.Clubes.PlanSaas;
 import com.varcal.cheermanager.repository.Auth.PermisoRepository;
 import com.varcal.cheermanager.repository.Auth.RolRepository;
 import com.varcal.cheermanager.repository.Auth.UserRepository;
+import com.varcal.cheermanager.Models.Financiero.TipoPlanPago;
 import com.varcal.cheermanager.Models.Org_dep.Division;
 import com.varcal.cheermanager.Models.Org_dep.Nivel;
 import com.varcal.cheermanager.repository.Clubes.ClubRepository;
+import com.varcal.cheermanager.repository.Financiero.TipoPlanPagoRepository;
 import com.varcal.cheermanager.repository.Clubes.PlanSaasRepository;
 import com.varcal.cheermanager.repository.Org_dep.DivisionRepository;
 import com.varcal.cheermanager.repository.Org_dep.NivelRepository;
@@ -56,12 +57,15 @@ public class ClubService {
     private final NivelRepository nivelRepository;
     private final DivisionRepository divisionRepository;
     private final PlanSaasRepository planSaasRepository;
+    private final TipoPlanPagoRepository tipoPlanPagoRepository;
 
     public ClubService(ClubRepository clubRepository, RolRepository rolRepository,
             PermisoRepository permisoRepository, UserRepository userRepository,
             TenantLookupRepository lookup, PasswordEncoder passwordEncoder,
             PlatformTransactionManager txManager, NivelRepository nivelRepository,
-            DivisionRepository divisionRepository, PlanSaasRepository planSaasRepository) {
+            DivisionRepository divisionRepository, PlanSaasRepository planSaasRepository,
+            TipoPlanPagoRepository tipoPlanPagoRepository) {
+        this.tipoPlanPagoRepository = tipoPlanPagoRepository;
         this.planSaasRepository = planSaasRepository;
         this.nivelRepository = nivelRepository;
         this.divisionRepository = divisionRepository;
@@ -155,6 +159,13 @@ public class ClubService {
         u.setRequiereCambioPassword(true);
         userRepository.save(u);
 
+        // Tipos de plan de pago base (por club): sin ellos no se puede crear ningun plan de inscripcion/mensualidad.
+        tipoPlan("Inscripción anual", TipoPlanPago.Categoria.inscripcion, 12, "Cobro único al inscribir al deportista en la temporada");
+        tipoPlan("Mensualidad", TipoPlanPago.Categoria.mensualidad, 1, "Cuota que se factura cada mes");
+        tipoPlan("Mensualidad trimestral", TipoPlanPago.Categoria.mensualidad, 3, "Cuota que cubre tres meses");
+        tipoPlan("Mensualidad semestral", TipoPlanPago.Categoria.mensualidad, 6, "Cuota que cubre seis meses");
+        tipoPlan("Mensualidad anual", TipoPlanPago.Categoria.mensualidad, 12, "Cuota que cubre doce meses");
+
         // Plantilla inicial EDITABLE (por defecto si): evita que el club arranque con pantallas vacias.
         // Son nombres genericos de ejemplo; cada club los renombra o borra segun su federacion/liga.
         if (!Boolean.FALSE.equals(req.cargarPlantilla())) {
@@ -169,6 +180,15 @@ public class ClubService {
                 divisionRepository.save(d);
             }
         }
+    }
+
+    private void tipoPlan(String nombre, TipoPlanPago.Categoria categoria, int meses, String descripcion) {
+        TipoPlanPago t = new TipoPlanPago();
+        t.setNombre(nombre);
+        t.setCategoria(categoria);
+        t.setDuracionMeses(meses);
+        t.setDescripcion(descripcion);
+        tipoPlanPagoRepository.save(t);
     }
 
     private Rol nuevoRol(String nombre, String descripcion, Set<Permiso> permisos) {

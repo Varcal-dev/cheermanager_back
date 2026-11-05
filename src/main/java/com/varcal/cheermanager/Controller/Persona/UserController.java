@@ -130,9 +130,16 @@ public class UserController {
 
     @GetMapping("/listar")
     @RequiresPermission("ver_usuarios")
-    public ResponseEntity<?> listarUsuarios() {
+    public ResponseEntity<?> listarUsuarios(
+            @org.springframework.web.bind.annotation.RequestParam(defaultValue = "false") boolean incluirInactivos) {
         try {
-            List<UsuarioDTO> usuarios = userRepository.findAll().stream()
+            List<Usuario> base = new java.util.ArrayList<>(userRepository.findAll());
+            if (incluirInactivos) {
+                // El @SQLRestriction oculta los desactivados: se piden aparte (consulta nativa filtrada por club).
+                base.addAll(userRepository.findInactivosDelClub(com.varcal.cheermanager.tenant.TenantContext.require()));
+                base.sort(java.util.Comparator.comparing(Usuario::getId));
+            }
+            List<UsuarioDTO> usuarios = base.stream()
                     .map(UsuarioDTO::new) // Mapear cada usuario al DTO
                     .collect(Collectors.toList());
             return ResponseEntity.ok(usuarios);
@@ -173,6 +180,18 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error al actualizar el usuario: " + e.getMessage());
         }
+    }
+
+    /** Reactiva un usuario desactivado (el PUT /actualizar no lo encuentra: el @SQLRestriction lo oculta). */
+    @org.springframework.web.bind.annotation.PostMapping("/{id}/reactivar")
+    @RequiresPermission("modificar_usuario")
+    @org.springframework.transaction.annotation.Transactional
+    public ResponseEntity<?> reactivarUsuario(@PathVariable Integer id) {
+        int n = userRepository.reactivarPorId(id.longValue(), com.varcal.cheermanager.tenant.TenantContext.require());
+        if (n == 0) {
+            return ResponseEntity.status(404).body("No hay un usuario desactivado con ese ID en tu club");
+        }
+        return ResponseEntity.ok("Usuario reactivado");
     }
 
     @DeleteMapping("/eliminar/{id}")

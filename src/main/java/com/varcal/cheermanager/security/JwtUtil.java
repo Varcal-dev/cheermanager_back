@@ -52,6 +52,33 @@ public class JwtUtil {
                 .compact();
     }
 
+    /**
+     * Token de SOPORTE: el superadmin entra a un club como su administrador. Lleva soporte=true (el refresh lo
+     * rechaza), el nombre del club y quien lo pidio; la duracion la fija quien lo emite (corta).
+     */
+    public String generateTokenSoporte(Long userId, String email, String rol, List<String> permisos, Integer clubId,
+            String clubNombre, String superadminEmail, long duracionMs) {
+        Date now = new Date();
+        return Jwts.builder()
+                .setSubject(email)
+                .setIssuedAt(now)
+                .setExpiration(new Date(now.getTime() + duracionMs))
+                .claim("userId", userId)
+                .claim("clubId", clubId)
+                .claim("roles", rol)
+                .claim("permisos", permisos)
+                .claim("soporte", true)
+                .claim("soporteClub", clubNombre)
+                .claim("soportePor", superadminEmail)
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    /** true si es un token de soporte (ver generateTokenSoporte). */
+    public boolean esTokenSoporte(String token) {
+        return Boolean.TRUE.equals(getClaims(token).get("soporte"));
+    }
+
     public Claims getClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(key)
