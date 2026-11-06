@@ -16,6 +16,7 @@ import com.varcal.cheermanager.DTO.Org_dep.CandidatoGrupoDTO;
 import com.varcal.cheermanager.DTO.Org_dep.CandidatosGrupoResponseDTO;
 import com.varcal.cheermanager.DTO.Org_dep.DeportistaInscritoDTO;
 import com.varcal.cheermanager.DTO.Org_dep.GrupoElegibleDTO;
+import com.varcal.cheermanager.DTO.Org_dep.GrupoEntrenamientoResponseDTO;
 import com.varcal.cheermanager.DTO.Org_dep.GruposElegiblesResponseDTO;
 import com.varcal.cheermanager.DTO.Persona.AsignacionEntrenadorDTO;
 import com.varcal.cheermanager.DTO.Persona.AsignacionEntrenadorResponseDTO;
@@ -34,6 +35,7 @@ import com.varcal.cheermanager.repository.Org_dep.GrupoEntrenadorRepository;
 import com.varcal.cheermanager.repository.Org_dep.GrupoEntrenamientoRepository;
 import com.varcal.cheermanager.repository.Personas.DeportistaRepository;
 import com.varcal.cheermanager.repository.Personas.EntrenadorRepository;
+import com.varcal.cheermanager.DTO.Org_dep.GrupoEntrenamientoResponseDTO;
 
 @Service
 public class GrupoEntrenamientoService {
@@ -59,12 +61,18 @@ public class GrupoEntrenamientoService {
     @Autowired
     private EntrenadorRepository entrenadorRepository;
 
-    public GrupoEntrenamiento crearGrupoEntrenamiento(GrupoEntrenamiento grupo) throws Exception {
+    @Transactional
+    public GrupoEntrenamientoResponseDTO crearGrupoEntrenamiento(
+            GrupoEntrenamiento grupo) throws Exception {
+
         try {
-            return grupoEntrenamientoRepository.save(grupo);
+            GrupoEntrenamiento guardado = grupoEntrenamientoRepository.save(grupo);
+
+            return convertirAGrupoResponseDTO(guardado);
+
         } catch (Exception e) {
-            // Captura otras excepciones inesperadas
-            throw new Exception("Error al crear el grupo de entrenamiento.", e);
+            throw new Exception(
+                    "Error al crear el grupo de entrenamiento.", e);
         }
     }
 
@@ -77,9 +85,12 @@ public class GrupoEntrenamientoService {
     // obtenerCandidatosGrupo, que resuelve todo en una sola llamada y con
     // motivo estructurado en vez de un string suelto.
     public String verificarElegibilidadDeportista(Integer grupoId, Integer deportistaId) {
-        // Antes llamaba a una funcion de MySQL (verificar_elegibilidad_deportista_grupo) que no estaba en los
-        // scripts del proyecto: una base nueva fallaba con "FUNCTION does not exist". Ahora se calcula aqui,
-        // con las mismas reglas que /candidatos (cupo y rango de ano de nacimiento de la categoria).
+        // Antes llamaba a una funcion de MySQL
+        // (verificar_elegibilidad_deportista_grupo) que no estaba en los
+        // scripts del proyecto: una base nueva fallaba con "FUNCTION does not exist".
+        // Ahora se calcula aqui,
+        // con las mismas reglas que /candidatos (cupo y rango de ano de nacimiento de
+        // la categoria).
         GrupoEntrenamiento grupo = grupoEntrenamientoRepository.findById(grupoId)
                 .orElseThrow(() -> new RuntimeException("Grupo no encontrado"));
         Deportista deportista = deportistaRepository.findById(deportistaId)
@@ -321,7 +332,8 @@ public class GrupoEntrenamientoService {
         return "Deportista removido del grupo correctamente";
     }
 
-    // ===== Historial de asignaciones entrenador-grupo (panel en entrenadores/page.tsx) =====
+    // ===== Historial de asignaciones entrenador-grupo (panel en
+    // entrenadores/page.tsx) =====
 
     public List<AsignacionEntrenadorResponseDTO> listarAsignacionesPorEntrenador(Integer entrenadorId) {
         return grupoEntrenadorRepository.findByEntrenadorIdOrderByFechaInicioDesc(entrenadorId).stream()
@@ -413,5 +425,28 @@ public class GrupoEntrenamientoService {
         }
 
         return resultado;
+    }
+
+    private GrupoEntrenamientoResponseDTO convertirAGrupoResponseDTO(
+            GrupoEntrenamiento grupo) {
+
+        GrupoEntrenamientoResponseDTO dto = new GrupoEntrenamientoResponseDTO();
+
+        dto.setId(grupo.getId().longValue());
+        dto.setNombre(grupo.getNombre());
+        // dto.setDescripcion(grupo.getDescripcion());
+        if (grupo.getCategoriaNivel() != null) {
+            dto.setNivelId(
+                    grupo.getCategoriaNivel().getId().longValue());
+
+            dto.setNombreNivel(
+                    grupo.getCategoriaNivel().getNombre());
+        }
+
+        // Completar con las relaciones reales de nivel y temporada.
+
+        dto.setCantidadDeportistas(0);
+
+        return dto;
     }
 }

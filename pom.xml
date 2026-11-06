@@ -23,6 +23,11 @@
 	</properties>
 
 	<dependencies>
+		<!-- Serializa colecciones LAZY sin inicializar como null en vez de reventar (open-in-view=false) -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-hibernate6</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>

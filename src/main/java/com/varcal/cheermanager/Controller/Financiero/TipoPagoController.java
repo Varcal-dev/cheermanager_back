@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.varcal.cheermanager.Models.Financiero.TipoPago;
+import com.varcal.cheermanager.Utils.SinPermisoEspecifico;
 import com.varcal.cheermanager.repository.Financiero.TipoPagoRepository;
 
 // Catálogo de solo lectura. TipoPagoRepository ya existía (lo agregó
@@ -21,6 +22,7 @@ import com.varcal.cheermanager.repository.Financiero.TipoPagoRepository;
 // registro (ver instrucciones en el mensaje de Claude).
 @RestController
 @RequestMapping("/api/tipos-pago")
+@SinPermisoEspecifico
 public class TipoPagoController {
 
     @Autowired

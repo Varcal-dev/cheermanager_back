@@ -23,12 +23,16 @@ import com.varcal.cheermanager.repository.Auth.PermisoRepository;
 import com.varcal.cheermanager.repository.Auth.RolRepository;
 import com.varcal.cheermanager.repository.Auth.UserRepository;
 import com.varcal.cheermanager.Models.Financiero.TipoPlanPago;
+import com.varcal.cheermanager.Models.Org_dep.CategoriaNivel;
 import com.varcal.cheermanager.Models.Org_dep.Division;
+import com.varcal.cheermanager.Models.Org_dep.EstadoCategoriaNivel;
 import com.varcal.cheermanager.Models.Org_dep.Nivel;
 import com.varcal.cheermanager.repository.Clubes.ClubRepository;
 import com.varcal.cheermanager.repository.Financiero.TipoPlanPagoRepository;
 import com.varcal.cheermanager.repository.Clubes.PlanSaasRepository;
+import com.varcal.cheermanager.repository.Org_dep.CategoriaNivelRepository;
 import com.varcal.cheermanager.repository.Org_dep.DivisionRepository;
+import com.varcal.cheermanager.repository.Org_dep.EstadoCategoriaNivelRepository;
 import com.varcal.cheermanager.repository.Org_dep.NivelRepository;
 import com.varcal.cheermanager.tenant.TenantContext;
 import com.varcal.cheermanager.tenant.TenantLookupRepository;
@@ -58,14 +62,19 @@ public class ClubService {
     private final DivisionRepository divisionRepository;
     private final PlanSaasRepository planSaasRepository;
     private final TipoPlanPagoRepository tipoPlanPagoRepository;
+    private final CategoriaNivelRepository categoriaNivelRepository;
+    private final EstadoCategoriaNivelRepository estadoCategoriaNivelRepository;
 
     public ClubService(ClubRepository clubRepository, RolRepository rolRepository,
             PermisoRepository permisoRepository, UserRepository userRepository,
             TenantLookupRepository lookup, PasswordEncoder passwordEncoder,
             PlatformTransactionManager txManager, NivelRepository nivelRepository,
             DivisionRepository divisionRepository, PlanSaasRepository planSaasRepository,
-            TipoPlanPagoRepository tipoPlanPagoRepository) {
+            TipoPlanPagoRepository tipoPlanPagoRepository, CategoriaNivelRepository categoriaNivelRepository,
+            EstadoCategoriaNivelRepository estadoCategoriaNivelRepository) {
         this.tipoPlanPagoRepository = tipoPlanPagoRepository;
+        this.categoriaNivelRepository = categoriaNivelRepository;
+        this.estadoCategoriaNivelRepository = estadoCategoriaNivelRepository;
         this.planSaasRepository = planSaasRepository;
         this.nivelRepository = nivelRepository;
         this.divisionRepository = divisionRepository;
@@ -169,15 +178,33 @@ public class ClubService {
         // Plantilla inicial EDITABLE (por defecto si): evita que el club arranque con pantallas vacias.
         // Son nombres genericos de ejemplo; cada club los renombra o borra segun su federacion/liga.
         if (!Boolean.FALSE.equals(req.cargarPlantilla())) {
+            List<Nivel> niveles = new java.util.ArrayList<>();
             for (int i = 1; i <= 6; i++) {
                 Nivel n = new Nivel();
                 n.setNombre("Nivel " + i);
-                nivelRepository.save(n);
+                niveles.add(nivelRepository.save(n));
             }
+            List<Division> divisiones = new java.util.ArrayList<>();
             for (String nombre : List.of("Tiny", "Mini", "Youth", "Junior", "Senior")) {
                 Division d = new Division();
                 d.setNombre(nombre);
-                divisionRepository.save(d);
+                divisiones.add(divisionRepository.save(d));
+            }
+            // Categorias por nivel (nivel x division, sin rango de edad ni cupo: sin limite). Son indispensables para
+            // crear grupos y no hay pantalla para crearlas; sin ellas un club nuevo no podia armar ni un grupo.
+            EstadoCategoriaNivel activa = estadoCategoriaNivelRepository.findAll().stream()
+                    .filter(e -> "Activa".equalsIgnoreCase(e.getNombre())).findFirst().orElse(null);
+            if (activa != null) {
+                for (Nivel n : niveles) {
+                    for (Division d : divisiones) {
+                        CategoriaNivel c = new CategoriaNivel();
+                        c.setNombre(n.getNombre() + " - " + d.getNombre());
+                        c.setNivel(n);
+                        c.setDivision(d);
+                        c.setEstadoCategoriaNivel(activa);
+                        categoriaNivelRepository.save(c);
+                    }
+                }
             }
         }
     }

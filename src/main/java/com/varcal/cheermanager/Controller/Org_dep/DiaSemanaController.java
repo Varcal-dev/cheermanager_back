@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.varcal.cheermanager.Models.Org_dep.DiaSemana;
+import com.varcal.cheermanager.Utils.SinPermisoEspecifico;
 import com.varcal.cheermanager.repository.Org_dep.DiaSemanaRepository;
 
 // Catálogo de solo lectura. DiaSemanaRepository ya existía (lo agregó
@@ -16,6 +17,7 @@ import com.varcal.cheermanager.repository.Org_dep.DiaSemanaRepository;
 // Misma convención que TipoGrupoController: sin @RequiresPermission.
 @RestController
 @RequestMapping("/api/dias-semana")
+@SinPermisoEspecifico
 public class DiaSemanaController {
 
     @Autowired
