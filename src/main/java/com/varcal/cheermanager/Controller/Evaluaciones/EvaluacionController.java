@@ -68,10 +68,13 @@ public class EvaluacionController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta,
             @RequestParam(required = false) String texto,
             @RequestParam(required = false) Integer pagina,
-            @RequestParam(required = false) Integer tamano) {
+            @RequestParam(required = false) Integer tamano,
+            // orden: fecha | deportista | categoria | criterio | puntaje. direccion: asc | desc.
+            @RequestParam(required = false) String orden,
+            @RequestParam(required = false) String direccion) {
         try {
             PaginaEvaluacionesDTO p = evaluacionService.buscar(deportistaId, grupoId, categoriaId, criterioId, desde,
-                    hasta, texto, pagina, tamano);
+                    hasta, texto, pagina, tamano, orden, direccion);
             return ResponseEntity.ok(p);
         } catch (RuntimeException e) {
             return error(e);

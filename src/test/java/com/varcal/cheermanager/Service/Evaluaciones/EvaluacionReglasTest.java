@@ -65,4 +65,34 @@ class EvaluacionReglasTest {
         assertEquals(100, EvaluacionReglas.tamanoPagina(5000));
         assertEquals(20, EvaluacionReglas.tamanoPagina(20));
     }
+
+    @Test
+    void ordenDelHistorial() {
+        // Por defecto: lo mas reciente primero (fecha y id descendentes).
+        org.springframework.data.domain.Sort def = EvaluacionReglas.ordenBusqueda(null, null);
+        assertEquals(org.springframework.data.domain.Sort.Direction.DESC, def.getOrderFor("fecha").getDirection());
+        assertEquals(org.springframework.data.domain.Sort.Direction.DESC, def.getOrderFor("id").getDirection());
+
+        // Por puntaje ascendente, con desempate por fecha reciente.
+        org.springframework.data.domain.Sort pun = EvaluacionReglas.ordenBusqueda("puntaje", "asc");
+        assertEquals(org.springframework.data.domain.Sort.Direction.ASC, pun.getOrderFor("puntajeObtenido").getDirection());
+        assertEquals(org.springframework.data.domain.Sort.Direction.DESC, pun.getOrderFor("fecha").getDirection());
+
+        // Texto: sin distinguir mayusculas y por apellido y luego nombre; sin direccion = ascendente.
+        org.springframework.data.domain.Sort dep = EvaluacionReglas.ordenBusqueda("Deportista", null);
+        assertEquals(org.springframework.data.domain.Sort.Direction.ASC,
+                dep.getOrderFor("deportista.persona.apellidos").getDirection());
+        assertEquals(true, dep.getOrderFor("deportista.persona.apellidos").isIgnoreCase());
+        assertEquals(true, dep.getOrderFor("deportista.persona.nombre") != null);
+
+        // Solo se aceptan los valores conocidos.
+        for (String[] malo : new String[][] { { "puntajeObtenido; drop", "asc" }, { "fecha", "arriba" } }) {
+            try {
+                EvaluacionReglas.ordenBusqueda(malo[0], malo[1]);
+            } catch (IllegalArgumentException e) {
+                continue;
+            }
+            throw new AssertionError("orden aceptado: " + malo[0] + "/" + malo[1]);
+        }
+    }
 }

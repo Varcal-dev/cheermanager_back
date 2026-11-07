@@ -109,6 +109,29 @@ public class AsistenciaService {
                 .collect(Collectors.toList());
     }
 
+    /** Tope del periodo consultable, para que una consulta no traiga años de registros de golpe. */
+    static final long MAX_DIAS_PERIODO = 366;
+
+    // Asistencias de un grupo entre dos fechas (inicio y fin incluidas).
+    public List<AsistenciaResponseDTO> listarPorGrupoYRango(Integer grupoId, LocalDate desde, LocalDate hasta) {
+        validarPeriodo(desde, hasta);
+        return asistenciaRepository.findByGrupoIdAndFechaBetween(grupoId, desde, hasta).stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    static void validarPeriodo(LocalDate desde, LocalDate hasta) {
+        if (desde == null || hasta == null) {
+            throw new RuntimeException("Indica la fecha de inicio y la fecha de fin del periodo");
+        }
+        if (desde.isAfter(hasta)) {
+            throw new RuntimeException("La fecha de inicio no puede ser posterior a la fecha de fin");
+        }
+        if (java.time.temporal.ChronoUnit.DAYS.between(desde, hasta) + 1 > MAX_DIAS_PERIODO) {
+            throw new RuntimeException("El periodo no puede superar " + MAX_DIAS_PERIODO + " días");
+        }
+    }
+
     public List<AsistenciaResponseDTO> listarPorDeportista(Integer deportistaId) {
         if (!deportistaRepository.existsById(deportistaId)) {
             throw new RuntimeException("Deportista no encontrado con ID: " + deportistaId);

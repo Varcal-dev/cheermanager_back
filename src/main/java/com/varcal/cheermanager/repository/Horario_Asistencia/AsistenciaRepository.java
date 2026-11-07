@@ -25,6 +25,14 @@ public interface AsistenciaRepository extends JpaRepository<Asistencia, Integer>
             + "WHERE he.grupoEntrenamiento.id = :grupoId AND a.fecha = :fecha")
     List<Asistencia> findByGrupoIdAndFecha(@Param("grupoId") Integer grupoId, @Param("fecha") LocalDate fecha);
 
+    // Asistencias de un grupo en un periodo (fecha inicio y fin, ambas incluidas): lo más reciente primero.
+    @Query("SELECT a FROM Asistencia a "
+            + "JOIN HorarioEntrenamiento he ON he.horario = a.horario "
+            + "WHERE he.grupoEntrenamiento.id = :grupoId AND a.fecha BETWEEN :desde AND :hasta "
+            + "ORDER BY a.fecha DESC, a.id ASC")
+    List<Asistencia> findByGrupoIdAndFechaBetween(@Param("grupoId") Integer grupoId,
+            @Param("desde") LocalDate desde, @Param("hasta") LocalDate hasta);
+
     @Query("SELECT COUNT(a) FROM Asistencia a WHERE a.deportista.id = :deportistaId "
             + "AND a.fecha BETWEEN :desde AND :hasta AND a.estadoAsistencia.estado = :estado")
     long contarPorDeportistaYEstadoEnRango(@Param("deportistaId") Integer deportistaId,

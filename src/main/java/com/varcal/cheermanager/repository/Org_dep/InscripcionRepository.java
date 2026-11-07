@@ -93,4 +93,8 @@ public interface InscripcionRepository extends JpaRepository<Inscripcion, Intege
 
     long countByPlanPagoIdAndEstado(Integer planPagoId, Inscripcion.EstadoInscripcion estado);
 
+    // Inscripciones que tienen este plan como su plan de MENSUALIDAD (columna plan_mensualidad_id).
+    // countByPlanPagoId... solo mira el plan de inscripción, por eso nunca contaba a los de mensualidad.
+    long countByPlanMensualidadIdAndEstado(Integer planMensualidadId, Inscripcion.EstadoInscripcion estado);
+
 }

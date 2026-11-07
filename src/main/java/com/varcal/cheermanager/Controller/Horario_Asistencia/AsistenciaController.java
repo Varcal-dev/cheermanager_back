@@ -78,6 +78,16 @@ public class AsistenciaController {
         return ResponseEntity.ok(asistenciaService.listarPorGrupoYFecha(grupoId, fecha));
     }
 
+    // Lo registrado de un grupo en un periodo: ?desde=yyyy-MM-dd&hasta=yyyy-MM-dd (ambas fechas incluidas).
+    @GetMapping("/grupo/{grupoId}/rango")
+    @RequiresPermission("ver_asistencia")
+    public ResponseEntity<List<AsistenciaResponseDTO>> listarPorGrupoYRango(
+            @PathVariable Integer grupoId,
+            @RequestParam LocalDate desde,
+            @RequestParam LocalDate hasta) {
+        return ResponseEntity.ok(asistenciaService.listarPorGrupoYRango(grupoId, desde, hasta));
+    }
+
     @GetMapping("/deportista/{deportistaId}")
     @RequiresPermission("ver_asistencia")
     public ResponseEntity<List<AsistenciaResponseDTO>> listarPorDeportista(@PathVariable Integer deportistaId) {

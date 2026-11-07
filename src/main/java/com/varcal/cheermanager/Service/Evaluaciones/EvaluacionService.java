@@ -146,13 +146,22 @@ public class EvaluacionService {
     @Transactional(readOnly = true)
     public PaginaEvaluacionesDTO buscar(Integer deportistaId, Integer grupoId, Integer categoriaId, Integer criterioId,
             LocalDate desde, LocalDate hasta, String texto, Integer pagina, Integer tamano) {
+        return buscar(deportistaId, grupoId, categoriaId, criterioId, desde, hasta, texto, pagina, tamano, null, null);
+    }
+
+    // Igual, con orden (fecha | deportista | categoria | criterio | puntaje) y direccion (asc | desc).
+    @Transactional(readOnly = true)
+    public PaginaEvaluacionesDTO buscar(Integer deportistaId, Integer grupoId, Integer categoriaId, Integer criterioId,
+            LocalDate desde, LocalDate hasta, String texto, Integer pagina, Integer tamano, String orden,
+            String direccion) {
         if (desde != null && hasta != null && desde.isAfter(hasta)) {
             throw new IllegalArgumentException("La fecha 'desde' no puede ser posterior a 'hasta'");
         }
         int tam = EvaluacionReglas.tamanoPagina(tamano);
         int pag = pagina == null ? 0 : Math.max(0, pagina);
         Page<Evaluacion> p = evaluacionRepository.buscar(deportistaId, grupoId, categoriaId, criterioId, desde, hasta,
-                EvaluacionReglas.patronBusqueda(texto), PageRequest.of(pag, tam));
+                EvaluacionReglas.patronBusqueda(texto),
+                PageRequest.of(pag, tam, EvaluacionReglas.ordenBusqueda(orden, direccion)));
         PaginaEvaluacionesDTO out = new PaginaEvaluacionesDTO();
         out.setContenido(p.getContent().stream().map(this::toResponseDTO).collect(Collectors.toList()));
         out.setTotal(p.getTotalElements());

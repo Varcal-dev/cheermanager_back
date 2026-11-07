@@ -48,6 +48,7 @@ public interface EvaluacionRepository extends JpaRepository<Evaluacion, Integer>
     /**
      * Busqueda paginada con filtros opcionales (null = sin filtro). grupoId = deportistas que HOY pertenecen al grupo;
      * texto = patron LIKE ya en minusculas sobre "nombre apellidos".
+     * Sin ORDER BY a proposito: el orden llega en el Pageable (EvaluacionReglas.ordenBusqueda).
      */
     @Query(value = "SELECT e FROM Evaluacion e JOIN FETCH e.deportista d JOIN FETCH d.persona p "
             + "JOIN FETCH e.criterioEvaluacion c JOIN FETCH c.categoria cat "
@@ -57,8 +58,7 @@ public interface EvaluacionRepository extends JpaRepository<Evaluacion, Integer>
             + "AND (:desde IS NULL OR e.fecha >= :desde) AND (:hasta IS NULL OR e.fecha <= :hasta) "
             + "AND (:grupoId IS NULL OR d.id IN (SELECT m.deportista.id FROM DeportistaPerteneceGrupo m "
             + "WHERE m.grupo.id = :grupoId AND m.fechaFin IS NULL)) "
-            + "AND (:texto IS NULL OR LOWER(CONCAT(p.nombre, ' ', p.apellidos)) LIKE :texto) "
-            + "ORDER BY e.fecha DESC, e.id DESC",
+            + "AND (:texto IS NULL OR LOWER(CONCAT(p.nombre, ' ', p.apellidos)) LIKE :texto)",
             countQuery = "SELECT COUNT(e) FROM Evaluacion e JOIN e.deportista d JOIN d.persona p "
                     + "JOIN e.criterioEvaluacion c JOIN c.categoria cat "
                     + "WHERE (:deportistaId IS NULL OR d.id = :deportistaId) "

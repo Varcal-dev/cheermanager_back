@@ -1,6 +1,9 @@
 package com.varcal.cheermanager.Service.Evaluaciones;
 
 import java.time.LocalDate;
+import java.util.Locale;
+
+import org.springframework.data.domain.Sort;
 
 /** Reglas puras de una evaluacion por criterio (sin base de datos). */
 public final class EvaluacionReglas {
@@ -45,6 +48,50 @@ public final class EvaluacionReglas {
         }
         String t = texto.trim().toLowerCase(java.util.Locale.ROOT).replace("%", "").replace("_", "");
         return t.isEmpty() ? null : "%" + t + "%";
+    }
+
+    /**
+     * Orden del historial. orden: fecha | deportista | categoria | criterio | puntaje (por defecto fecha);
+     * direccion: asc | desc (por defecto: fecha desc, el resto asc). Solo se aceptan esos valores, asi nunca
+     * llega al ORDER BY un texto del cliente. Los desempates son estables para que la paginacion no repita filas.
+     * Las propiedades son rutas desde Evaluacion.
+     */
+    public static Sort ordenBusqueda(String orden, String direccion) {
+        String clave = orden == null || orden.isBlank() ? "fecha" : orden.trim().toLowerCase(Locale.ROOT);
+        Sort.Direction dir;
+        if (direccion == null || direccion.isBlank()) {
+            dir = clave.equals("fecha") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        } else if (direccion.trim().equalsIgnoreCase("asc")) {
+            dir = Sort.Direction.ASC;
+        } else if (direccion.trim().equalsIgnoreCase("desc")) {
+            dir = Sort.Direction.DESC;
+        } else {
+            throw new IllegalArgumentException("La direccion del orden debe ser asc o desc");
+        }
+        Sort principal;
+        switch (clave) {
+            case "fecha":
+                // Mismo desempate que tenia el historial: lo mas reciente (o lo mas antiguo) primero.
+                return Sort.by(dir, "fecha", "id");
+            case "deportista":
+                principal = Sort.by(
+                        new Sort.Order(dir, "deportista.persona.apellidos").ignoreCase(),
+                        new Sort.Order(dir, "deportista.persona.nombre").ignoreCase());
+                break;
+            case "categoria":
+                principal = Sort.by(new Sort.Order(dir, "criterioEvaluacion.categoria.categoria").ignoreCase());
+                break;
+            case "criterio":
+                principal = Sort.by(new Sort.Order(dir, "criterioEvaluacion.nombre").ignoreCase());
+                break;
+            case "puntaje":
+                principal = Sort.by(dir, "puntajeObtenido");
+                break;
+            default:
+                throw new IllegalArgumentException(
+                        "Orden no valido: use fecha, deportista, categoria, criterio o puntaje");
+        }
+        return principal.and(Sort.by(Sort.Direction.DESC, "fecha", "id"));
     }
 
     /** Tamano de pagina acotado a 1..100 (50 por defecto). */

@@ -89,6 +89,17 @@ public class PlanPagoService {
         plan.setActivo(dto.getActivo() != null ? dto.getActivo() : true);
     }
 
+    // Una inscripción guarda dos planes distintos: planPago (el de INSCRIPCIÓN) y planMensualidad (el
+    // de MENSUALIDAD). Cada plan se cuenta por la columna que le corresponde según su categoría; antes
+    // todos se contaban por planPago y los planes de mensualidad siempre daban 0.
+    private long contarInscritosActivos(PlanPago plan) {
+        boolean esMensualidad = plan.getTipoPlan() != null
+                && plan.getTipoPlan().getCategoria() == TipoPlanPago.Categoria.mensualidad;
+        return esMensualidad
+                ? inscripcionRepository.countByPlanMensualidadIdAndEstado(plan.getId(), Inscripcion.EstadoInscripcion.Activa)
+                : inscripcionRepository.countByPlanPagoIdAndEstado(plan.getId(), Inscripcion.EstadoInscripcion.Activa);
+    }
+
     private PlanPagoDTO toDTO(PlanPago plan) {
         PlanPagoDTO dto = new PlanPagoDTO();
         dto.setId(plan.getId());
@@ -106,8 +117,7 @@ public class PlanPagoService {
         dto.setActivo(plan.getActivo());
         dto.setFechaVigenciaInicio(plan.getFechaVigenciaInicio());
         dto.setFechaVigenciaFin(plan.getFechaVigenciaFin());
-        dto.setDeportistasInscritos(
-                inscripcionRepository.countByPlanPagoIdAndEstado(plan.getId(), Inscripcion.EstadoInscripcion.Activa));
+        dto.setDeportistasInscritos(contarInscritosActivos(plan));
         return dto;
     }
 }

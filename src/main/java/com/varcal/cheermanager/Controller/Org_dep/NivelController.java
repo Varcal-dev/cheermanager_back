@@ -44,7 +44,6 @@ public class NivelController {
     @GetMapping("/detallado")
     @RequiresPermission("ver_nivel")
     public List<NivelDetalleDTO> obtenerNivelesDetallado() {
-        System.out.println("ENTRÓ AL CONTROLLER");
         return nivelService.obtenerNivelesDetallado();
     }
 
