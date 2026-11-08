@@ -1,4 +1,5 @@
 HELP.md
+node_modules
 target/
 uploads/
 application-local.properties
