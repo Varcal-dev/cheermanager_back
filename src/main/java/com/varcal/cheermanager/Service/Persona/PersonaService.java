@@ -273,9 +273,12 @@ public class PersonaService {
         deportista.setEstado(estado);
         deportista.setAltura(deportistaDTO.getAltura());
         deportista.setPeso(deportistaDTO.getPeso());
-        referencias.exigirNivel(deportistaDTO.getNivelActualId());
+        // El nivel del club es opcional al registrar: se define despues de evaluar (0/null = sin nivel).
+        Integer nivelInicial = deportistaDTO.getNivelActualId() == null || deportistaDTO.getNivelActualId() <= 0
+                ? null : deportistaDTO.getNivelActualId();
+        referencias.exigirNivel(nivelInicial);
         referencias.exigirConvenio(deportistaDTO.getConvenioId());
-        deportista.setNivelActualId(deportistaDTO.getNivelActualId());
+        deportista.setNivelActualId(nivelInicial);
         deportista.setFechaRegistro(LocalDate.now());
         deportista.setContactoEmergencia(deportistaDTO.getContactoEmergencia());
         deportista.setConvenioId(deportistaDTO.getConvenioId());
@@ -364,7 +367,8 @@ public class PersonaService {
             // deportista ANTES de tocar el campo (nivelAnteriorId), y solo se deja
             // constancia en el historial si de verdad hubo un cambio.
             Integer nivelAnteriorId = deportista.getNivelActualId();
-            Integer nivelNuevoId = deportistaDTO.getNivelActualId();
+            Integer nivelNuevoId = deportistaDTO.getNivelActualId() == null || deportistaDTO.getNivelActualId() <= 0
+                    ? null : deportistaDTO.getNivelActualId();
             boolean huboCambioDeNivel = nivelNuevoId != null && !nivelNuevoId.equals(nivelAnteriorId);
 
             referencias.exigirNivel(nivelNuevoId);
