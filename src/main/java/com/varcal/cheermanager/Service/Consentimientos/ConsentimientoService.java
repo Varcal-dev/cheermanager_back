@@ -9,7 +9,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.varcal.cheermanager.Models.Clubes.Club;
 import com.varcal.cheermanager.Models.Consentimientos.Consentimiento;
+import com.varcal.cheermanager.repository.Clubes.ClubRepository;
+import com.varcal.cheermanager.tenant.TenantContext;
 import com.varcal.cheermanager.Models.Consentimientos.Consentimiento.Tipo;
 import com.varcal.cheermanager.Models.Personas.Acudiente;
 import com.varcal.cheermanager.Models.Personas.Persona;
@@ -50,15 +53,18 @@ public class ConsentimientoService {
     private final PersonaRepository personaRepository;
     private final AcudienteRepository acudienteRepository;
     private final DeportistaAcudienteRepository vinculoRepository;
+    private final ClubRepository clubRepository;
     private final boolean exigirSalud;
 
     public ConsentimientoService(ConsentimientoRepository repo, PersonaRepository personaRepository,
             AcudienteRepository acudienteRepository, DeportistaAcudienteRepository vinculoRepository,
+            ClubRepository clubRepository,
             @Value("${app.consentimientos.exigir-salud:false}") boolean exigirSalud) {
         this.repo = repo;
         this.personaRepository = personaRepository;
         this.acudienteRepository = acudienteRepository;
         this.vinculoRepository = vinculoRepository;
+        this.clubRepository = clubRepository;
         this.exigirSalud = exigirSalud;
     }
 
@@ -141,8 +147,41 @@ public class ConsentimientoService {
      * registro si no hay autorizacion vigente. Por defecto false para no frenar a un club que aun
      * esta cargando sus autorizaciones: activalo cuando el reporte de pendientes este en cero.
      */
+    public record Exigencia(boolean activa, int pendientes) {
+    }
+
+    /** Activa si el club la prendio (L5) o si el despliegue la fuerza con app.consentimientos.exigir-salud. */
+    boolean exigenciaActiva() {
+        if (exigirSalud) {
+            return true;
+        }
+        return clubRepository.findById(TenantContext.require())
+                .map(c -> Boolean.TRUE.equals(c.getExigirConsentimientoSalud())).orElse(false);
+    }
+
+    public Exigencia exigencia() {
+        return new Exigencia(exigenciaActiva(), pendientes(Tipo.DATOS_SALUD).size());
+    }
+
+    /** Activar solo si no quedan deportistas sin consentimiento de salud; desactivar siempre se puede. */
+    @Transactional
+    public Exigencia configurarExigencia(boolean activar) {
+        Club club = clubRepository.findById(TenantContext.require())
+                .orElseThrow(() -> new IllegalArgumentException("Club no encontrado"));
+        if (activar) {
+            int faltan = pendientes(Tipo.DATOS_SALUD).size();
+            if (faltan > 0) {
+                throw new IllegalArgumentException("No se puede activar: " + faltan
+                        + " deportista(s) aun no tienen consentimiento de salud vigente.");
+            }
+        }
+        club.setExigirConsentimientoSalud(activar);
+        clubRepository.save(club);
+        return new Exigencia(exigenciaActiva(), 0);
+    }
+
     public void exigirConsentimientoSalud(Integer personaId) {
-        if (exigirSalud && !tieneVigente(personaId, Tipo.DATOS_SALUD)) {
+        if (exigenciaActiva() && !tieneVigente(personaId, Tipo.DATOS_SALUD)) {
             throw new RuntimeException(
                     "No hay un consentimiento vigente para tratar datos de salud de esta persona. Registralo primero.");
         }

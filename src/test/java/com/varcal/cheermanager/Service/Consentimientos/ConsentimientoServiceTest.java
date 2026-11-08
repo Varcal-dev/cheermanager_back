@@ -20,7 +20,10 @@ import com.varcal.cheermanager.Models.Consentimientos.Consentimiento.Tipo;
 import com.varcal.cheermanager.Models.Personas.Acudiente;
 import com.varcal.cheermanager.Models.Personas.Persona;
 import com.varcal.cheermanager.Service.Consentimientos.ConsentimientoService.OtorgarRequest;
+import com.varcal.cheermanager.Models.Clubes.Club;
+import com.varcal.cheermanager.repository.Clubes.ClubRepository;
 import com.varcal.cheermanager.repository.Consentimientos.ConsentimientoRepository;
+import com.varcal.cheermanager.tenant.TenantContext;
 import com.varcal.cheermanager.repository.Personas.AcudienteRepository;
 import com.varcal.cheermanager.repository.Personas.DeportistaAcudienteRepository;
 import com.varcal.cheermanager.repository.Personas.PersonaRepository;
@@ -31,11 +34,12 @@ class ConsentimientoServiceTest {
     PersonaRepository personas = mock(PersonaRepository.class);
     AcudienteRepository acudientes = mock(AcudienteRepository.class);
     DeportistaAcudienteRepository vinculos = mock(DeportistaAcudienteRepository.class);
+    ClubRepository clubes = mock(ClubRepository.class);
     ConsentimientoService service;
 
     @BeforeEach
     void setUp() {
-        service = new ConsentimientoService(repo, personas, acudientes, vinculos, false);
+        service = new ConsentimientoService(repo, personas, acudientes, vinculos, clubes, false);
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken("u", null, List.of());
         auth.setDetails(Map.of("userId", 7));
         SecurityContextHolder.getContext().setAuthentication(auth);
@@ -132,7 +136,7 @@ class ConsentimientoServiceTest {
         when(repo.existsByTitularIdAndTipoAndFechaRevocadoIsNull(10, Tipo.DATOS_SALUD)).thenReturn(false);
         assertDoesNotThrow(() -> service.exigirConsentimientoSalud(10)); // desactivada
 
-        ConsentimientoService estricto = new ConsentimientoService(repo, personas, acudientes, vinculos, true);
+        ConsentimientoService estricto = new ConsentimientoService(repo, personas, acudientes, vinculos, clubes, true);
         assertThrows(RuntimeException.class, () -> estricto.exigirConsentimientoSalud(10));
         when(repo.existsByTitularIdAndTipoAndFechaRevocadoIsNull(10, Tipo.DATOS_SALUD)).thenReturn(true);
         assertDoesNotThrow(() -> estricto.exigirConsentimientoSalud(10));
@@ -142,5 +146,50 @@ class ConsentimientoServiceTest {
     void mayoriaDeEdadSeCalculaPorFecha() {
         assertTrue(ConsentimientoService.esMenor(LocalDate.now().minusYears(17).minusDays(364)));
         assertFalse(ConsentimientoService.esMenor(LocalDate.now().minusYears(18)));
+    }
+
+    @Test
+    void elClubActivaLaExigenciaSoloSinPendientes() {
+        TenantContext.set(2);
+        try {
+            Club club = new Club();
+            club.setId(2);
+            when(clubes.findById(2)).thenReturn(Optional.of(club));
+            when(repo.deportistasSinConsentimiento(Tipo.DATOS_SALUD)).thenReturn(List.of());
+            when(repo.existsByTitularIdAndTipoAndFechaRevocadoIsNull(10, Tipo.DATOS_SALUD)).thenReturn(false);
+
+            assertFalse(service.exigencia().activa());
+            assertFalse(service.configurarExigencia(false).activa());
+
+            assertTrue(service.configurarExigencia(true).activa());
+            assertTrue(club.getExigirConsentimientoSalud());
+            assertThrows(RuntimeException.class, () -> service.exigirConsentimientoSalud(10));
+
+            assertFalse(service.configurarExigencia(false).activa());
+            service.exigirConsentimientoSalud(10);
+        } finally {
+            TenantContext.clear();
+        }
+    }
+
+    @Test
+    void noSePuedeActivarConPendientes() {
+        TenantContext.set(2);
+        try {
+            Club club = new Club();
+            when(clubes.findById(2)).thenReturn(Optional.of(club));
+            com.varcal.cheermanager.Models.Personas.Deportista d = new com.varcal.cheermanager.Models.Personas.Deportista();
+            Persona p = new Persona();
+            p.setId(10);
+            p.setNombre("A");
+            p.setApellidos("B");
+            d.setId(1);
+            d.setPersona(p);
+            when(repo.deportistasSinConsentimiento(Tipo.DATOS_SALUD)).thenReturn(List.of(d));
+            assertThrows(IllegalArgumentException.class, () -> service.configurarExigencia(true));
+            assertFalse(club.getExigirConsentimientoSalud());
+        } finally {
+            TenantContext.clear();
+        }
     }
 }

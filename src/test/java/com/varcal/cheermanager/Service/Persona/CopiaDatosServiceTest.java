@@ -33,7 +33,7 @@ import com.varcal.cheermanager.testsupport.Fakes.Repo;
 class CopiaDatosServiceTest {
 
     static class ConsentFalso extends ConsentimientoService {
-        ConsentFalso() { super(null, null, null, null, false); }
+        ConsentFalso() { super(null, null, null, null, null, false); }
 
         @Override
         public List<Resumen> listarDePersona(Integer personaId) {

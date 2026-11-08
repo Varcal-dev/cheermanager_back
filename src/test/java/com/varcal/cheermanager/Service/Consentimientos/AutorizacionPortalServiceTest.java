@@ -30,7 +30,9 @@ class AutorizacionPortalServiceTest {
         final Set<String> vigentes = new HashSet<>();
         final List<OtorgarRequest> otorgados = new ArrayList<>();
 
-        ConsentFalso() { super(null, null, null, null, false); }
+        ConsentFalso() {
+            super(null, null, null, null, null, false);
+        }
 
         @Override
         public boolean tieneVigente(Integer personaId, Tipo tipo) { return vigentes.contains(personaId + ":" + tipo); }

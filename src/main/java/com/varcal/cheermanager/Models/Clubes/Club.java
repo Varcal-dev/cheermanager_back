@@ -63,4 +63,8 @@ public class Club {
 
     @Column(name = "notas_suscripcion", length = 500)
     private String notasSuscripcion;
+
+    /** L5: con true, guardar datos de salud exige consentimiento vigente. Solo se activa sin pendientes. */
+    @Column(name = "exigir_consentimiento_salud", nullable = false)
+    private Boolean exigirConsentimientoSalud = false;
 }

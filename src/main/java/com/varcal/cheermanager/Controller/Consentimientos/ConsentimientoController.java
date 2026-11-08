@@ -47,4 +47,21 @@ public class ConsentimientoController {
     public List<Pendiente> pendientes(@RequestParam(defaultValue = "DATOS_SALUD") Tipo tipo) {
         return service.pendientes(tipo);
     }
+
+    @GetMapping("/exigencia-salud")
+    @RequiresPermission("ver_consentimientos")
+    public ConsentimientoService.Exigencia exigencia() {
+        return service.exigencia();
+    }
+
+    /** Body: {"activa": true|false}. Activar se rechaza (400) mientras haya pendientes. */
+    @PutMapping("/exigencia-salud")
+    @RequiresPermission("gestionar_consentimientos")
+    public ResponseEntity<?> configurarExigencia(@RequestBody Map<String, Boolean> body) {
+        try {
+            return ResponseEntity.ok(service.configurarExigencia(Boolean.TRUE.equals(body.get("activa"))));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
 }
