@@ -71,6 +71,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/login", "/api/logout", "/api/refresh-token",
                                 "/api/forgot-password", "/api/reset-password")
                         .permitAll()
+                        // Pre-registro de la landing (sin sesion). La defensa esta en PreRegistroService.
+                        .requestMatchers(HttpMethod.POST, "/api/public/preregistro")
+                        .permitAll()
                         .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
