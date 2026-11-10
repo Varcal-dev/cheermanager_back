@@ -20,6 +20,7 @@ import com.varcal.cheermanager.Service.Clubes.SuscripcionService;
 import com.varcal.cheermanager.Service.Legal.LegalService;
 import com.varcal.cheermanager.repository.Auth.UserRepository;
 import com.varcal.cheermanager.repository.Clubes.ClubRepository;
+import com.varcal.cheermanager.Service.Clubes.FuncionesService;
 import com.varcal.cheermanager.tenant.TenantContext;
 
 import io.jsonwebtoken.Claims;
@@ -51,15 +52,21 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     static final String MENSAJE_SOLO_LECTURA = "La suscripción de tu club está vencida: puedes consultar la información, "
             + "pero no crear ni modificar datos. Contacta a CheerManager para renovarla.";
 
+    static final String MENSAJE_FUNCION_NO_INCLUIDA = "Esta función no está incluida en el plan de tu club. "
+            + "Contacta a CheerManager para ampliar tu plan.";
+
     private final JwtUtil jwtUtil;
     private final TokenBlacklistService tokenBlacklistService;
     private final UserRepository userRepository;
     private final ClubRepository clubRepository;
     private final LegalService legalService;
+    private final FuncionesService funcionesService;
 
     public JwtTokenFilter(JwtUtil jwtUtil, TokenBlacklistService tokenBlacklistService,
-            UserRepository userRepository, ClubRepository clubRepository, LegalService legalService) {
+            UserRepository userRepository, ClubRepository clubRepository, LegalService legalService,
+            FuncionesService funcionesService) {
         this.legalService = legalService;
+        this.funcionesService = funcionesService;
         this.jwtUtil = jwtUtil;
         this.tokenBlacklistService = tokenBlacklistService;
         this.userRepository = userRepository;
@@ -77,6 +84,18 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 response.getWriter().write("{\"success\":false,\"status\":402,\"message\":\""
                         + MENSAJE_SOLO_LECTURA + "\"}");
                 return;
+            }
+            if (TenantContext.isSet() && !esRutaExenta(request)) {
+                // S1b: la funcion pertenece a un plan que el club no tiene (V39). Se frena aqui, sin importar el rol.
+                var regla = FuncionesService.reglaDe(request.getRequestURI(), request.getMethod());
+                if (regla.isPresent() && !funcionesService.habilitadas(TenantContext.get()).incluye(regla.get().funcion())) {
+                    response.setStatus(403);
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.getWriter().write("{\"success\":false,\"status\":403,\"code\":\"FUNCION_NO_INCLUIDA\","
+                            + "\"funcion\":\"" + regla.get().funcion() + "\",\"message\":\""
+                            + MENSAJE_FUNCION_NO_INCLUIDA + "\"}");
+                    return;
+                }
             }
             if (esEscritura(request) && !esRutaExenta(request) && legalPendiente()) {
                 response.setStatus(428);

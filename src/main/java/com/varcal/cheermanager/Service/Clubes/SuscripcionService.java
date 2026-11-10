@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,7 +47,7 @@ public class SuscripcionService {
             Integer planId, String planCodigo, String planNombre, BigDecimal precioMensual,
             String estadoSuscripcion, String vigencia, LocalDate vigenteHasta, Long diasRestantes, Integer diasGracia,
             Integer limiteDeportistas, Integer limiteDelPlan, Integer limiteEfectivo, long deportistasActivos,
-            String notas) {
+            String notas, int cupoExtraPaquetes) {
     }
 
     /** Campos null = sin cambio. sinVencimiento=true borra la fecha; quitarLimite=true vuelve al limite del plan. */
@@ -62,6 +63,8 @@ public class SuscripcionService {
     private final PlanSaasRepository planRepository;
     private final SuscripcionPagoRepository pagoRepository;
     private final TenantLookupRepository lookup;
+    /** Paquetes de deportistas vigentes (V40). Opcional: sin el, el cupo es solo el del plan o el limite propio. */
+    private PaquetesService paquetes;
 
     public SuscripcionService(ClubRepository clubRepository, PlanSaasRepository planRepository,
             SuscripcionPagoRepository pagoRepository, TenantLookupRepository lookup) {
@@ -69,6 +72,21 @@ public class SuscripcionService {
         this.planRepository = planRepository;
         this.pagoRepository = pagoRepository;
         this.lookup = lookup;
+    }
+
+    @Autowired(required = false)
+    void setPaquetes(PaquetesService paquetes) {
+        this.paquetes = paquetes;
+    }
+
+    /** Cupo que suman los paquetes vigentes del club (0 si no tiene). */
+    private int extraDe(Club c) {
+        return paquetes == null || c.getPlanId() == null ? 0 : paquetes.cupoExtra(c.getId(), c.getPlanId());
+    }
+
+    /** Limite base (el del club, o el del plan) mas los paquetes vigentes; null = ilimitado. */
+    private Integer limiteConPaquetes(Integer base, Club c) {
+        return base == null ? null : base + extraDe(c);
     }
 
     public static LocalDate hoy() {
@@ -113,13 +131,15 @@ public class SuscripcionService {
         VigenciaSuscripcion vigencia = VigenciaSuscripcion.de(c, hoy);
         Long dias = c.getVigenteHasta() == null ? null : ChronoUnit.DAYS.between(hoy, c.getVigenteHasta());
         Integer delPlan = plan == null ? null : plan.getMaxDeportistas();
-        Integer efectivo = c.getLimiteDeportistas() != null ? c.getLimiteDeportistas() : delPlan;
+        Integer base = c.getLimiteDeportistas() != null ? c.getLimiteDeportistas() : delPlan;
+        int extra = base == null ? 0 : extraDe(c);
+        Integer efectivo = limiteConPaquetes(base, c);
         return new Resumen(c.getId(), c.getNombre(), c.getSlug(), c.getActivo(),
                 plan == null ? null : plan.getId(), plan == null ? null : plan.getCodigo(),
                 plan == null ? null : plan.getNombre(), plan == null ? null : plan.getPrecioMensual(),
                 c.getEstadoSuscripcion() == null ? null : c.getEstadoSuscripcion().name(), vigencia.name(),
                 c.getVigenteHasta(), dias, c.getDiasGracia(), c.getLimiteDeportistas(), delPlan, efectivo,
-                lookup.contarDeportistasActivos(c.getId()), conNotas ? c.getNotasSuscripcion() : null);
+                lookup.contarDeportistasActivos(c.getId()), conNotas ? c.getNotasSuscripcion() : null, extra);
     }
 
     // ------------------------------------------------------------------ limites
@@ -135,6 +155,7 @@ public class SuscripcionService {
         if (limite == null) {
             return null;
         }
+        limite = limiteConPaquetes(limite, c);
         return (int) Math.max(0, limite - lookup.contarDeportistasActivos(clubId));
     }
 
@@ -152,10 +173,11 @@ public class SuscripcionService {
         if (limite == null) {
             return;
         }
+        limite = limiteConPaquetes(limite, c);
         long activos = lookup.contarDeportistasActivos(clubId);
         if (activos >= limite) {
             throw new RuntimeException("Tu plan permite hasta " + limite + " deportistas activos y el club ya tiene "
-                    + activos + ". Retira a algún deportista o pide ampliar el plan.");
+                    + activos + ". Retira a algún deportista, agrega un paquete de deportistas o pide ampliar el plan.");
         }
     }
 
@@ -194,12 +216,35 @@ public class SuscripcionService {
             }
             c.setLimiteDeportistas(req.limiteDeportistas());
         }
+        if (req.planId() != null || req.limiteDeportistas() != null || Boolean.TRUE.equals(req.quitarLimite())) {
+            validarCabenActivos(c);
+        }
         if (req.notas() != null) {
             String n = req.notas().trim();
             c.setNotasSuscripcion(n.isEmpty() ? null : n.substring(0, Math.min(n.length(), 500)));
         }
         clubRepository.save(c);
         return resumen(clubId);
+    }
+
+    /**
+     * Baja de plan (L10): no se puede dejar al club con un limite menor a sus deportistas activos actuales.
+     * Se valida con el limite EFECTIVO resultante (el propio del club si lo tiene; si no, el del plan).
+     */
+    private void validarCabenActivos(Club c) {
+        Integer limite = c.getLimiteDeportistas();
+        if (limite == null && c.getPlanId() != null) {
+            limite = planRepository.findById(c.getPlanId()).map(PlanSaas::getMaxDeportistas).orElse(null);
+        }
+        if (limite == null) {
+            return;
+        }
+        limite = limiteConPaquetes(limite, c);
+        long activos = lookup.contarDeportistasActivos(c.getId());
+        if (activos > limite) {
+            throw new RuntimeException("No se puede aplicar: el club tiene " + activos + " deportistas activos y el "
+                    + "límite resultante es " + limite + ". Retira deportistas o elige un plan con más cupo.");
+        }
     }
 
     /**
