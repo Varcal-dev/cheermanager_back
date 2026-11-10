@@ -21,6 +21,7 @@ import com.varcal.cheermanager.Service.Legal.LegalService;
 import com.varcal.cheermanager.repository.Auth.UserRepository;
 import com.varcal.cheermanager.repository.Clubes.ClubRepository;
 import com.varcal.cheermanager.Service.Clubes.FuncionesService;
+import com.varcal.cheermanager.Service.Clubes.SuscripcionService;
 import com.varcal.cheermanager.tenant.TenantContext;
 
 import io.jsonwebtoken.Claims;
@@ -52,6 +53,8 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     static final String MENSAJE_SOLO_LECTURA = "La suscripción de tu club está vencida: puedes consultar la información, "
             + "pero no crear ni modificar datos. Contacta a CheerManager para renovarla.";
 
+    static final String MENSAJE_FUNCION_SOLO_LECTURA = "Esta función ya no está en el plan de tu club: puedes consultarla y "
+            + "descargar tus datos, pero no crear ni editar. Disponible en solo lectura hasta el ";
     static final String MENSAJE_FUNCION_NO_INCLUIDA = "Esta función no está incluida en el plan de tu club. "
             + "Contacta a CheerManager para ampliar tu plan.";
 
@@ -88,13 +91,23 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             if (TenantContext.isSet() && !esRutaExenta(request)) {
                 // S1b: la funcion pertenece a un plan que el club no tiene (V39). Se frena aqui, sin importar el rol.
                 var regla = FuncionesService.reglaDe(request.getRequestURI(), request.getMethod());
-                if (regla.isPresent() && !funcionesService.habilitadas(TenantContext.get()).incluye(regla.get().funcion())) {
-                    response.setStatus(403);
-                    response.setContentType("application/json;charset=UTF-8");
-                    response.getWriter().write("{\"success\":false,\"status\":403,\"code\":\"FUNCION_NO_INCLUIDA\","
-                            + "\"funcion\":\"" + regla.get().funcion() + "\",\"message\":\""
-                            + MENSAJE_FUNCION_NO_INCLUIDA + "\"}");
-                    return;
+                if (regla.isPresent()) {
+                    var h = funcionesService.habilitadas(TenantContext.get());
+                    var estado = h.estado(regla.get().funcion(), SuscripcionService.hoy());
+                    boolean frenar = estado == FuncionesService.Estado.BLOQUEADA
+                            || (estado == FuncionesService.Estado.SOLO_LECTURA && esEscritura(request));
+                    if (frenar) {
+                        boolean soloLectura = estado == FuncionesService.Estado.SOLO_LECTURA;
+                        response.setStatus(403);
+                        response.setContentType("application/json;charset=UTF-8");
+                        String mensaje = soloLectura
+                                ? MENSAJE_FUNCION_SOLO_LECTURA + h.transiciones().get(regla.get().funcion()).soloLecturaHasta() + "."
+                                : MENSAJE_FUNCION_NO_INCLUIDA;
+                        response.getWriter().write("{\"success\":false,\"status\":403,\"code\":\""
+                                + (soloLectura ? "FUNCION_SOLO_LECTURA" : "FUNCION_NO_INCLUIDA") + "\",\"funcion\":\""
+                                + regla.get().funcion() + "\",\"message\":\"" + mensaje + "\"}");
+                        return;
+                    }
                 }
             }
             if (esEscritura(request) && !esRutaExenta(request) && legalPendiente()) {

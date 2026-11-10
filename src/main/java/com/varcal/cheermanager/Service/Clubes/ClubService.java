@@ -113,9 +113,11 @@ public class ClubService {
         Club club = new Club();
         club.setNombre(req.nombre().trim());
         club.setSlug(slug);
-        // Suscripcion: todo club nuevo empieza en prueba (Club.DIAS_PRUEBA dias) con el plan Start.
-        // El superadmin puede cambiar plan, vigencia y limites desde la pantalla de Clubes.
-        club.setPlanId(planSaasRepository.findByCodigo("start").map(PlanSaas::getId).orElse(null));
+        // Suscripcion: todo club nuevo empieza en prueba (Club.DIAS_PRUEBA dias) con el plan "prueba": todas las funciones
+        // y el cupo de Start (V41). Si ese plan aun no existe, cae a Start. El superadmin puede cambiar plan, vigencia y
+        // limites desde la pantalla de Clubes.
+        club.setPlanId(planSaasRepository.findByCodigo("prueba").or(() -> planSaasRepository.findByCodigo("start"))
+                .map(PlanSaas::getId).orElse(null));
         club = clubRepository.save(club);
 
         final Integer clubId = club.getId();

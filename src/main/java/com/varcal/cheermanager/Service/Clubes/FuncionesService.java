@@ -1,5 +1,7 @@
 package com.varcal.cheermanager.Service.Clubes;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -29,10 +31,30 @@ public class FuncionesService {
     public record Regla(String prefijo, String funcion, boolean soloEscritura) {
     }
 
-    public record Habilitadas(boolean todas, Set<String> codigos) {
+    /** Una funcion que el club perdio al bajar de plan: solo lectura hasta esa fecha; despues, bloqueada. */
+    public record Transicion(LocalDate soloLecturaHasta) {
+    }
+
+    public enum Estado {
+        PLENA, SOLO_LECTURA, BLOQUEADA
+    }
+
+    public record Habilitadas(boolean todas, Set<String> codigos, Map<String, Transicion> transiciones) {
+        public Habilitadas(boolean todas, Set<String> codigos) {
+            this(todas, codigos, Map.of());
+        }
+
         public boolean incluye(String funcion) {
             return todas || codigos.contains(funcion);
         }
+
+        public Estado estado(String funcion, LocalDate hoy) {
+            return estadoDe(incluye(funcion), transiciones.get(funcion), hoy);
+        }
+    }
+
+    /** Fila para la pantalla "Plan y mis datos": una funcion en ventana o ya bloqueada tras bajar de plan. */
+    public record Perdida(String funcion, String nombre, String estado, LocalDate soloLecturaHasta) {
     }
 
     public static final List<Regla> REGLAS = List.of(
@@ -80,6 +102,21 @@ public class FuncionesService {
             }
         }
         return Optional.empty();
+    }
+
+    /** Incluida -> plena; perdida dentro de su ventana -> solo lectura; perdida y fuera de la ventana -> bloqueada. */
+    public static Estado estadoDe(boolean incluida, Transicion t, LocalDate hoy) {
+        if (incluida) {
+            return Estado.PLENA;
+        }
+        return t != null && !hoy.isAfter(t.soloLecturaHasta()) ? Estado.SOLO_LECTURA : Estado.BLOQUEADA;
+    }
+
+    /** Funciones que estaban en el plan anterior y no estan en el nuevo. */
+    public static Set<String> perdidas(Set<String> antes, Set<String> despues) {
+        Set<String> r = new HashSet<>(antes);
+        r.removeAll(despues);
+        return r;
     }
 
     /** Funciones del plan, mas las excepciones del club (true agrega, false quita). */
@@ -132,6 +169,64 @@ public class FuncionesService {
             boolean activa = h instanceof Boolean b ? b : h instanceof Number n && n.intValue() != 0;
             excepciones.put((String) fila.get("caracteristica"), activa);
         }
-        return new Habilitadas(false, resolver(delPlan, excepciones));
+        Map<String, Transicion> transiciones = new HashMap<>();
+        for (Map<String, Object> fila : jdbc.queryForList(
+                "SELECT caracteristica, solo_lectura_hasta FROM clubes_caracteristicas_transicion WHERE club_id = ?",
+                clubId)) {
+            transiciones.put((String) fila.get("caracteristica"),
+                    new Transicion(((java.sql.Date) fila.get("solo_lectura_hasta")).toLocalDate()));
+        }
+        return new Habilitadas(false, resolver(delPlan, excepciones), transiciones);
+    }
+
+    /**
+     * Al cambiar de plan: lo que el club pierde entra en ventana de solo lectura (dias del plan de origen) y lo que
+     * gana deja de estar en ventana. No borra datos. Si el club no tenia plan o el plan no cambio, no hace nada.
+     */
+    public void alCambiarPlan(int clubId, Integer planAnteriorId, Integer planNuevoId) {
+        if (planAnteriorId == null || planNuevoId == null || planAnteriorId.equals(planNuevoId)) {
+            return;
+        }
+        Set<String> antes = funcionesDelPlan(planAnteriorId);
+        Set<String> despues = funcionesDelPlan(planNuevoId);
+        Integer dias = jdbc.queryForObject("SELECT dias_solo_lectura_al_bajar FROM planes_saas WHERE id = ?",
+                Integer.class, planAnteriorId);
+        java.sql.Date hasta = java.sql.Date.valueOf(SuscripcionService.hoy().plusDays(dias == null ? 30 : dias));
+        for (String f : perdidas(antes, despues)) {
+            jdbc.update("INSERT INTO clubes_caracteristicas_transicion (club_id, caracteristica, plan_origen_id, "
+                    + "solo_lectura_hasta) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE solo_lectura_hasta = "
+                    + "VALUES(solo_lectura_hasta), plan_origen_id = VALUES(plan_origen_id)",
+                    clubId, f, planAnteriorId, hasta);
+        }
+        // una funcion que el plan nuevo trae nunca debe quedar en ventana
+        for (String f : despues) {
+            jdbc.update("DELETE FROM clubes_caracteristicas_transicion WHERE club_id = ? AND caracteristica = ?", clubId, f);
+        }
+        olvidar(clubId);
+    }
+
+    /** Para la pantalla del club: funciones perdidas con su estado de hoy (las que el plan actual ya trae no salen). */
+    public List<Perdida> perdidasDelClub(int clubId) {
+        Habilitadas h = habilitadas(clubId);
+        LocalDate hoy = SuscripcionService.hoy();
+        List<Perdida> r = new ArrayList<>();
+        for (Map<String, Object> fila : jdbc.queryForList(
+                "SELECT t.caracteristica, c.nombre, t.solo_lectura_hasta FROM clubes_caracteristicas_transicion t "
+                        + "JOIN caracteristicas_saas c ON c.codigo = t.caracteristica WHERE t.club_id = ? ORDER BY c.orden",
+                clubId)) {
+            String f = (String) fila.get("caracteristica");
+            if (h.incluye(f)) {
+                continue;
+            }
+            LocalDate hasta = ((java.sql.Date) fila.get("solo_lectura_hasta")).toLocalDate();
+            r.add(new Perdida(f, (String) fila.get("nombre"), h.estado(f, hoy).name(), hasta));
+        }
+        return r;
+    }
+
+    private Set<String> funcionesDelPlan(int planId) {
+        return new HashSet<>(jdbc.queryForList(
+                "SELECT caracteristica FROM planes_caracteristicas WHERE plan_id = ? AND habilitada = 1",
+                String.class, planId));
     }
 }

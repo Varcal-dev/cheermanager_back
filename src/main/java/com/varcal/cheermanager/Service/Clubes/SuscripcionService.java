@@ -65,6 +65,8 @@ public class SuscripcionService {
     private final TenantLookupRepository lookup;
     /** Paquetes de deportistas vigentes (V40). Opcional: sin el, el cupo es solo el del plan o el limite propio. */
     private PaquetesService paquetes;
+    /** Ventanas de solo lectura al bajar de plan (V41). Opcional, igual que los paquetes. */
+    private FuncionesService funciones;
 
     public SuscripcionService(ClubRepository clubRepository, PlanSaasRepository planRepository,
             SuscripcionPagoRepository pagoRepository, TenantLookupRepository lookup) {
@@ -77,6 +79,11 @@ public class SuscripcionService {
     @Autowired(required = false)
     void setPaquetes(PaquetesService paquetes) {
         this.paquetes = paquetes;
+    }
+
+    @Autowired(required = false)
+    void setFunciones(FuncionesService funciones) {
+        this.funciones = funciones;
     }
 
     /** Cupo que suman los paquetes vigentes del club (0 si no tiene). */
@@ -186,6 +193,7 @@ public class SuscripcionService {
     @Transactional
     public Resumen actualizar(Integer clubId, ActualizarRequest req) {
         Club c = editable(clubId);
+        Integer planAnterior = c.getPlanId();
         if (req.planId() != null) {
             planRepository.findById(req.planId()).orElseThrow(() -> new RuntimeException("El plan no existe"));
             c.setPlanId(req.planId());
@@ -224,6 +232,10 @@ public class SuscripcionService {
             c.setNotasSuscripcion(n.isEmpty() ? null : n.substring(0, Math.min(n.length(), 500)));
         }
         clubRepository.save(c);
+        if (funciones != null && req.planId() != null) {
+            // lo que el plan nuevo no trae entra en 30 dias de solo lectura (V41); los datos no se borran
+            funciones.alCambiarPlan(clubId, planAnterior, req.planId());
+        }
         return resumen(clubId);
     }
 
