@@ -72,7 +72,7 @@ public class SecurityConfig {
                                 "/api/forgot-password", "/api/reset-password")
                         .permitAll()
                         // Pre-registro de la landing (sin sesion). La defensa esta en PreRegistroService.
-                        .requestMatchers(HttpMethod.POST, "/api/public/preregistro")
+                        .requestMatchers(HttpMethod.POST, "/api/public/preregistro", "/api/public/clubes/*/interesados")
                         .permitAll()
                         .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
                         .anyRequest().authenticated())
