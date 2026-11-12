@@ -36,6 +36,23 @@ public class AsistenciaController {
     @Autowired
     private DeportistaPerteneceGrupoRepository deportistaPerteneceGrupoRepository;
 
+    @Autowired
+    private com.varcal.cheermanager.Service.Horario_Asistencia.AsistenciaEscaneoService escaneoService;
+
+    public record EscaneoRequest(String codigo, Integer horarioId, java.time.LocalDate fecha) {
+    }
+
+    /** Marca presente a quien escanea su carnet. 400 si el codigo es invalido o de otro club. */
+    @PostMapping("/escaneo")
+    @RequiresPermission("registrar_asistencia")
+    public ResponseEntity<?> escanear(@RequestBody EscaneoRequest req) {
+        try {
+            return ResponseEntity.ok(escaneoService.escanear(req.codigo(), req.horarioId(), req.fecha()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("message", e.getMessage()));
+        }
+    }
+
     @PostMapping
     @RequiresPermission("registrar_asistencia")
     public ResponseEntity<AsistenciaResponseDTO> registrar(@RequestBody AsistenciaDTO dto) {

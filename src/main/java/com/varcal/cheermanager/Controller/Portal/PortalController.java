@@ -72,6 +72,28 @@ public class PortalController {
         return service.rutinas(id);
     }
 
+    @GetMapping("/deportistas/{id}/carnet")
+    @RequiresPermission("acceder_portal")
+    public com.varcal.cheermanager.Service.Carnet.CarnetService.Carnet carnet(@PathVariable Integer id) {
+        return service.carnet(id);
+    }
+
+    @GetMapping("/deportistas/{id}/foto")
+    @RequiresPermission("acceder_portal")
+    public ResponseEntity<?> foto(@PathVariable Integer id) {
+        try {
+            return ResponseEntity.ok().contentType(org.springframework.http.MediaType.IMAGE_JPEG).body(service.foto(id));
+        } catch (Exception e) {
+            return ResponseEntity.status(404).body("Sin foto");
+        }
+    }
+
+    @GetMapping("/deportistas/{id}/horarios")
+    @RequiresPermission("acceder_portal")
+    public List<HorarioItem> horarios(@PathVariable Integer id) {
+        return service.horarios(id);
+    }
+
     @GetMapping("/temporadas-abiertas")
     @RequiresPermission("acceder_portal")
     public List<TemporadaItem> temporadasAbiertas() {

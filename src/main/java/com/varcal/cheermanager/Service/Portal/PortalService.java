@@ -41,6 +41,17 @@ import com.varcal.cheermanager.repository.Personas.DeportistaRepository;
 @Transactional(readOnly = true)
 public class PortalService {
 
+    // Inyectados por campo para no tocar el constructor existente.
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.varcal.cheermanager.Service.Carnet.CarnetService carnetService;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.varcal.cheermanager.repository.Horario_Asistencia.HorarioEntrenamientoRepository horarioEntrenamientoRepository;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.varcal.cheermanager.Service.Persona.PersonaService personaService;
+
+
     public record MiPerfil(String tipo, String nombre, List<DeportistaResumen> deportistas) {
     }
 
@@ -51,6 +62,10 @@ public class PortalService {
 
     public record InscripcionResumen(Integer id, String temporada, String estado, LocalDate fechaInscripcion,
             LocalDate fechaVencimiento) {
+    }
+
+    /** Una franja semanal de un grupo del deportista (para pintar su calendario). */
+    public record HorarioItem(Integer grupoId, String grupo, String dia, String horaInicio, String horaFin) {
     }
 
     public record AsistenciaItem(LocalDate fecha, String estado, String dia, String horaInicio, String horaFin) {
@@ -226,6 +241,38 @@ public class PortalService {
             }
         }
         res.sort((a, b) -> b.fecha().compareTo(a.fecha()));
+        return res;
+    }
+
+    // ---------- Carnet, foto y horarios del deportista ----------
+
+    /** Carnet (con el mismo codigo QR firmado que ve el club) de un deportista propio. */
+    public com.varcal.cheermanager.Service.Carnet.CarnetService.Carnet carnet(Integer deportistaId) {
+        return carnetService.carnet(propio(deportistaId).getId());
+    }
+
+    public byte[] foto(Integer deportistaId) throws Exception {
+        return personaService.obtenerFotoDeportista(propio(deportistaId).getId());
+    }
+
+    /** Horarios semanales de los grupos a los que el deportista pertenece HOY, ordenados por dia y hora. */
+    public List<HorarioItem> horarios(Integer deportistaId) {
+        Deportista d = propio(deportistaId);
+        List<HorarioItem> res = new ArrayList<>();
+        for (DeportistaPerteneceGrupo m : grupoRepository.findByDeportistaIdAndFechaFinIsNull(d.getId())) {
+            for (var he : horarioEntrenamientoRepository.findByGrupoEntrenamientoId(m.getGrupo().getId())) {
+                var h = he.getHorario();
+                if (h == null) {
+                    continue;
+                }
+                res.add(new HorarioItem(m.getGrupo().getId(), m.getGrupo().getNombre(),
+                        h.getDia() != null ? h.getDia().getDia() : null,
+                        h.getHoraInicio() != null ? h.getHoraInicio().toString() : null,
+                        h.getHoraFin() != null ? h.getHoraFin().toString() : null));
+            }
+        }
+        res.sort(java.util.Comparator.comparing((HorarioItem x) -> x.dia() == null ? "" : x.dia())
+                .thenComparing(x -> x.horaInicio() == null ? "" : x.horaInicio()));
         return res;
     }
 
