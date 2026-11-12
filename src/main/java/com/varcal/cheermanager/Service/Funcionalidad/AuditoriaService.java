@@ -65,6 +65,15 @@ public class AuditoriaService {
         }
     }
 
+    /**
+     * Registra un hecho que no es un INSERT/UPDATE/DELETE de una entidad (un exporte, un cambio de permisos).
+     * Mismas garantias que registrar(): best-effort, jamas propaga una excepcion.
+     */
+    public void registrarEvento(String tablaAfectada, Auditoria.AccionEnum accion, Object registroId,
+            String valoresAnteriores, String nuevosValores) {
+        registrar(tablaAfectada, accion, registroId, valoresAnteriores, nuevosValores);
+    }
+
     private Integer convertirAEntero(Object valor) {
         if (valor instanceof Integer i) return i;
         if (valor instanceof Number n) return n.intValue();

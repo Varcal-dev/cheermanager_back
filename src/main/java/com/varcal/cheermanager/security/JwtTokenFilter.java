@@ -97,14 +97,14 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                     boolean frenar = estado == FuncionesService.Estado.BLOQUEADA
                             || (estado == FuncionesService.Estado.SOLO_LECTURA && esEscritura(request));
                     if (frenar) {
-                        boolean soloLectura = estado == FuncionesService.Estado.SOLO_LECTURA;
+                        boolean soloLectura1 = estado == FuncionesService.Estado.SOLO_LECTURA;
                         response.setStatus(403);
                         response.setContentType("application/json;charset=UTF-8");
-                        String mensaje = soloLectura
+                        String mensaje = soloLectura1
                                 ? MENSAJE_FUNCION_SOLO_LECTURA + h.transiciones().get(regla.get().funcion()).soloLecturaHasta() + "."
                                 : MENSAJE_FUNCION_NO_INCLUIDA;
                         response.getWriter().write("{\"success\":false,\"status\":403,\"code\":\""
-                                + (soloLectura ? "FUNCION_SOLO_LECTURA" : "FUNCION_NO_INCLUIDA") + "\",\"funcion\":\""
+                                + (soloLectura1 ? "FUNCION_SOLO_LECTURA" : "FUNCION_NO_INCLUIDA") + "\",\"funcion\":\""
                                 + regla.get().funcion() + "\",\"message\":\"" + mensaje + "\"}");
                         return;
                     }

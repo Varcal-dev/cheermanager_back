@@ -30,7 +30,11 @@ public class Auditoria {
 
 
     public enum AccionEnum {
-        INSERT, UPDATE, DELETE
+        INSERT, UPDATE, DELETE,
+        /** Descarga de datos (exportes CSV). No cambia registros: el detalle dice que se exporto y con que filtros. */
+        EXPORTE,
+        /** Cambio de los permisos de un rol (la relacion rol-permisos no aparece en el snapshot de la entidad). */
+        PERMISOS
     }
 
     @Id
