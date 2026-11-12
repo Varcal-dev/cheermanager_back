@@ -30,9 +30,12 @@ public class CarnetService {
     private final DeportistaRepository deportistas;
     private final DeportistaPerteneceGrupoRepository membresias;
     private final ClubRepository clubes;
+    private final com.varcal.cheermanager.repository.Personas.EntrenadorRepository entrenadores;
 
     public CarnetService(@Value("${jwt.secret}") String secreto, DeportistaRepository deportistas,
-            DeportistaPerteneceGrupoRepository membresias, ClubRepository clubes) {
+            DeportistaPerteneceGrupoRepository membresias, ClubRepository clubes,
+            com.varcal.cheermanager.repository.Personas.EntrenadorRepository entrenadores) {
+        this.entrenadores = entrenadores;
         this.clave = ("carnet:" + secreto).getBytes(StandardCharsets.UTF_8);
         this.deportistas = deportistas;
         this.membresias = membresias;
@@ -44,10 +47,14 @@ public class CarnetService {
     }
 
     String firma(int clubId, int deportistaId) {
+        return firmaTexto(clubId + "." + deportistaId);
+    }
+
+    private String firmaTexto(String texto) {
         try {
             Mac mac = Mac.getInstance("HmacSHA256");
             mac.init(new SecretKeySpec(clave, "HmacSHA256"));
-            byte[] h = mac.doFinal((clubId + "." + deportistaId).getBytes(StandardCharsets.UTF_8));
+            byte[] h = mac.doFinal(texto.getBytes(StandardCharsets.UTF_8));
             return Base64.getUrlEncoder().withoutPadding().encodeToString(h).substring(0, 16);
         } catch (Exception e) {
             throw new IllegalStateException("No se pudo firmar el carnet.");
@@ -56,6 +63,59 @@ public class CarnetService {
 
     public String codigo(int clubId, int deportistaId) {
         return PREFIJO + "." + clubId + "." + deportistaId + "." + firma(clubId, deportistaId);
+    }
+
+    // ---- Carnet del personal (entrenadores): CM2.<clubId>.<entrenadorId>.<firma>. La firma incluye una "E"
+    // para que un codigo de deportista no sirva como de entrenador ni al reves. ----
+    private static final String PREFIJO_PERSONAL = "CM2";
+
+    public String codigoEntrenador(int clubId, int entrenadorId) {
+        return PREFIJO_PERSONAL + "." + clubId + "." + entrenadorId + "." + firmaTexto("E." + clubId + "." + entrenadorId);
+    }
+
+    public record CarnetPersonal(Integer entrenadorId, String codigo, String nombre, String club, String estado,
+            boolean vigente) {
+    }
+
+    /** Carnet de un entrenador del club actual. */
+    public CarnetPersonal carnetEntrenador(Integer entrenadorId) {
+        var e = entrenadores.findById(entrenadorId)
+                .orElseThrow(() -> new IllegalArgumentException("Entrenador no encontrado."));
+        return armarEntrenador(e);
+    }
+
+    /** Verifica un codigo CM2 escaneado: firma valida y del club de quien escanea. */
+    public CarnetPersonal verificarEntrenador(String codigo) {
+        String[] p = codigo == null ? new String[0] : codigo.trim().split("\\.");
+        if (p.length != 4 || !PREFIJO_PERSONAL.equals(p[0])) {
+            throw new IllegalArgumentException("Código de carnet de personal inválido.");
+        }
+        int clubId;
+        int entId;
+        try {
+            clubId = Integer.parseInt(p[1]);
+            entId = Integer.parseInt(p[2]);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Código de carnet de personal inválido.");
+        }
+        boolean firmaOk = MessageDigest.isEqual(firmaTexto("E." + clubId + "." + entId).getBytes(StandardCharsets.UTF_8),
+                p[3].getBytes(StandardCharsets.UTF_8));
+        if (!firmaOk) {
+            throw new IllegalArgumentException("Código de carnet de personal inválido.");
+        }
+        if (clubId != TenantContext.require()) {
+            throw new IllegalArgumentException("Este carnet pertenece a otro club.");
+        }
+        return carnetEntrenador(entId);
+    }
+
+    private CarnetPersonal armarEntrenador(com.varcal.cheermanager.Models.Personas.Entrenador e) {
+        int clubId = TenantContext.require();
+        String estado = e.getEstado() == null ? "—" : e.getEstado().getEstado();
+        String club = clubes.findById(clubId).map(c -> c.getNombre()).orElse("");
+        String nombre = (e.getPersona().getNombre() + " " + e.getPersona().getApellidos()).trim();
+        return new CarnetPersonal(e.getId(), codigoEntrenador(clubId, e.getId()), nombre, club, estado,
+                "Activo".equalsIgnoreCase(estado));
     }
 
     /** Carnet de un deportista del club actual. */

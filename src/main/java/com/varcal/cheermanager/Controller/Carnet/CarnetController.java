@@ -38,4 +38,14 @@ public class CarnetController {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
+
+    @GetMapping("/entrenador/{entrenadorId}")
+    @RequiresPermission("ver_entrenador")
+    public ResponseEntity<?> carnetEntrenador(@PathVariable Integer entrenadorId) {
+        try {
+            return ResponseEntity.ok(servicio.carnetEntrenador(entrenadorId));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
 }

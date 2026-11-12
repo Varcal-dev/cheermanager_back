@@ -43,7 +43,33 @@ class CarnetServiceTest {
         Repo mem = new Repo().on("findByDeportistaIdAndFechaFinIsNull", a -> List.of(m));
         Repo clubes = new Repo().on("findById", a -> Optional.of(club));
         return new CarnetService(secreto, Fakes.proxy(DeportistaRepository.class, deps),
-                Fakes.proxy(DeportistaPerteneceGrupoRepository.class, mem), Fakes.proxy(ClubRepository.class, clubes));
+                Fakes.proxy(DeportistaPerteneceGrupoRepository.class, mem), Fakes.proxy(ClubRepository.class, clubes),
+                Fakes.proxy(com.varcal.cheermanager.repository.Personas.EntrenadorRepository.class, new Repo().on("findById", a -> {
+                    if (((Integer) a[0]) != 5) return Optional.empty();
+                    var e = new com.varcal.cheermanager.Models.Personas.Entrenador();
+                    e.setId(5);
+                    e.setPersona(d.getPersona());
+                    e.setEstado(ep);
+                    return Optional.of(e);
+                })));
+    }
+
+    @Test
+    void el_carnet_de_personal_se_verifica_y_no_se_mezcla_con_el_de_deportista() {
+        TenantContext.set(2);
+        try {
+            CarnetService s = servicio("secreto", "Activo");
+            CarnetService.CarnetPersonal c = s.carnetEntrenador(5);
+            assertTrue(c.codigo().startsWith("CM2.2.5."));
+            assertEquals(5, s.verificarEntrenador(c.codigo()).entrenadorId());
+            // un codigo de deportista no sirve como de entrenador, ni al reves
+            assertThrows(IllegalArgumentException.class, () -> s.verificarEntrenador(s.carnet(7).codigo()));
+            assertThrows(IllegalArgumentException.class, () -> s.verificar(c.codigo()));
+            // cambiar el prefijo conservando la firma tampoco funciona
+            assertThrows(IllegalArgumentException.class, () -> s.verificar(c.codigo().replace("CM2", "CM1")));
+        } finally {
+            TenantContext.clear();
+        }
     }
 
     @Test

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.varcal.cheermanager.Service.Clubes.SuscripcionService;
 import com.varcal.cheermanager.Service.Importacion.ExportesService;
+import com.varcal.cheermanager.Service.Reportes.AnalisisService;
 import com.varcal.cheermanager.Service.Reportes.ReportesService;
 import com.varcal.cheermanager.Utils.RequiresPermission;
 
@@ -29,10 +30,21 @@ public class ReportesController {
 
     private final ReportesService reportes;
     private final ExportesService exportes;
+    private final AnalisisService analisis;
 
-    public ReportesController(ReportesService reportes, ExportesService exportes) {
+    public ReportesController(ReportesService reportes, ExportesService exportes, AnalisisService analisis) {
         this.reportes = reportes;
         this.exportes = exportes;
+        this.analisis = analisis;
+    }
+
+    /** Analisis historico mensual: altas, asistencia, retencion, evaluaciones, cobrado y deportistas en riesgo. */
+    @GetMapping("/reportes/analisis")
+    @RequiresPermission("ver_dash_organizacion")
+    public AnalisisService.Analisis analisis(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta) {
+        return analisis.analizar(desde, hasta, SuscripcionService.hoy());
     }
 
     @GetMapping("/reportes/financiero")
