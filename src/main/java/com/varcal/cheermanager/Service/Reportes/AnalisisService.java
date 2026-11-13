@@ -36,18 +36,21 @@ public class AnalisisService {
 
     public record MesAnalisis(String mes, long altas, long sesiones, long asistidas, Double tasaAsistencia,
             long deportistasActivos, Double retencion, Double promedioEvaluacion, long evaluaciones,
-            BigDecimal cobrado) {
+            BigDecimal cobrado, long bajas, long reingresos) {
+    }
+
+    public record Motivo(String motivo, long cantidad) {
     }
 
     public record Riesgo(Integer deportistaId, String nombre, long sesiones, long asistidas, double tasa) {
     }
 
     public record Resumen(long altas, Double tasaAsistencia, Double retencionPromedio, Double promedioEvaluacion,
-            BigDecimal cobrado) {
+            BigDecimal cobrado, long bajas, long reingresos) {
     }
 
     public record Analisis(LocalDate desde, LocalDate hasta, Resumen resumen, List<MesAnalisis> meses,
-            List<Riesgo> enRiesgo) {
+            List<Riesgo> enRiesgo, List<Motivo> motivosBaja) {
     }
 
     @PersistenceContext
@@ -73,6 +76,7 @@ public class AnalisisService {
         Integer club = TenantContext.require();
 
         Map<String, long[]> m = new TreeMap<>(); // altas, sesiones, asistidas, evalN, activos
+        Map<String, long[]> mov = new HashMap<>(); // bajas, reingresos (historial de estados)
         Map<String, double[]> ev = new HashMap<>(); // suma puntajes
         Map<String, BigDecimal> cob = new HashMap<>();
         for (YearMonth y = YearMonth.from(r.desde()); !y.isAfter(YearMonth.from(r.hasta())); y = y.plusMonths(1))
@@ -81,6 +85,23 @@ public class AnalisisService {
         for (Object[] o : q("SELECT DATE_FORMAT(d.fecha_inscripcion, '%Y-%m'), COUNT(*) FROM deportistas d "
                 + "WHERE d.club_id = :club AND d.fecha_inscripcion BETWEEN :desde AND :hasta GROUP BY 1", club, r))
             m.computeIfAbsent((String) o[0], k -> new long[5])[0] = n(o[1]);
+
+        // Bajas = pasar a "Retirado"; reingresos = salir de "Retirado". Salen del historial de estados del deportista.
+        for (Object[] o : q("SELECT DATE_FORMAT(h.fecha_cambio, '%Y-%m'), "
+                + "SUM(CASE WHEN en.estado = 'Retirado' AND (ea.estado IS NULL OR ea.estado <> 'Retirado') THEN 1 ELSE 0 END), "
+                + "SUM(CASE WHEN ea.estado = 'Retirado' AND en.estado <> 'Retirado' THEN 1 ELSE 0 END) "
+                + "FROM historial_estado_deportista h JOIN estados_persona en ON en.id = h.estado_nuevo_id "
+                + "LEFT JOIN estados_persona ea ON ea.id = h.estado_anterior_id "
+                + "WHERE h.club_id = :club AND DATE(h.fecha_cambio) BETWEEN :desde AND :hasta GROUP BY 1", club, r))
+            mov.put((String) o[0], new long[] { n(o[1]), n(o[2]) });
+
+        List<Motivo> motivos = new ArrayList<>();
+        for (Object[] o : q("SELECT COALESCE(NULLIF(TRIM(h.motivo_cambio), ''), 'Sin motivo'), COUNT(*) "
+                + "FROM historial_estado_deportista h JOIN estados_persona en ON en.id = h.estado_nuevo_id "
+                + "LEFT JOIN estados_persona ea ON ea.id = h.estado_anterior_id "
+                + "WHERE h.club_id = :club AND en.estado = 'Retirado' AND (ea.estado IS NULL OR ea.estado <> 'Retirado') "
+                + "AND DATE(h.fecha_cambio) BETWEEN :desde AND :hasta GROUP BY 1 ORDER BY 2 DESC LIMIT 10", club, r))
+            motivos.add(new Motivo((String) o[0], n(o[1])));
 
         for (Object[] o : q("SELECT DATE_FORMAT(a.fecha, '%Y-%m'), COUNT(*), "
                 + "SUM(CASE WHEN ea.estado IN ('Presente','Tarde') THEN 1 ELSE 0 END) FROM asistencias a "
@@ -112,7 +133,7 @@ public class AnalisisService {
 
         List<MesAnalisis> meses = new ArrayList<>();
         String previo = null;
-        long altas = 0, ses = 0, asi = 0, evN = 0, retN = 0;
+        long altas = 0, ses = 0, asi = 0, evN = 0, retN = 0, bajas = 0, reingresos = 0;
         double evSuma = 0, retSuma = 0;
         BigDecimal totalCob = BigDecimal.ZERO;
         for (var en : m.entrySet()) {
@@ -132,7 +153,11 @@ public class AnalisisService {
             Double prom = v[3] == 0 ? null
                     : BigDecimal.valueOf(ev.get(k)[0] / v[3]).setScale(2, RoundingMode.HALF_UP).doubleValue();
             BigDecimal c = cob.getOrDefault(k, BigDecimal.ZERO);
-            meses.add(new MesAnalisis(k, v[0], v[1], v[2], pct(v[2], v[1]), act.size(), ret, prom, v[3], c));
+            long[] mv = mov.getOrDefault(k, new long[2]);
+            meses.add(new MesAnalisis(k, v[0], v[1], v[2], pct(v[2], v[1]), act.size(), ret, prom, v[3], c, mv[0],
+                    mv[1]));
+            bajas += mv[0];
+            reingresos += mv[1];
             altas += v[0];
             ses += v[1];
             asi += v[2];
@@ -158,7 +183,7 @@ public class AnalisisService {
         }
 
         Resumen res = new Resumen(altas, pct(asi, ses), retN == 0 ? null : Math.round(retSuma / retN * 10) / 10.0,
-                evN == 0 ? null : Math.round(evSuma / evN * 100) / 100.0, totalCob);
-        return new Analisis(r.desde(), r.hasta(), res, meses, riesgo);
+                evN == 0 ? null : Math.round(evSuma / evN * 100) / 100.0, totalCob, bajas, reingresos);
+        return new Analisis(r.desde(), r.hasta(), res, meses, riesgo, motivos);
     }
 }

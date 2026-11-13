@@ -46,7 +46,7 @@ public class ProductoController {
     @RequiresPermission("crear_producto")
     public ResponseEntity<?> crear(@RequestBody ProductoDTO dto) {
         try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(productoService.crear(dto));
+            return ResponseEntity.status(HttpStatus.CREATED).body(productoService.obtenerPorId(productoService.crear(dto).getId()));
         } catch (RuntimeException e) {
             return ResponseEntity.status(409).body(e.getMessage());
         }
@@ -56,7 +56,7 @@ public class ProductoController {
     @RequiresPermission("modificar_producto")
     public ResponseEntity<?> actualizar(@PathVariable Integer id, @RequestBody ProductoDTO dto) {
         try {
-            return ResponseEntity.ok(productoService.actualizar(id, dto));
+            return ResponseEntity.ok(productoService.obtenerPorId(productoService.actualizar(id, dto).getId()));
         } catch (RuntimeException e) {
             return ResponseEntity.status(404).body(e.getMessage());
         }

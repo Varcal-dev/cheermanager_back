@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.varcal.cheermanager.DTO.Inventario.ProductoDTO;
 import com.varcal.cheermanager.DTO.Inventario.ProductoResponseDTO;
@@ -28,6 +29,7 @@ public class ProductoService {
     @Autowired
     private ProductoVarianteService productoVarianteService;
 
+    @Transactional(readOnly = true)
     public List<ProductoResponseDTO> listarTodos() {
         return productoRepository.findAll().stream().map(this::toResponseDTO).collect(Collectors.toList());
     }
@@ -35,6 +37,7 @@ public class ProductoService {
     // Sobrecarga con búsqueda: si "q" viene vacío/nulo se comporta exactamente
     // igual que listarTodos() (compatibilidad con quien ya llame al método
     // original). Si trae texto, filtra en la BD por nombre, SKU o categoría.
+    @Transactional(readOnly = true)
     public List<ProductoResponseDTO> listarTodos(String q) {
         if (q == null || q.isBlank()) {
             return listarTodos();
@@ -42,10 +45,12 @@ public class ProductoService {
         return productoRepository.buscar(q.trim()).stream().map(this::toResponseDTO).collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<ProductoResponseDTO> listarActivos() {
         return productoRepository.findByActivoTrue().stream().map(this::toResponseDTO).collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public ProductoResponseDTO obtenerPorId(Integer id) {
         return toResponseDTO(buscarOFallar(id));
     }

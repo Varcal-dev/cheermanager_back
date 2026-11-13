@@ -59,6 +59,9 @@ public class GrupoEntrenamientoService {
     private HorarioEntrenamientoRepository horarioEntrenamientoRepository;
 
     @Autowired
+    private com.varcal.cheermanager.repository.Org_dep.InscripcionRepository inscripcionRepository;
+
+    @Autowired
     private EntrenadorRepository entrenadorRepository;
 
     @Transactional
@@ -217,7 +220,9 @@ public class GrupoEntrenamientoService {
                     d.getFechaNacimiento(),
                     edad,
                     motivo == null,
-                    motivo);
+                    motivo,
+                    sesionesGrupo,
+                    sesionesPlan);
 
             if (motivo == null) {
                 elegibles.add(dto);
@@ -240,6 +245,7 @@ public class GrupoEntrenamientoService {
     // grupo?", resuelve "¿en qué grupos entra este deportista?". Reusa la
     // misma regla (año de nacimiento de la categoría + cupo del grupo) para
     // que las dos vistas nunca queden desincronizadas si el criterio cambia.
+    @Transactional(readOnly = true)
     public GruposElegiblesResponseDTO obtenerGruposElegiblesParaDeportista(Integer deportistaId) {
         DeportistaInscritoDTO deportista = inscripcionService.obtenerDeportistasInscritosDTO().stream()
                 .filter(d -> d.getDeportistaId().equals(deportistaId))
@@ -259,6 +265,13 @@ public class GrupoEntrenamientoService {
         List<GrupoElegibleDTO> elegibles = new ArrayList<>();
         List<GrupoElegibleDTO> noElegibles = new ArrayList<>();
 
+        // Sesiones por semana del plan de mensualidad con que se matriculo (inscripcion activa).
+        Integer sesionesPlan = inscripcionRepository
+                .findByDeportistaIdAndEstado(deportistaId, com.varcal.cheermanager.Models.Org_dep.Inscripcion.EstadoInscripcion.Activa)
+                .stream().map(i -> i.getPlanMensualidad())
+                .filter(p -> p != null && p.getSesionesSemanales() != null)
+                .map(p -> p.getSesionesSemanales()).findFirst().orElse(null);
+
         for (GrupoEntrenamiento grupo : grupoEntrenamientoRepository.findAll()) {
             CategoriaNivel categoria = grupo.getCategoriaNivel();
             Integer añoMin = categoria != null ? categoria.getAñoNacimientoMin() : null;
@@ -271,6 +284,12 @@ public class GrupoEntrenamientoService {
 
             String motivo = calcularMotivoNoElegible(añoNacimiento, añoMin, añoMax, grupoLleno,
                     cupoActual, cupoMaximo);
+
+            int sesionesGrupo = sesionesSemanalesDelGrupo(grupo.getId());
+            if (motivo == null && sesionesPlan != null && sesionesGrupo > 0 && sesionesGrupo != sesionesPlan) {
+                motivo = "Este grupo entrena " + sesionesGrupo + " " + (sesionesGrupo == 1 ? "día" : "días")
+                        + " por semana y el plan de mensualidad del deportista es de " + sesionesPlan + " por semana";
+            }
 
             GrupoElegibleDTO dto = new GrupoElegibleDTO(
                     grupo.getId(),
@@ -297,6 +316,13 @@ public class GrupoEntrenamientoService {
                 deportista.getNombre() + " " + deportista.getApellidos(),
                 elegibles,
                 noElegibles);
+    }
+
+    /** Dias distintos de la semana en que entrena el grupo, segun sus horarios. */
+    private int sesionesSemanalesDelGrupo(Integer grupoId) {
+        return (int) horarioEntrenamientoRepository.findByGrupoEntrenamientoId(grupoId).stream()
+                .filter(h -> h.getHorario() != null && h.getHorario().getDia() != null)
+                .map(h -> h.getHorario().getDia()).distinct().count();
     }
 
     private String calcularMotivoNoElegible(Integer añoNacimiento, Integer añoMin, Integer añoMax,

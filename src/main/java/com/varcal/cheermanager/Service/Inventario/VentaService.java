@@ -203,16 +203,19 @@ public class VentaService {
                 .orElseThrow(() -> new RuntimeException("Metodo de pago no reconocido: " + nombre));
     }
 
+    @Transactional(readOnly = true)
     public List<VentaResponseDTO> listarPorRango(LocalDate desde, LocalDate hasta) {
         return ventaRepository.findByFechaBetweenOrderByFechaDesc(desde, hasta).stream()
                 .map(this::toResponseDTO).collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<VentaResponseDTO> listarPorPersona(Integer personaId) {
         return ventaRepository.findByPersonaIdOrderByFechaDesc(personaId).stream()
                 .map(this::toResponseDTO).collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public VentaResponseDTO obtenerPorId(Integer id) {
         return toResponseDTO(ventaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Venta no encontrada con ID: " + id)));

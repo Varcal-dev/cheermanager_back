@@ -21,4 +21,8 @@ public class GrupoElegibleDTO {
     private Integer cupoMaximo; // null = sin límite definido
     private boolean elegible;
     private String motivo; // null cuando elegible = true
+    /** Dias distintos por semana en que entrena el grupo (0 = aun sin horarios). */
+    private Integer sesionesSemanales;
+    /** Sesiones por semana del plan de mensualidad del deportista (null = sin plan o sin dato). */
+    private Integer sesionesPlan;
 }
