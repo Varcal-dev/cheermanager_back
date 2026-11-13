@@ -36,7 +36,7 @@ public class DashboardFinanzasService {
     public ResumenFinanzasDTO obtenerResumen() {
         ResumenFinanzasDTO dto = new ResumenFinanzasDTO();
 
-        LocalDate hoy = LocalDate.now();
+        LocalDate hoy = com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy();
         LocalDate inicioMes = hoy.withDayOfMonth(1);
         LocalDate finMes = hoy.withDayOfMonth(hoy.lengthOfMonth());
 
@@ -136,7 +136,7 @@ public class DashboardFinanzasService {
     // vencimiento de factura, que no existe en el modelo actual.
     private List<TendenciaMensualDTO> calcularTendencia() {
         List<TendenciaMensualDTO> tendencia = new ArrayList<>();
-        LocalDate hoy = LocalDate.now();
+        LocalDate hoy = com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy();
 
         for (int i = 5; i >= 0; i--) {
             LocalDate mesRef = hoy.minusMonths(i);

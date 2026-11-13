@@ -36,19 +36,19 @@ class FacturaEstadoCuentaTest {
 
     @Test
     void pendienteSiNoHaVencido() {
-        FacturaResponseDTO r = dto(factura(LocalDate.now().plusDays(3), false), "0");
+        FacturaResponseDTO r = dto(factura(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().plusDays(3), false), "0");
         assertEquals("PENDIENTE", r.getEstadoCuenta());
         assertNull(r.getDiasMora());
     }
 
     @Test
     void abonoParcialSiNoHaVencido() {
-        assertEquals("ABONO_PARCIAL", dto(factura(LocalDate.now().plusDays(3), false), "40000").getEstadoCuenta());
+        assertEquals("ABONO_PARCIAL", dto(factura(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().plusDays(3), false), "40000").getEstadoCuenta());
     }
 
     @Test
     void enMoraDespuesDelVencimientoConSaldo() {
-        FacturaResponseDTO r = dto(factura(LocalDate.now().minusDays(4), false), "40000");
+        FacturaResponseDTO r = dto(factura(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().minusDays(4), false), "40000");
         assertEquals("EN_MORA", r.getEstadoCuenta());
         assertEquals(4L, r.getDiasMora());
         assertEquals(new BigDecimal("60000.00"), r.getSaldoPendiente());
@@ -56,12 +56,12 @@ class FacturaEstadoCuentaTest {
 
     @Test
     void pagadaNuncaEstaEnMora() {
-        assertEquals("PAGADA", dto(factura(LocalDate.now().minusDays(30), false), "100000").getEstadoCuenta());
+        assertEquals("PAGADA", dto(factura(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().minusDays(30), false), "100000").getEstadoCuenta());
     }
 
     @Test
     void anuladaNoTieneSaldo() {
-        FacturaResponseDTO r = dto(factura(LocalDate.now().minusDays(30), true), "0");
+        FacturaResponseDTO r = dto(factura(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().minusDays(30), true), "0");
         assertEquals("ANULADA", r.getEstadoCuenta());
         assertEquals(BigDecimal.ZERO, r.getSaldoPendiente());
     }

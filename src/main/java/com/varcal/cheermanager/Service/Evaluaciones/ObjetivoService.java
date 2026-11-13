@@ -40,7 +40,7 @@ public class ObjetivoService {
         objetivo.setDeportista(deportista);
         objetivo.setNombre(dto.getNombre());
         objetivo.setDescripcion(dto.getDescripcion());
-        objetivo.setFechaCreacion(dto.getFechaCreacion() != null ? dto.getFechaCreacion() : LocalDate.now());
+        objetivo.setFechaCreacion(dto.getFechaCreacion() != null ? dto.getFechaCreacion() : com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy());
         objetivo.setEstadoObjetivo(estado);
 
         return toResponseDTO(objetivoRepository.save(objetivo));

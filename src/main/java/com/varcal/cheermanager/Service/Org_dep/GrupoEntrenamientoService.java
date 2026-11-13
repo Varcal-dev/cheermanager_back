@@ -203,7 +203,7 @@ public class GrupoEntrenamientoService {
         for (DeportistaInscritoDTO d : candidatos) {
             Integer añoNacimiento = d.getFechaNacimiento() != null ? d.getFechaNacimiento().getYear() : null;
             Integer edad = d.getFechaNacimiento() != null
-                    ? Period.between(d.getFechaNacimiento(), LocalDate.now()).getYears()
+                    ? Period.between(d.getFechaNacimiento(), com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy()).getYears()
                     : null;
 
             String motivo = calcularMotivoNoElegible(añoNacimiento, añoMin, añoMax, grupoLleno, cupoActual,
@@ -326,7 +326,7 @@ public class GrupoEntrenamientoService {
                 .findByGrupoIdAndDeportistaIdAndFechaFinIsNull(grupoId, deportistaId)
                 .orElseThrow(() -> new RuntimeException("El deportista no pertenece actualmente a este grupo"));
 
-        membresia.setFechaFin(LocalDate.now());
+        membresia.setFechaFin(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy());
         deportistaPerteneceGrupoRepository.save(membresia);
 
         return "Deportista removido del grupo correctamente";
@@ -374,7 +374,7 @@ public class GrupoEntrenamientoService {
             throw new RuntimeException("Esta asignación ya estaba finalizada");
         }
 
-        asignacion.setFechaFin(LocalDate.now());
+        asignacion.setFechaFin(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy());
         grupoEntrenadorRepository.save(asignacion);
 
         return "Asignación finalizada correctamente";

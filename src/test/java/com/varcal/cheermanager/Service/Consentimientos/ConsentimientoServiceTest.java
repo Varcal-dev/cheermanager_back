@@ -65,14 +65,14 @@ class ConsentimientoServiceTest {
 
     @Test
     void menorSinAcudienteSeRechaza() {
-        persona(LocalDate.now().minusYears(12));
+        persona(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().minusYears(12));
         assertThrows(RuntimeException.class, () -> service.otorgar(req(null)));
         verify(repo, never()).save(any());
     }
 
     @Test
     void menorConAcudienteNoVinculadoSeRechaza() {
-        persona(LocalDate.now().minusYears(12));
+        persona(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().minusYears(12));
         Acudiente a = new Acudiente();
         a.setId(5);
         when(acudientes.findById(5)).thenReturn(Optional.of(a));
@@ -82,7 +82,7 @@ class ConsentimientoServiceTest {
 
     @Test
     void menorConAcudienteVinculadoSeAcepta() {
-        persona(LocalDate.now().minusYears(12));
+        persona(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().minusYears(12));
         Acudiente a = new Acudiente();
         a.setId(5);
         when(acudientes.findById(5)).thenReturn(Optional.of(a));
@@ -95,7 +95,7 @@ class ConsentimientoServiceTest {
 
     @Test
     void mayorDeEdadAutorizaElMismoSinAcudiente() {
-        persona(LocalDate.now().minusYears(30));
+        persona(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().minusYears(30));
         assertNull(service.otorgar(req(null)).acudienteId());
     }
 
@@ -107,21 +107,21 @@ class ConsentimientoServiceTest {
 
     @Test
     void noSeDuplicaUnConsentimientoVigente() {
-        persona(LocalDate.now().minusYears(30));
+        persona(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().minusYears(30));
         when(repo.existsByTitularIdAndTipoAndFechaRevocadoIsNull(10, Tipo.DATOS_SALUD)).thenReturn(true);
         assertThrows(RuntimeException.class, () -> service.otorgar(req(null)));
     }
 
     @Test
     void canalInvalidoSeRechaza() {
-        persona(LocalDate.now().minusYears(30));
+        persona(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().minusYears(30));
         assertThrows(RuntimeException.class,
                 () -> service.otorgar(new OtorgarRequest(10, Tipo.DATOS_SALUD, "2026-01", "telepatia", null, null)));
     }
 
     @Test
     void revocarDosVecesFalla() {
-        Persona p = persona(LocalDate.now().minusYears(30));
+        Persona p = persona(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().minusYears(30));
         Consentimiento c = new Consentimiento();
         c.setId(1);
         c.setTitular(p);
@@ -144,8 +144,8 @@ class ConsentimientoServiceTest {
 
     @Test
     void mayoriaDeEdadSeCalculaPorFecha() {
-        assertTrue(ConsentimientoService.esMenor(LocalDate.now().minusYears(17).minusDays(364)));
-        assertFalse(ConsentimientoService.esMenor(LocalDate.now().minusYears(18)));
+        assertTrue(ConsentimientoService.esMenor(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().minusYears(17).minusDays(364)));
+        assertFalse(ConsentimientoService.esMenor(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().minusYears(18)));
     }
 
     @Test

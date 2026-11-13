@@ -87,7 +87,7 @@ public class CobroEventoService {
                     .toList();
         }
 
-        LocalDate hoy = LocalDate.now();
+        LocalDate hoy = com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy();
         LocalDate vencimiento = dto.getFechaVencimiento() != null
                 ? dto.getFechaVencimiento() : FacturaService.calcularVencimiento(hoy);
         if (vencimiento.isBefore(hoy)) {

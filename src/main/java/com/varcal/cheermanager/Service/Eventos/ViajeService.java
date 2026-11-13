@@ -82,7 +82,7 @@ public class ViajeService {
         this.integrantes = integrantes;
     }
 
-    protected LocalDate hoy() { return LocalDate.now(); }
+    protected LocalDate hoy() { return com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy(); }
     protected LocalDateTime ahora() { return LocalDateTime.now(); }
 
     public List<Opcion> opciones() {

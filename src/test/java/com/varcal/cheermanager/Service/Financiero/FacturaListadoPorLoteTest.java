@@ -41,9 +41,9 @@ class FacturaListadoPorLoteTest {
         FacturaService service = new FacturaService(null, null, pagos, null);
 
         List<FacturaResponseDTO> r = service.toResponseDTOs(List.of(
-                factura(1, LocalDate.now().minusDays(4)),
-                factura(2, LocalDate.now().plusDays(3)),
-                factura(3, LocalDate.now().minusDays(1))));
+                factura(1, com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().minusDays(4)),
+                factura(2, com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().plusDays(3)),
+                factura(3, com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().minusDays(1))));
 
         assertEquals(3, r.size());
         assertEquals("EN_MORA", r.get(0).getEstadoCuenta());

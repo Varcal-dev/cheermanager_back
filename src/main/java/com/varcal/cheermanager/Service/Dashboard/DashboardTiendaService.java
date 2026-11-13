@@ -36,7 +36,7 @@ public class DashboardTiendaService {
     public ResumenTiendaDTO obtenerResumen() {
         ResumenTiendaDTO dto = new ResumenTiendaDTO();
 
-        LocalDate hoy = LocalDate.now();
+        LocalDate hoy = com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy();
         LocalDate inicioMes = hoy.withDayOfMonth(1);
         LocalDate finMes = hoy.withDayOfMonth(hoy.lengthOfMonth());
 

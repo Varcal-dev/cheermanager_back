@@ -82,7 +82,7 @@ public class FacturaService {
             throw new RuntimeException("Evento no encontrado");
         }
 
-        LocalDate emision = dto.getFechaEmision() != null ? dto.getFechaEmision() : LocalDate.now();
+        LocalDate emision = dto.getFechaEmision() != null ? dto.getFechaEmision() : com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy();
         LocalDate vencimiento = dto.getFechaVencimiento() != null ? dto.getFechaVencimiento() : calcularVencimiento(emision);
         if (vencimiento.isBefore(emision)) {
             throw new RuntimeException("El vencimiento no puede ser anterior a la emision");
@@ -205,7 +205,7 @@ public class FacturaService {
 
     /** Facturas vencidas con saldo pendiente, las mas antiguas primero. */
     public List<FacturaResponseDTO> listarEnMora() {
-        return toResponseDTOs(facturaRepository.findEnMora(LocalDate.now()));
+        return toResponseDTOs(facturaRepository.findEnMora(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy()));
     }
 
     public List<FacturaResponseDTO> listarPorPersona(Integer personaId) {
@@ -238,7 +238,7 @@ public class FacturaService {
         int size = Math.min(Math.max(tamano, 1), 100);
         int page = Math.max(pagina, 0);
 
-        var resultado = facturaRepository.buscarPagina(qN, estadoN, conceptoN, d, h, LocalDate.now(),
+        var resultado = facturaRepository.buscarPagina(qN, estadoN, conceptoN, d, h, com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy(),
                 PageRequest.of(page, size));
         return PaginaDTO.de(resultado, this::toResponseDTOs);
     }
@@ -310,7 +310,7 @@ public class FacturaService {
         dto.setTotalPagado(pagado);
         dto.setSaldoPendiente(anulada ? BigDecimal.ZERO : saldo.max(BigDecimal.ZERO));
 
-        LocalDate hoy = LocalDate.now();
+        LocalDate hoy = com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy();
         if (anulada) {
             dto.setEstadoCuenta("ANULADA");
         } else if (saldo.signum() <= 0) {

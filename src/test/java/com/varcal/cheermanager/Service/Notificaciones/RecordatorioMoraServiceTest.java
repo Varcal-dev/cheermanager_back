@@ -107,7 +107,7 @@ class RecordatorioMoraServiceTest {
         }
 
         Factura enMora(int personaId, String total) {
-            return w.factura(personaId, total, LocalDate.now().minusDays(5));
+            return w.factura(personaId, total, com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().minusDays(5));
         }
     }
 
@@ -244,7 +244,7 @@ class RecordatorioMoraServiceTest {
         Escenario e = new Escenario(true, false);
         Factura anulada = e.enMora(1, "100000");
         anulada.setAnulada(true);
-        e.w.factura(1, "100000", LocalDate.now().plusDays(3)); // aun no vence
+        e.w.factura(1, "100000", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().plusDays(3)); // aun no vence
         RecordatorioMoraResultadoDTO r = e.servicio.enviar(req(true, false, false), 9);
         assertEquals(0, r.facturasEnMora());
         assertEquals(0, e.notificaciones.size());

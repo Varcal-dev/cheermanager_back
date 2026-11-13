@@ -98,7 +98,7 @@ public class AutorizacionPortalService {
     private Item item(Deportista d, Usuario u, Acudiente ac) {
         Persona p = d.getPersona();
         LocalDate nac = p.getFechaNacimiento();
-        boolean menor = nac != null && nac.isAfter(LocalDate.now().minusYears(18));
+        boolean menor = nac != null && nac.isAfter(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().minusYears(18));
         boolean puede = true;
         String motivo = null;
         if (nac == null) {

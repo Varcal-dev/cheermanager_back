@@ -41,7 +41,7 @@ public class SolicitudTitularService {
 
     /** Reloj, sobrescribible en pruebas. */
     protected LocalDate hoy() {
-        return LocalDate.now();
+        return com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy();
     }
 
     static int diasPlazo(Tipo t) {

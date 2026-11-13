@@ -33,7 +33,7 @@ public class CalendarioService {
     }
 
     protected LocalDate hoy() {
-        return LocalDate.now();
+        return com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy();
     }
 
     protected LocalDateTime ahora() {

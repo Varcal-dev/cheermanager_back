@@ -160,7 +160,7 @@ public class MundoFinanciero {
         f.setNumeroFactura("FAC-2026-" + String.format("%04d", f.getId()));
         f.setPersona(personas.containsKey(personaId) ? personas.get(personaId) : persona(personaId, "P" + personaId));
         f.setTotal(new BigDecimal(total));
-        f.setFechaEmision(LocalDate.now().minusDays(20));
+        f.setFechaEmision(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().minusDays(20));
         f.setFechaVencimiento(vencimiento);
         f.setAnulada(false);
         facturas.add(f);

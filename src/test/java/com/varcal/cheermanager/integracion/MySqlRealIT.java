@@ -89,7 +89,7 @@ class MySqlRealIT {
             p = personaRepository.save(p);
             Factura f = new Factura();
             f.setNumeroFactura("IT-" + System.nanoTime());
-            f.setFechaEmision(LocalDate.now());
+            f.setFechaEmision(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy());
             f.setPersona(p);
             f.setTotal(total);
             return facturaRepository.save(f).getId();
@@ -109,7 +109,7 @@ class MySqlRealIT {
                         dto.setFacturaId(facturaId);
                         dto.setTipoPagoId(tipoPagoId);
                         dto.setMetodoPagoId(metodoPagoId);
-                        dto.setFecha(LocalDate.now());
+                        dto.setFecha(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy());
                         dto.setEstado("Pagado");
                         dto.setMonto(monto);
                         pagoService.registrarPago(dto);

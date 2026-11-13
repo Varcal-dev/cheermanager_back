@@ -37,7 +37,7 @@ public class DashboardHorariosService {
     private DeportistaRepository deportistaRepository;
 
     public ResumenHorariosDTO obtenerResumen(int diasAnalizados) {
-        LocalDate hasta = LocalDate.now();
+        LocalDate hasta = com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy();
         LocalDate desde = hasta.minusDays(diasAnalizados);
 
         ResumenHorariosDTO resumen = new ResumenHorariosDTO();

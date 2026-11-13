@@ -165,7 +165,7 @@ public class PedidoUniformeService {
         if (valor.divide(BigDecimal.valueOf(cuotas), 2, RoundingMode.DOWN).compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("El valor es muy bajo para dividirlo en " + cuotas + " cuotas.");
         }
-        LocalDate hoy = LocalDate.now();
+        LocalDate hoy = com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy();
         LocalDate primero = s.primerVencimiento() == null ? FacturaService.calcularVencimiento(hoy) : s.primerVencimiento();
         if (primero.isBefore(hoy)) {
             throw new IllegalArgumentException("El primer vencimiento no puede ser anterior a hoy.");
@@ -237,7 +237,7 @@ public class PedidoUniformeService {
         Set<Integer> yaFacturadas = previos.stream().filter(c -> !anuladas.contains(c.getFacturaId()))
                 .map(PedidoUniformeCobro::getPersonaId).collect(Collectors.toSet());
 
-        LocalDate hoy = LocalDate.now();
+        LocalDate hoy = com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy();
         // Si el primer vencimiento ya paso (p. ej. alguien que entra despues), la 1.a cuota vence hoy.
         LocalDate base = p.getPrimerVencimiento().isBefore(hoy) ? hoy : p.getPrimerVencimiento();
         List<BigDecimal> valores = repartir(p.getValorPorDeportista(), p.getNumeroCuotas());

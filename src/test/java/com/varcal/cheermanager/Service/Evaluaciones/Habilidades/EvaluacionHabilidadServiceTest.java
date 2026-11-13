@@ -126,7 +126,7 @@ class EvaluacionHabilidadServiceTest {
         assertThrows(IllegalArgumentException.class, () -> servicio().evaluar(sol(1, null, new Deduccion("Flyer", -1)), 1));
         assertThrows(IllegalArgumentException.class,
                 () -> servicio().evaluar(sol(1, null, new Deduccion("Flyer", 1), new Deduccion("Flyer", 1)), 1));
-        assertThrows(IllegalArgumentException.class, () -> servicio().evaluar(sol(1, LocalDate.now().plusDays(1)), 1));
+        assertThrows(IllegalArgumentException.class, () -> servicio().evaluar(sol(1, com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().plusDays(1)), 1));
         assertThrows(IllegalArgumentException.class, () -> servicio().evaluar(new Solicitud(99, 1, null, null, null), 1));
         assertThrows(IllegalArgumentException.class, () -> servicio().evaluar(sol(99, null), 1));
         assertThrows(IllegalArgumentException.class, () -> servicio().evaluar(sol(4, null), 1)); // inactiva
@@ -135,7 +135,7 @@ class EvaluacionHabilidadServiceTest {
     @Test
     void reevaluar_actualiza_estado_cuenta_y_mejor_puntaje() {
         EvaluacionHabilidadService s = servicio();
-        LocalDate hoy = LocalDate.now();
+        LocalDate hoy = com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy();
         s.evaluar(sol(1, hoy.minusDays(10), new Deduccion("Flyer", 3), new Deduccion("Bases_Spotters", 3),
                 new Deduccion("Transiciones", 3), new Deduccion("Sincronizacion", 3)), 1); // 2.8
         s.evaluar(sol(1, hoy), 1); // 4.0

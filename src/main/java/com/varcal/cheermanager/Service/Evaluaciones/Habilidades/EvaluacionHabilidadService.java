@@ -102,8 +102,8 @@ public class EvaluacionHabilidadService {
         HabilidadCatalogo habilidad = catalogo.findById(s.habilidadId())
                 .filter(h -> Boolean.TRUE.equals(h.getActivo()))
                 .orElseThrow(() -> new IllegalArgumentException("Habilidad no encontrada."));
-        LocalDate fecha = s.fecha() == null ? LocalDate.now() : s.fecha();
-        if (fecha.isAfter(LocalDate.now())) {
+        LocalDate fecha = s.fecha() == null ? com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy() : s.fecha();
+        if (fecha.isAfter(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy())) {
             throw new IllegalArgumentException("La fecha de la evaluación no puede ser futura.");
         }
         String obs = s.observaciones() == null || s.observaciones().isBlank() ? null : s.observaciones().trim();

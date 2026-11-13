@@ -52,7 +52,7 @@ public class Club {
 
     /** Ultimo dia vigente (inclusive). Vacio = sin vencimiento. */
     @Column(name = "vigente_hasta")
-    private LocalDate vigenteHasta = LocalDate.now().plusDays(DIAS_PRUEBA);
+    private LocalDate vigenteHasta = com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().plusDays(DIAS_PRUEBA);
 
     @Column(name = "dias_gracia", nullable = false)
     private Integer diasGracia = 5;

@@ -170,7 +170,7 @@ public class PortalService {
         Persona p = d.getPersona();
         List<String> grupos = grupoRepository.findByDeportistaIdAndFechaFinIsNull(d.getId()).stream()
                 .map(g -> g.getGrupo().getNombre()).toList();
-        LocalDate hasta = LocalDate.now();
+        LocalDate hasta = com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy();
         LocalDate desde = hasta.minusDays(90);
         long total = asistenciaRepository.countByDeportistaIdAndFechaBetween(d.getId(), desde, hasta);
         long presentes = asistenciaRepository.contarPorDeportistaYEstadoEnRango(d.getId(), desde, hasta, "Presente");
@@ -197,7 +197,7 @@ public class PortalService {
 
     public List<AsistenciaItem> asistencias(Integer deportistaId, LocalDate desde, LocalDate hasta) {
         Deportista d = propio(deportistaId);
-        LocalDate h = hasta != null ? hasta : LocalDate.now();
+        LocalDate h = hasta != null ? hasta : com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy();
         LocalDate dd = desde != null ? desde : h.minusDays(90);
         return asistenciaRepository.findByDeportistaIdAndFechaBetweenOrderByFechaDesc(d.getId(), dd, h).stream()
                 .map(a -> new AsistenciaItem(a.getFecha(),

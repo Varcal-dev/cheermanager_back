@@ -78,7 +78,7 @@ public class RankingService {
     }
 
     protected LocalDate hoy() {
-        return LocalDate.now();
+        return com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy();
     }
 
     public List<Temporada_> listarTemporadas() {

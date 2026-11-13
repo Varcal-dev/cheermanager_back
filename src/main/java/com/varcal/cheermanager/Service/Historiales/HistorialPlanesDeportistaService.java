@@ -45,7 +45,7 @@ public class HistorialPlanesDeportistaService {
         PlanPago planNuevo = planPagoRepository.findById(planPagoNuevoId)
                 .orElseThrow(() -> new RuntimeException("Plan de pago no encontrado con ID: " + planPagoNuevoId));
 
-        LocalDate fecha = fechaCambio != null ? fechaCambio : LocalDate.now();
+        LocalDate fecha = fechaCambio != null ? fechaCambio : com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy();
 
         // Cerrar el plan vigente anterior, si tenía uno.
         historialPlanesDeportistaRepository.findByDeportistaIdAndFechaFinIsNull(deportistaId)

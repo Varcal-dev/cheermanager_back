@@ -37,7 +37,7 @@ class FacturaServiceMovimientosTest {
         assertEquals(prefijo + "0001", a.getNumeroFactura());
         assertEquals(prefijo + "0002", b.getNumeroFactura());
         assertEquals("UNIFORME", a.getConcepto());
-        assertEquals(LocalDate.now().plusDays(FacturaService.DIAS_PARA_PAGAR), a.getFechaVencimiento());
+        assertEquals(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().plusDays(FacturaService.DIAS_PARA_PAGAR), a.getFechaVencimiento());
         assertTrue(Fakes.igual("5000.56", b.getTotal()));
         assertEquals("PENDIENTE", a.getEstadoCuenta());
     }
@@ -60,8 +60,8 @@ class FacturaServiceMovimientosTest {
         eventoMalo.setEventoId(777);
         assertThrows(RuntimeException.class, () -> w.facturaService.crearManual(eventoMalo));
         FacturaManualDTO vencidaAntes = manual(1, "OTRO", "10");
-        vencidaAntes.setFechaEmision(LocalDate.now());
-        vencidaAntes.setFechaVencimiento(LocalDate.now().minusDays(1));
+        vencidaAntes.setFechaEmision(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy());
+        vencidaAntes.setFechaVencimiento(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().minusDays(1));
         assertThrows(RuntimeException.class, () -> w.facturaService.crearManual(vencidaAntes));
         assertEquals(0, w.facturas.size());
 
@@ -72,7 +72,7 @@ class FacturaServiceMovimientosTest {
     @Test
     void anularFacturaSinPagosDejaMotivoYNoSeBorra() {
         MundoFinanciero w = new MundoFinanciero();
-        Factura f = w.factura(1, "50000", LocalDate.now().plusDays(3));
+        Factura f = w.factura(1, "50000", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().plusDays(3));
         FacturaResponseDTO r = w.facturaService.anular(f.getId(), "Cobro duplicado");
         assertTrue(r.getAnulada());
         assertEquals("ANULADA", r.getEstadoCuenta());
@@ -84,9 +84,9 @@ class FacturaServiceMovimientosTest {
     @Test
     void anularFacturaConPagoPagadoSeBloqueaYNoCambiaNada() {
         MundoFinanciero w = new MundoFinanciero();
-        Factura f = w.factura(1, "50000", LocalDate.now().plusDays(3));
-        w.pagoDirecto(f, "20000", EstadoPago.Pagado, LocalDate.now());
-        w.pagoDirecto(f, "10000", EstadoPago.Pendiente, LocalDate.now());
+        Factura f = w.factura(1, "50000", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().plusDays(3));
+        w.pagoDirecto(f, "20000", EstadoPago.Pagado, com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy());
+        w.pagoDirecto(f, "10000", EstadoPago.Pendiente, com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy());
         assertThrows(RuntimeException.class, () -> w.facturaService.anular(f.getId(), "Quiero anularla"));
         assertFalse(f.getAnulada());
         assertEquals(EstadoPago.Pendiente, w.pagos.get(1).getEstado());
@@ -95,8 +95,8 @@ class FacturaServiceMovimientosTest {
     @Test
     void anularPrimeroElPagoPermiteLuegoAnularLaFactura() {
         MundoFinanciero w = new MundoFinanciero();
-        Factura f = w.factura(1, "50000", LocalDate.now().plusDays(3));
-        var p = w.pagoDirecto(f, "20000", EstadoPago.Pagado, LocalDate.now());
+        Factura f = w.factura(1, "50000", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().plusDays(3));
+        var p = w.pagoDirecto(f, "20000", EstadoPago.Pagado, com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy());
         w.pagoService.anular(p.getId(), "Pago mal digitado");
         FacturaResponseDTO r = w.facturaService.anular(f.getId(), "Factura mal generada");
         assertEquals("ANULADA", r.getEstadoCuenta());
@@ -105,9 +105,9 @@ class FacturaServiceMovimientosTest {
     @Test
     void anularFacturaAnulaSusPagosPendientesYVencidos() {
         MundoFinanciero w = new MundoFinanciero();
-        Factura f = w.factura(1, "50000", LocalDate.now().plusDays(3));
-        w.pagoDirecto(f, "10000", EstadoPago.Pendiente, LocalDate.now());
-        w.pagoDirecto(f, "10000", EstadoPago.Vencido, LocalDate.now());
+        Factura f = w.factura(1, "50000", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().plusDays(3));
+        w.pagoDirecto(f, "10000", EstadoPago.Pendiente, com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy());
+        w.pagoDirecto(f, "10000", EstadoPago.Vencido, com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy());
         w.facturaService.anular(f.getId(), "Se cancela el servicio");
         assertTrue(w.pagos.stream().allMatch(p -> p.getEstado() == EstadoPago.Anulado));
         assertTrue(w.pagos.get(0).getMotivoAnulacion().contains("Se cancela el servicio"));
@@ -116,7 +116,7 @@ class FacturaServiceMovimientosTest {
     @Test
     void anularExigeMotivoNoRepiteYFacturaInexistente() {
         MundoFinanciero w = new MundoFinanciero();
-        Factura f = w.factura(1, "50000", LocalDate.now().plusDays(3));
+        Factura f = w.factura(1, "50000", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().plusDays(3));
         assertThrows(RuntimeException.class, () -> w.facturaService.anular(f.getId(), ""));
         assertThrows(RuntimeException.class, () -> w.facturaService.anular(f.getId(), "abc"));
         assertThrows(RuntimeException.class, () -> w.facturaService.anular(999, "Motivo valido"));
@@ -127,15 +127,15 @@ class FacturaServiceMovimientosTest {
     @Test
     void estadoDeCuentaSigueElFlujoPendienteAbonoMoraPagada() {
         MundoFinanciero w = new MundoFinanciero();
-        Factura vigente = w.factura(1, "100000", LocalDate.now().plusDays(2));
-        Factura vencida = w.factura(1, "100000", LocalDate.now().minusDays(4));
+        Factura vigente = w.factura(1, "100000", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().plusDays(2));
+        Factura vencida = w.factura(1, "100000", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().minusDays(4));
         assertEquals("PENDIENTE", w.facturaService.toResponseDTO(vigente).getEstadoCuenta());
-        w.pagoService.registrarPago(PagoServiceTest.dto(vigente.getId(), "30000", "Pagado", LocalDate.now()));
+        w.pagoService.registrarPago(PagoServiceTest.dto(vigente.getId(), "30000", "Pagado", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy()));
         assertEquals("ABONO_PARCIAL", w.facturaService.toResponseDTO(vigente).getEstadoCuenta());
         FacturaResponseDTO mora = w.facturaService.toResponseDTO(vencida);
         assertEquals("EN_MORA", mora.getEstadoCuenta());
         assertEquals(4L, (long) mora.getDiasMora());
-        w.pagoService.registrarPago(PagoServiceTest.dto(vencida.getId(), "100000", "Pagado", LocalDate.now()));
+        w.pagoService.registrarPago(PagoServiceTest.dto(vencida.getId(), "100000", "Pagado", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy()));
         assertEquals("PAGADA", w.facturaService.toResponseDTO(vencida).getEstadoCuenta());
     }
 

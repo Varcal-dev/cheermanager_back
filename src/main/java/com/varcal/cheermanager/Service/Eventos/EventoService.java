@@ -47,12 +47,12 @@ public class EventoService {
     // Calendario: próximos eventos, para mostrar en un dashboard o notificar
     // a entrenadores/deportistas de lo que se viene.
     public List<EventoResponseDTO> proximos() {
-        return eventoRepository.findByFechaGreaterThanEqualOrderByFechaAsc(LocalDate.now()).stream()
+        return eventoRepository.findByFechaGreaterThanEqualOrderByFechaAsc(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy()).stream()
                 .map(this::toResponseDTO).collect(Collectors.toList());
     }
 
     public List<EventoResponseDTO> historial() {
-        return eventoRepository.findByFechaLessThanOrderByFechaDesc(LocalDate.now()).stream()
+        return eventoRepository.findByFechaLessThanOrderByFechaDesc(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy()).stream()
                 .map(this::toResponseDTO).collect(Collectors.toList());
     }
 

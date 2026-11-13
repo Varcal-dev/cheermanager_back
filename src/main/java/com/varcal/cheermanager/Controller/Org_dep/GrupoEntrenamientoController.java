@@ -146,7 +146,7 @@ public class GrupoEntrenamientoController {
                         deportistaDTO
                                 .setTelefono(d.getPersona() != null ? d.getPersona().getTelefono() : "Desconocido");
                         deportistaDTO.setFechaNacimiento(
-                                d.getPersona() != null ? d.getPersona().getFechaNacimiento() : LocalDate.now());
+                                d.getPersona() != null ? d.getPersona().getFechaNacimiento() : com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy());
 
                         deportistaDTO.setNivelActualId(d.getNivelActualId());
                         return deportistaDTO;

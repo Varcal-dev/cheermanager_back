@@ -148,7 +148,7 @@ public class HistorialMedicoService {
     }
 
     public boolean tieneCondicionActiva(Integer personaId) {
-        LocalDate hace30Dias = LocalDate.now().minusDays(30);
+        LocalDate hace30Dias = com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().minusDays(30);
         List<HistorialMedico> recientes = historialMedicoRepository
                 .findByPersonaIdAndFechaRegistroAfterAndGravedadIsNotNull(personaId, hace30Dias);
         return !recientes.isEmpty();

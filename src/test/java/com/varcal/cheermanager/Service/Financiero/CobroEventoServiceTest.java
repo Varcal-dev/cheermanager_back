@@ -173,7 +173,7 @@ class CobroEventoServiceTest {
         assertEquals(7, (int) f.getEventoId());
         assertTrue(Fakes.igual("50000.50", f.getTotal()), "el monto se redondea a 2 decimales");
         assertEquals("Evento: Nacional", f.getDescripcion());
-        assertFalse(f.getFechaVencimiento().isBefore(LocalDate.now()));
+        assertFalse(f.getFechaVencimiento().isBefore(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy()));
     }
 
     @Test
@@ -216,7 +216,7 @@ class CobroEventoServiceTest {
     void vencimientoAnteriorAHoyEsRechazado() {
         Escenario e = new Escenario(true, dosGrupos(), List.of());
         CobroEventoLoteDTO d = dto("100");
-        d.setFechaVencimiento(LocalDate.now().minusDays(1));
+        d.setFechaVencimiento(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().minusDays(1));
         assertThrows(RuntimeException.class, () -> e.servicio.cobrar(7, d));
         assertEquals(0, e.facturas.creadas.size());
     }

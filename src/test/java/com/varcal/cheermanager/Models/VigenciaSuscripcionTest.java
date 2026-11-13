@@ -68,6 +68,6 @@ class VigenciaSuscripcionTest {
         Club nuevo = new Club();
         nuevo.setId(7);
         assertEquals(EstadoSuscripcion.PRUEBA, nuevo.getEstadoSuscripcion());
-        assertEquals(VigenciaSuscripcion.VIGENTE, VigenciaSuscripcion.de(nuevo, LocalDate.now()));
+        assertEquals(VigenciaSuscripcion.VIGENTE, VigenciaSuscripcion.de(nuevo, com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy()));
     }
 }

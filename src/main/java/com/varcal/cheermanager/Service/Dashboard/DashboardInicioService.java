@@ -63,7 +63,7 @@ public class DashboardInicioService {
 
         calcularCartera(dto);
 
-        LocalDate hoy = LocalDate.now();
+        LocalDate hoy = com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy();
         LocalDate hace7Dias = hoy.minusDays(7);
         long total = asistenciaRepository.contarTotalEnRango(hace7Dias, hoy);
         long presentes = asistenciaRepository.contarPorEstadoEnRango(hace7Dias, hoy, ESTADO_PRESENTE);
@@ -77,7 +77,7 @@ public class DashboardInicioService {
     }
 
     private ProximoEventoDTO calcularProximoEvento() {
-        List<Evento> proximos = eventoRepository.findByFechaGreaterThanEqualOrderByFechaAsc(LocalDate.now());
+        List<Evento> proximos = eventoRepository.findByFechaGreaterThanEqualOrderByFechaAsc(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy());
         if (proximos.isEmpty()) {
             return null;
         }
@@ -87,7 +87,7 @@ public class DashboardInicioService {
         dto.setEventoId(e.getId());
         dto.setNombre(e.getNombre());
         dto.setFecha(e.getFecha());
-        dto.setDiasRestantes(ChronoUnit.DAYS.between(LocalDate.now(), e.getFecha()));
+        dto.setDiasRestantes(ChronoUnit.DAYS.between(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy(), e.getFecha()));
         return dto;
     }
 

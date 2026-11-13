@@ -62,7 +62,7 @@ public class InteresadoService {
         this.grupos = grupos;
     }
 
-    protected LocalDate hoy() { return LocalDate.now(); }
+    protected LocalDate hoy() { return com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy(); }
     protected LocalDateTime ahora() { return LocalDateTime.now(); }
     protected long ahoraMs() { return System.currentTimeMillis(); }
 

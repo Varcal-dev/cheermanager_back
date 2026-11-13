@@ -33,7 +33,7 @@ public class DashboardEventosService {
     public ResumenEventosDTO obtenerResumen() {
         ResumenEventosDTO dto = new ResumenEventosDTO();
 
-        dto.setProximosEventos(eventoRepository.findByFechaGreaterThanEqualOrderByFechaAsc(LocalDate.now()).stream()
+        dto.setProximosEventos(eventoRepository.findByFechaGreaterThanEqualOrderByFechaAsc(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy()).stream()
                 .map(this::toProximoEventoDTO)
                 .collect(Collectors.toList()));
 

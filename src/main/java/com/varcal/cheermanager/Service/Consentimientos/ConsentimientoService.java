@@ -188,6 +188,6 @@ public class ConsentimientoService {
     }
 
     static boolean esMenor(LocalDate nacimiento) {
-        return nacimiento.isAfter(LocalDate.now().minusYears(18));
+        return nacimiento.isAfter(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().minusYears(18));
     }
 }

@@ -77,7 +77,7 @@ public class VentaService {
         }
 
         Venta venta = new Venta();
-        venta.setFecha(LocalDate.now());
+        venta.setFecha(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy());
         venta.setMetodoPago(dto.getMetodoPago());
 
         if (dto.getPersonaId() != null) {

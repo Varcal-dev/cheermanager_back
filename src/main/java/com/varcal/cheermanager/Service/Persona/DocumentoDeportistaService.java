@@ -57,7 +57,7 @@ public class DocumentoDeportistaService {
     }
 
     protected LocalDate hoy() {
-        return LocalDate.now();
+        return com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy();
     }
 
     @Transactional

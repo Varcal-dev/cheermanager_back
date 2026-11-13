@@ -279,7 +279,7 @@ public class PersonaService {
         referencias.exigirNivel(nivelInicial);
         referencias.exigirConvenio(deportistaDTO.getConvenioId());
         deportista.setNivelActualId(nivelInicial);
-        deportista.setFechaRegistro(LocalDate.now());
+        deportista.setFechaRegistro(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy());
         deportista.setContactoEmergencia(deportistaDTO.getContactoEmergencia());
         deportista.setConvenioId(deportistaDTO.getConvenioId());
         Deportista deportistaGuardado = deportistaRepository.save(deportista);
@@ -386,7 +386,7 @@ public class PersonaService {
                 historialNivelDeportistaService.registrarCambio(
                         deportistaActualizado.getId(),
                         nivelNuevoId,
-                        null, // fechaCambio null -> el service usa LocalDate.now()
+                        null, // fechaCambio null -> el service usa com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy()
                         "Cambio de nivel vía modificación de deportista");
             }
 
@@ -795,7 +795,7 @@ public class PersonaService {
             inscripcion.setEstado(Inscripcion.EstadoInscripcion.Inactiva);
             inscripcionRepository.save(inscripcion);
         }
-        LocalDate hoy = LocalDate.now();
+        LocalDate hoy = com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy();
         for (DeportistaPerteneceGrupo membresia : deportistaPerteneceGrupoRepository
                 .findByDeportistaIdAndFechaFinIsNull(deportista.getId())) {
             membresia.setFechaFin(hoy);

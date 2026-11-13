@@ -40,7 +40,7 @@ public class HistorialNivelDeportistaService {
         HistorialNivelDeportista historial = new HistorialNivelDeportista();
         historial.setDeportista(deportista);
         historial.setNivelId(nivelId);
-        historial.setFechaCambio(fechaCambio != null ? fechaCambio : LocalDate.now());
+        historial.setFechaCambio(fechaCambio != null ? fechaCambio : com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy());
         historial.setMotivo(motivo);
 
         return historialNivelDeportistaRepository.save(historial);

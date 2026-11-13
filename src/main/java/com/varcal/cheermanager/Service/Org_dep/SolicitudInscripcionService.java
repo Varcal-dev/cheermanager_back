@@ -61,7 +61,7 @@ public class SolicitudInscripcionService {
 
     /** Temporadas a las que aun se puede solicitar: las que no han terminado. */
     public List<Temporada> temporadasAbiertas() {
-        LocalDate hoy = LocalDate.now();
+        LocalDate hoy = com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy();
         return temporadaRepository.findAllByOrderByFechaInicioDesc().stream()
                 .filter(t -> !t.getFechaFin().isBefore(hoy)).toList();
     }
@@ -77,7 +77,7 @@ public class SolicitudInscripcionService {
         }
         Temporada t = temporadaRepository.findById(temporadaId)
                 .orElseThrow(() -> new RuntimeException("Temporada no encontrada"));
-        if (t.getFechaFin().isBefore(LocalDate.now())) {
+        if (t.getFechaFin().isBefore(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy())) {
             throw new RuntimeException("La temporada ya termino");
         }
         if (repo.existsByDeportistaIdAndTemporadaIdAndEstadoIn(deportistaId, temporadaId,
@@ -125,7 +125,7 @@ public class SolicitudInscripcionService {
         dto.setPlanPagoId(req.planPagoId());
         dto.setPlanMensualidadId(req.planMensualidadId());
         dto.setTemporadaId(t.getId());
-        dto.setFechaInscripcion(LocalDate.now());
+        dto.setFechaInscripcion(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy());
         dto.setFechaVencimiento(t.getFechaFin());
         dto.setEstado("Activa");
         Inscripcion creada = inscripcionService.crearInscripcion(dto);

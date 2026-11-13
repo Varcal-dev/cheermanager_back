@@ -109,7 +109,7 @@ class PedidoUniformeServiceTest {
     }
 
     PedidoUniformeService.Solicitud pedido(String valor, int cuotas) {
-        return new PedidoUniformeService.Solicitud("Uniforme 2027", 3, new BigDecimal(valor), cuotas, LocalDate.now().plusDays(15));
+        return new PedidoUniformeService.Solicitud("Uniforme 2027", 3, new BigDecimal(valor), cuotas, com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().plusDays(15));
     }
 
     void tresActivos() {
@@ -158,7 +158,7 @@ class PedidoUniformeServiceTest {
         assertThrows(IllegalArgumentException.class, () -> s.crear(pedido("90000", 13), 1));
         assertThrows(IllegalArgumentException.class, () -> s.crear(new PedidoUniformeService.Solicitud("U", 3, new BigDecimal("0.01"), 3, null), 1));
         assertThrows(IllegalArgumentException.class,
-                () -> s.crear(new PedidoUniformeService.Solicitud("U", 3, BigDecimal.TEN, 2, LocalDate.now().minusDays(1)), 1));
+                () -> s.crear(new PedidoUniformeService.Solicitud("U", 3, BigDecimal.TEN, 2, com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().minusDays(1)), 1));
         assertTrue(pedidos.isEmpty());
         PedidoUniformeService.Resumen r = s.crear(pedido("90000", 3), 7);
         assertEquals("Senior N3", r.grupo());
@@ -234,10 +234,10 @@ class PedidoUniformeServiceTest {
         PedidoUniformeService s = servicio();
         miembros.add(miembro(1, 11, "Ana", "Activo"));
         s.crear(pedido("60000", 2), 1);
-        pedidos.get(0).setPrimerVencimiento(LocalDate.now().minusDays(20));
+        pedidos.get(0).setPrimerVencimiento(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().minusDays(20));
         s.facturar(1, false);
-        assertEquals(LocalDate.now(), facturaService.creadas.get(0).getFechaVencimiento());
-        assertEquals(LocalDate.now().plusMonths(1), facturaService.creadas.get(1).getFechaVencimiento());
+        assertEquals(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy(), facturaService.creadas.get(0).getFechaVencimiento());
+        assertEquals(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().plusMonths(1), facturaService.creadas.get(1).getFechaVencimiento());
 
         PedidoUniformeService vacio = servicio();
         vacio.crear(pedido("60000", 2), 1);

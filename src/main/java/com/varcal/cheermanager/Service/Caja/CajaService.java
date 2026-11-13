@@ -131,7 +131,7 @@ public class CajaService {
 
     @Transactional(readOnly = true)
     public List<CierreResumen> listarCierres(LocalDate desde, LocalDate hasta) {
-        LocalDate h = hasta == null ? LocalDate.now() : hasta;
+        LocalDate h = hasta == null ? com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy() : hasta;
         LocalDate d = desde == null ? h.minusDays(60) : desde;
         if (d.isAfter(h)) {
             throw new RuntimeException("La fecha 'desde' no puede ser posterior a 'hasta'");
@@ -155,7 +155,7 @@ public class CajaService {
     public Resumen cerrar(LocalDate fecha, BigDecimal efectivoContado, String nota) {
         Resumen vivo = fecha == null ? null : resumen(fecha);
         CierreCaja c = fecha == null ? null : cierres.findByFecha(fecha).orElse(null);
-        String n = CajaReglas.validarCierre(fecha, LocalDate.now(), efectivoContado, vivo == null ? BigDecimal.ZERO : vivo.efectivoEsperado(),
+        String n = CajaReglas.validarCierre(fecha, com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy(), efectivoContado, vivo == null ? BigDecimal.ZERO : vivo.efectivoEsperado(),
                 nota, c == null ? null : c.getEstado());
         if (c == null) {
             c = new CierreCaja();

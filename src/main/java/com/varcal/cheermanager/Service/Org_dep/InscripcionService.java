@@ -389,7 +389,7 @@ public class InscripcionService {
             historialPlanesDeportistaService.registrarCambioDePlan(
                     guardada.getDeportista().getId(),
                     guardada.getPlanPago().getId(),
-                    LocalDate.now(),
+                    com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy(),
                     "Cambio de plan en inscripción #" + guardada.getId());
         }
 

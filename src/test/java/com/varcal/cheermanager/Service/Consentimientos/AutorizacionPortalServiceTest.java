@@ -67,8 +67,8 @@ class AutorizacionPortalServiceTest {
     ConsentFalso consent;
 
     AutorizacionPortalService servicio() {
-        menor = persona(100, LocalDate.now().minusYears(10));
-        adulta = persona(200, LocalDate.now().minusYears(25));
+        menor = persona(100, com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().minusYears(10));
+        adulta = persona(200, com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().minusYears(25));
         consent = new ConsentFalso();
         Acudiente ac = new Acudiente();
         ac.setId(5);
@@ -164,7 +164,7 @@ class AutorizacionPortalServiceTest {
     void menor_con_su_propia_cuenta_no_puede_firmar() {
         AutorizacionPortalService s = servicio();
         // Usuario 20 no es acudiente de la menor ni es ella: no la ve. Y la menor propia (sin acudiente) no firma.
-        Persona menorPropia = persona(300, LocalDate.now().minusYears(12));
+        Persona menorPropia = persona(300, com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().minusYears(12));
         Usuario u = new Usuario();
         u.setId(40);
         u.setPersona(menorPropia);

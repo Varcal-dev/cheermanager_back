@@ -235,7 +235,7 @@ class VentaServiceTest {
     void anularVentaCargadaAFacturaAjenaNoTocaEsaFactura() {
         Tienda t = new Tienda();
         // El deportista ya tenia una mensualidad pendiente; la venta se carga a esa cuenta.
-        Factura ajena = t.w.factura(1, "90000", java.time.LocalDate.now().plusDays(3));
+        Factura ajena = t.w.factura(1, "90000", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().plusDays(3));
         ajena.setConcepto("MENSUALIDAD");
         ajena.setDescripcion("Mensualidad noviembre");
         VentaDTO d = t.ventaAPersona(null, 1, 1);
@@ -254,7 +254,7 @@ class VentaServiceTest {
         Tienda t = new Tienda();
         VentaResponseDTO r = t.servicio.registrar(t.ventaAPersona(false, 1, 1)); // a cuenta
         Factura f = t.w.facturas.get(0);
-        t.w.pagoDirecto(f, "10000", EstadoPago.Pendiente, java.time.LocalDate.now());
+        t.w.pagoDirecto(f, "10000", EstadoPago.Pendiente, com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy());
         t.servicio.anular(r.getId(), "Se cancela el pedido");
         assertEquals(EstadoPago.Anulado, t.w.pagos.get(0).getEstado());
         assertTrue(f.getAnulada());
@@ -264,7 +264,7 @@ class VentaServiceTest {
     void anularConCajaCerradaDelPagoBloqueaTodaLaAnulacion() {
         Tienda t = new Tienda();
         VentaResponseDTO r = t.servicio.registrar(t.ventaAPersona(null, 1, 2));
-        t.w.diasCerrados.add(java.time.LocalDate.now());
+        t.w.diasCerrados.add(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy());
         assertThrows(IllegalStateException.class, () -> t.servicio.anular(r.getId(), "Fuera de tiempo"));
         // nada quedo a medias
         assertEquals(8, (int) t.variantes.get(0).getStockActual());

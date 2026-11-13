@@ -59,7 +59,7 @@ public class EvaluacionService {
     /** Valida (escala, fecha, duplicado del mismo dia) y guarda una evaluacion nueva. */
     private Evaluacion guardarNueva(Deportista deportista, CriterioEvaluacion criterio, LocalDate fechaIn, Integer puntaje) {
         EvaluacionReglas.validarPuntaje(puntaje);
-        LocalDate fecha = EvaluacionReglas.validarFecha(fechaIn, LocalDate.now());
+        LocalDate fecha = EvaluacionReglas.validarFecha(fechaIn, com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy());
         if (evaluacionRepository.existsByDeportistaIdAndCriterioEvaluacionIdAndFecha(deportista.getId(),
                 criterio.getId(), fecha)) {
             throw new IllegalStateException("Ya existe una evaluacion de '" + criterio.getNombre()
@@ -132,7 +132,7 @@ public class EvaluacionService {
                 .orElseThrow(() -> new RuntimeException("Evaluacion no encontrada con ID: " + id));
         EvaluacionReglas.validarPuntaje(dto.getPuntajeObtenido());
         LocalDate fecha = EvaluacionReglas.validarFecha(dto.getFecha() != null ? dto.getFecha() : e.getFecha(),
-                LocalDate.now());
+                com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy());
         if (evaluacionRepository.existsByDeportistaIdAndCriterioEvaluacionIdAndFechaAndIdNot(
                 e.getDeportista().getId(), e.getCriterioEvaluacion().getId(), fecha, id)) {
             throw new IllegalStateException("Ya existe otra evaluacion de este criterio para el deportista en esa fecha");

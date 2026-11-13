@@ -78,7 +78,7 @@ public class OnboardingService {
         pasos.add(conteo("grupos", "Crear grupos de entrenamiento", grupoRepository.count()));
         pasos.add(conteo("deportistas", "Registrar deportistas", deportistaRepository.count()));
 
-        long sinAcudiente = vinculoRepository.contarMenoresSinAcudiente(LocalDate.now().minusYears(18));
+        long sinAcudiente = vinculoRepository.contarMenoresSinAcudiente(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().minusYears(18));
         pasos.add(new Paso("acudientes", "Todo deportista menor de edad tiene acudiente", sinAcudiente == 0,
                 sinAcudiente == 0 ? "Sin pendientes" : sinAcudiente + " menores sin acudiente"));
 

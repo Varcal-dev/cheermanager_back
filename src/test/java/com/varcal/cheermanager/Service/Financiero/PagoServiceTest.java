@@ -32,10 +32,10 @@ class PagoServiceTest {
     @Test
     void abonoParcialDejaSaldoYLuegoElPagoCompletoLoCierra() {
         MundoFinanciero w = new MundoFinanciero();
-        Factura f = w.factura(1, "100000", LocalDate.now().plusDays(5));
-        PagoResponseDTO r1 = w.pagoService.registrarPago(dto(f.getId(), "40000", "Pagado", LocalDate.now()));
+        Factura f = w.factura(1, "100000", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().plusDays(5));
+        PagoResponseDTO r1 = w.pagoService.registrarPago(dto(f.getId(), "40000", "Pagado", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy()));
         assertTrue(Fakes.igual("60000", r1.getSaldoPendienteFactura()));
-        PagoResponseDTO r2 = w.pagoService.registrarPago(dto(f.getId(), "60000", "Pagado", LocalDate.now()));
+        PagoResponseDTO r2 = w.pagoService.registrarPago(dto(f.getId(), "60000", "Pagado", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy()));
         assertTrue(Fakes.igual("0", r2.getSaldoPendienteFactura()));
         assertTrue(Fakes.igual("0", w.pagoService.calcularSaldoPendiente(f.getId())));
         assertEquals("PAGADA", w.facturaService.toResponseDTO(f).getEstadoCuenta());
@@ -44,10 +44,10 @@ class PagoServiceTest {
     @Test
     void sobrepagoSeRechazaYNoGuardaNada() {
         MundoFinanciero w = new MundoFinanciero();
-        Factura f = w.factura(1, "100000", LocalDate.now().plusDays(5));
-        w.pagoService.registrarPago(dto(f.getId(), "70000", "Pagado", LocalDate.now()));
+        Factura f = w.factura(1, "100000", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().plusDays(5));
+        w.pagoService.registrarPago(dto(f.getId(), "70000", "Pagado", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy()));
         RuntimeException e = assertThrows(RuntimeException.class,
-                () -> w.pagoService.registrarPago(dto(f.getId(), "30000.01", "Pagado", LocalDate.now())));
+                () -> w.pagoService.registrarPago(dto(f.getId(), "30000.01", "Pagado", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy())));
         assertTrue(e.getMessage().contains("excede"));
         assertEquals(1, w.pagos.size());
     }
@@ -55,20 +55,20 @@ class PagoServiceTest {
     @Test
     void unPagoPendienteNoDescuentaSaldoNiCuentaParaSobrepago() {
         MundoFinanciero w = new MundoFinanciero();
-        Factura f = w.factura(1, "100000", LocalDate.now().plusDays(5));
-        w.pagoService.registrarPago(dto(f.getId(), "100000", "Pendiente", LocalDate.now()));
+        Factura f = w.factura(1, "100000", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().plusDays(5));
+        w.pagoService.registrarPago(dto(f.getId(), "100000", "Pendiente", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy()));
         assertTrue(Fakes.igual("100000", w.pagoService.calcularSaldoPendiente(f.getId())));
         // y todavia se puede pagar completo
-        w.pagoService.registrarPago(dto(f.getId(), "100000", "Pagado", LocalDate.now()));
+        w.pagoService.registrarPago(dto(f.getId(), "100000", "Pagado", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy()));
         assertTrue(Fakes.igual("0", w.pagoService.calcularSaldoPendiente(f.getId())));
     }
 
     @Test
     void marcarPendienteComoPagadoRevisaElSobrepago() {
         MundoFinanciero w = new MundoFinanciero();
-        Factura f = w.factura(1, "100000", LocalDate.now().plusDays(5));
-        PagoResponseDTO pendiente = w.pagoService.registrarPago(dto(f.getId(), "80000", "Pendiente", LocalDate.now()));
-        w.pagoService.registrarPago(dto(f.getId(), "50000", "Pagado", LocalDate.now()));
+        Factura f = w.factura(1, "100000", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().plusDays(5));
+        PagoResponseDTO pendiente = w.pagoService.registrarPago(dto(f.getId(), "80000", "Pendiente", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy()));
+        w.pagoService.registrarPago(dto(f.getId(), "50000", "Pagado", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy()));
         // 50000 + 80000 > 100000: no se puede confirmar el pendiente
         assertThrows(RuntimeException.class, () -> w.pagoService.actualizarEstado(pendiente.getId(), "Pagado"));
         assertEquals(EstadoPago.Pendiente, w.pagos.get(0).getEstado());
@@ -77,26 +77,26 @@ class PagoServiceTest {
     @Test
     void validacionesBasicasDelPago() {
         MundoFinanciero w = new MundoFinanciero();
-        Factura f = w.factura(1, "100000", LocalDate.now().plusDays(5));
-        assertThrows(RuntimeException.class, () -> w.pagoService.registrarPago(dto(f.getId(), null, "Pagado", LocalDate.now())));
-        assertThrows(RuntimeException.class, () -> w.pagoService.registrarPago(dto(f.getId(), "0", "Pagado", LocalDate.now())));
-        assertThrows(RuntimeException.class, () -> w.pagoService.registrarPago(dto(f.getId(), "-10", "Pagado", LocalDate.now())));
-        assertThrows(RuntimeException.class, () -> w.pagoService.registrarPago(dto(f.getId(), "10", "Inventado", LocalDate.now())));
-        assertThrows(RuntimeException.class, () -> w.pagoService.registrarPago(dto(f.getId(), "10", null, LocalDate.now())));
+        Factura f = w.factura(1, "100000", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().plusDays(5));
+        assertThrows(RuntimeException.class, () -> w.pagoService.registrarPago(dto(f.getId(), null, "Pagado", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy())));
+        assertThrows(RuntimeException.class, () -> w.pagoService.registrarPago(dto(f.getId(), "0", "Pagado", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy())));
+        assertThrows(RuntimeException.class, () -> w.pagoService.registrarPago(dto(f.getId(), "-10", "Pagado", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy())));
+        assertThrows(RuntimeException.class, () -> w.pagoService.registrarPago(dto(f.getId(), "10", "Inventado", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy())));
+        assertThrows(RuntimeException.class, () -> w.pagoService.registrarPago(dto(f.getId(), "10", null, com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy())));
         assertThrows(RuntimeException.class, () -> w.pagoService.registrarPago(dto(f.getId(), "10", "Pagado", null)));
-        assertThrows(RuntimeException.class, () -> w.pagoService.registrarPago(dto(999, "10", "Pagado", LocalDate.now())));
+        assertThrows(RuntimeException.class, () -> w.pagoService.registrarPago(dto(999, "10", "Pagado", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy())));
         // "Anulado" no se registra directo: se anula con motivo
-        assertThrows(RuntimeException.class, () -> w.pagoService.registrarPago(dto(f.getId(), "10", "Anulado", LocalDate.now())));
+        assertThrows(RuntimeException.class, () -> w.pagoService.registrarPago(dto(f.getId(), "10", "Anulado", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy())));
         assertEquals(0, w.pagos.size());
     }
 
     @Test
     void unaFacturaAnuladaNoAdmitePagos() {
         MundoFinanciero w = new MundoFinanciero();
-        Factura f = w.factura(1, "100000", LocalDate.now().plusDays(5));
+        Factura f = w.factura(1, "100000", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().plusDays(5));
         f.setAnulada(true);
         RuntimeException e = assertThrows(RuntimeException.class,
-                () -> w.pagoService.registrarPago(dto(f.getId(), "10000", "Pagado", LocalDate.now())));
+                () -> w.pagoService.registrarPago(dto(f.getId(), "10000", "Pagado", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy())));
         assertTrue(e.getMessage().contains("anulada"));
         assertEquals(0, w.pagos.size());
     }
@@ -104,8 +104,8 @@ class PagoServiceTest {
     @Test
     void anularUnPagoLiberaElSaldoYQuedaConMotivo() {
         MundoFinanciero w = new MundoFinanciero();
-        Factura f = w.factura(1, "100000", LocalDate.now().plusDays(5));
-        PagoResponseDTO p = w.pagoService.registrarPago(dto(f.getId(), "100000", "Pagado", LocalDate.now()));
+        Factura f = w.factura(1, "100000", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().plusDays(5));
+        PagoResponseDTO p = w.pagoService.registrarPago(dto(f.getId(), "100000", "Pagado", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy()));
         PagoResponseDTO anulado = w.pagoService.anular(p.getId(), "Error de digitacion");
         assertEquals("Anulado", anulado.getEstado());
         assertEquals("Error de digitacion", anulado.getMotivoAnulacion());
@@ -118,8 +118,8 @@ class PagoServiceTest {
     @Test
     void anularExigeMotivoYNoSePuedeAnularDosVecesNiReactivar() {
         MundoFinanciero w = new MundoFinanciero();
-        Factura f = w.factura(1, "100000", LocalDate.now().plusDays(5));
-        PagoResponseDTO p = w.pagoService.registrarPago(dto(f.getId(), "50000", "Pagado", LocalDate.now()));
+        Factura f = w.factura(1, "100000", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().plusDays(5));
+        PagoResponseDTO p = w.pagoService.registrarPago(dto(f.getId(), "50000", "Pagado", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy()));
         assertThrows(RuntimeException.class, () -> w.pagoService.anular(p.getId(), "  "));
         assertThrows(RuntimeException.class, () -> w.pagoService.anular(p.getId(), "ab"));
         assertEquals(EstadoPago.Pagado, w.pagos.get(0).getEstado());
@@ -132,8 +132,8 @@ class PagoServiceTest {
     @Test
     void conLaCajaCerradaNoSeRegistraConfirmaNiAnulaUnPagoPagado() {
         MundoFinanciero w = new MundoFinanciero();
-        LocalDate ayer = LocalDate.now().minusDays(1);
-        Factura f = w.factura(1, "100000", LocalDate.now().plusDays(5));
+        LocalDate ayer = com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().minusDays(1);
+        Factura f = w.factura(1, "100000", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().plusDays(5));
         // pago ya confirmado ayer, y luego se cierra la caja de ayer
         Pago pagado = w.pagoDirecto(f, "30000", EstadoPago.Pagado, ayer);
         Pago pendiente = w.pagoDirecto(f, "20000", EstadoPago.Pendiente, ayer);
@@ -152,8 +152,8 @@ class PagoServiceTest {
     void conLaCajaCerradaSiSePuedeRegistrarUnPendienteOAnularUnPendiente() {
         // Pendiente/Vencido no son dinero recibido: no afectan el cuadre de caja.
         MundoFinanciero w = new MundoFinanciero();
-        LocalDate ayer = LocalDate.now().minusDays(1);
-        Factura f = w.factura(1, "100000", LocalDate.now().plusDays(5));
+        LocalDate ayer = com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().minusDays(1);
+        Factura f = w.factura(1, "100000", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().plusDays(5));
         w.diasCerrados.add(ayer);
         PagoResponseDTO p = w.pagoService.registrarPago(dto(f.getId(), "10000", "Pendiente", ayer));
         PagoResponseDTO a = w.pagoService.anular(p.getId(), "Ya no aplica");
@@ -163,9 +163,9 @@ class PagoServiceTest {
     @Test
     void elPagoPagadoDeHoyFuncionaConOtroDiaCerrado() {
         MundoFinanciero w = new MundoFinanciero();
-        w.diasCerrados.add(LocalDate.now().minusDays(1));
-        Factura f = w.factura(1, "100000", LocalDate.now().plusDays(5));
-        PagoResponseDTO r = w.pagoService.registrarPago(dto(f.getId(), "100000", "Pagado", LocalDate.now()));
+        w.diasCerrados.add(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().minusDays(1));
+        Factura f = w.factura(1, "100000", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().plusDays(5));
+        PagoResponseDTO r = w.pagoService.registrarPago(dto(f.getId(), "100000", "Pagado", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy()));
         assertEquals("Pagado", r.getEstado());
     }
 
@@ -177,8 +177,8 @@ class PagoServiceTest {
         assertEquals(100, PagoService.recortarReferencia("x".repeat(150)).length());
 
         MundoFinanciero w = new MundoFinanciero();
-        Factura f = w.factura(1, "100000", LocalDate.now().plusDays(5));
-        PagoDTO d = dto(f.getId(), "1000", "Pagado", LocalDate.now());
+        Factura f = w.factura(1, "100000", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().plusDays(5));
+        PagoDTO d = dto(f.getId(), "1000", "Pagado", com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy());
         d.setReferencia("  NEQUI-998 ");
         w.pagoService.registrarPago(d);
         assertEquals("NEQUI-998", w.pagos.get(0).getReferencia());
