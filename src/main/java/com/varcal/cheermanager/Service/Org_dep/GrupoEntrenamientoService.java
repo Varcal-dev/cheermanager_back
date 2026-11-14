@@ -220,9 +220,7 @@ public class GrupoEntrenamientoService {
                     d.getFechaNacimiento(),
                     edad,
                     motivo == null,
-                    motivo,
-                    sesionesGrupo,
-                    sesionesPlan);
+                    motivo);
 
             if (motivo == null) {
                 elegibles.add(dto);
@@ -299,7 +297,9 @@ public class GrupoEntrenamientoService {
                     cupoActual,
                     cupoMaximo,
                     motivo == null,
-                    motivo);
+                    motivo,
+                    sesionesGrupo,
+                    sesionesPlan);
 
             if (motivo == null) {
                 elegibles.add(dto);
