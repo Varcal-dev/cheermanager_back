@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,7 +15,9 @@ import com.varcal.cheermanager.DTO.Dashboard.ResumenInicioDTO.ProximoEventoDTO;
 import com.varcal.cheermanager.Models.Eventos.Evento;
 import com.varcal.cheermanager.Models.Financiero.Factura;
 import com.varcal.cheermanager.Models.Personas.Deportista;
+import com.varcal.cheermanager.Service.Auth.UsuarioService;
 import com.varcal.cheermanager.Service.Historiales.HistorialMedicoService;
+import com.varcal.cheermanager.Utils.AuthenticatedUserUtil;
 import com.varcal.cheermanager.repository.Eventos.EventoRepository;
 import com.varcal.cheermanager.repository.Financiero.FacturaRepository;
 import com.varcal.cheermanager.repository.Financiero.PagoRepository;
@@ -49,6 +52,9 @@ public class DashboardInicioService {
     @Autowired
     private HistorialMedicoService historialMedicoService;
 
+    @Autowired
+    private UsuarioService usuarioService;
+
     public ResumenInicioDTO obtenerResumen() {
         ResumenInicioDTO dto = new ResumenInicioDTO();
 
@@ -61,7 +67,10 @@ public class DashboardInicioService {
 
         dto.setProximoEvento(calcularProximoEvento());
 
-        calcularCartera(dto);
+        // La cartera son pesos del club: solo para quien puede ver finanzas. El resto recibe null (el front oculta la tarjeta).
+        if (puedeVerFinanzas()) {
+            calcularCartera(dto);
+        }
 
         LocalDate hoy = com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy();
         LocalDate hace7Dias = hoy.minusDays(7);
@@ -74,6 +83,11 @@ public class DashboardInicioService {
                 .count());
 
         return dto;
+    }
+
+    private boolean puedeVerFinanzas() {
+        Set<String> permisos = usuarioService.obtenerPermisos(AuthenticatedUserUtil.getCurrentUserId().intValue());
+        return permisos.contains("ver_dash_finanzas") || permisos.contains("ver_factura");
     }
 
     private ProximoEventoDTO calcularProximoEvento() {

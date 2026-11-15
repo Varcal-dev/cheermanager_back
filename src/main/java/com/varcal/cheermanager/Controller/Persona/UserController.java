@@ -75,10 +75,24 @@ public class UserController {
     @Autowired
     private UsuarioService usuarioService;
 
+    @Autowired
+    private com.varcal.cheermanager.Service.Auth.JerarquiaAccesoService jerarquia;
+
+    /** Respuesta uniforme para las negativas del techo de permisos (403) y del ultimo administrador (409). */
+    private static ResponseEntity<?> negado(org.springframework.web.server.ResponseStatusException e) {
+        return ResponseEntity.status(e.getStatusCode()).body(java.util.Map.of("success", false, "message", e.getReason()));
+    }
+
     @PostMapping("/registrar")
     @RequiresPermission("crear_usuario")
     public ResponseEntity<?> registrarUsuario(@RequestBody UsuarioDTO usuarioDTO) {
         try {
+            // Nadie crea una cuenta con un rol que tenga mas permisos que el suyo propio.
+            if (usuarioDTO.getRolId() != null) {
+                rolRepository.findById(usuarioDTO.getRolId())
+                        .ifPresent(rol -> jerarquia.exigirPuedeOtorgarRoles(List.of(rol)));
+            }
+
             Persona persona = null;
 
             // Caso: persona existente
@@ -111,6 +125,8 @@ public class UserController {
                     usuarioDTO.getRolId());
 
             return ResponseEntity.ok(new UsuarioDTO(usuario)); // DTO: nunca la entidad (filtraba el hash)
+        } catch (org.springframework.web.server.ResponseStatusException e) {
+            return negado(e);
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error al registrar el usuario: " + e.getMessage());
         }
@@ -155,6 +171,10 @@ public class UserController {
             Usuario usuario = userRepository.findById(id.longValue())
                     .orElseThrow(() -> new RuntimeException("Usuario no encontrado con el ID: " + id));
 
+            // Techo de permisos: cambiar datos, clave o rol de alguien exige tener todo lo que ese usuario puede hacer
+            // (si no, bastaria "modificar_usuario" para ponerle una clave nueva al Administrador y entrar como el).
+            jerarquia.exigirPuedeGestionar(usuario);
+
             // Actualizar los datos del usuario
             usuario.setUsername(usuarioDTO.getUsername());
             usuario.setEmail(usuarioDTO.getEmail());
@@ -166,17 +186,32 @@ public class UserController {
                 Rol rol = rolRepository.findById(usuarioDTO.getRolId())
                         .orElseThrow(() -> new RuntimeException(
                                 "El rol con ID '" + usuarioDTO.getRolId() + "' no existe en la base de datos"));
+                boolean cambia = usuario.getRol() == null || !usuario.getRol().getId().equals(rol.getId());
+                if (cambia) {
+                    jerarquia.exigirNoEsUnoMismo(id, "cambiar el rol de");
+                    jerarquia.exigirPuedeOtorgarRoles(List.of(rol));
+                    if (!com.varcal.cheermanager.Service.Auth.JerarquiaAccesoService.ROL_ADMINISTRADOR
+                            .equalsIgnoreCase(rol.getNombre())) {
+                        jerarquia.exigirNoDejarSinAdministrador(usuario, "quitarle el rol");
+                    }
+                }
                 usuario.setRol(rol);
             }
             // El DTO ya traía este campo, pero nunca se aplicaba — por eso
             // "Activar/Desactivar" en el front no tenía forma de funcionar
             // contra este endpoint.
             if (usuarioDTO.getActivo() != null) {
+                if (!usuarioDTO.getActivo()) {
+                    jerarquia.exigirNoEsUnoMismo(id, "desactivar");
+                    jerarquia.exigirNoDejarSinAdministrador(usuario, "desactivar");
+                }
                 usuario.setActivo(usuarioDTO.getActivo());
             }
 
             Usuario usuarioActualizado = userRepository.save(usuario);
             return ResponseEntity.ok(new UsuarioDTO(usuarioActualizado)); // Devolver el usuario actualizado
+        } catch (org.springframework.web.server.ResponseStatusException e) {
+            return negado(e);
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error al actualizar el usuario: " + e.getMessage());
         }
@@ -198,11 +233,17 @@ public class UserController {
     @RequiresPermission("eliminar_usuario")
     public ResponseEntity<?> eliminarUsuario(@PathVariable Integer id) {
         try {
-            if (!userRepository.existsById(id.longValue())) {
+            Usuario objetivo = userRepository.findById(id.longValue()).orElse(null);
+            if (objetivo == null) {
                 return ResponseEntity.status(404).body("Usuario no encontrado con el ID: " + id);
             }
+            jerarquia.exigirNoEsUnoMismo(id, "eliminar");
+            jerarquia.exigirPuedeGestionar(objetivo);
+            jerarquia.exigirNoDejarSinAdministrador(objetivo, "eliminar");
             userRepository.deleteById(id.longValue());
             return ResponseEntity.ok("Usuario eliminado exitosamente");
+        } catch (org.springframework.web.server.ResponseStatusException e) {
+            return negado(e);
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error al eliminar el usuario: " + e.getMessage());
         }
@@ -336,11 +377,25 @@ public class UserController {
     @RequiresPermission("asignar_permiso")
     public ResponseEntity<?> asignarRoles(@PathVariable Integer usuarioId, @RequestBody Set<Integer> rolIds) {
         try {
+            Usuario objetivo = userRepository.findById(usuarioId.longValue()).orElse(null);
+            if (objetivo == null) {
+                return ResponseEntity.status(404).body("Usuario no encontrado");
+            }
+            List<Rol> nuevos = rolRepository.findAllById(rolIds);
+            jerarquia.exigirNoEsUnoMismo(usuarioId, "cambiar los roles de");
+            jerarquia.exigirPuedeGestionar(objetivo);
+            jerarquia.exigirPuedeOtorgarRoles(nuevos);
+            if (nuevos.stream().noneMatch(r -> com.varcal.cheermanager.Service.Auth.JerarquiaAccesoService.ROL_ADMINISTRADOR
+                    .equalsIgnoreCase(r.getNombre()))) {
+                jerarquia.exigirNoDejarSinAdministrador(objetivo, "quitarle el rol");
+            }
             Usuario usuarioActualizado = usuarioService.asignarRoles(usuarioId, rolIds);
             if (usuarioActualizado == null) {
                 return ResponseEntity.status(404).body("Usuario no encontrado");
             }
             return ResponseEntity.ok(new UsuarioDTO(usuarioActualizado));
+        } catch (org.springframework.web.server.ResponseStatusException e) {
+            return negado(e);
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error al asignar roles: " + e.getMessage());
         }
@@ -350,6 +405,15 @@ public class UserController {
     @PostMapping("/{usuarioId}/clave-temporal")
     @RequiresPermission("restablecer_clave_usuario")
     public ResponseEntity<?> claveTemporal(@PathVariable Integer usuarioId) {
+        // Techo de permisos: restablecer la clave de alguien es entrar como el, asi que exige tener todo lo suyo.
+        Usuario objetivo = userRepository.findById(usuarioId.longValue()).orElse(null);
+        if (objetivo != null) {
+            try {
+                jerarquia.exigirPuedeGestionar(objetivo);
+            } catch (org.springframework.web.server.ResponseStatusException e) {
+                return negado(e);
+            }
+        }
         String clave = personaService.restablecerClaveTemporal(usuarioId.longValue());
         return ResponseEntity.ok(java.util.Map.of("claveTemporal", clave,
                 "aviso", "Entregala por un canal privado. Debera cambiarla al ingresar."));

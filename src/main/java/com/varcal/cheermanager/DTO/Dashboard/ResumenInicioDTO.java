@@ -12,8 +12,10 @@ public class ResumenInicioDTO {
 
     private ProximoEventoDTO proximoEvento; // null si no hay ninguno agendado
 
+    // Cartera: dato financiero. Solo se llena para quien tiene ver_dash_finanzas o ver_factura; para el resto
+    // (entrenador, asistente, inventario...) va null, igual que los permisos de Finanzas que no tienen.
     private BigDecimal carteraPendienteTotal; // suma de (factura.total - pagado) de todas las facturas
-    private long facturasConSaldoPendiente;
+    private Long facturasConSaldoPendiente;
 
     private Double porcentajeAsistenciaUltimos7Dias; // null si no hay registros
 

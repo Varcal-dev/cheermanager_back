@@ -7,6 +7,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.varcal.cheermanager.DTO.Notificaciones.RecordatorioMoraResultadoDTO;
+import com.varcal.cheermanager.Service.Clubes.FuncionesService;
 import com.varcal.cheermanager.tenant.TenantContext;
 import com.varcal.cheermanager.tenant.TenantLookupRepository;
 
@@ -24,12 +25,15 @@ public class RecordatoriosMoraJob {
 
     private final TenantLookupRepository lookup;
     private final RecordatorioMoraService service;
+    private final FuncionesService funciones;
     private final boolean activa;
 
     public RecordatoriosMoraJob(TenantLookupRepository lookup, RecordatorioMoraService service,
+                                FuncionesService funciones,
                                 @Value("${app.recordatorios.automaticos:true}") boolean activa) {
         this.lookup = lookup;
         this.service = service;
+        this.funciones = funciones;
         this.activa = activa;
     }
 
@@ -40,6 +44,11 @@ public class RecordatoriosMoraJob {
         }
         for (Integer clubId : lookup.idsClubesActivos()) {
             try {
+                // El envio manual ya lo frena el filtro de planes; la tarea automatica no pasa por el filtro, asi que
+                // consulta el plan ella misma. Un club sin la funcion (o en su ventana de solo lectura) no recibe envios.
+                if (!funciones.plena(clubId, "RECORDATORIOS_MORA")) {
+                    continue;
+                }
                 RecordatorioMoraResultadoDTO r = TenantContext.runAs(clubId, () -> service.ejecutarAutomatico());
                 if (r != null && (!r.enviados().isEmpty() || !r.fallidos().isEmpty())) {
                     log.info("Recordatorios de mora club {}: enviados {}, fallidos {}", clubId, r.enviados(), r.fallidos());

@@ -72,7 +72,21 @@ public class FuncionesService {
             new Regla("/api/recordatorios-mora", "RECORDATORIOS_MORA", true),
             new Regla("/api/auditoria", "AUDITORIA", false),
             new Regla("/api/conciliacion", "CONCILIACION_BANCARIA", false),
-            new Regla("/api/sedes", "MULTISEDE", false));
+            new Regla("/api/sedes", "MULTISEDE", false),
+            // Roles del club mas alla de la plantilla: leer siempre (la pantalla de usuarios los lista); crear,
+            // editar, borrar y asignar permisos solo con el plan.
+            new Regla("/api/roles", "ROLES_PERSONALIZADOS", true),
+            // Pestanas Financiero y Administracion del dashboard. El resumen de Inicio (KPIs) no se frena.
+            new Regla("/api/dashboard/finanzas", "DASHBOARDS_AVANZADOS", false),
+            new Regla("/api/dashboard/administracion", "DASHBOARDS_AVANZADOS", false));
+
+    /**
+     * Una funcion del catalogo tal como la ve el front: con el plan mas barato que la trae (para el candado) y si
+     * el plan solo frena la escritura (la pantalla sigue consultable) o la bloquea del todo.
+     */
+    public record EntradaCatalogo(String codigo, String nombre, String descripcion, String planMinimo,
+            String planMinimoCodigo, boolean soloEscritura) {
+    }
 
     private static final long VIGENCIA_CACHE_MS = 60_000;
 
@@ -81,6 +95,11 @@ public class FuncionesService {
 
     private final JdbcTemplate jdbc;
     private final Map<Integer, Guardada> cache = new ConcurrentHashMap<>();
+
+    private record Catalogada(List<EntradaCatalogo> valor, long hasta) {
+    }
+
+    private volatile Catalogada catalogoGuardado;
 
     public FuncionesService(JdbcTemplate jdbc) {
         this.jdbc = jdbc;
@@ -102,6 +121,25 @@ public class FuncionesService {
             }
         }
         return Optional.empty();
+    }
+
+    /** true si TODAS las reglas de esa funcion solo frenan escritura (la pantalla se puede consultar sin el plan). */
+    public static boolean soloEscritura(String funcion) {
+        boolean hay = false;
+        for (Regla r : REGLAS) {
+            if (r.funcion().equals(funcion)) {
+                hay = true;
+                if (!r.soloEscritura()) {
+                    return false;
+                }
+            }
+        }
+        return hay;
+    }
+
+    /** "CheerManager Pro" -> "Pro": la etiqueta corta que va junto al candado. */
+    public static String nombreCorto(String nombrePlan) {
+        return nombrePlan == null ? null : nombrePlan.replaceFirst("^CheerManager\\s+", "").trim();
     }
 
     /** Incluida -> plena; perdida dentro de su ventana -> solo lectura; perdida y fuera de la ventana -> bloqueada. */
@@ -145,9 +183,48 @@ public class FuncionesService {
         return v;
     }
 
+    /**
+     * true solo si el club tiene la funcion completa. Para tareas automaticas que ENVIAN o ESCRIBEN: una funcion en
+     * ventana de solo lectura (plan recien bajado) no debe seguir enviando cosas por su cuenta.
+     */
+    public boolean plena(int clubId, String funcion) {
+        return habilitadas(clubId).estado(funcion, SuscripcionService.hoy()) == Estado.PLENA;
+    }
+
+    /**
+     * Funciones disponibles con el plan mas barato (orden > 0: no cuenta Prueba ni Fundador) que las trae.
+     * Es dato de plataforma y cambia poco: se guarda 60 s para todos los clubes.
+     */
+    public List<EntradaCatalogo> catalogo() {
+        long ahora = System.currentTimeMillis();
+        Catalogada c = catalogoGuardado;
+        if (c != null && c.hasta() > ahora) {
+            return c.valor();
+        }
+        Map<String, String[]> minimo = new HashMap<>();
+        for (Map<String, Object> fila : jdbc.queryForList(
+                "SELECT pc.caracteristica, p.codigo, p.nombre FROM planes_caracteristicas pc "
+                        + "JOIN planes_saas p ON p.id = pc.plan_id WHERE pc.habilitada = 1 AND p.orden > 0 "
+                        + "ORDER BY p.orden")) {
+            minimo.putIfAbsent((String) fila.get("caracteristica"),
+                    new String[] { (String) fila.get("codigo"), (String) fila.get("nombre") });
+        }
+        List<EntradaCatalogo> r = new ArrayList<>();
+        for (Map<String, Object> fila : jdbc.queryForList(
+                "SELECT codigo, nombre, descripcion FROM caracteristicas_saas WHERE disponible = 1 ORDER BY orden")) {
+            String codigo = (String) fila.get("codigo");
+            String[] m = minimo.get(codigo);
+            r.add(new EntradaCatalogo(codigo, (String) fila.get("nombre"), (String) fila.get("descripcion"),
+                    m == null ? null : nombreCorto(m[1]), m == null ? null : m[0], soloEscritura(codigo)));
+        }
+        catalogoGuardado = new Catalogada(r, ahora + VIGENCIA_CACHE_MS);
+        return r;
+    }
+
     /** Para usarlo tras cambiar el plan o las excepciones de un club sin esperar el minuto de cache. */
     public void olvidar(int clubId) {
         cache.remove(clubId);
+        catalogoGuardado = null;
     }
 
     private Habilitadas calcular(int clubId) {

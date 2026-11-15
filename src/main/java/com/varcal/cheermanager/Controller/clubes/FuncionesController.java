@@ -21,7 +21,8 @@ import com.varcal.cheermanager.tenant.TenantContext;
 
 /**
  * Funciones del plan del club (V39) y sus ventanas al bajar de plan (V41).
- *  - GET /api/suscripcion/funciones: que trae el plan y que funciones esta perdiendo (el menu y "Plan y mis datos").
+ *  - GET /api/suscripcion/funciones: que trae el plan, que funciones esta perdiendo y el catalogo con el plan minimo
+ *    de cada una (el menu pinta con candado lo que el plan no trae, y "Plan y mis datos").
  *  - GET /api/suscripcion/funciones/{codigo}/exportar: ZIP con los datos de esa funcion, siempre disponible.
  */
 @RestController
@@ -42,7 +43,8 @@ public class FuncionesController {
         int clubId = TenantContext.require();
         FuncionesService.Habilitadas h = funciones.habilitadas(clubId);
         List<FuncionesService.Perdida> perdidas = funciones.perdidasDelClub(clubId);
-        return Map.of("todas", h.todas(), "funciones", new TreeSet<>(h.codigos()), "perdidas", perdidas);
+        return Map.of("todas", h.todas(), "funciones", new TreeSet<>(h.codigos()), "perdidas", perdidas,
+                "catalogo", funciones.catalogo());
     }
 
     @GetMapping("/funciones/{codigo}/exportar")

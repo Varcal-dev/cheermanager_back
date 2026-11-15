@@ -12,7 +12,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.varcal.cheermanager.DTO.Ath.RolConConteoDTO;
 import com.varcal.cheermanager.Models.Auth.Permiso;
@@ -29,6 +31,12 @@ public class RolService {
 
     @Autowired
     private AuditoriaService auditoriaService;
+
+    @Autowired
+    private JerarquiaAccesoService jerarquia;
+
+    /** Permisos sin los cuales el Administrador no podria volver a abrir la pantalla de roles para arreglarlo. */
+    private static final Set<String> PERMISOS_DE_RESCATE = Set.of("ver_roles", "gestionar_roles", "asignar_permiso");
 
     public RolService(RolRepository rolRepository, PermisoRepository permisoRepository) {
         this.rolRepository = rolRepository;
@@ -65,6 +73,14 @@ public class RolService {
     public Rol modificarRol(Integer id, Rol rolDetails) {
         return rolRepository.findById(id)
                 .map(rol -> {
+                    // Las migraciones y el techo de permisos reconocen al Administrador por nombre: renombrarlo
+                    // dejaria a los permisos nuevos sin llegar a nadie.
+                    if (JerarquiaAccesoService.ROL_ADMINISTRADOR.equalsIgnoreCase(rol.getNombre())
+                            && !JerarquiaAccesoService.ROL_ADMINISTRADOR.equalsIgnoreCase(rolDetails.getNombre())) {
+                        throw new ResponseStatusException(HttpStatus.CONFLICT,
+                                "El rol Administrador no se puede renombrar.");
+                    }
+                    jerarquia.exigirPuedeOtorgarRoles(List.of(rol));
                     rol.setNombre(rolDetails.getNombre());
                     // Antes solo se actualizaba el nombre — "Editar Rol" en
                     // el front no tenía forma de guardar cambios en la
@@ -76,6 +92,20 @@ public class RolService {
     }
 
     public void deleteRol(Integer id) {
+        Rol rol = rolRepository.findById(id).orElse(null);
+        if (rol == null) {
+            return;
+        }
+        if (JerarquiaAccesoService.ROL_ADMINISTRADOR.equalsIgnoreCase(rol.getNombre())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "El rol Administrador no se puede eliminar.");
+        }
+        jerarquia.exigirPuedeOtorgarRoles(List.of(rol));
+        boolean enUso = rolRepository.listarRolesConConteo().stream()
+                .anyMatch(f -> ((Number) f[0]).intValue() == id && ((Number) f[2]).intValue() > 0);
+        if (enUso) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "El rol tiene usuarios asignados: reasignalos a otro rol antes de eliminarlo.");
+        }
         rolRepository.deleteById(id);
     }
 
@@ -90,6 +120,21 @@ public class RolService {
         if (TenantContext.get() != Club.PLATAFORMA_ID
                 && permisos.stream().anyMatch(p -> RolesPlantilla.SOLO_PLATAFORMA.contains(p.getNombre()))) {
             throw new RuntimeException("Hay permisos reservados a la plataforma que no se pueden asignar a un rol de club");
+        }
+
+        // Techo de permisos: no se puede tocar un rol con mas poder que el propio, ni agregarle permisos que uno no
+        // tiene (un rol personalizado con "asignar_permiso" no puede darse el resto del sistema).
+        Set<String> antesNombres = nombresDePermisos(rol.getPermisos());
+        Set<String> despuesNombres = permisos.stream().map(Permiso::getNombre).collect(Collectors.toSet());
+        jerarquia.exigirPuedeOtorgarRoles(List.of(rol));
+        Set<String> nuevos = new HashSet<>(despuesNombres);
+        nuevos.removeAll(antesNombres);
+        jerarquia.exigirPuedeOtorgarPermisos(nuevos);
+        if (JerarquiaAccesoService.ROL_ADMINISTRADOR.equalsIgnoreCase(rol.getNombre())
+                && !despuesNombres.containsAll(PERMISOS_DE_RESCATE)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "El rol Administrador debe conservar los permisos de roles (" + String.join(", ", PERMISOS_DE_RESCATE)
+                            + ") para poder corregir errores.");
         }
 
         // Los permisos son una relacion: el snapshot automatico de la auditoria no los ve. Se registra aparte
