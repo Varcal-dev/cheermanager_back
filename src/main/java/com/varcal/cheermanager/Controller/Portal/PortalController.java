@@ -34,6 +34,28 @@ public class PortalController {
         return service.perfil();
     }
 
+    /** Perfil 360 del deportista (estado, facturacion si corresponde, asistencia y evolucion tecnica). */
+    @GetMapping("/deportistas/{id}/resumen")
+    @RequiresPermission("acceder_portal")
+    public com.varcal.cheermanager.Service.Perfil.PerfilDeportistaService.Perfil resumen(@PathVariable Integer id) {
+        return service.resumen(id);
+    }
+
+    @GetMapping("/deportistas/{id}/resumen/competencia")
+    @RequiresPermission("acceder_portal")
+    public com.varcal.cheermanager.Service.Perfil.PerfilCompetenciaSaludService.DatosCompetencia resumenCompetencia(
+            @PathVariable Integer id) {
+        return service.competenciaPerfil(id);
+    }
+
+    /** Estado y diagnostico (sin seguimientos clinicos). */
+    @GetMapping("/deportistas/{id}/resumen/salud")
+    @RequiresPermission("acceder_portal")
+    public com.varcal.cheermanager.Service.Perfil.PerfilCompetenciaSaludService.DatosSalud resumenSalud(
+            @PathVariable Integer id) {
+        return service.saludPerfil(id);
+    }
+
     @GetMapping("/deportistas/{id}/facturas")
     @RequiresPermission("acceder_portal")
     public List<FacturaResponseDTO> facturas(@PathVariable Integer id) {

@@ -51,6 +51,12 @@ public class PortalService {
     @org.springframework.beans.factory.annotation.Autowired
     private com.varcal.cheermanager.Service.Persona.PersonaService personaService;
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.varcal.cheermanager.Service.Perfil.PerfilDeportistaService perfilService;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.varcal.cheermanager.Service.Perfil.PerfilCompetenciaSaludService perfilCompetenciaSaludService;
+
 
     public record MiPerfil(String tipo, String nombre, List<DeportistaResumen> deportistas) {
     }
@@ -61,7 +67,7 @@ public class PortalService {
     }
 
     public record InscripcionResumen(Integer id, String temporada, String estado, LocalDate fechaInscripcion,
-            LocalDate fechaVencimiento) {
+            LocalDate fechaVencimiento, String planInscripcion, String planMensualidad) {
     }
 
     /** Una franja semanal de un grupo del deportista (para pintar su calendario). */
@@ -178,7 +184,8 @@ public class PortalService {
         List<InscripcionResumen> insc = inscripcionRepository.findByDeportistaId(d.getId().longValue()).stream()
                 .map(i -> new InscripcionResumen(i.getId(), i.getTemporada() != null ? i.getTemporada().getNombre() : null,
                         i.getEstado() != null ? i.getEstado().name() : null, i.getFechaInscripcion(),
-                        i.getFechaVencimiento()))
+                        i.getFechaVencimiento(), i.getPlanPago() != null ? i.getPlanPago().getNombre() : null,
+                        i.getPlanMensualidad() != null ? i.getPlanMensualidad().getNombre() : null))
                 .toList();
         return new DeportistaResumen(d.getId(), p.getNombre() + " " + p.getApellidos(),
                 d.getEstado() != null ? d.getEstado().getEstado() : null, grupos, (int) presentes, (int) total, pct,
@@ -242,6 +249,35 @@ public class PortalService {
         }
         res.sort((a, b) -> b.fecha().compareTo(a.fecha()));
         return res;
+    }
+
+    // ---------- Resumen (perfil) del deportista ----------
+
+    /**
+     * Perfil 360 de un deportista propio: estado, facturacion, asistencia y evolucion tecnica. La facturacion solo
+     * llega si quien consulta es el acudiente o el propio deportista mayor de edad; nunca hay ranking ni comparaciones.
+     */
+    public com.varcal.cheermanager.Service.Perfil.PerfilDeportistaService.Perfil resumen(Integer deportistaId) {
+        Usuario u = usuario();
+        Deportista d = misDeportistas(u).stream().filter(x -> x.getId().equals(deportistaId)).findFirst()
+                .orElseThrow(() -> new RuntimeException("Deportista no encontrado"));
+        boolean esAcudiente = acudienteRepository.findByUsuarioId(u.getId())
+                .map(a -> vinculoRepository.deportistasDeAcudiente(a.getId()).stream()
+                        .anyMatch(x -> x.getId().equals(d.getId())))
+                .orElse(false);
+        return perfilService.paraPortal(d, esAcudiente);
+    }
+
+    /** Competencia del perfil: rosters, resultados de su grupo y aptitud para el proximo evento (deportista propio). */
+    public com.varcal.cheermanager.Service.Perfil.PerfilCompetenciaSaludService.DatosCompetencia competenciaPerfil(
+            Integer deportistaId) {
+        return perfilCompetenciaSaludService.competencia(propio(deportistaId).getId());
+    }
+
+    /** Salud del perfil para la familia: estado y diagnostico de la lesion abierta, sin seguimientos ni historial. */
+    public com.varcal.cheermanager.Service.Perfil.PerfilCompetenciaSaludService.DatosSalud saludPerfil(
+            Integer deportistaId) {
+        return perfilCompetenciaSaludService.salud(propio(deportistaId).getId(), false);
     }
 
     // ---------- Carnet, foto y horarios del deportista ----------

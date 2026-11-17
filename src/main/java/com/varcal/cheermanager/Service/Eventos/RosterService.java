@@ -273,6 +273,11 @@ public class RosterService {
                 .map(DeportistaPerteneceGrupo::getDeportista).filter(d -> d != null && d.getId().equals(deportistaId)).findFirst().orElse(null);
     }
 
+    /** Aptitud de UN deportista a una fecha (perfil del deportista): mismos criterios que el roster. */
+    public List<Problema> problemasDe(Integer deportistaId, LocalDate fechaReferencia) {
+        return new Evaluador(fechaReferencia == null ? hoy() : fechaReferencia).problemas(deportistaId);
+    }
+
     private static boolean hayBloqueo(List<Problema> ps) {
         return ps.stream().anyMatch(Problema::bloquea);
     }
