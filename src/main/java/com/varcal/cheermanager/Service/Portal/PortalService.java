@@ -54,6 +54,9 @@ public class PortalService {
     @org.springframework.beans.factory.annotation.Autowired
     private com.varcal.cheermanager.Service.Perfil.PerfilDeportistaService perfilService;
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.varcal.cheermanager.Service.Perfil.PerfilCompetenciaSaludService perfilCompetenciaSaludService;
+
 
     public record MiPerfil(String tipo, String nombre, List<DeportistaResumen> deportistas) {
     }
@@ -262,6 +265,18 @@ public class PortalService {
                         .anyMatch(x -> x.getId().equals(d.getId())))
                 .orElse(false);
         return perfilService.paraPortal(d, esAcudiente);
+    }
+
+    /** Competencia del perfil: rosters, resultados de su grupo y aptitud para el proximo evento (deportista propio). */
+    public com.varcal.cheermanager.Service.Perfil.PerfilCompetenciaSaludService.DatosCompetencia competenciaPerfil(
+            Integer deportistaId) {
+        return perfilCompetenciaSaludService.competencia(propio(deportistaId).getId());
+    }
+
+    /** Salud del perfil para la familia: estado y diagnostico de la lesion abierta, sin seguimientos ni historial. */
+    public com.varcal.cheermanager.Service.Perfil.PerfilCompetenciaSaludService.DatosSalud saludPerfil(
+            Integer deportistaId) {
+        return perfilCompetenciaSaludService.salud(propio(deportistaId).getId(), false);
     }
 
     // ---------- Carnet, foto y horarios del deportista ----------

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.varcal.cheermanager.Service.Auth.UsuarioService;
+import com.varcal.cheermanager.Service.Perfil.PerfilCompetenciaSaludService;
 import com.varcal.cheermanager.Service.Perfil.PerfilDeportistaService;
 import com.varcal.cheermanager.Utils.AuthenticatedUserUtil;
 import com.varcal.cheermanager.Utils.RequiresPermission;
@@ -20,10 +21,13 @@ import com.varcal.cheermanager.Utils.RequiresPermission;
 public class PerfilDeportistaController {
 
     private final PerfilDeportistaService service;
+    private final PerfilCompetenciaSaludService competenciaSalud;
     private final UsuarioService usuarioService;
 
-    public PerfilDeportistaController(PerfilDeportistaService service, UsuarioService usuarioService) {
+    public PerfilDeportistaController(PerfilDeportistaService service, PerfilCompetenciaSaludService competenciaSalud,
+            UsuarioService usuarioService) {
         this.service = service;
+        this.competenciaSalud = competenciaSalud;
         this.usuarioService = usuarioService;
     }
 
@@ -37,6 +41,28 @@ public class PerfilDeportistaController {
         try {
             Set<String> permisos = usuarioService.obtenerPermisos(AuthenticatedUserUtil.getCurrentUserId().intValue());
             return ResponseEntity.ok(service.paraClub(id, permisos));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    /** Roster, resultados de su grupo y aptitud para el proximo evento. */
+    @GetMapping("/{id}/resumen/competencia")
+    @RequiresPermission("ver_evento")
+    public ResponseEntity<?> competencia(@PathVariable Integer id) {
+        try {
+            return ResponseEntity.ok(competenciaSalud.competencia(id));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    /** Detalle de salud (seguimientos e historial de lesiones): solo con ver_lesiones. */
+    @GetMapping("/{id}/resumen/salud")
+    @RequiresPermission("ver_lesiones")
+    public ResponseEntity<?> salud(@PathVariable Integer id) {
+        try {
+            return ResponseEntity.ok(competenciaSalud.salud(id, true));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(404).body(Map.of("message", e.getMessage()));
         }
