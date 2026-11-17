@@ -143,7 +143,7 @@ public class DocumentoDeportistaService {
         return new Alertas(venc, por, sin, items);
     }
 
-    static Estado estado(DocumentoDeportista d, LocalDate hoy, int dias) {
+    public static Estado estado(DocumentoDeportista d, LocalDate hoy, int dias) {
         if (d == null) {
             return Estado.SIN_REGISTRO;
         }

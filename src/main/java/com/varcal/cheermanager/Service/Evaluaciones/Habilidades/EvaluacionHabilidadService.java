@@ -35,7 +35,7 @@ public class EvaluacionHabilidadService {
     public static final String EN_DESARROLLO = "EN_DESARROLLO";
     public static final String DOMINADA = "DOMINADA";
     /** Proporcion del valor inicial desde la que la habilidad se considera dominada / en desarrollo. */
-    static final BigDecimal UMBRAL_DOMINADA = new BigDecimal("0.85");
+    public static final BigDecimal UMBRAL_DOMINADA = new BigDecimal("0.85");
     static final BigDecimal UMBRAL_EN_DESARROLLO = new BigDecimal("0.60");
 
     private final HabilidadCatalogoRepository catalogo;

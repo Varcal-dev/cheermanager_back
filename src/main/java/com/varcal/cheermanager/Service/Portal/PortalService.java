@@ -51,6 +51,9 @@ public class PortalService {
     @org.springframework.beans.factory.annotation.Autowired
     private com.varcal.cheermanager.Service.Persona.PersonaService personaService;
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.varcal.cheermanager.Service.Perfil.PerfilDeportistaService perfilService;
+
 
     public record MiPerfil(String tipo, String nombre, List<DeportistaResumen> deportistas) {
     }
@@ -242,6 +245,23 @@ public class PortalService {
         }
         res.sort((a, b) -> b.fecha().compareTo(a.fecha()));
         return res;
+    }
+
+    // ---------- Resumen (perfil) del deportista ----------
+
+    /**
+     * Perfil 360 de un deportista propio: estado, facturacion, asistencia y evolucion tecnica. La facturacion solo
+     * llega si quien consulta es el acudiente o el propio deportista mayor de edad; nunca hay ranking ni comparaciones.
+     */
+    public com.varcal.cheermanager.Service.Perfil.PerfilDeportistaService.Perfil resumen(Integer deportistaId) {
+        Usuario u = usuario();
+        Deportista d = misDeportistas(u).stream().filter(x -> x.getId().equals(deportistaId)).findFirst()
+                .orElseThrow(() -> new RuntimeException("Deportista no encontrado"));
+        boolean esAcudiente = acudienteRepository.findByUsuarioId(u.getId())
+                .map(a -> vinculoRepository.deportistasDeAcudiente(a.getId()).stream()
+                        .anyMatch(x -> x.getId().equals(d.getId())))
+                .orElse(false);
+        return perfilService.paraPortal(d, esAcudiente);
     }
 
     // ---------- Carnet, foto y horarios del deportista ----------
