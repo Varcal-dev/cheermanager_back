@@ -37,6 +37,7 @@ import com.varcal.cheermanager.repository.Personas.EstadoPersonaRepository;
 import com.varcal.cheermanager.repository.Personas.HistorialDeportistaEstadoRepository;
 import com.varcal.cheermanager.repository.Org_dep.DeportistaPerteneceGrupoRepository;
 import com.varcal.cheermanager.repository.Org_dep.InscripcionRepository;
+import com.varcal.cheermanager.repository.Personas.DeportistaAcudienteRepository;
 import com.varcal.cheermanager.Models.Org_dep.DeportistaPerteneceGrupo;
 import com.varcal.cheermanager.Models.Org_dep.Inscripcion;
 import com.varcal.cheermanager.Service.File.FileStorageService;
@@ -89,6 +90,9 @@ public class PersonaService {
 
     @Autowired
     private DeportistaPerteneceGrupoRepository deportistaPerteneceGrupoRepository;
+
+    @Autowired
+    private DeportistaAcudienteRepository deportistaAcudienteRepository;
 
     /** Limite de deportistas activos segun el plan del club (V11). */
     @Autowired
@@ -284,6 +288,9 @@ public class PersonaService {
         deportista.setConvenioId(deportistaDTO.getConvenioId());
         Deportista deportistaGuardado = deportistaRepository.save(deportista);
 
+        // El registro es el "alta" del deportista: queda en el historial de estados para el dashboard.
+        registrarCambioEstado(deportistaGuardado, null, estado, null, "Registro del deportista");
+
         // Dejar constancia del nivel inicial en el historial, para que la línea de
         // tiempo del deportista arranque desde el día 0 y no desde el primer cambio.
         if (deportistaGuardado.getNivelActualId() != null) {
@@ -404,7 +411,7 @@ public class PersonaService {
         List<Object[]> resultados = deportistaRepository.obtenerDeportistasConDetalles();
 
         // Mapear los resultados al DTO
-        return resultados.stream().map(obj -> {
+        List<DeportistaVistaDTO> lista = resultados.stream().map(obj -> {
             DeportistaVistaDTO dto = new DeportistaVistaDTO();
             dto.setDeportistaId((Integer) obj[0]);
             dto.setPersonaId((Integer) obj[1]);
@@ -432,6 +439,32 @@ public class PersonaService {
             dto.setConvenioNombre((String) obj[18]);
             return dto;
         }).collect(Collectors.toList());
+        completarGruposYAcudientes(lista);
+        return lista;
+    }
+
+    /**
+     * Agrega a cada fila los grupos vigentes y si tiene acudiente, con dos consultas para todo el club
+     * (sin una consulta por deportista).
+     */
+    private void completarGruposYAcudientes(List<DeportistaVistaDTO> lista) {
+        if (lista.isEmpty()) {
+            return;
+        }
+        java.util.Map<Integer, List<String>> gruposPorDeportista = new java.util.HashMap<>();
+        for (Object[] fila : deportistaPerteneceGrupoRepository.gruposVigentesPorDeportista()) {
+            gruposPorDeportista.computeIfAbsent((Integer) fila[0], k -> new java.util.ArrayList<>())
+                    .add((String) fila[1]);
+        }
+        java.util.Set<Integer> conAcudiente = new java.util.HashSet<>(
+                deportistaAcudienteRepository.idsDeportistasConAcudiente());
+        for (DeportistaVistaDTO dto : lista) {
+            List<String> g = gruposPorDeportista.getOrDefault(dto.getDeportistaId(), List.of());
+            g = new java.util.ArrayList<>(g);
+            java.util.Collections.sort(g);
+            dto.setGrupos(g);
+            dto.setTieneAcudiente(conAcudiente.contains(dto.getDeportistaId()));
+        }
     }
 
     // Método para listar deportistas con filtros (estado, nivel, grupo)
@@ -443,7 +476,7 @@ public class PersonaService {
         }
 
         // Mapear entidades a DTOs
-        return deportistas.stream().map(deportista -> {
+        List<DeportistaVistaDTO> lista = deportistas.stream().map(deportista -> {
             DeportistaVistaDTO dto = new DeportistaVistaDTO();
             Persona persona = deportista.getPersona();
 
@@ -470,6 +503,8 @@ public class PersonaService {
 
             return dto;
         }).collect(Collectors.toList());
+        completarGruposYAcudientes(lista);
+        return lista;
     }
 
     // Método para obtener el perfil completo del deportista
@@ -629,7 +664,7 @@ public class PersonaService {
         historial.setDeportista(deportista);
         historial.setEstadoAnterior(estadoAnterior);
         historial.setEstadoNuevo(estadoNuevo);
-        historial.setFechaCambio(LocalDateTime.now());
+        historial.setFechaCambio(LocalDateTime.now(java.time.ZoneId.of("America/Bogota")));
         historial.setUsuarioId(usuarioId);
         historial.setMotivoCambio(motivo);
         historialDeportistaEstadoRepository.save(historial);

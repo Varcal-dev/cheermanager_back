@@ -1,6 +1,8 @@
 package com.varcal.cheermanager.DTO.Persona;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 import lombok.Data;
 
@@ -28,4 +30,8 @@ public class DeportistaVistaDTO {
     private Integer convenioId;
     private String convenioNombre;
     private Boolean tieneCondicionActiva;
+    /** Nombres de los grupos de entrenamiento en que esta hoy (membresias vigentes). */
+    private List<String> grupos = new ArrayList<>();
+    /** false = no tiene ningun acudiente vinculado. */
+    private Boolean tieneAcudiente;
 }

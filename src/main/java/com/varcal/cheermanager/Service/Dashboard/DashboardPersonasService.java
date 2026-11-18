@@ -1,6 +1,8 @@
 package com.varcal.cheermanager.Service.Dashboard;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,9 +68,10 @@ public class DashboardPersonasService {
 
         // Altas y bajas: usa HistorialDeportistaEstado, que ya existía
         // (Model + Repository) pero no estaba conectado a ningún dashboard.
-        dto.setAltasRecientes(contarMovimientos(diasAltasBajas, true));
-        dto.setBajasRecientes(contarMovimientos(diasAltasBajas, false));
-        dto.setMovimientosRecientes(listarMovimientos(diasAltasBajas));
+        List<MovimientoEstadoDTO> movimientos = listarMovimientos(diasAltasBajas, deportistas);
+        dto.setAltasRecientes(movimientos.stream().filter(m -> "ALTA".equals(m.getTipo())).count());
+        dto.setBajasRecientes(movimientos.stream().filter(m -> "BAJA".equals(m.getTipo())).count());
+        dto.setMovimientosRecientes(movimientos);
 
         List<Entrenador> entrenadores = entrenadorRepository.findAll();
         dto.setTotalEntrenadores(entrenadores.size());
@@ -130,28 +133,64 @@ public class DashboardPersonasService {
                 .count();
     }
 
-    private long contarMovimientos(int dias, boolean altas) {
-        LocalDateTime desde = LocalDateTime.now().minusDays(dias);
-        return historialDeportistaEstadoRepository.findAllByOrderByFechaCambioDesc().stream()
-                .filter(h -> h.getFechaCambio().isAfter(desde))
-                .filter(h -> esAlta(h) == altas)
-                .count();
-    }
+    private static final ZoneId ZONA = ZoneId.of("America/Bogota");
 
-    private List<MovimientoEstadoDTO> listarMovimientos(int dias) {
-        LocalDateTime desde = LocalDateTime.now().minusDays(dias);
-        return historialDeportistaEstadoRepository.findAllByOrderByFechaCambioDesc().stream()
+    /**
+     * Movimientos del periodo, del mas reciente al mas antiguo.
+     * ALTA = deportista nuevo (registro) o que vuelve tras estar Retirado; BAJA = pasa a Retirado; CAMBIO = cualquier
+     * otro cambio de estado (Lesionado, Suspendido...), que se muestra pero no cuenta como alta ni baja.
+     * Los deportistas registrados antes de que el registro dejara su fila inicial en el historial se toman de su
+     * fecha de registro, para que sus altas tampoco se pierdan.
+     */
+    private List<MovimientoEstadoDTO> listarMovimientos(int dias, List<Deportista> deportistas) {
+        LocalDateTime desde = LocalDateTime.now(ZONA).minusDays(dias);
+        List<HistorialDeportistaEstado> historial = historialDeportistaEstadoRepository.findAllByOrderByFechaCambioDesc();
+
+        java.util.Set<Integer> conFilaDeRegistro = historial.stream()
+                .filter(h -> h.getEstadoAnterior() == null)
+                .map(h -> h.getDeportista().getId())
+                .collect(Collectors.toSet());
+
+        List<MovimientoEstadoDTO> lista = historial.stream()
                 .filter(h -> h.getFechaCambio().isAfter(desde))
                 .map(this::toMovimientoDTO)
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(java.util.ArrayList::new));
+
+        for (Deportista d : deportistas) {
+            LocalDate registro = d.getFechaRegistro();
+            if (registro == null || conFilaDeRegistro.contains(d.getId()) || !registro.atStartOfDay().isAfter(desde)) {
+                continue;
+            }
+            MovimientoEstadoDTO m = new MovimientoEstadoDTO();
+            m.setDeportistaId(d.getId());
+            m.setNombreCompleto(d.getPersona().getNombre() + " " + d.getPersona().getApellidos());
+            m.setEstadoAnterior(null);
+            m.setEstadoNuevo(d.getEstado() != null ? d.getEstado().getEstado() : null);
+            m.setFechaCambio(registro.atStartOfDay());
+            m.setTipo("ALTA");
+            m.setEsAlta(true);
+            m.setMotivo("Registro del deportista");
+            lista.add(m);
+        }
+        lista.sort((a, b) -> b.getFechaCambio().compareTo(a.getFechaCambio()));
+        return lista;
     }
 
-    // "Alta" = el estado nuevo se llama "Activo" (mismo supuesto de texto
-    // literal que ya usa el resto del sistema, ej. HistorialMedicoService,
-    // el % de asistencia, etc.) — cualquier otro estado nuevo se cuenta
-    // como "baja" (Inactivo, Retirado, Suspendido...).
-    private boolean esAlta(HistorialDeportistaEstado h) {
-        return h.getEstadoNuevo() != null && "Activo".equalsIgnoreCase(h.getEstadoNuevo().getEstado());
+    private static boolean esRetirado(com.varcal.cheermanager.Models.Personas.EstadoPersona e) {
+        return e != null && "Retirado".equalsIgnoreCase(e.getEstado());
+    }
+
+    private static String tipoDe(HistorialDeportistaEstado h) {
+        if (h.getEstadoAnterior() == null) {
+            return "ALTA"; // primer registro del deportista
+        }
+        if (esRetirado(h.getEstadoNuevo()) && !esRetirado(h.getEstadoAnterior())) {
+            return "BAJA";
+        }
+        if (esRetirado(h.getEstadoAnterior()) && !esRetirado(h.getEstadoNuevo())) {
+            return "ALTA"; // reingreso
+        }
+        return "CAMBIO";
     }
 
     private MovimientoEstadoDTO toMovimientoDTO(HistorialDeportistaEstado h) {
@@ -161,7 +200,9 @@ public class DashboardPersonasService {
         dto.setEstadoAnterior(h.getEstadoAnterior() != null ? h.getEstadoAnterior().getEstado() : null);
         dto.setEstadoNuevo(h.getEstadoNuevo() != null ? h.getEstadoNuevo().getEstado() : null);
         dto.setFechaCambio(h.getFechaCambio());
-        dto.setEsAlta(esAlta(h));
+        String tipo = tipoDe(h);
+        dto.setTipo(tipo);
+        dto.setEsAlta("ALTA".equals(tipo));
         dto.setMotivo(h.getMotivoCambio());
         return dto;
     }

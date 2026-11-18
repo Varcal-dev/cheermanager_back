@@ -49,6 +49,8 @@ public class AsistenciaService {
         EstadoAsistencia estado = estadoAsistenciaRepository.findById(dto.getEstadoAsistenciaId())
                 .orElseThrow(() -> new RuntimeException("Estado de asistencia no encontrado con ID: " + dto.getEstadoAsistenciaId()));
 
+        exigirFechaDelHorario(horario, dto.getFecha());
+
         Asistencia asistencia = asistenciaRepository
                 .findByDeportistaIdAndHorarioIdAndFecha(dto.getDeportistaId(), dto.getHorarioId(), dto.getFecha())
                 .orElseGet(Asistencia::new);
@@ -73,6 +75,9 @@ public class AsistenciaService {
     public ResultadoRegistroMasivo registrarMasivo(RegistroAsistenciaMasivoDTO dto) {
         Horario horario = horarioRepository.findById(dto.getHorarioId())
                 .orElseThrow(() -> new RuntimeException("Horario no encontrado con ID: " + dto.getHorarioId()));
+
+        // La fecha debe ser un dia en que el horario realmente entrena: si no, se rechaza todo el lote.
+        exigirFechaDelHorario(horario, dto.getFecha());
 
         ResultadoRegistroMasivo resultado = new ResultadoRegistroMasivo();
 
@@ -101,6 +106,16 @@ public class AsistenciaService {
         }
 
         return resultado;
+    }
+
+    /** La asistencia solo se registra en fechas que caen en el dia de la semana del horario (calendario del grupo). */
+    static void exigirFechaDelHorario(Horario horario, LocalDate fecha) {
+        if (fecha == null) {
+            throw new RuntimeException("Indica la fecha del entrenamiento");
+        }
+        if (!DiaSemanaFecha.coincide(horario.getDia(), fecha)) {
+            throw new RuntimeException(DiaSemanaFecha.mensajeNoCoincide(horario.getDia(), fecha));
+        }
     }
 
     public List<AsistenciaResponseDTO> listarPorGrupoYFecha(Integer grupoId, LocalDate fecha) {

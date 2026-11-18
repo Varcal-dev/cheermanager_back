@@ -28,6 +28,23 @@ public class AcudienteService {
             String telefono, String email, String direccion) {
     }
 
+    /** Catalogo de parentescos: el vinculo solo admite estos valores (la pantalla los muestra en un selector). */
+    public static final List<String> PARENTESCOS = List.of("Madre", "Padre", "Abuelo/a", "Tío/a", "Hermano/a",
+            "Tutor legal", "Otro");
+
+    private static String parentescoValido(String valor) {
+        String v = limpio(valor);
+        if (v == null) {
+            return null;
+        }
+        for (String p : PARENTESCOS) {
+            if (p.equalsIgnoreCase(v)) {
+                return p;
+            }
+        }
+        throw new RuntimeException("Parentesco no valido. Opciones: " + String.join(", ", PARENTESCOS));
+    }
+
     public record VinculoRequest(Integer acudienteId, String parentesco, Boolean principal, Boolean autorizaRecoger) {
     }
 
@@ -177,7 +194,7 @@ public class AcudienteService {
         DeportistaAcudiente v = new DeportistaAcudiente();
         v.setDeportista(d);
         v.setAcudiente(a);
-        v.setParentesco(limpio(req.parentesco()));
+        v.setParentesco(parentescoValido(req.parentesco()));
         v.setPrincipal(principal);
         v.setAutorizaRecoger(Boolean.TRUE.equals(req.autorizaRecoger()));
         return VinculoResponse.de(vinculoRepository.save(v));

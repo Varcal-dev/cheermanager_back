@@ -30,6 +30,8 @@ import com.varcal.cheermanager.Models.Org_dep.GrupoEntrenador;
 import com.varcal.cheermanager.Models.Org_dep.GrupoEntrenamiento;
 import com.varcal.cheermanager.Models.Personas.Deportista;
 import com.varcal.cheermanager.Models.Personas.Entrenador;
+import com.varcal.cheermanager.Service.Org_dep.PlanGruposReglas.Franja;
+import com.varcal.cheermanager.Service.Org_dep.PlanGruposReglas.GrupoConFranjas;
 import com.varcal.cheermanager.repository.Org_dep.DeportistaPerteneceGrupoRepository;
 import com.varcal.cheermanager.repository.Org_dep.GrupoEntrenadorRepository;
 import com.varcal.cheermanager.repository.Org_dep.GrupoEntrenamientoRepository;
@@ -99,8 +101,9 @@ public class GrupoEntrenamientoService {
         Deportista deportista = deportistaRepository.findById(deportistaId)
                 .orElseThrow(() -> new RuntimeException("Deportista no encontrado"));
 
-        if (deportistaPerteneceGrupoRepository.existsByDeportistaIdAndFechaFinIsNull(deportistaId)) {
-            return "El deportista ya pertenece activamente a un grupo";
+        String motivoPlan = motivoPlanYHorarios(cargarContextoHorarios(), deportistaId, grupoId);
+        if (motivoPlan != null) {
+            return motivoPlan;
         }
         CategoriaNivel categoria = grupo.getCategoriaNivel();
         Integer cupoMaximo = categoria != null ? categoria.getCantidadMax() : null;
@@ -114,14 +117,20 @@ public class GrupoEntrenamientoService {
     }
 
     public String agregarDeportistaAGrupo(Integer deportistaId, Integer grupoId, String observaciones) {
-        if (deportistaPerteneceGrupoRepository.existsByDeportistaIdAndFechaFinIsNull(deportistaId)) {
-            throw new RuntimeException("El deportista ya pertenece activamente a un grupo");
+        if (deportistaPerteneceGrupoRepository.existsByDeportistaIdAndGrupoIdAndFechaFinIsNull(deportistaId, grupoId)) {
+            throw new RuntimeException("El deportista ya pertenece a este grupo");
         }
 
         GrupoEntrenamiento grupo = grupoEntrenamientoRepository.findById(grupoId)
                 .orElseThrow(() -> new RuntimeException("Grupo no encontrado"));
         Deportista deportista = deportistaRepository.findById(deportistaId)
                 .orElseThrow(() -> new RuntimeException("Deportista no encontrado"));
+
+        // Puede estar en varios grupos si su plan permite las sesiones y los horarios no se cruzan.
+        String motivoPlan = motivoPlanYHorarios(cargarContextoHorarios(), deportistaId, grupoId);
+        if (motivoPlan != null) {
+            throw new RuntimeException(motivoPlan);
+        }
 
         DeportistaPerteneceGrupo membresia = new DeportistaPerteneceGrupo();
         membresia.setGrupo(grupo);
@@ -198,9 +207,14 @@ public class GrupoEntrenamientoService {
         List<CandidatoGrupoDTO> elegibles = new ArrayList<>();
         List<CandidatoGrupoDTO> noElegibles = new ArrayList<>();
 
+        // Un deportista puede estar en varios grupos: se descarta solo a quien ya esta en ESTE grupo.
+        java.util.Set<Integer> yaEnEsteGrupo = deportistaPerteneceGrupoRepository.findByGrupoIdAndFechaFinIsNull(grupoId)
+                .stream().map(m -> m.getDeportista().getId()).collect(Collectors.toSet());
+        ContextoHorarios contexto = cargarContextoHorarios();
+
         List<DeportistaInscritoDTO> candidatos = inscripcionService.obtenerDeportistasInscritosDTO().stream()
                 .filter(d -> "Activa".equalsIgnoreCase(d.getEstadoInscripcion()))
-                .filter(d -> d.getGrupoEntrenamiento() == null || d.getGrupoEntrenamiento().isBlank())
+                .filter(d -> !yaEnEsteGrupo.contains(d.getDeportistaId()))
                 .toList();
 
         for (DeportistaInscritoDTO d : candidatos) {
@@ -211,6 +225,9 @@ public class GrupoEntrenamientoService {
 
             String motivo = calcularMotivoNoElegible(añoNacimiento, añoMin, añoMax, grupoLleno, cupoActual,
                     cupoMaximo);
+            if (motivo == null) {
+                motivo = motivoPlanYHorarios(contexto, d.getDeportistaId(), grupoId);
+            }
 
             CandidatoGrupoDTO dto = new CandidatoGrupoDTO(
                     d.getDeportistaId(),
@@ -251,11 +268,6 @@ public class GrupoEntrenamientoService {
                 .orElseThrow(() -> new RuntimeException(
                         "El deportista no tiene una inscripción activa"));
 
-        if (deportista.getGrupoEntrenamiento() != null && !deportista.getGrupoEntrenamiento().isBlank()) {
-            throw new RuntimeException(
-                    "El deportista ya pertenece al grupo: " + deportista.getGrupoEntrenamiento());
-        }
-
         Integer añoNacimiento = deportista.getFechaNacimiento() != null
                 ? deportista.getFechaNacimiento().getYear()
                 : null;
@@ -264,11 +276,8 @@ public class GrupoEntrenamientoService {
         List<GrupoElegibleDTO> noElegibles = new ArrayList<>();
 
         // Sesiones por semana del plan de mensualidad con que se matriculo (inscripcion activa).
-        Integer sesionesPlan = inscripcionRepository
-                .findByDeportistaIdAndEstado(deportistaId, com.varcal.cheermanager.Models.Org_dep.Inscripcion.EstadoInscripcion.Activa)
-                .stream().map(i -> i.getPlanMensualidad())
-                .filter(p -> p != null && p.getSesionesSemanales() != null)
-                .map(p -> p.getSesionesSemanales()).findFirst().orElse(null);
+        ContextoHorarios contexto = cargarContextoHorarios();
+        Integer sesionesPlan = contexto.sesionesPlan.get(deportistaId);
 
         for (GrupoEntrenamiento grupo : grupoEntrenamientoRepository.findAll()) {
             CategoriaNivel categoria = grupo.getCategoriaNivel();
@@ -284,9 +293,8 @@ public class GrupoEntrenamientoService {
                     cupoActual, cupoMaximo);
 
             int sesionesGrupo = sesionesSemanalesDelGrupo(grupo.getId());
-            if (motivo == null && sesionesPlan != null && sesionesGrupo > 0 && sesionesGrupo != sesionesPlan) {
-                motivo = "Este grupo entrena " + sesionesGrupo + " " + (sesionesGrupo == 1 ? "día" : "días")
-                        + " por semana y el plan de mensualidad del deportista es de " + sesionesPlan + " por semana";
+            if (motivo == null) {
+                motivo = motivoPlanYHorarios(contexto, deportistaId, grupo.getId());
             }
 
             GrupoElegibleDTO dto = new GrupoElegibleDTO(
@@ -316,6 +324,58 @@ public class GrupoEntrenamientoService {
                 deportista.getNombre() + " " + deportista.getApellidos(),
                 elegibles,
                 noElegibles);
+    }
+
+    // ===== Varios grupos por deportista: plan y cruces de horario =====
+
+    /** Datos que se leen una sola vez por llamada para no consultar la base por cada deportista. */
+    private static final class ContextoHorarios {
+        final java.util.Map<Integer, GrupoConFranjas> grupos = new java.util.HashMap<>();
+        final java.util.Map<Integer, List<Integer>> gruposDelDeportista = new java.util.HashMap<>();
+        final java.util.Map<Integer, Integer> sesionesPlan = new java.util.HashMap<>();
+    }
+
+    private ContextoHorarios cargarContextoHorarios() {
+        ContextoHorarios c = new ContextoHorarios();
+
+        java.util.Map<Integer, List<Franja>> franjas = new java.util.HashMap<>();
+        for (HorarioEntrenamiento he : horarioEntrenamientoRepository.findAll()) {
+            if (he.getHorario() == null || he.getHorario().getDia() == null || he.getGrupoEntrenamiento() == null) {
+                continue;
+            }
+            franjas.computeIfAbsent(he.getGrupoEntrenamiento().getId(), k -> new ArrayList<>())
+                    .add(new Franja(he.getHorario().getDia().getId(), he.getHorario().getDia().getDia(),
+                            he.getHorario().getHoraInicio(), he.getHorario().getHoraFin()));
+        }
+        for (Object[] fila : deportistaPerteneceGrupoRepository.gruposVigentesPorDeportista()) {
+            Integer deportistaId = (Integer) fila[0];
+            String nombre = (String) fila[1];
+            Integer grupoId = (Integer) fila[2];
+            c.gruposDelDeportista.computeIfAbsent(deportistaId, k -> new ArrayList<>()).add(grupoId);
+            c.grupos.putIfAbsent(grupoId, new GrupoConFranjas(grupoId, nombre, franjas.getOrDefault(grupoId, List.of())));
+        }
+        // El grupo que se quiere agregar puede no tener a nadie todavia: se completa al evaluarlo.
+        for (GrupoEntrenamiento g : grupoEntrenamientoRepository.findAll()) {
+            c.grupos.putIfAbsent(g.getId(), new GrupoConFranjas(g.getId(), g.getNombre(), franjas.getOrDefault(g.getId(), List.of())));
+        }
+        for (com.varcal.cheermanager.Models.Org_dep.Inscripcion i : inscripcionRepository
+                .findByEstadoAndPlanMensualidadIsNotNull(com.varcal.cheermanager.Models.Org_dep.Inscripcion.EstadoInscripcion.Activa)) {
+            if (i.getPlanMensualidad().getSesionesSemanales() != null && i.getDeportista() != null) {
+                c.sesionesPlan.putIfAbsent(i.getDeportista().getId(), i.getPlanMensualidad().getSesionesSemanales());
+            }
+        }
+        return c;
+    }
+
+    /** Motivo por el que el deportista no puede sumar este grupo (plan o cruce de horario), o null si puede. */
+    private String motivoPlanYHorarios(ContextoHorarios c, Integer deportistaId, Integer grupoId) {
+        GrupoConFranjas nuevo = c.grupos.get(grupoId);
+        if (nuevo == null) {
+            return null;
+        }
+        List<GrupoConFranjas> actuales = c.gruposDelDeportista.getOrDefault(deportistaId, List.of()).stream()
+                .map(c.grupos::get).filter(java.util.Objects::nonNull).toList();
+        return PlanGruposReglas.motivoNoPuedeEntrar(c.sesionesPlan.get(deportistaId), actuales, nuevo);
     }
 
     /** Dias distintos de la semana en que entrena el grupo, segun sus horarios. */

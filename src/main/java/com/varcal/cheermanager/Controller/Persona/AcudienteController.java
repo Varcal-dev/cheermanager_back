@@ -28,6 +28,12 @@ public class AcudienteController {
         return service.listar();
     }
 
+    @GetMapping("/parentescos")
+    @RequiresPermission("ver_acudientes")
+    public List<String> parentescos() {
+        return AcudienteService.PARENTESCOS;
+    }
+
     @GetMapping("/{id}")
     @RequiresPermission("ver_acudientes")
     public Acudiente obtener(@PathVariable Integer id) {

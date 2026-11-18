@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import com.varcal.cheermanager.Models.Org_dep.DeportistaPerteneceGrupo;
 
@@ -27,4 +28,14 @@ public interface DeportistaPerteneceGrupoRepository extends JpaRepository<Deport
     // su historial ni el de otros deportistas del grupo.
     Optional<DeportistaPerteneceGrupo> findByGrupoIdAndDeportistaIdAndFechaFinIsNull(Integer grupoId,
             Integer deportistaId);
+
+    /** [deportistaId, nombreGrupo, grupoId] de las membresias vigentes de todo el club (una sola consulta para listar). */
+    @Query("SELECT m.deportista.id, m.grupo.nombre, m.grupo.id FROM DeportistaPerteneceGrupo m WHERE m.fechaFin IS NULL")
+    List<Object[]> gruposVigentesPorDeportista();
+
+    /** Membresias vigentes de un deportista con su grupo cargado (para validar plan y horarios). */
+    @Query("SELECT m FROM DeportistaPerteneceGrupo m JOIN FETCH m.grupo WHERE m.deportista.id = :deportistaId AND m.fechaFin IS NULL")
+    List<DeportistaPerteneceGrupo> vigentesConGrupo(@org.springframework.data.repository.query.Param("deportistaId") Integer deportistaId);
+
+    boolean existsByDeportistaIdAndGrupoIdAndFechaFinIsNull(Integer deportistaId, Integer grupoId);
 }
