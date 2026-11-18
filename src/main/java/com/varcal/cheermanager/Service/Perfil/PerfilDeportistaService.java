@@ -76,7 +76,7 @@ public class PerfilDeportistaService {
     }
 
     public record DatosEstado(Integer deportistaId, String nombre, String estado, String nivel, List<String> grupos,
-            String planPago, LocalDate fechaRegistro, Integer antiguedadMeses, Integer edad,
+            String planPago, String planMensualidad, LocalDate fechaRegistro, Integer antiguedadMeses, Integer edad,
             List<Vencimiento> vencimientos) {
     }
 
@@ -146,6 +146,10 @@ public class PerfilDeportistaService {
     private final RankingService rankingService;
     private final FacturaService facturaService;
     private final PagoService pagoService;
+
+    /** Inscripciones del deportista (de ellas salen el plan de inscripcion y el de mensualidad). */
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.varcal.cheermanager.repository.Org_dep.InscripcionRepository inscripciones;
 
     public PerfilDeportistaService(DeportistaRepository deportistas, DeportistaPerteneceGrupoRepository membresias,
             NivelRepository niveles, HistorialPlanesDeportistaRepository historialPlanes, PlanPagoRepository planes,
@@ -229,6 +233,21 @@ public class PerfilDeportistaService {
                 notaFacturacion);
     }
 
+    /** {inscripcion, mensualidad}: nombres de los planes de la inscripcion activa mas reciente (null si no hay). */
+    protected String[] planesDe(Integer deportistaId) {
+        if (inscripciones == null) {
+            return new String[] { null, null };
+        }
+        return inscripciones.findByDeportistaId(deportistaId.longValue()).stream()
+                .filter(i -> i.getEstado() == com.varcal.cheermanager.Models.Org_dep.Inscripcion.EstadoInscripcion.Activa)
+                .max(java.util.Comparator.comparing(
+                        com.varcal.cheermanager.Models.Org_dep.Inscripcion::getFechaInscripcion,
+                        java.util.Comparator.nullsFirst(java.util.Comparator.naturalOrder())))
+                .map(i -> new String[] { i.getPlanPago() == null ? null : i.getPlanPago().getNombre(),
+                        i.getPlanMensualidad() == null ? null : i.getPlanMensualidad().getNombre() })
+                .orElse(new String[] { null, null });
+    }
+
     // ---------- Estado ----------
 
     private DatosEstado estado(Deportista d, LocalDate hoy) {
@@ -237,13 +256,18 @@ public class PerfilDeportistaService {
                 .filter(m -> m.getGrupo() != null).map(m -> m.getGrupo().getNombre()).toList();
         String nivel = d.getNivelActualId() == null ? null
                 : niveles.findById(d.getNivelActualId()).map(Nivel::getNombre).orElse(null);
-        String plan = historialPlanes.findByDeportistaIdAndFechaFinIsNull(d.getId())
-                .flatMap(h -> planes.findById(h.getPlanPagoId())).map(PlanPago::getNombre).orElse(null);
+        String[] pl = planesDe(d.getId());
+        String plan = pl[0];
+        if (plan == null) {
+            plan = historialPlanes.findByDeportistaIdAndFechaFinIsNull(d.getId())
+                    .flatMap(h -> planes.findById(h.getPlanPagoId())).map(PlanPago::getNombre).orElse(null);
+        }
+        String planMensualidad = pl[1];
         Integer antiguedad = d.getFechaRegistro() == null ? null
                 : (int) Math.max(0, Period.between(d.getFechaRegistro(), hoy).toTotalMonths());
         Integer edad = p.getFechaNacimiento() == null ? null : Period.between(p.getFechaNacimiento(), hoy).getYears();
         return new DatosEstado(d.getId(), p.getNombre() + " " + p.getApellidos(),
-                d.getEstado() != null ? d.getEstado().getEstado() : null, nivel, grupos, plan, d.getFechaRegistro(),
+                d.getEstado() != null ? d.getEstado().getEstado() : null, nivel, grupos, plan, planMensualidad, d.getFechaRegistro(),
                 antiguedad, edad, vencimientos(d.getId(), hoy));
     }
 

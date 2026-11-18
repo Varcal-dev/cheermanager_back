@@ -67,7 +67,7 @@ public class PortalService {
     }
 
     public record InscripcionResumen(Integer id, String temporada, String estado, LocalDate fechaInscripcion,
-            LocalDate fechaVencimiento) {
+            LocalDate fechaVencimiento, String planInscripcion, String planMensualidad) {
     }
 
     /** Una franja semanal de un grupo del deportista (para pintar su calendario). */
@@ -184,7 +184,8 @@ public class PortalService {
         List<InscripcionResumen> insc = inscripcionRepository.findByDeportistaId(d.getId().longValue()).stream()
                 .map(i -> new InscripcionResumen(i.getId(), i.getTemporada() != null ? i.getTemporada().getNombre() : null,
                         i.getEstado() != null ? i.getEstado().name() : null, i.getFechaInscripcion(),
-                        i.getFechaVencimiento()))
+                        i.getFechaVencimiento(), i.getPlanPago() != null ? i.getPlanPago().getNombre() : null,
+                        i.getPlanMensualidad() != null ? i.getPlanMensualidad().getNombre() : null))
                 .toList();
         return new DeportistaResumen(d.getId(), p.getNombre() + " " + p.getApellidos(),
                 d.getEstado() != null ? d.getEstado().getEstado() : null, grupos, (int) presentes, (int) total, pct,
