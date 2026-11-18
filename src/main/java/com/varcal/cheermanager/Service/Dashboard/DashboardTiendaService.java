@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.varcal.cheermanager.DTO.Dashboard.ResumenTiendaDTO;
 import com.varcal.cheermanager.DTO.Dashboard.ResumenTiendaDTO.ProductoMasVendidoDTO;
@@ -33,6 +34,8 @@ public class DashboardTiendaService {
     @Autowired
     private ProductoVarianteRepository productoVarianteRepository;
 
+    // open-in-view está desactivado: sin transacción, Venta.detalles (lazy) falla con "no Session".
+    @Transactional(readOnly = true)
     public ResumenTiendaDTO obtenerResumen() {
         ResumenTiendaDTO dto = new ResumenTiendaDTO();
 

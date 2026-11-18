@@ -62,4 +62,9 @@ public interface AsistenciaRepository extends JpaRepository<Asistencia, Integer>
 
     @Query("SELECT COUNT(a) FROM Asistencia a WHERE a.fecha BETWEEN :desde AND :hasta AND a.estadoAsistencia.estado = :estado")
     long contarPorEstadoEnRango(@Param("desde") LocalDate desde, @Param("hasta") LocalDate hasta, @Param("estado") String estado);
+
+    /** Registros del rango con estado, deportista, persona y horario ya cargados (para las metricas, sin N+1). */
+    @Query("SELECT a FROM Asistencia a JOIN FETCH a.estadoAsistencia JOIN FETCH a.deportista d JOIN FETCH d.persona "
+            + "JOIN FETCH a.horario WHERE a.fecha BETWEEN :desde AND :hasta")
+    List<Asistencia> enRangoConDetalle(@Param("desde") LocalDate desde, @Param("hasta") LocalDate hasta);
 }

@@ -39,6 +39,24 @@ public class AsistenciaController {
     @Autowired
     private com.varcal.cheermanager.Service.Horario_Asistencia.AsistenciaEscaneoService escaneoService;
 
+    @Autowired
+    private com.varcal.cheermanager.Service.Horario_Asistencia.AsistenciaMetricasService metricasService;
+
+    /** Metricas detalladas de asistencia del rango (por defecto los ultimos 30 dias), opcionalmente de un solo grupo. */
+    @GetMapping("/metricas")
+    @RequiresPermission("registrar_asistencia")
+    public ResponseEntity<?> metricas(@org.springframework.web.bind.annotation.RequestParam(required = false) java.time.LocalDate desde,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) java.time.LocalDate hasta,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) Integer grupoId) {
+        java.time.LocalDate fin = hasta != null ? hasta : com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy();
+        java.time.LocalDate ini = desde != null ? desde : fin.minusDays(29);
+        try {
+            return ResponseEntity.ok(metricasService.calcular(ini, fin, grupoId));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("message", e.getMessage()));
+        }
+    }
+
     public record EscaneoRequest(String codigo, Integer horarioId, java.time.LocalDate fecha) {
     }
 
