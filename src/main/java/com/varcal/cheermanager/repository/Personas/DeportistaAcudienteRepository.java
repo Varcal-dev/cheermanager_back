@@ -31,4 +31,8 @@ public interface DeportistaAcudienteRepository extends JpaRepository<DeportistaA
     @Query("SELECT COUNT(d) FROM Deportista d WHERE d.persona.fechaNacimiento > :limite "
             + "AND NOT EXISTS (SELECT 1 FROM DeportistaAcudiente da WHERE da.deportista = d)")
     long contarMenoresSinAcudiente(@Param("limite") LocalDate limite);
+
+    /** Ids de los deportistas que tienen al menos un acudiente vinculado. */
+    @Query("SELECT DISTINCT da.deportista.id FROM DeportistaAcudiente da")
+    List<Integer> idsDeportistasConAcudiente();
 }

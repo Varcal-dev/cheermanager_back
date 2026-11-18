@@ -41,7 +41,9 @@ public class ResumenPersonasDTO {
         private String estadoAnterior; // null si es el primer registro del deportista
         private String estadoNuevo;
         private LocalDateTime fechaCambio;
-        private Boolean esAlta; // true si estadoNuevo = "Activo"
+        private Boolean esAlta; // true si es un deportista nuevo o que vuelve tras un retiro
+        /** ALTA (registro nuevo o reingreso tras un retiro), BAJA (pasa a Retirado) o CAMBIO (otro estado: no cuenta). */
+        private String tipo;
         private String motivo;
     }
 }

@@ -80,6 +80,9 @@ public class SecurityConfig {
                         // Pre-registro de la landing (sin sesion). La defensa esta en PreRegistroService.
                         .requestMatchers(HttpMethod.POST, "/api/public/preregistro", "/api/public/clubes/*/interesados")
                         .permitAll()
+                        // Pagina "Unete": directorio y ficha publica de cada club (solo lectura).
+                        .requestMatchers(HttpMethod.GET, "/api/public/clubes", "/api/public/clubes/*")
+                        .permitAll()
                         // Webhook de Wompi (sin sesion): WompiService valida el checksum del evento.
                         .requestMatchers(HttpMethod.POST, "/api/wompi/eventos").permitAll()
                         .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
