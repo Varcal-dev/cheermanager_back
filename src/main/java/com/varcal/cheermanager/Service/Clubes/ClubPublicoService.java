@@ -18,11 +18,11 @@ import com.varcal.cheermanager.Models.Clubes.EstadoSuscripcion;
 import com.varcal.cheermanager.Models.Horario_Asistencia.HorarioEntrenamiento;
 import com.varcal.cheermanager.Models.Horario_Asistencia.Sede;
 import com.varcal.cheermanager.Models.Org_dep.GrupoEntrenamiento;
-import com.varcal.cheermanager.Tenant.TenantContext;
 import com.varcal.cheermanager.repository.Clubes.ClubRepository;
 import com.varcal.cheermanager.repository.Horario_Asistencia.HorarioEntrenamientoRepository;
 import com.varcal.cheermanager.repository.Horario_Asistencia.SedeRepository;
 import com.varcal.cheermanager.repository.Org_dep.GrupoEntrenamientoRepository;
+import com.varcal.cheermanager.tenant.TenantContext;
 
 /**
  * Informacion publica de cada club para la pagina "Unete": nombre, sedes, grupos y horarios.

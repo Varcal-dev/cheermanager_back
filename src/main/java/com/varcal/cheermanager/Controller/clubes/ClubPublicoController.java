@@ -1,4 +1,4 @@
-package com.varcal.cheermanager.Controller.clubes;
+package com.varcal.cheermanager.Controller.Clubes;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
