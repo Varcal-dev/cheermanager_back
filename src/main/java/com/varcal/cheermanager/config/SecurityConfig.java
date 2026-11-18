@@ -80,6 +80,8 @@ public class SecurityConfig {
                         // Pre-registro de la landing (sin sesion). La defensa esta en PreRegistroService.
                         .requestMatchers(HttpMethod.POST, "/api/public/preregistro", "/api/public/clubes/*/interesados")
                         .permitAll()
+                        // Webhook de Wompi (sin sesion): WompiService valida el checksum del evento.
+                        .requestMatchers(HttpMethod.POST, "/api/wompi/eventos").permitAll()
                         .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);

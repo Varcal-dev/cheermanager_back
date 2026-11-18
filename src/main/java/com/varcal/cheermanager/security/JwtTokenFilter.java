@@ -45,7 +45,9 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
     /** Rutas que siguen funcionando con la suscripcion vencida (cerrar sesion, renovar sesion, cambiar clave, avisos). */
     private static final List<String> RUTAS_EXENTAS = List.of(
-            "/api/logout", "/api/refresh-token", "/api/change-password", "/api/portal/notificaciones", "/api/legal");
+            "/api/logout", "/api/refresh-token", "/api/change-password", "/api/portal/notificaciones", "/api/legal",
+            // Un club vencido (solo lectura) tiene que poder pagar su suscripcion (PAG-1).
+            "/api/suscripcion/pagar");
 
     static final String MENSAJE_LEGAL_PENDIENTE = "Tu club aún no ha aceptado los Términos y Condiciones y la Política "
             + "de Tratamiento de Datos vigentes. El administrador del club debe aceptarlos para poder crear o modificar datos.";

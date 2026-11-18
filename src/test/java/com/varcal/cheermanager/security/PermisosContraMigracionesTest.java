@@ -55,7 +55,9 @@ class PermisosContraMigracionesTest {
                 + leer("db/migration/V34__lesiones_y_retorno.sql") + "\n"
                 + leer("db/migration/V36__interesados.sql") + "\n"
                 + leer("db/migration/V37__sedes_y_espacios.sql") + "\n"
-                + leer("db/migration/V38__viajes_competencia.sql");
+                + leer("db/migration/V38__viajes_competencia.sql") + "\n"
+                + leer("db/migration/V45__facturacion_electronica_base.sql") + "\n"
+                + leer("db/migration/V46__pagos_wompi_suscripcion.sql");
         // Sin comentarios SQL: V2 tiene un ";" dentro de un comentario ("...concreto; plural = ...") que cortaba el
         // bloque INSERT y dejaba ~28 permisos reales fuera del catalogo, haciendo fallar esta prueba.
         sql = sql.replaceAll("(?m)--[^\\n]*", "");
