@@ -78,7 +78,7 @@ Alta de un club: `POST /api/clubes` (solo superadmin) crea el club, los roles pl
 
 ## Seguridad y permisos
 
-- Stateless: JWT en `Authorization: Bearer`, expiración por defecto 8 h, `refresh-token` (revalida al usuario, recalcula permisos y revoca el token anterior).
+- Stateless: JWT en `Authorization: Bearer`, expiración por defecto 60 min, `refresh-token` (revalida al usuario, recalcula permisos y revoca el token anterior).
 - **Tokens revocados persistentes** (V14): logout y renovación guardan el hash SHA-256 del token en base de datos, así que un reinicio no los revive. Un job horario purga los vencidos.
 - Login por **correo**; bloqueo por intentos fallidos (5 intentos → 15 min por defecto); respuestas indistinguibles entre correo inexistente y clave incorrecta.
 - Recuperación de clave: `forgot-password` nunca devuelve el token; lo entrega `PasswordResetNotifier` por correo (SMTP) o, sin SMTP, lo escribe en el log (solo desarrollo).
@@ -204,7 +204,7 @@ Los secretos **no tienen valor por defecto**: si falta una obligatoria, la app n
 |---|---|---|---|
 | `DB_URL` / `DB_USERNAME` / `DB_PASSWORD` | Sí | — | Conexión a MySQL |
 | `JWT_SECRET` | Sí | — | Mínimo 32 bytes (`openssl rand -base64 64`) |
-| `JWT_EXPIRATION_MS` | No | `28800000` (8 h) | Vigencia del token |
+| `JWT_EXPIRATION_MS` | No | `3600000` (60 min) | Vigencia del token |
 | `CORS_ALLOWED_ORIGINS` | No | `http://localhost:3000` | Orígenes del frontend, separados por coma, sin barra final |
 | `FRONTEND_RESET_URL` | No | `http://localhost:3000/reset-password` | Base del enlace de recuperación |
 | `APP_BOOTSTRAP_ADMIN_USERNAME` / `_EMAIL` / `_PASSWORD` | Para crear el superadmin | `superadmin` / vacío / vacío | Se crea solo si no existe y la clave tiene ≥ 10 caracteres |

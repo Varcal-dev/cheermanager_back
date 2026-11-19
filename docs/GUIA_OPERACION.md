@@ -50,7 +50,7 @@ Esto se ensaya con `ops/probar_restauracion.sh` cada mes. **No esperes a un desa
 ## 5. Sesiones y tokens
 
 - Cerrar sesión o renovar la sesión revoca el token. Desde la migración V14 la revocación **se guarda en la base** y sobrevive a reinicios (se guarda solo el SHA-256 del token).
-- El front renueva la sesión solo mientras el usuario trabaja (cuando quedan menos de 30 minutos). Un usuario inactivo más de 8 horas debe volver a entrar.
+- El front renueva la sesión solo mientras el usuario trabaja (cuando quedan menos de 30 minutos). Un usuario inactivo más de 60 minutos debe volver a entrar.
 - Límite: el API consulta las revocaciones en memoria. Con **varias instancias** del API, cada una vería las revocaciones nuevas de las otras solo al reiniciar; si algún día escalas a varias instancias, esa consulta debe pasar a la base.
 - Si sospechas que un token se filtró y necesitas invalidar **todas** las sesiones de inmediato: cambia `JWT_SECRET` y reinicia el API (todos tendrán que volver a entrar).
 
