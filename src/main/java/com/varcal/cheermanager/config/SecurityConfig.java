@@ -21,6 +21,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.varcal.cheermanager.security.JwtTokenFilter;
+import com.varcal.cheermanager.security.RateLimitFilter;
 
 @Configuration
 public class SecurityConfig {
@@ -31,8 +32,21 @@ public class SecurityConfig {
     @Value("${app.cors.allowed-origins}")
     private String allowedOrigins;
 
-    public SecurityConfig(JwtTokenFilter jwtTokenFilter) {
+    /** Limite de intentos por IP en login / recuperacion de clave (SEC-01). Ver RateLimitFilter. */
+    private final RateLimitFilter rateLimitFilter;
+
+    public SecurityConfig(JwtTokenFilter jwtTokenFilter,
+            @Value("${app.seguridad.rate-limit.enabled:true}") boolean rateLimitActivo,
+            @Value("${app.seguridad.rate-limit.login-max:20}") int loginMax,
+            @Value("${app.seguridad.rate-limit.login-ventana-seg:300}") long loginVentanaSeg,
+            @Value("${app.seguridad.rate-limit.forgot-max:5}") int forgotMax,
+            @Value("${app.seguridad.rate-limit.forgot-ventana-seg:3600}") long forgotVentanaSeg,
+            @Value("${app.seguridad.rate-limit.reset-max:10}") int resetMax,
+            @Value("${app.seguridad.rate-limit.reset-ventana-seg:3600}") long resetVentanaSeg) {
         this.jwtTokenFilter = jwtTokenFilter;
+        this.rateLimitFilter = new RateLimitFilter(rateLimitActivo,
+                loginMax, loginVentanaSeg * 1000, forgotMax, forgotVentanaSeg * 1000,
+                resetMax, resetVentanaSeg * 1000, System::currentTimeMillis);
     }
 
     @Bean
@@ -80,14 +94,13 @@ public class SecurityConfig {
                         // Pre-registro de la landing (sin sesion). La defensa esta en PreRegistroService.
                         .requestMatchers(HttpMethod.POST, "/api/public/preregistro", "/api/public/clubes/*/interesados")
                         .permitAll()
-                        // Pagina "Unete": directorio y ficha publica de cada club (solo lectura).
-                        .requestMatchers(HttpMethod.GET, "/api/public/clubes", "/api/public/clubes/*")
-                        .permitAll()
                         // Webhook de Wompi (sin sesion): WompiService valida el checksum del evento.
                         .requestMatchers(HttpMethod.POST, "/api/wompi/eventos").permitAll()
                         .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
                         .anyRequest().authenticated())
-                .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
+                // Antes del filtro JWT: un atacante limitado no debe llegar ni a validar tokens ni a tocar la BD.
+                .addFilterBefore(rateLimitFilter, JwtTokenFilter.class);
 
         return http.build();
     }

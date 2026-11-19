@@ -20,6 +20,8 @@ api.tudominio.com {
 ```
 Pon `CORS_ALLOWED_ORIGINS` con el dominio exacto del frontend.
 
+**Límite de intentos por IP (login y recuperar clave):** la API toma la IP del cliente de `X-Forwarded-For` solo si quien conecta es un proxy local o de red privada. Caddy ya envía el header. Con Nginx añade `proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;`. **No publiques el puerto 8081**: debe seguir en `127.0.0.1`, de modo que solo el proxy llegue a la API. Si algún día corres más de una instancia de la API, el contador no se comparte entre ellas.
+
 ## Base de datos que ya existe (producción actual)
 Si tu BD fue creada con los scripts 01 y 02 y no tiene tabla `flyway_schema_history`, arranca la app con `baseline-version=2` (ya viene así): Flyway la marca como V2 y aplica solo V3. **Haz respaldo antes.**
 Antes de migrar prueba en una copia: `ops/probar_esquema.sh`.
