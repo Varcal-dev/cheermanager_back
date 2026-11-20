@@ -217,7 +217,7 @@ Los secretos **no tienen valor por defecto**: si falta una obligatoria, la app n
 | `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_TEMPLATE`, `WHATSAPP_LANGUAGE` | No | plantilla `recordatorio_mora`, idioma `es` | WhatsApp Business Cloud API (plantilla aprobada por Meta con 3 variables). Sin esto, se generan enlaces `wa.me` |
 | `FORWARD_HEADERS_STRATEGY` | No | `none` | `framework` detrás de Nginx/Caddy/Railway |
 | `RATE_LIMIT_ENABLED`, `RATE_LIMIT_LOGIN_MAX`, `RATE_LIMIT_FORGOT_MAX`, `RATE_LIMIT_RESET_MAX` (y `..._VENTANA_SEG`) | No | `true`, 20 / 5 min, 5 / 1 h, 10 / 1 h | Límite de intentos por IP: login (solo fallidos), recuperar clave, restablecer clave. Responde 429 con `Retry-After` |
-| `UPLOAD_DIR` | No | `./uploads` | Fotos y documentos (máx. 10 MB) |
+| `UPLOAD_DIR` | No | `./uploads` (en Docker: `/data/uploads`, volumen `uploads`) | Fotos y documentos (máx. 10 MB) |
 | `JPA_DDL_AUTO` / `FLYWAY_ENABLED` | No | `validate` / `true` | Nunca `update` fuera de tu máquina |
 | `LOG_LEVEL_ROOT` / `LOG_LEVEL_APP` | No | `INFO` | No subir a `DEBUG` Hibernate SQL ni Spring Security en producción |
 | `PORT` | No | `8081` | |
@@ -279,7 +279,7 @@ La numeración salta de V16 a V18 (no existe V17).
 Guías completas en [`docs/GUIA_DESPLIEGUE.md`](docs/GUIA_DESPLIEGUE.md), [`docs/GUIA_OPERACION.md`](docs/GUIA_OPERACION.md) y, para quien administra un club, [`docs/GUIA_USUARIO_ADMIN_CLUB.md`](docs/GUIA_USUARIO_ADMIN_CLUB.md). Resumen:
 
 1. VPS con Docker y HTTPS delante de la API (Caddy o Nginx, con `FORWARD_HEADERS_STRATEGY=framework`).
-2. `docker compose up -d --build`: MySQL 8 (puerto 3306 no publicado, volumen `dbdata`) + API en `127.0.0.1:8081`. Logs de Docker con rotación.
+2. `docker compose up -d --build`: MySQL 8 (puerto 3306 no publicado, volúmenes `dbdata` y `uploads`) + API en `127.0.0.1:8081`. Logs de Docker con rotación.
 3. Entrar como `superadmin`, cambiar la clave y crear el primer club con `POST /api/clubes`.
 4. Salud: `GET /actuator/health`. Cada línea de log lleva `[rid]`.
 

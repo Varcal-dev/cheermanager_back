@@ -10,6 +10,10 @@ RUN ./mvnw -q -B -DskipTests package && cp target/*.jar app.jar
 # ---- Etapa 2: ejecutar ----
 FROM eclipse-temurin:21-jre
 RUN useradd --system --create-home --uid 10001 cheer
+# Fotos y documentos: carpeta propia de "cheer" y fuera de /app (que es de root). El compose monta aqui el volumen
+# `uploads`; un volumen nuevo hereda este dueno, asi que la API puede escribir y los archivos sobreviven a recrear el contenedor.
+RUN mkdir -p /data/uploads && chown cheer:cheer /data/uploads
+ENV UPLOAD_DIR=/data/uploads
 WORKDIR /app
 COPY --from=build /app/app.jar app.jar
 USER cheer
