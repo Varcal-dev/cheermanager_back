@@ -4,6 +4,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.PersistenceContext;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +35,9 @@ public class MovimientoInventarioService {
     @Autowired
     private UserRepository userRepository;
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
     // Único método del sistema que debe modificar ProductoVariante.stockActual
     // — cualquier ajuste de stock (venta, compra, conteo físico) pasa por
     // acá, para que MovimientoInventario sea siempre el registro fiel de por
@@ -39,6 +46,14 @@ public class MovimientoInventarioService {
     public MovimientoInventario registrar(MovimientoInventarioDTO dto) {
         ProductoVariante variante = productoVarianteRepository.findById(dto.getProductoVarianteId())
                 .orElseThrow(() -> new RuntimeException("Variante no encontrada con ID: " + dto.getProductoVarianteId()));
+
+        // INV-01: leer-calcular-guardar el stock sin bloqueo perdia actualizaciones si dos operaciones sobre la
+        // misma variante coincidian (dos ventas de la ultima unidad pasaban ambas la validacion). refresh con
+        // PESSIMISTIC_WRITE ejecuta SELECT ... FOR UPDATE: espera a quien tenga la fila y relee el valor mas
+        // reciente confirmado. Hace falta el refresh (no basta un findById con lock) porque quien llama (p. ej.
+        // VentaService) ya pudo cargar la variante en esta transaccion, y MySQL (REPEATABLE READ) mostraria una
+        // lectura normal con el stock de antes.
+        entityManager.refresh(variante, LockModeType.PESSIMISTIC_WRITE);
 
         if (!Boolean.TRUE.equals(variante.getProducto().getRequiereControlStock())) {
             throw new RuntimeException(
