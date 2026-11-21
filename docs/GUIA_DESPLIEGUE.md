@@ -39,7 +39,7 @@ Docker rota los logs solos (10 MB x 5 archivos por servicio, ver `docker-compose
 ## Configuración opcional y fotos
 - **Variables:** el servicio `api` del compose pasa al contenedor las variables opcionales (Wompi, SMTP, WhatsApp, límites de intentos, logs, etc.) **solo si están en tu `.env`**; las que no pongas usan el valor por defecto de la aplicación. La lista completa y sus ejemplos están en `env.example`. Tras editar `.env`: `docker compose up -d` y comprueba con `docker compose config` (debe mostrar tus valores y ninguna variable vacía de más).
 - **Fotos y documentos** viven en el volumen Docker `uploads` (`/data/uploads` dentro del contenedor) y sobreviven a `docker compose up --build` y a recrear la API. **`docker compose down -v` borra los volúmenes, incluidas las fotos y la base de datos: no lo uses en producción.**
-- **Pendiente:** el respaldo diario (`ops/backup.sh`) cubre solo la base de datos; las fotos del volumen `uploads` todavía no tienen copia de seguridad.
+- **Respaldo:** `ops/backup.sh` cubre solo la base de datos; las fotos del volumen `uploads` las respalda `ops/backup_uploads.sh` (ver `GUIA_OPERACION.md`).
 
 ## Variables útiles
 `LOG_LEVEL_APP=DEBUG` (temporal), `CONSENTIMIENTOS_EXIGIR_SALUD=true` (cuando el reporte `/api/consentimientos/pendientes` esté en cero), `JWT_EXPIRATION_MS`.

@@ -6,6 +6,8 @@ ENV=/etc/cheermanager/ops.env
 
 # Respaldo diario 2:30 a.m.
 30 2 * * *   set -a; . $ENV; set +a; $OPS/backup.sh >> /var/log/cheermanager-backup.log 2>&1
+# Respaldo de fotos y documentos (volumen uploads) 2:45 a.m. El usuario de este cron debe poder usar Docker.
+45 2 * * *   set -a; . $ENV; set +a; $OPS/backup_uploads.sh >> /var/log/cheermanager-backup-uploads.log 2>&1
 # Prueba de restauracion, el dia 1 de cada mes 4:00 a.m.
 0 4 1 * *    set -a; . $ENV; set +a; $OPS/probar_restauracion.sh >> /var/log/cheermanager-restauracion.log 2>&1
 # Vigilante cada 5 minutos

@@ -57,7 +57,7 @@ src/main/java/com/varcal/cheermanager/
 │                  #   GlobalExceptionHandler, RequestIdFilter
 ├── aspect/        # AuditoriaAspect (registra altas/bajas de repositorios)
 └── Utils/         # AuthenticatedUserUtil, CalendarioHabil, ClaveTemporal, @RequiresPermission, @SinPermisoEspecifico, ...
-ops/               # backup, restore, probar_restauracion, verificar_salud, alertar, probar_esquema, exportar_baseline
+ops/               # backup, restore, backup_uploads, restore_uploads, probar_restauracion, verificar_salud, alertar, probar_esquema, exportar_baseline
 docs/              # GUIA_DESPLIEGUE.md, GUIA_OPERACION.md, GUIA_USUARIO_ADMIN_CLUB.md
 ajustes_claudia/   # Bitácora histórica de decisiones y resúmenes de cambios por módulo
 ```
@@ -292,6 +292,7 @@ Guías completas en [`docs/GUIA_DESPLIEGUE.md`](docs/GUIA_DESPLIEGUE.md), [`docs
 | `backup.sh` | Respaldo lógico con rotación (`KEEP_DAYS`, 14 por defecto), cifrado con age (`BACKUP_AGE_RECIPIENT`) y copia externa opcional con rclone |
 | `restore.sh` | Restaura un respaldo, cifrado o no (pide confirmar el nombre de la base; el cifrado requiere `BACKUP_AGE_IDENTITY`) |
 | `probar_restauracion.sh` | Restaura el último respaldo en una base de prueba y la verifica (parcial si está cifrado y no hay llave) |
+| `backup_uploads.sh` / `restore_uploads.sh` | Respaldo y restauración de fotos y documentos (volumen `uploads`), cifrados con age igual que la base; `BACKUP_UPLOADS=1` activa su vigilancia |
 | `verificar_salud.sh` | Vigilante: API, respaldo reciente, prueba de restauración reciente y disco |
 | `alertar.sh` | Alertas por webhook (Slack/Discord/Mattermost) o Telegram |
 | `probar_esquema.sh` | Prueba las migraciones contra un MySQL desechable |

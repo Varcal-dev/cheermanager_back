@@ -7,9 +7,12 @@ Qué corre solo, cómo te enteras de que algo falló y cómo recuperarte. Pensad
 | Qué | Cuándo | Script | Si falla |
 |---|---|---|---|
 | Respaldo de la base (con suma de verificación y copia externa opcional) | Diario 2:30 | `ops/backup.sh` | Alerta inmediata |
+| Respaldo de fotos y documentos (volumen `uploads`, cifrado) | Diario 2:45 | `ops/backup_uploads.sh` | Alerta inmediata |
 | Prueba de restauración en una base aparte | Día 1 de cada mes | `ops/probar_restauracion.sh` | Alerta inmediata |
-| Vigilante: API viva, respaldo reciente, prueba reciente, disco | Cada 5 min | `ops/verificar_salud.sh` | Alerta (sin repetir antes de 60 min) y aviso al recuperarse |
+| Vigilante: API viva, respaldo reciente (base y, con `BACKUP_UPLOADS=1`, fotos), prueba reciente, disco | Cada 5 min | `ops/verificar_salud.sh` | Alerta (sin repetir antes de 60 min) y aviso al recuperarse |
 | Limpieza de tokens revocados vencidos | Cada hora (dentro del API) | automático | Queda en el log |
+
+Los scripts de `ops/` se guardan en Git con permiso de ejecución. Si al clonar en el servidor el cron responde "Permission denied", ejecuta `chmod +x ops/*.sh` (y, si desarrollas en Windows, `git update-index --chmod=+x ops/*.sh` antes de subir los cambios).
 
 El crontab de ejemplo está en `ops/crontab.ejemplo`. Las claves y variables `ALERTA_*` van en un archivo con permisos 600 (por ejemplo `/etc/cheermanager/ops.env`), nunca en el repositorio.
 
@@ -33,6 +36,16 @@ Prueba: `set -a; . /etc/cheermanager/ops.env; set +a; ops/alertar.sh "prueba"`. 
 - **Pérdida máxima (RPO):** hasta 24 horas de datos (el respaldo es diario). Si necesitas menos, sube la frecuencia del respaldo (ej. cada 6 horas); la base es pequeña.
 - **Tiempo de recuperación (RTO):** con el servidor sano, unos 30 minutos. Con servidor perdido: lo que tardes en levantar uno nuevo con Docker (≈1 hora) más la restauración.
 - Los respaldos **solo en el mismo servidor no protegen** de perder el servidor. Configura `RCLONE_REMOTE` (rclone hacia Google Drive, S3, Backblaze…) para copiar cada respaldo fuera.
+
+### Respaldo de fotos y documentos
+
+Las fotos y documentos viven en el volumen Docker `uploads`, que el respaldo de la base **no** incluye. `ops/backup_uploads.sh` los empaqueta desde el contenedor `api` (`docker compose exec`), los cifra con las mismas claves públicas de age y deja `uploads_<fecha>.tar.gz.age` con su `.sha256` en `BACKUP_DIR`, con la misma rotación y copia externa (`RCLONE_REMOTE`) que la base. Reglas que conviene saber:
+
+- Es un respaldo **completo** cada día, no incremental: el espacio crece con la cantidad de fotos (≈ tamaño total × `KEEP_DAYS`). Revisa el disco y el destino externo.
+- El usuario del cron debe poder usar Docker, y el contenedor `api` debe estar en marcha; si no, el respaldo falla y avisa. `docker compose` lee el `.env` de la carpeta del repo para interpolar el archivo, así que ese `.env` debe existir allí.
+- Activa `BACKUP_UPLOADS=1` en `ops.env` para que el vigilante avise si el respaldo falta o tiene más de `MAX_BACKUP_HORAS`.
+- Restaurar: `BACKUP_AGE_IDENTITY=/ruta/llave.txt ops/restore_uploads.sh uploads_<fecha>.tar.gz.age` (comprueba que el archivo se puede leer completo antes de escribir, y no borra lo que ya exista). Con `UPLOADS_DIR=/carpeta` extrae en una carpeta, útil para revisar el contenido en tu computador.
+- Como con la base, la restauración **completa** de este respaldo exige la llave privada, que no está en el servidor: pruébala a mano de vez en cuando.
 
 ### Cifrado de los respaldos
 
@@ -74,6 +87,8 @@ Debe terminar en `PRUEBA DE RESTAURACION OK`. Anota la fecha.
 7. Revisa `curl http://127.0.0.1:8081/actuator/health` y entra con un usuario de prueba.
 8. Anota qué pasó y cuántas horas de datos se perdieron: los clubes deben reconstruirlas (por ejemplo asistencias o pagos de ese lapso).
 
+9. Fotos y documentos: con el volumen vacío o nuevo, restaura el último `uploads_*.tar.gz.age` con `ops/restore_uploads.sh` (ver "Respaldo de fotos y documentos"). La base y las fotos se respaldan por separado: restaura ambas.
+
 Esto se ensaya con `ops/probar_restauracion.sh` cada mes. **No esperes a un desastre para ver si funciona.**
 
 ## 5. Sesiones y tokens
@@ -101,6 +116,7 @@ Cada `push` y cada pull request ejecutan: back → `mvn verify` y construcción 
 - [ ] `ops.env` creado, crontab instalado y una alerta de prueba recibida.
 - [ ] Un respaldo hecho, **copiado fuera del servidor** y una prueba de restauración en OK (`ultima_prueba_restauracion.txt`).
 - [ ] Respaldos **cifrados** (`BACKUP_AGE_RECIPIENT`), llave privada guardada en **dos sitios** fuera del servidor y una restauración **completa** probada con ella.
+- [ ] Respaldo de fotos y documentos funcionando (`BACKUP_UPLOADS=1`), cifrado y copiado fuera del servidor, y una restauración de prueba hecha con `ops/restore_uploads.sh`.
 - [ ] Monitor externo configurado.
 - [ ] CI en verde en `main`.
 - [ ] Correo (SMTP) configurado — pendiente: se deja para los últimos ajustes.

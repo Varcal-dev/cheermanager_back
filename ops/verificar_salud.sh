@@ -5,6 +5,8 @@
 #   BACKUP_DIR=/var/backups/cheermanager DB_NAME=cheermanager ./ops/verificar_salud.sh
 # Variables: HEALTH_URL (http://127.0.0.1:8081/actuator/health) · MAX_BACKUP_HORAS (26) · MAX_PRUEBA_DIAS (40)
 #            DISCO_MAX_PCT (85) · ALERTA_REPETIR_MIN (60) · ESTADO_DIR (/var/tmp)
+#            BACKUP_UPLOADS=1 : tambien exige un respaldo reciente de fotos y documentos (ops/backup_uploads.sh),
+#            con el mismo limite MAX_BACKUP_HORAS. Sin esta variable no se vigila.
 # Sale con 1 si encontro algun problema (util tambien para monitores externos).
 set -uo pipefail
 AQUI="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -26,6 +28,17 @@ if [ -z "$ULT" ]; then
 else
   EDAD_H=$(( ( $(date +%s) - $(stat -c %Y "$ULT") ) / 3600 ))
   [ "$EDAD_H" -le "$MAX_BACKUP_HORAS" ] || PROBLEMAS+=("El ultimo respaldo tiene $EDAD_H horas (maximo $MAX_BACKUP_HORAS)")
+fi
+
+# 2b) respaldo reciente de fotos y documentos (solo si se activo BACKUP_UPLOADS=1)
+if [ "${BACKUP_UPLOADS:-0}" = "1" ]; then
+  ULTU="$(ls -1t "$BACKUP_DIR"/uploads_*.tar.gz "$BACKUP_DIR"/uploads_*.tar.gz.age 2>/dev/null | head -n1 || true)"
+  if [ -z "$ULTU" ]; then
+    PROBLEMAS+=("No hay ningun respaldo de fotos y documentos en $BACKUP_DIR (ops/backup_uploads.sh)")
+  else
+    EDAD_U=$(( ( $(date +%s) - $(stat -c %Y "$ULTU") ) / 3600 ))
+    [ "$EDAD_U" -le "$MAX_BACKUP_HORAS" ] || PROBLEMAS+=("El ultimo respaldo de fotos y documentos tiene $EDAD_U horas (maximo $MAX_BACKUP_HORAS)")
+  fi
 fi
 
 # 3) prueba de restauracion reciente y buena
