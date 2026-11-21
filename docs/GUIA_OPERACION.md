@@ -74,3 +74,19 @@ Cada `push` y cada pull request ejecutan: back → `mvn verify` y construcción 
 - [ ] Monitor externo configurado.
 - [ ] CI en verde en `main`.
 - [ ] Correo (SMTP) configurado — pendiente: se deja para los últimos ajustes.
+
+## 9. Antes de desplegar la migración V47 (FIN-01: mensualidad única por periodo)
+
+La migración `V47` crea un índice único `(club_id, inscripcion_id, periodo)` en `facturas`. **Si ya existen dos facturas del mismo mes para una inscripción, la migración se detiene** (no borra ni cambia nada) con un error que nombra `FIN01_HAY_FACTURAS_DUPLICADAS_REVISAR_ANTES_DE_MIGRAR`, y el API no arranca hasta resolverlo. Por eso, **antes de desplegar**, en la base de producción:
+
+```sql
+SELECT f.club_id, f.inscripcion_id, f.periodo, COUNT(*) AS cuantas,
+       GROUP_CONCAT(CONCAT(f.id, ':', f.numero_factura, ':', IF(f.anulada = 1, 'anulada', 'vigente')) ORDER BY f.id) AS facturas
+  FROM facturas f
+ WHERE f.periodo IS NOT NULL AND f.inscripcion_id IS NOT NULL
+ GROUP BY f.club_id, f.inscripcion_id, f.periodo
+HAVING COUNT(*) > 1;
+```
+
+Si devuelve **0 filas**, despliega con tranquilidad. Si devuelve filas: revisa cada caso (¿cuál tiene pagos?), **anula la sobrante desde la app con su motivo** (no se borran facturas). OJO: una factura anulada sigue ocupando su periodo, así que el índice igual fallaría. Para cada caso hay que dejar **una sola** fila con ese `(inscripción, periodo)`; el arreglo de datos (p. ej. vaciar el `periodo` de la sobrante anulada y sin pagos) se hace a mano y con respaldo previo: escríbeme el caso y preparo el script. Haz un respaldo antes (sección 3).
+
