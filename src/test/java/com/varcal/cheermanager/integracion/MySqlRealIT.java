@@ -38,7 +38,14 @@ import com.varcal.cheermanager.repository.Inventario.ProductoRepository;
 import com.varcal.cheermanager.repository.Inventario.ProductoVarianteRepository;
 import com.varcal.cheermanager.Models.Financiero.Factura;
 import com.varcal.cheermanager.Models.Personas.Persona;
+import com.varcal.cheermanager.DTO.Financiero.ResumenGeneracionCobrosDTO;
 import com.varcal.cheermanager.Service.Financiero.PagoService;
+import com.varcal.cheermanager.Service.Org_dep.InscripcionService;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import com.varcal.cheermanager.repository.Financiero.FacturaRepository;
 import com.varcal.cheermanager.repository.Financiero.MetodoPagoRepository;
 import com.varcal.cheermanager.repository.Financiero.TipoPagoRepository;
@@ -74,6 +81,7 @@ class MySqlRealIT {
 
     @Autowired JdbcTemplate jdbc;
     @Autowired PagoService pagoService;
+    @Autowired InscripcionService inscripcionService;
     @Autowired FacturaRepository facturaRepository;
     @Autowired PersonaRepository personaRepository;
     @Autowired TipoPagoRepository tipoPagoRepository;
@@ -261,5 +269,83 @@ class MySqlRealIT {
         assertEquals(20, aceptados, "con stock de sobra todas las operaciones deben aceptarse");
         assertEquals(100, stock, "10 entradas y 10 salidas de 1 unidad deben dejar el stock en 100");
         assertEquals(20, movimientos);
+    }
+
+    // ===== FIN-01: una mensualidad por inscripcion y periodo =====
+
+    private Integer insertar(String sql, Object... args) {
+        KeyHolder kh = new GeneratedKeyHolder();
+        jdbc.update(con -> {
+            PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            for (int i = 0; i < args.length; i++) ps.setObject(i + 1, args[i]);
+            return ps;
+        }, kh);
+        return kh.getKey().intValue();
+    }
+
+    /** Persona + deportista + plan + inscripcion ACTIVA con plan de mensualidad, en el club 2 (Ratels). */
+    private Integer crearInscripcionConMensualidadClub2() {
+        Integer personaId = insertar("INSERT INTO personas (nombre, apellidos, club_id) VALUES (?, ?, 2)",
+                "Prueba", "Mensualidad " + System.nanoTime());
+        Integer estadoId = jdbc.queryForObject("SELECT id FROM estados_persona LIMIT 1", Integer.class);
+        Integer deportistaId = insertar("INSERT INTO deportistas (persona_id, estado_id, club_id) VALUES (?, ?, 2)",
+                personaId, estadoId);
+        List<Integer> tipos = jdbc.queryForList("SELECT id FROM tipos_planes_pago WHERE club_id = 2 LIMIT 1", Integer.class);
+        Integer tipoId = tipos.isEmpty()
+                ? insertar("INSERT INTO tipos_planes_pago (categoria, duracion_meses, nombre, club_id) VALUES ('MENSUAL', 1, 'IT FIN-01', 2)")
+                : tipos.get(0);
+        Integer planId = insertar("INSERT INTO planes_pago (nombre, valor_mensual, fecha_vigencia_inicio, tipo_plan_id, club_id) "
+                + "VALUES (?, 80000.00, '2026-01-01', ?, 2)", "Plan IT FIN-01 " + System.nanoTime(), tipoId);
+        return insertar("INSERT INTO inscripciones (deportista_id, plan_pago_id, plan_mensualidad_id, fecha_inscripcion, estado, club_id) "
+                + "VALUES (?, ?, ?, '2026-01-15', 'Activa', 2)", deportistaId, planId, planId);
+    }
+
+    @Test
+    void dosGeneracionesSimultaneasDelMismoPeriodoDejanUnaSolaMensualidad() throws Exception {
+        final Integer inscripcionId = crearInscripcionConMensualidadClub2();
+        final String periodo = "2026-09";
+
+        ExecutorService pool = Executors.newFixedThreadPool(2);
+        CountDownLatch salida = new CountDownLatch(1);
+        List<Future<ResumenGeneracionCobrosDTO>> resultados = new ArrayList<>();
+        for (int i = 0; i < 2; i++) {
+            resultados.add(pool.submit(() -> {
+                salida.await(); // el job y el boton manual arrancan a la vez
+                return TenantContext.runAs(2, () -> inscripcionService.generarCobrosMensualidad(periodo));
+            }));
+        }
+        salida.countDown();
+        int generadas = 0;
+        int yaFacturadas = 0;
+        for (Future<ResumenGeneracionCobrosDTO> f : resultados) {
+            ResumenGeneracionCobrosDTO r = f.get();
+            assertTrue(r.getErrores().isEmpty(), "una colision no debe reportarse como error: " + r.getErrores());
+            generadas += r.getFacturasGeneradas();
+            yaFacturadas += r.getYaFacturadas();
+        }
+        pool.shutdown();
+
+        Integer facturas = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM facturas WHERE inscripcion_id = ? AND periodo = ?", Integer.class, inscripcionId, periodo);
+        assertEquals(1, facturas, "debe existir exactamente UNA mensualidad del periodo");
+        assertEquals(1, generadas, "solo un proceso la crea");
+        assertEquals(1, yaFacturadas, "el otro la cuenta como ya facturada");
+    }
+
+    @Test
+    void elIndiceUnicoRechazaElPeriodoRepetidoPeroNoLasFacturasSinPeriodo() {
+        Integer inscripcionId = crearInscripcionConMensualidadClub2();
+        Integer personaId = jdbc.queryForObject("SELECT p.id FROM personas p JOIN deportistas d ON d.persona_id = p.id "
+                + "JOIN inscripciones i ON i.deportista_id = d.id WHERE i.id = ?", Integer.class, inscripcionId);
+        String sql = "INSERT INTO facturas (numero_factura, fecha_emision, persona_id, total, inscripcion_id, periodo, club_id) "
+                + "VALUES (?, '2026-10-01', ?, 80000.00, ?, ?, 2)";
+
+        // Sin periodo (inscripcion, tienda, manuales): MySQL admite varios NULL en un UNIQUE.
+        insertar(sql, "IT-NULL-A-" + System.nanoTime(), personaId, inscripcionId, null);
+        insertar(sql, "IT-NULL-B-" + System.nanoTime(), personaId, inscripcionId, null);
+
+        insertar(sql, "IT-P-A-" + System.nanoTime(), personaId, inscripcionId, "2026-10");
+        assertThrows(DataIntegrityViolationException.class,
+                () -> insertar(sql, "IT-P-B-" + System.nanoTime(), personaId, inscripcionId, "2026-10"));
     }
 }

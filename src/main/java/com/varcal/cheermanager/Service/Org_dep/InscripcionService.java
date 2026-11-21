@@ -9,8 +9,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import com.varcal.cheermanager.DTO.Financiero.ResumenGeneracionCobrosDTO;
 import com.varcal.cheermanager.DTO.Org_dep.DeportistaInscritoDTO;
@@ -66,6 +70,9 @@ public class InscripcionService {
 
     @Autowired
     private FacturaService facturaService;
+
+    @Autowired
+    private PlatformTransactionManager txManager;
 
     public List<Object[]> obtenerDetalleInscripciones() {
         return inscripcionRepository.obtenerVistaInscripcionesDetalle();
@@ -222,15 +229,61 @@ public class InscripcionService {
             }
 
             try {
-                generarFacturaParaPlan(inscripcion, inscripcion.getPlanMensualidad(), fechaEmision,
-                        periodoStr, "Mensualidad");
-                resumen.setFacturasGeneradas(resumen.getFacturasGeneradas() + 1);
+                if (facturarMensualidadConReintento(inscripcion.getId(), fechaEmision, periodoStr)) {
+                    resumen.setFacturasGeneradas(resumen.getFacturasGeneradas() + 1);
+                } else {
+                    // Otro proceso (el job o el boton manual) la creo entre la consulta y el insert.
+                    resumen.setYaFacturadas(resumen.getYaFacturadas() + 1);
+                }
             } catch (Exception e) {
                 resumen.getErrores().add("Inscripción #" + inscripcion.getId() + ": " + e.getMessage());
             }
         }
 
         return resumen;
+    }
+
+    // ===== FIN-01: una mensualidad por inscripcion y periodo, tambien bajo concurrencia =====
+    //
+    // La regla la impone la BD (UNIQUE club_id + inscripcion_id + periodo, migracion V47); la consulta
+    // previa solo evita trabajo. Cada mensualidad se crea en su PROPIA transaccion: una violacion del
+    // UNIQUE (otro proceso gano la carrera) marca como rollback-only la transaccion donde ocurre, y si
+    // fuera la del lote se perderian todas las facturas del mes. Dentro de la transaccion nueva se vuelve
+    // a leer todo (instantanea fresca): asi se ven las facturas que otros ya confirmaron y el consecutivo
+    // del numero de factura no se repite.
+    //
+    // Devuelve true si la creo esta llamada, false si ya existia (la creo otro proceso).
+    private boolean facturarMensualidadConReintento(Integer inscripcionId, LocalDate fechaEmision, String periodo) {
+        TransactionTemplate tx = new TransactionTemplate(txManager);
+        tx.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        TransactionTemplate soloLectura = new TransactionTemplate(txManager);
+        soloLectura.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        soloLectura.setReadOnly(true);
+
+        // 2 intentos: el 2.o cubre la colision (muy rara) del consecutivo del numero de factura con otro proceso.
+        for (int intento = 1; ; intento++) {
+            try {
+                Boolean creada = tx.execute(status -> {
+                    if (facturaRepository.findByInscripcionIdAndPeriodo(inscripcionId, periodo).isPresent()) {
+                        return false;
+                    }
+                    Inscripcion fresca = inscripcionRepository.findById(inscripcionId)
+                            .orElseThrow(() -> new RuntimeException("Inscripción no encontrada"));
+                    generarFacturaParaPlan(fresca, fresca.getPlanMensualidad(), fechaEmision, periodo, "Mensualidad");
+                    return true;
+                });
+                return Boolean.TRUE.equals(creada);
+            } catch (DataIntegrityViolationException e) {
+                Boolean existe = soloLectura.execute(status ->
+                        facturaRepository.findByInscripcionIdAndPeriodo(inscripcionId, periodo).isPresent());
+                if (Boolean.TRUE.equals(existe)) {
+                    return false;
+                }
+                if (intento >= 2) {
+                    throw e;
+                }
+            }
+        }
     }
 
     // ===== CABO 1: descuento de convenio aplicado automáticamente =====
