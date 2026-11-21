@@ -289,9 +289,9 @@ Guías completas en [`docs/GUIA_DESPLIEGUE.md`](docs/GUIA_DESPLIEGUE.md), [`docs
 
 | Script | Función |
 |---|---|
-| `backup.sh` | Respaldo lógico con rotación (`KEEP_DAYS`, 14 por defecto) y copia externa opcional con rclone |
-| `restore.sh` | Restaura un respaldo (pide confirmar el nombre de la base) |
-| `probar_restauracion.sh` | Restaura el último respaldo en una base de prueba y la verifica |
+| `backup.sh` | Respaldo lógico con rotación (`KEEP_DAYS`, 14 por defecto), cifrado con age (`BACKUP_AGE_RECIPIENT`) y copia externa opcional con rclone |
+| `restore.sh` | Restaura un respaldo, cifrado o no (pide confirmar el nombre de la base; el cifrado requiere `BACKUP_AGE_IDENTITY`) |
+| `probar_restauracion.sh` | Restaura el último respaldo en una base de prueba y la verifica (parcial si está cifrado y no hay llave) |
 | `verificar_salud.sh` | Vigilante: API, respaldo reciente, prueba de restauración reciente y disco |
 | `alertar.sh` | Alertas por webhook (Slack/Discord/Mattermost) o Telegram |
 | `probar_esquema.sh` | Prueba las migraciones contra un MySQL desechable |

@@ -20,7 +20,7 @@ RESP="$(curl -sS -m 10 "$HEALTH_URL" 2>/dev/null || true)"
 echo "$RESP" | grep -q '"status"[[:space:]]*:[[:space:]]*"UP"' || PROBLEMAS+=("El API no responde UP en $HEALTH_URL")
 
 # 2) respaldo reciente
-ULT="$(ls -1t "$BACKUP_DIR/${DB_NAME}"_*.sql.gz 2>/dev/null | head -n1 || true)"
+ULT="$(ls -1t "$BACKUP_DIR/${DB_NAME}"_*.sql.gz "$BACKUP_DIR/${DB_NAME}"_*.sql.gz.age 2>/dev/null | head -n1 || true)"
 if [ -z "$ULT" ]; then
   PROBLEMAS+=("No hay ningun respaldo en $BACKUP_DIR")
 else
@@ -33,7 +33,8 @@ SELLO="$BACKUP_DIR/ultima_prueba_restauracion.txt"
 if [ ! -f "$SELLO" ]; then
   PROBLEMAS+=("Nunca se ha probado restaurar un respaldo (ejecuta ops/probar_restauracion.sh)")
 else
-  grep -q ' OK ' "$SELLO" || PROBLEMAS+=("La ultima prueba de restauracion fallo: $(cat "$SELLO")")
+  # PARCIAL = respaldo cifrado verificado sin la llave privada (que no esta en el servidor): no es un fallo.
+  grep -qE ' (OK|PARCIAL) ' "$SELLO" || PROBLEMAS+=("La ultima prueba de restauracion fallo: $(cat "$SELLO")")
   EDAD_D=$(( ( $(date +%s) - $(stat -c %Y "$SELLO") ) / 86400 ))
   [ "$EDAD_D" -le "$MAX_PRUEBA_DIAS" ] || PROBLEMAS+=("La ultima prueba de restauracion tiene $EDAD_D dias (maximo $MAX_PRUEBA_DIAS)")
 fi
