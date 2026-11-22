@@ -118,6 +118,10 @@ public class ClubService {
         // limites desde la pantalla de Clubes.
         club.setPlanId(planSaasRepository.findByCodigo("prueba").or(() -> planSaasRepository.findByCodigo("start"))
                 .map(PlanSaas::getId).orElse(null));
+        // Datos de salud de menores (Ley 1581): el club nuevo nace exigiendo autorizacion vigente antes de guardarlos.
+        // No hay deportistas, asi que no hay pendientes. El administrador puede desactivarlo (y volver a activarlo
+        // cuando no queden pendientes) en Consentimientos > exigencia de salud (L5). Los clubes existentes no cambian.
+        club.setExigirConsentimientoSalud(true);
         club = clubRepository.save(club);
 
         final Integer clubId = club.getId();
