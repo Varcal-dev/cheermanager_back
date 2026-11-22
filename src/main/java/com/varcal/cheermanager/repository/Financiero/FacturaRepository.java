@@ -88,13 +88,19 @@ public interface FacturaRepository extends JpaRepository<Factura, Integer> {
             + "AND (:estado = 'TODOS' "
             + "  OR (:estado = 'ANULADA' AND f.anulada = true) "
             + "  OR (f.anulada = false AND ( "
-            + "       (:estado = 'PAGADA' AND f.total <= " + PAGADO_SQ + ") "
+            + "       (:estado = 'CON_SALDO' AND f.total > " + PAGADO_SQ + ") "
+            + "    OR (:estado = 'PAGADA' AND f.total <= " + PAGADO_SQ + ") "
             + "    OR (:estado = 'EN_MORA' AND f.total > " + PAGADO_SQ + " AND f.fechaVencimiento < :hoy) "
             + "    OR (:estado = 'ABONO_PARCIAL' AND f.total > " + PAGADO_SQ + " AND " + PAGADO_SQ + " > 0 "
             + "        AND (f.fechaVencimiento IS NULL OR f.fechaVencimiento >= :hoy)) "
             + "    OR (:estado = 'PENDIENTE' AND f.total > " + PAGADO_SQ + " AND " + PAGADO_SQ + " = 0 "
             + "        AND (f.fechaVencimiento IS NULL OR f.fechaVencimiento >= :hoy)) "
             + "  ))) ";
+
+    // Pantalla de Pagos: suma del TOTAL de las facturas vigentes con saldo (la parte ya pagada de esas mismas facturas
+    // la da PagoRepository.sumarPagadoEnFacturasConSaldo; el saldo pendiente es la diferencia).
+    @Query("SELECT COALESCE(SUM(f.total), 0) FROM Factura f WHERE f.anulada = false AND f.total > " + PAGADO_SQ)
+    BigDecimal sumarTotalFacturasConSaldo();
 
     @Query(value = "SELECT f FROM Factura f JOIN FETCH f.persona pe LEFT JOIN FETCH f.descuento" + FILTRO_PAGINA
             + "ORDER BY f.fechaEmision DESC, f.id DESC",

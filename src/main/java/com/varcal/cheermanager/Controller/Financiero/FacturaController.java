@@ -61,6 +61,13 @@ public class FacturaController {
         return facturaService.listarPagina(q, estado, concepto, desde, hasta, pagina, tamano);
     }
 
+    // Facturas con saldo pendiente (pantalla de Pagos): acotada por la deuda real, con tope de seguridad.
+    @GetMapping("/con-saldo")
+    @RequiresPermission("ver_factura")
+    public PaginaDTO<FacturaResponseDTO> conSaldo() {
+        return facturaService.listarConSaldo();
+    }
+
     // Totales de cartera en mora (tarjeta de alerta de la pantalla).
     @GetMapping("/resumen-cartera")
     @RequiresPermission("ver_factura")

@@ -71,4 +71,28 @@ class FacturaPaginaTest {
 
         verify(facturas).buscarPagina(eq("maria"), eq("EN_MORA"), eq("UNIFORME"), any(), any(), any(), any(Pageable.class));
     }
+
+    @Test
+    void conSaldoEsUnEstadoValidoDelFiltro() {
+        when(facturas.buscarPagina(anyString(), anyString(), anyString(), any(), any(), any(), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of()));
+        service.listarPagina(null, "con_saldo", null, null, null, 0, 20);
+        verify(facturas).buscarPagina(eq(""), eq("CON_SALDO"), eq("TODOS"), any(LocalDate.class), any(LocalDate.class),
+                any(LocalDate.class), any(Pageable.class));
+    }
+
+    @Test
+    void listarConSaldoPideLaPrimeraPaginaConElTopeDe500() {
+        when(facturas.buscarPagina(anyString(), anyString(), anyString(), any(), any(), any(), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of()));
+
+        service.listarConSaldo();
+
+        ArgumentCaptor<Pageable> pageable = ArgumentCaptor.forClass(Pageable.class);
+        verify(facturas).buscarPagina(eq(""), eq("CON_SALDO"), eq("TODOS"), any(LocalDate.class), any(LocalDate.class),
+                any(LocalDate.class), pageable.capture());
+        assertEquals(0, pageable.getValue().getPageNumber());
+        assertEquals(FacturaService.TOPE_CON_SALDO, pageable.getValue().getPageSize());
+        assertEquals(500, FacturaService.TOPE_CON_SALDO);
+    }
 }

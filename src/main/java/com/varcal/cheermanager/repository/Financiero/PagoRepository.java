@@ -9,6 +9,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -48,6 +50,34 @@ public interface PagoRepository extends JpaRepository<Pago, Integer> {
 
     @Query("SELECT COALESCE(SUM(p.monto), 0) FROM Pago p WHERE p.estado = 'Pagado'")
     BigDecimal sumarTotalRecaudado();
+
+    // ---- Pantalla de Pagos: listado paginado con filtros y totales ----
+    // Mismas convenciones que FacturaRepository.buscarPagina: los parametros nunca van null (el Service pone valores
+    // por defecto) y el estado se compara con literales ya usados arriba, no con un enum como parametro.
+    String FILTRO_PAGINA = " WHERE p.fecha BETWEEN :desde AND :hasta "
+            + "AND (:q = '' OR LOWER(f.numeroFactura) LIKE LOWER(CONCAT('%', :q, '%')) "
+            + "     OR LOWER(CONCAT(pe.nombre, ' ', pe.apellidos)) LIKE LOWER(CONCAT('%', :q, '%'))) "
+            + "AND (:estado = 'TODOS' "
+            + "  OR (:estado = 'PAGADO' AND p.estado = 'Pagado') "
+            + "  OR (:estado = 'PENDIENTE' AND p.estado = 'Pendiente') "
+            + "  OR (:estado = 'VENCIDO' AND p.estado = 'Vencido') "
+            + "  OR (:estado = 'ANULADO' AND p.estado = 'Anulado')) ";
+
+    @Query(value = "SELECT p FROM Pago p JOIN FETCH p.factura f JOIN FETCH f.persona pe "
+            + "JOIN FETCH p.tipoPago JOIN FETCH p.metodoPago" + FILTRO_PAGINA + "ORDER BY p.fecha DESC, p.id DESC",
+           countQuery = "SELECT COUNT(p) FROM Pago p JOIN p.factura f JOIN f.persona pe" + FILTRO_PAGINA)
+    Page<Pago> buscarPagina(@Param("q") String q,
+                            @Param("estado") String estado,
+                            @Param("desde") LocalDate desde,
+                            @Param("hasta") LocalDate hasta,
+                            Pageable pageable);
+
+    // Parte YA PAGADA de las facturas vigentes con saldo: junto con FacturaRepository.sumarTotalFacturasConSaldo da el
+    // saldo pendiente total (suma de total - pagado de las facturas con saldo > 0).
+    @Query("SELECT COALESCE(SUM(p.monto), 0) FROM Pago p WHERE p.estado = 'Pagado' AND p.factura.anulada = false "
+            + "AND p.factura.total > (SELECT COALESCE(SUM(p2.monto), 0) FROM Pago p2 "
+            + "WHERE p2.factura = p.factura AND p2.estado = 'Pagado')")
+    BigDecimal sumarPagadoEnFacturasConSaldo();
 
     // Nuevo: recaudo dentro de un rango de fechas — base del KPI de
     // "recaudo del mes" y de la tendencia de los últimos meses en el

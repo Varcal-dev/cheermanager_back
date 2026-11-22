@@ -1,14 +1,18 @@
 package com.varcal.cheermanager.Service.Financiero;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.varcal.cheermanager.DTO.Comunes.PaginaDTO;
 import com.varcal.cheermanager.DTO.Financiero.PagoDTO;
 import com.varcal.cheermanager.DTO.Financiero.PagoResponseDTO;
 import com.varcal.cheermanager.Models.Financiero.EstadoPago;
@@ -113,6 +117,44 @@ public class PagoService {
 
     public List<PagoResponseDTO> listar() {
         return toResponseDTOs(pagoRepository.findAll());
+    }
+
+    private static final Set<String> ESTADOS_FILTRO = Set.of("TODOS", "PAGADO", "PENDIENTE", "VENCIDO", "ANULADO");
+
+    /**
+     * Listado paginado para la pantalla de Pagos. Todos los filtros son opcionales: q (numero de factura o nombre de la
+     * persona), estado (TODOS|PAGADO|PENDIENTE|VENCIDO|ANULADO) y rango de fecha del pago. Mas recientes primero.
+     */
+    @Transactional(readOnly = true)
+    public PaginaDTO<PagoResponseDTO> listarPagina(String q, String estado, LocalDate desde, LocalDate hasta,
+                                                   int pagina, int tamano) {
+        String estadoN = (estado == null || estado.isBlank()) ? "TODOS" : estado.trim().toUpperCase();
+        if (!ESTADOS_FILTRO.contains(estadoN)) {
+            throw new IllegalArgumentException("Estado no valido: " + estado);
+        }
+        String qN = q == null ? "" : q.trim();
+        LocalDate d = desde != null ? desde : LocalDate.of(1900, 1, 1);
+        LocalDate h = hasta != null ? hasta : LocalDate.of(2999, 12, 31);
+        if (d.isAfter(h)) {
+            throw new IllegalArgumentException("La fecha 'desde' no puede ser posterior a 'hasta'");
+        }
+        int size = Math.min(Math.max(tamano, 1), 100);
+        int page = Math.max(pagina, 0);
+
+        var resultado = pagoRepository.buscarPagina(qN, estadoN, d, h, PageRequest.of(page, size));
+        return PaginaDTO.de(resultado, this::toResponseDTOs);
+    }
+
+    /**
+     * Tarjetas de la pantalla de Pagos (no dependen de la pagina ni de los filtros): lo recaudado (pagos en estado
+     * Pagado) y el saldo pendiente de las facturas vigentes (total - pagado, solo las que aun deben algo).
+     */
+    @Transactional(readOnly = true)
+    public Map<String, Object> resumen() {
+        BigDecimal recaudado = pagoRepository.sumarTotalRecaudado();
+        BigDecimal pendiente = facturaRepository.sumarTotalFacturasConSaldo()
+                .subtract(pagoRepository.sumarPagadoEnFacturasConSaldo());
+        return Map.of("totalRecaudado", recaudado, "totalPendiente", pendiente.max(BigDecimal.ZERO));
     }
 
     public PagoResponseDTO obtenerPorId(Integer id) {

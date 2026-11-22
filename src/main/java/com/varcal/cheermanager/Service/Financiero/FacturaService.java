@@ -213,7 +213,10 @@ public class FacturaService {
     }
 
     private static final Set<String> ESTADOS_FILTRO =
-            Set.of("TODOS", "PAGADA", "ABONO_PARCIAL", "PENDIENTE", "EN_MORA", "ANULADA");
+            Set.of("TODOS", "CON_SALDO", "PAGADA", "ABONO_PARCIAL", "PENDIENTE", "EN_MORA", "ANULADA");
+
+    /** Tope de filas de "facturas con saldo": esa lista la acota la deuda real, no el historial. Es solo un seguro. */
+    public static final int TOPE_CON_SALDO = 500;
 
     /**
      * Listado paginado con filtros. Todos los filtros son opcionales:
@@ -240,6 +243,18 @@ public class FacturaService {
 
         var resultado = facturaRepository.buscarPagina(qN, estadoN, conceptoN, d, h, com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy(),
                 PageRequest.of(page, size));
+        return PaginaDTO.de(resultado, this::toResponseDTOs);
+    }
+
+    /**
+     * Facturas vigentes con saldo pendiente (para la pestana "con saldo" y el modal de registrar pago de la pantalla
+     * de Pagos). Hasta TOPE_CON_SALDO; {@code totalElementos} dice cuantas hay en realidad para avisar si se truncan.
+     */
+    @Transactional(readOnly = true)
+    public PaginaDTO<FacturaResponseDTO> listarConSaldo() {
+        var resultado = facturaRepository.buscarPagina("", "CON_SALDO", "TODOS",
+                LocalDate.of(1900, 1, 1), LocalDate.of(2999, 12, 31),
+                com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy(), PageRequest.of(0, TOPE_CON_SALDO));
         return PaginaDTO.de(resultado, this::toResponseDTOs);
     }
 

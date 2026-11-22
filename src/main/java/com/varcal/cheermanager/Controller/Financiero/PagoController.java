@@ -3,9 +3,11 @@ package com.varcal.cheermanager.Controller.Financiero;
 import com.varcal.cheermanager.Utils.RequiresPermission;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,8 +17,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.varcal.cheermanager.DTO.Comunes.PaginaDTO;
 import com.varcal.cheermanager.DTO.Financiero.PagoDTO;
 import com.varcal.cheermanager.Service.Financiero.PagoService;
 import com.varcal.cheermanager.DTO.Financiero.PagoResponseDTO;
@@ -42,6 +46,27 @@ public class PagoController {
     @RequiresPermission("ver_pago")
     public List<PagoResponseDTO> listar() {
         return pagoService.listar();
+    }
+
+    // Listado para la pantalla: paginado y con filtros (el listado completo de arriba se conserva para quien ya lo
+    // consuma, pero la pantalla de Pagos ya no lo usa).
+    @GetMapping("/pagina")
+    @RequiresPermission("ver_pago")
+    public PaginaDTO<PagoResponseDTO> pagina(
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) String estado,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta,
+            @RequestParam(defaultValue = "0") int pagina,
+            @RequestParam(defaultValue = "20") int tamano) {
+        return pagoService.listarPagina(q, estado, desde, hasta, pagina, tamano);
+    }
+
+    // Totales de las tarjetas de la pantalla (recaudado y saldo pendiente).
+    @GetMapping("/resumen")
+    @RequiresPermission("ver_pago")
+    public Map<String, Object> resumen() {
+        return pagoService.resumen();
     }
 
     @GetMapping("/{id}")

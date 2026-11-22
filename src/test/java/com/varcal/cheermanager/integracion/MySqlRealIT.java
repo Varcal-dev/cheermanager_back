@@ -25,7 +25,11 @@ import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import com.varcal.cheermanager.DTO.Comunes.PaginaDTO;
+import com.varcal.cheermanager.DTO.Financiero.FacturaResponseDTO;
 import com.varcal.cheermanager.DTO.Financiero.PagoDTO;
+import com.varcal.cheermanager.DTO.Financiero.PagoResponseDTO;
+import com.varcal.cheermanager.Service.Financiero.FacturaService;
 import com.varcal.cheermanager.DTO.Inventario.MovimientoInventarioDTO;
 import com.varcal.cheermanager.Models.Auth.Usuario;
 import com.varcal.cheermanager.Models.Inventario.CategoriaProducto;
@@ -81,6 +85,7 @@ class MySqlRealIT {
 
     @Autowired JdbcTemplate jdbc;
     @Autowired PagoService pagoService;
+    @Autowired FacturaService facturaService;
     @Autowired InscripcionService inscripcionService;
     @Autowired FacturaRepository facturaRepository;
     @Autowired PersonaRepository personaRepository;
@@ -347,5 +352,88 @@ class MySqlRealIT {
         insertar(sql, "IT-P-A-" + System.nanoTime(), personaId, inscripcionId, "2026-10");
         assertThrows(DataIntegrityViolationException.class,
                 () -> insertar(sql, "IT-P-B-" + System.nanoTime(), personaId, inscripcionId, "2026-10"));
+    }
+
+    // ---------------------------------------------------------------------------------------------------------
+    // PERF-01: la pantalla de Pagos pagina en el servidor. Estas consultas HQL solo se validan arrancando el contexto
+    // (aqui) y ejecutandolas contra MySQL real; la base compartida puede traer datos de otras pruebas, por eso se aisla
+    // con una persona unica y los totales se comparan como DIFERENCIA antes/despues.
+    // ---------------------------------------------------------------------------------------------------------
+
+    private Integer crearFactura(Persona persona, String numero, String total, boolean anulada) {
+        Factura f = new Factura();
+        f.setNumeroFactura(numero);
+        f.setFechaEmision(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy());
+        f.setPersona(persona);
+        f.setTotal(new BigDecimal(total));
+        f.setAnulada(anulada);
+        return facturaRepository.save(f).getId();
+    }
+
+    private void pagar(Integer facturaId, String monto, Integer tipoPagoId, Integer metodoPagoId) {
+        PagoDTO dto = new PagoDTO();
+        dto.setFacturaId(facturaId);
+        dto.setTipoPagoId(tipoPagoId);
+        dto.setMetodoPagoId(metodoPagoId);
+        dto.setFecha(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy());
+        dto.setEstado("Pagado");
+        dto.setMonto(new BigDecimal(monto));
+        pagoService.registrarPago(dto);
+    }
+
+    @Test
+    void pantallaDePagosPaginaFiltraYTotalizaComoElDetalle() {
+        final String sufijo = Long.toString(System.nanoTime(), 36);
+        final Integer tipoPagoId = TenantContext.runAs(2, () -> tipoPagoRepository.findAll().get(0).getId());
+        final Integer metodoPagoId = TenantContext.runAs(2, () -> metodoPagoRepository.findAll().get(0).getId());
+
+        Map<String, Object> antes = TenantContext.runAs(2, () -> pagoService.resumen());
+
+        // F1 pagada completa (sin saldo), F2 con abono (saldo 150), F3 sin pagos (saldo 300), F4 anulada (no cuenta).
+        TenantContext.runAs(2, () -> {
+            Persona p = new Persona();
+            p.setNombre("ItPagos");
+            p.setApellidos(sufijo);
+            p = personaRepository.save(p);
+            Integer f1 = crearFactura(p, "ITP-" + sufijo + "-1", "100.00", false);
+            Integer f2 = crearFactura(p, "ITP-" + sufijo + "-2", "200.00", false);
+            crearFactura(p, "ITP-" + sufijo + "-3", "300.00", false);
+            crearFactura(p, "ITP-" + sufijo + "-4", "400.00", true);
+            pagar(f1, "100.00", tipoPagoId, metodoPagoId);
+            pagar(f2, "50.00", tipoPagoId, metodoPagoId);
+        });
+
+        // --- Totales de las tarjetas: la diferencia debe ser exactamente lo creado.
+        Map<String, Object> despues = TenantContext.runAs(2, () -> pagoService.resumen());
+        BigDecimal dRecaudado = ((BigDecimal) despues.get("totalRecaudado")).subtract((BigDecimal) antes.get("totalRecaudado"));
+        BigDecimal dPendiente = ((BigDecimal) despues.get("totalPendiente")).subtract((BigDecimal) antes.get("totalPendiente"));
+        assertEquals(0, new BigDecimal("150.00").compareTo(dRecaudado), "recaudado: 100 + 50");
+        assertEquals(0, new BigDecimal("450.00").compareTo(dPendiente), "pendiente: 150 (F2) + 300 (F3); F1 pagada y F4 anulada no cuentan");
+
+        // --- Facturas con saldo: solo F2 y F3 de esta persona.
+        PaginaDTO<FacturaResponseDTO> conSaldo = TenantContext.runAs(2, () -> facturaService.listarConSaldo());
+        List<String> numeros = conSaldo.contenido().stream().map(FacturaResponseDTO::getNumeroFactura)
+                .filter(n -> n.startsWith("ITP-" + sufijo)).sorted().toList();
+        assertEquals(List.of("ITP-" + sufijo + "-2", "ITP-" + sufijo + "-3"), numeros);
+
+        // --- Pagos paginados, aislados con la busqueda por nombre unico.
+        PaginaDTO<PagoResponseDTO> todos = TenantContext.runAs(2, () -> pagoService.listarPagina(sufijo, null, null, null, 0, 20));
+        assertEquals(2, todos.totalElementos());
+        assertEquals(2, todos.contenido().size());
+        assertEquals(0, new BigDecimal("50.00").compareTo(todos.contenido().get(0).getMonto()), "el mas reciente primero");
+
+        PaginaDTO<PagoResponseDTO> pagina0 = TenantContext.runAs(2, () -> pagoService.listarPagina(sufijo, null, null, null, 0, 1));
+        PaginaDTO<PagoResponseDTO> pagina1 = TenantContext.runAs(2, () -> pagoService.listarPagina(sufijo, null, null, null, 1, 1));
+        assertEquals(2, pagina0.totalElementos());
+        assertEquals(2, pagina0.totalPaginas());
+        assertEquals(1, pagina0.contenido().size());
+        assertEquals(1, pagina1.contenido().size());
+        assertNotEquals(pagina0.contenido().get(0).getId(), pagina1.contenido().get(0).getId());
+
+        // --- Filtros: por numero de factura, por estado y por rango de fechas.
+        assertEquals(1, TenantContext.runAs(2, () -> pagoService.listarPagina("ITP-" + sufijo + "-2", "PAGADO", null, null, 0, 20)).totalElementos());
+        assertEquals(0, TenantContext.runAs(2, () -> pagoService.listarPagina(sufijo, "ANULADO", null, null, 0, 20)).totalElementos());
+        LocalDate manana = com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().plusDays(1);
+        assertEquals(0, TenantContext.runAs(2, () -> pagoService.listarPagina(sufijo, null, manana, null, 0, 20)).totalElementos());
     }
 }
