@@ -32,6 +32,7 @@ services:
       db:
         condition: service_healthy
     environment:
+      TZ: America/Bogota
       DB_URL: jdbc:mysql://db:3306/cheermanager?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Bogota
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}

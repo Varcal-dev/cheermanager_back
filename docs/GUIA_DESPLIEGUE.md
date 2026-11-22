@@ -39,9 +39,12 @@ Docker rota los logs solos (10 MB x 5 archivos por servicio, ver `docker-compose
 ## Configuración opcional y fotos
 - **Variables:** el servicio `api` del compose pasa al contenedor las variables opcionales (Wompi, SMTP, WhatsApp, límites de intentos, logs, etc.) **solo si están en tu `.env`**; las que no pongas usan el valor por defecto de la aplicación. La lista completa y sus ejemplos están en `env.example`. Tras editar `.env`: `docker compose up -d` y comprueba con `docker compose config` (debe mostrar tus valores y ninguna variable vacía de más).
 - **Fotos y documentos** viven en el volumen Docker `uploads` (`/data/uploads` dentro del contenedor) y sobreviven a `docker compose up --build` y a recrear la API. **`docker compose down -v` borra los volúmenes, incluidas las fotos y la base de datos: no lo uses en producción.**
+- **Zona horaria:** el API corre en hora de Bogotá (`-Duser.timezone=America/Bogota` en el `Dockerfile` y `TZ` en el compose), igual que la base. Los sellos de hora (auditoría, consentimientos, pagos, movimientos) se guardan en esa hora. Lo guardado **antes** de este cambio quedó en UTC (5 horas adelantado): no se migra; toma como fecha de corte el día del despliegue. Comprobación: `docker compose exec api date` debe mostrar hora de Bogotá.
 - **Respaldo:** `ops/backup.sh` cubre solo la base de datos; las fotos del volumen `uploads` las respalda `ops/backup_uploads.sh` (ver `GUIA_OPERACION.md`).
 
 ## Variables útiles
+Los clubes que se crean desde ahora **nacen exigiendo consentimiento de salud** (antes de guardar historial médico o lesiones hay que registrar la autorización del titular); su administrador puede desactivarlo en *Consentimientos*, y volver a activarlo cuando no queden pendientes. Los clubes anteriores no cambian. `CONSENTIMIENTOS_EXIGIR_SALUD=true` lo fuerza para todos.
+
 `LOG_LEVEL_APP=DEBUG` (temporal), `CONSENTIMIENTOS_EXIGIR_SALUD=true` (cuando el reporte `/api/consentimientos/pendientes` esté en cero), `JWT_EXPIRATION_MS`.
 
 ## Seguridad básica

@@ -12,7 +12,7 @@ Qué corre solo, cómo te enteras de que algo falló y cómo recuperarte. Pensad
 | Vigilante: API viva, respaldo reciente (base y, con `BACKUP_UPLOADS=1`, fotos), prueba reciente, disco | Cada 5 min | `ops/verificar_salud.sh` | Alerta (sin repetir antes de 60 min) y aviso al recuperarse |
 | Limpieza de tokens revocados vencidos | Cada hora (dentro del API) | automático | Queda en el log |
 
-Los scripts de `ops/` se guardan en Git con permiso de ejecución. Si al clonar en el servidor el cron responde "Permission denied", ejecuta `chmod +x ops/*.sh` (y, si desarrollas en Windows, `git update-index --chmod=+x ops/*.sh` antes de subir los cambios).
+Los scripts de `ops/` se guardan en Git con permiso de ejecución (modo 100755) y el CI falla si alguno lo pierde: el cron los llama directo y, sin ese permiso, responde "Permission denied" y **no corre ningún respaldo**. Comprueba en el servidor con `ls -l /opt/cheermanager/back/ops/*.sh` (deben empezar por `-rwxr-xr-x`). Si no, `chmod +x ops/*.sh`. Si desarrollas en Windows y agregas un script nuevo, marca el permiso antes de subirlo: `git update-index --chmod=+x ops/nuevo.sh`. Si tras un `git pull` Git se queja de un cambio de modo local, `git checkout -- ops/` y vuelve a hacer el pull.
 
 El crontab de ejemplo está en `ops/crontab.ejemplo`. Las claves y variables `ALERTA_*` van en un archivo con permisos 600 (por ejemplo `/etc/cheermanager/ops.env`), nunca en el repositorio.
 

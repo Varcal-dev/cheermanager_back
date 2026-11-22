@@ -18,7 +18,9 @@ WORKDIR /app
 COPY --from=build /app/app.jar app.jar
 USER cheer
 EXPOSE 8081
-ENV JAVA_OPTS="-XX:MaxRAMPercentage=75"
+# Zona horaria de la JVM: LocalDateTime.now() (auditoria, consentimientos, pagos...) debe ser hora de Bogota (OPS-01).
+# -Duser.timezone usa la base de zonas del propio JDK: no depende de tzdata en la imagen.
+ENV JAVA_OPTS="-XX:MaxRAMPercentage=75 -Duser.timezone=America/Bogota"
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
   CMD wget -qO- http://localhost:8081/actuator/health || exit 1
 ENTRYPOINT ["sh","-c","exec java $JAVA_OPTS -jar app.jar"]
