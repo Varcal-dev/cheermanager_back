@@ -54,5 +54,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: Sintaxis de los scripts
         run: for f in ops/*.sh; do bash -n "$f" && echo "ok $f"; done
+      - name: Bit de ejecucion (cron los llama directo)
+        run: |
+          # Un script en modo 100644 hace que cron responda "Permission denied" y las alertas fallen en silencio.
+          malos=$(git ls-files -s 'ops/*.sh' | grep -v '^100755' || true)
+          if [ -n "$malos" ]; then echo "Faltan permisos de ejecucion (git update-index --chmod=+x):"; echo "$malos"; exit 1; fi
       - name: shellcheck
         run: shellcheck -S warning ops/*.sh
