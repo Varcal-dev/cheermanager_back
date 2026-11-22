@@ -43,6 +43,8 @@ Docker rota los logs solos (10 MB x 5 archivos por servicio, ver `docker-compose
 - **Respaldo:** `ops/backup.sh` cubre solo la base de datos; las fotos del volumen `uploads` las respalda `ops/backup_uploads.sh` (ver `GUIA_OPERACION.md`).
 
 ## Variables útiles
+Los clubes que se crean desde ahora **nacen exigiendo consentimiento de salud** (antes de guardar historial médico o lesiones hay que registrar la autorización del titular); su administrador puede desactivarlo en *Consentimientos*, y volver a activarlo cuando no queden pendientes. Los clubes anteriores no cambian. `CONSENTIMIENTOS_EXIGIR_SALUD=true` lo fuerza para todos.
+
 `LOG_LEVEL_APP=DEBUG` (temporal), `CONSENTIMIENTOS_EXIGIR_SALUD=true` (cuando el reporte `/api/consentimientos/pendientes` esté en cero), `JWT_EXPIRATION_MS`.
 
 ## Seguridad básica
