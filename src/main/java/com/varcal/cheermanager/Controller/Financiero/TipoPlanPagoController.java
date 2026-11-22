@@ -1,5 +1,6 @@
 package com.varcal.cheermanager.Controller.Financiero;
 
+import jakarta.validation.Valid;
 import com.varcal.cheermanager.Utils.RequiresPermission;
 
 import java.util.List;
@@ -62,7 +63,7 @@ public class TipoPlanPagoController {
 
     @PostMapping
     @RequiresPermission("gestionar_plan_pago")
-    public ResponseEntity<?> crear(@RequestBody TipoPlanPagoDTO dto) {
+    public ResponseEntity<?> crear(@Valid @RequestBody TipoPlanPagoDTO dto) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(service.crear(dto));
         } catch (IllegalArgumentException e) {
@@ -72,7 +73,7 @@ public class TipoPlanPagoController {
 
     @PutMapping("/{id}")
     @RequiresPermission("gestionar_plan_pago")
-    public ResponseEntity<?> actualizar(@PathVariable Integer id, @RequestBody TipoPlanPagoDTO dto) {
+    public ResponseEntity<?> actualizar(@PathVariable Integer id, @Valid @RequestBody TipoPlanPagoDTO dto) {
         try {
             return ResponseEntity.ok(service.actualizar(id, dto));
         } catch (EntityNotFoundException e) {

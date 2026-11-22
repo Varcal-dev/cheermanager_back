@@ -1,5 +1,6 @@
 package com.varcal.cheermanager.Controller.Financiero;
 
+import jakarta.validation.Valid;
 import com.varcal.cheermanager.Utils.RequiresPermission;
 
 import java.util.List;
@@ -51,7 +52,7 @@ public class ConvenioController {
 
     @PostMapping
     @RequiresPermission("gestionar_convenio")
-    public ResponseEntity<Convenio> crearConvenio(@RequestBody ConvenioDto dto) {
+    public ResponseEntity<Convenio> crearConvenio(@Valid @RequestBody ConvenioDto dto) {
         Descuento descuento = descuentoRepository.findById(dto.getDescuentoId())
                 .orElseThrow(() -> new RuntimeException("Descuento no encontrado"));
 
@@ -67,7 +68,7 @@ public class ConvenioController {
 
     @PutMapping("/{id}")
     @RequiresPermission("gestionar_convenio")
-    public ResponseEntity<Convenio> actualizar(@PathVariable Integer id, @RequestBody ConvenioDto dto) {
+    public ResponseEntity<Convenio> actualizar(@PathVariable Integer id, @Valid @RequestBody ConvenioDto dto) {
         Convenio actualizado = convenioService.actualizarConvenio(id, dto);
         return actualizado != null ? ResponseEntity.ok(actualizado) : ResponseEntity.notFound().build();
     }

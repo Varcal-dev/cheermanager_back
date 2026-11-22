@@ -1,5 +1,6 @@
 package com.varcal.cheermanager.Controller.Inventario;
 
+import jakarta.validation.Valid;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +45,7 @@ public class ProductoController {
 
     @PostMapping
     @RequiresPermission("crear_producto")
-    public ResponseEntity<?> crear(@RequestBody ProductoDTO dto) {
+    public ResponseEntity<?> crear(@Valid @RequestBody ProductoDTO dto) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(productoService.obtenerPorId(productoService.crear(dto).getId()));
         } catch (RuntimeException e) {
@@ -54,7 +55,7 @@ public class ProductoController {
 
     @PutMapping("/{id}")
     @RequiresPermission("modificar_producto")
-    public ResponseEntity<?> actualizar(@PathVariable Integer id, @RequestBody ProductoDTO dto) {
+    public ResponseEntity<?> actualizar(@PathVariable Integer id, @Valid @RequestBody ProductoDTO dto) {
         try {
             return ResponseEntity.ok(productoService.obtenerPorId(productoService.actualizar(id, dto).getId()));
         } catch (RuntimeException e) {
