@@ -1,5 +1,6 @@
 package com.varcal.cheermanager.Controller.Historiales;
 
+import jakarta.validation.Valid;
 import com.varcal.cheermanager.DTO.Persona.HistorialMedicoDTO;
 import com.varcal.cheermanager.Service.Historiales.HistorialMedicoService;
 import com.varcal.cheermanager.Utils.RequiresPermission;
@@ -37,7 +38,7 @@ public class HistorialMedicoController {
 
     @PostMapping
     @RequiresPermission("crear_historial_medico")
-    public ResponseEntity<?> crear(@RequestBody HistorialMedicoDTO dto) {
+    public ResponseEntity<?> crear(@Valid @RequestBody HistorialMedicoDTO dto) {
         try {
             HistorialMedicoDTO creado = historialMedicoService.crearHistorialMedico(dto);
             return ResponseEntity.status(201).body(creado);
@@ -70,7 +71,7 @@ public class HistorialMedicoController {
 
     @PutMapping("/{id}")
     @RequiresPermission("modificar_historial_medico")
-    public ResponseEntity<?> actualizarHistorialMedico(@PathVariable Integer id, @RequestBody HistorialMedicoDTO dto) {
+    public ResponseEntity<?> actualizarHistorialMedico(@PathVariable Integer id, @Valid @RequestBody HistorialMedicoDTO dto) {
         try {
             HistorialMedicoDTO result = historialMedicoService.actualizarHistorialMedico(id, dto);
             return ResponseEntity.ok(result);

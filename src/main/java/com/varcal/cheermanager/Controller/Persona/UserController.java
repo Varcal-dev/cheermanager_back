@@ -1,5 +1,8 @@
 package com.varcal.cheermanager.Controller.Persona;
 
+import jakarta.validation.Valid;
+import org.springframework.validation.annotation.Validated;
+import com.varcal.cheermanager.DTO.Comunes.Crear;
 import com.varcal.cheermanager.tenant.ReferenciasClub;
 import com.varcal.cheermanager.tenant.TenantLookupRepository;
 
@@ -85,7 +88,7 @@ public class UserController {
 
     @PostMapping("/registrar")
     @RequiresPermission("crear_usuario")
-    public ResponseEntity<?> registrarUsuario(@RequestBody UsuarioDTO usuarioDTO) {
+    public ResponseEntity<?> registrarUsuario(@Validated(Crear.class) @RequestBody UsuarioDTO usuarioDTO) {
         try {
             // Nadie crea una cuenta con un rol que tenga mas permisos que el suyo propio.
             if (usuarioDTO.getRolId() != null) {
@@ -166,7 +169,17 @@ public class UserController {
 
     @PutMapping("/actualizar/{id}")
     @RequiresPermission("modificar_usuario")
-    public ResponseEntity<?> actualizarUsuario(@PathVariable Integer id, @RequestBody UsuarioDTO usuarioDTO) {
+    public ResponseEntity<?> actualizarUsuario(@PathVariable Integer id, @Valid @RequestBody UsuarioDTO usuarioDTO) {
+        // La clave es opcional al editar (vacia = no cambiar); si viene, cumple la misma regla que el cambio de clave.
+        String claveNueva = usuarioDTO.getPassword();
+        if (claveNueva != null && !claveNueva.isEmpty()) {
+            if (claveNueva.length() < 8) {
+                return ResponseEntity.badRequest().body("La contrasena debe tener al menos 8 caracteres");
+            }
+            if (claveNueva.length() > 72) {
+                return ResponseEntity.badRequest().body("La contrasena no puede superar 72 caracteres");
+            }
+        }
         try {
             Usuario usuario = userRepository.findById(id.longValue())
                     .orElseThrow(() -> new RuntimeException("Usuario no encontrado con el ID: " + id));
@@ -290,7 +303,7 @@ public class UserController {
     // tiene su propio endpoint: POST /api/change-password).
     @PutMapping("/me")
     @SinPermisoEspecifico("perfil propio")
-    public ResponseEntity<?> actualizarMiPerfil(@RequestBody ActualizarPerfilDTO dto) {
+    public ResponseEntity<?> actualizarMiPerfil(@Valid @RequestBody ActualizarPerfilDTO dto) {
         Integer userId = getAuthenticatedUserId();
         if (userId == null) {
             return ResponseEntity.status(401).body(Map.of("success", false, "message", "No hay usuario autenticado"));
