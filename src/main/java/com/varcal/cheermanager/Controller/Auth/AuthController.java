@@ -60,7 +60,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletRequest request) {
-        String ip = request.getRemoteAddr();
+        String ip = com.varcal.cheermanager.security.ClienteIp.de(request);
         String email = loginRequest.getEmail();
 
         // 1) En que club esta este correo (consulta sin filtro de club, solo devuelve el id).
@@ -117,7 +117,7 @@ public class AuthController {
             Long userId = jwtUtil.getUserId(token);
             Usuario usuario = userRepository.findById(userId).orElse(null);
             String email = usuario != null ? usuario.getEmail() : jwtUtil.getUserEmail(token);
-            logAccesoService.registrarAcceso(usuario, email, "LOGOUT", request.getRemoteAddr(), null);
+            logAccesoService.registrarAcceso(usuario, email, "LOGOUT", com.varcal.cheermanager.security.ClienteIp.de(request), null);
         } catch (Exception e) {
             // El logout ya ocurrio; un fallo del log de auditoria no lo revierte.
         }

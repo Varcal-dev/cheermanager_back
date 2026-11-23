@@ -215,7 +215,7 @@ Los secretos **no tienen valor por defecto**: si falta una obligatoria, la app n
 | `RECORDATORIOS_AUTOMATICOS` | No | `true` | `false` apaga el envío automático en todo el servidor |
 | `MAIL_FROM` + `SPRING_MAIL_HOST/PORT/USERNAME/PASSWORD` (+ `SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH`, `..._STARTTLS_ENABLE`) | No | `no-reply@cheermanager.local` | SMTP: recuperación de clave y recordatorios |
 | `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_TEMPLATE`, `WHATSAPP_LANGUAGE` | No | plantilla `recordatorio_mora`, idioma `es` | WhatsApp Business Cloud API (plantilla aprobada por Meta con 3 variables). Sin esto, se generan enlaces `wa.me` |
-| `FORWARD_HEADERS_STRATEGY` | No | `none` | `framework` detrás de Nginx/Caddy/Railway |
+| `FORWARD_HEADERS_STRATEGY` | No | `none` | `framework` detrás de Nginx/Caddy/Railway (esquema y host; la IP del cliente la resuelve `security/ClienteIp`, ver `docs/GUIA_DESPLIEGUE.md`) |
 | `RATE_LIMIT_ENABLED`, `RATE_LIMIT_LOGIN_MAX`, `RATE_LIMIT_FORGOT_MAX`, `RATE_LIMIT_RESET_MAX` (y `..._VENTANA_SEG`) | No | `true`, 20 / 5 min, 5 / 1 h, 10 / 1 h | Límite de intentos por IP: login (solo fallidos), recuperar clave, restablecer clave. Responde 429 con `Retry-After` |
 | `UPLOAD_DIR` | No | `./uploads` (en Docker: `/data/uploads`, volumen `uploads`) | Fotos y documentos (máx. 10 MB) |
 | `JPA_DDL_AUTO` / `FLYWAY_ENABLED` | No | `validate` / `true` | Nunca `update` fuera de tu máquina |

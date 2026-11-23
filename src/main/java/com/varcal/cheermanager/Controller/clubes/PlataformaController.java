@@ -61,6 +61,6 @@ public class PlataformaController {
     @RequiresPermission("gestionar_clubes")
     public PlataformaService.AccesoSoporte acceso(@PathVariable Integer clubId, HttpServletRequest request) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return service.accesoSoporte(clubId, email, request.getRemoteAddr());
+        return service.accesoSoporte(clubId, email, com.varcal.cheermanager.security.ClienteIp.de(request));
     }
 }

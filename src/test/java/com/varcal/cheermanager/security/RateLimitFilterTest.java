@@ -144,23 +144,4 @@ class RateLimitFilterTest {
         otro.addHeader("X-Forwarded-For", "198.51.100.9");
         assertEquals(401, ejecutar(f, otro, 401, llamadas).getStatus());
     }
-
-    @Test
-    void xForwardedForSeIgnoraSiQuienConectaEsUnaIpPublica() throws Exception {
-        MockHttpServletRequest r = post("/api/login", "203.0.113.50");
-        r.addHeader("X-Forwarded-For", "1.2.3.4");
-        assertEquals("203.0.113.50", RateLimitFilter.ipCliente(r));
-    }
-
-    @Test
-    void reconoceProxiesLocalesYPrivados() {
-        assertTrue(RateLimitFilter.esProxyConfiable("127.0.0.1"));
-        assertTrue(RateLimitFilter.esProxyConfiable("172.18.0.1"));
-        assertTrue(RateLimitFilter.esProxyConfiable("10.1.2.3"));
-        assertTrue(RateLimitFilter.esProxyConfiable("192.168.1.5"));
-        assertTrue(RateLimitFilter.esProxyConfiable("::1"));
-        assertTrue(RateLimitFilter.esProxyConfiable("fd12:3456::1"));
-        assertFalse(RateLimitFilter.esProxyConfiable("8.8.8.8"));
-        assertFalse(RateLimitFilter.esProxyConfiable(null));
-    }
 }

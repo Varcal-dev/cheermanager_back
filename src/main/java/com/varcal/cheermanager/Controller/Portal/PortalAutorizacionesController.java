@@ -45,7 +45,6 @@ public class PortalAutorizacionesController {
     }
 
     private static String ipDe(HttpServletRequest request) {
-        String xff = request.getHeader("X-Forwarded-For");
-        return xff != null && !xff.isBlank() ? xff.split(",")[0].trim() : request.getRemoteAddr();
+        return com.varcal.cheermanager.security.ClienteIp.de(request);
     }
 }
