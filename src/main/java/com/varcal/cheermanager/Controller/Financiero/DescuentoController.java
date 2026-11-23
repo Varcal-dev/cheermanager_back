@@ -1,5 +1,6 @@
 package com.varcal.cheermanager.Controller.Financiero;
 
+import jakarta.validation.Valid;
 import com.varcal.cheermanager.Utils.RequiresPermission;
 
 import java.util.List;
@@ -40,13 +41,13 @@ public class DescuentoController {
 
     @PostMapping
     @RequiresPermission("gestionar_descuento")
-    public Descuento crear(@RequestBody Descuento descuento) {
+    public Descuento crear(@Valid @RequestBody Descuento descuento) {
         return service.crear(descuento);
     }
 
     @PutMapping("/{id}")
     @RequiresPermission("gestionar_descuento")
-    public ResponseEntity<Descuento> actualizar(@PathVariable Integer id, @RequestBody Descuento nuevo) {
+    public ResponseEntity<Descuento> actualizar(@PathVariable Integer id, @Valid @RequestBody Descuento nuevo) {
         return service.actualizar(id, nuevo)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

@@ -1,5 +1,8 @@
 package com.varcal.cheermanager.Controller.Persona;
 
+import jakarta.validation.Valid;
+import org.springframework.validation.annotation.Validated;
+import com.varcal.cheermanager.DTO.Comunes.Crear;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +29,7 @@ public class EntrenadoresController {
     // Método para registrar un entrenador
     @PostMapping()
     @RequiresPermission("crear_entrenador")
-    public ResponseEntity<?> registrarEntrenador(@RequestBody EntrenadorDTO entrenadorDTO) {
+    public ResponseEntity<?> registrarEntrenador(@Validated(Crear.class) @RequestBody EntrenadorDTO entrenadorDTO) {
         try {
             Entrenador entrenador = personaService.registrarEntrenador(entrenadorDTO);
             return ResponseEntity.ok(entrenador);
@@ -37,7 +40,7 @@ public class EntrenadoresController {
 
     @PatchMapping("/{id}")
     @RequiresPermission("modificar_entrenador")
-    public ResponseEntity<?> modificarEntrenador(@PathVariable Integer id, @RequestBody EntrenadorDTO entrenadorDTO) {
+    public ResponseEntity<?> modificarEntrenador(@PathVariable Integer id, @Valid @RequestBody EntrenadorDTO entrenadorDTO) {
         try {
             Entrenador entrenador = personaService.modificarEntrenador(id, entrenadorDTO);
             return ResponseEntity.ok(entrenador); // Devolver el entrenador actualizado

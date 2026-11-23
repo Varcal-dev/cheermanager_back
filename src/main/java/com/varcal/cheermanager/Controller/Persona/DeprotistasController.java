@@ -1,5 +1,8 @@
 package com.varcal.cheermanager.Controller.Persona;
 
+import jakarta.validation.Valid;
+import org.springframework.validation.annotation.Validated;
+import com.varcal.cheermanager.DTO.Comunes.Crear;
 import java.util.List;
 import java.util.Optional;
 
@@ -62,7 +65,7 @@ public class DeprotistasController {
     // Método para registrar un deportista
     @PostMapping()
     @RequiresPermission("crear_deportista")
-    public ResponseEntity<?> registrarDeportista(@RequestBody DeportistaDTO deportistaDTO) {
+    public ResponseEntity<?> registrarDeportista(@Validated(Crear.class) @RequestBody DeportistaDTO deportistaDTO) {
         try {
             Deportista deportista = personaService.registrarDeportista(deportistaDTO);
             return ResponseEntity.ok(deportista);
@@ -76,7 +79,7 @@ public class DeprotistasController {
 
     @PutMapping("/{id}")
     @RequiresPermission("modificar_deportista")
-    public ResponseEntity<?> modificarDeportista(@PathVariable Integer id, @RequestBody DeportistaDTO deportistaDTO) {
+    public ResponseEntity<?> modificarDeportista(@PathVariable Integer id, @Valid @RequestBody DeportistaDTO deportistaDTO) {
         try {
             Deportista deportista = personaService.modificarDeportista(id, deportistaDTO);
             return ResponseEntity.ok(deportista); // Devolver el deportista actualizado
@@ -191,7 +194,7 @@ public class DeprotistasController {
     @RequiresPermission("modificar_deportista")
     public ResponseEntity<?> vincularUsuario(
             @PathVariable Integer id,
-            @RequestBody VincularDeportistaUsuarioDTO dto) {
+            @Valid @RequestBody VincularDeportistaUsuarioDTO dto) {
         try {
             personaService.vincularDeportistaConUsuario(id, dto.getUsuarioId());
             return ResponseEntity.ok("Deportista vinculado al usuario exitosamente");
@@ -311,7 +314,7 @@ public class DeprotistasController {
     // Endpoints para historial médico
     @PostMapping("/{id}/historial-medico")
     @RequiresPermission("crear_historial_medico")
-    public ResponseEntity<?> crearHistorialMedico(@PathVariable Integer id, @RequestBody HistorialMedicoDTO dto) {
+    public ResponseEntity<?> crearHistorialMedico(@PathVariable Integer id, @Valid @RequestBody HistorialMedicoDTO dto) {
         try {
             HistorialMedicoDTO result = historialMedicoService.crearHistorialMedicoDeDeportista(id, dto);
             return ResponseEntity.ok(result);
