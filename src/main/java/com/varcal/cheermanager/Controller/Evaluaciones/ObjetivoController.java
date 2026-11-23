@@ -1,5 +1,6 @@
 package com.varcal.cheermanager.Controller.Evaluaciones;
 
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +22,7 @@ public class ObjetivoController {
 
     @PostMapping
     @RequiresPermission("crear_objetivo")
-    public ResponseEntity<?> crear(@RequestBody ObjetivoDTO dto) {
+    public ResponseEntity<?> crear(@Valid @RequestBody ObjetivoDTO dto) {
         try {
             return ResponseEntity.status(201).body(objetivoService.crear(dto));
         } catch (RuntimeException e) {
@@ -62,7 +63,7 @@ public class ObjetivoController {
 
     @PutMapping("/{id}")
     @RequiresPermission("modificar_objetivo")
-    public ResponseEntity<?> actualizar(@PathVariable Integer id, @RequestBody ObjetivoDTO dto) {
+    public ResponseEntity<?> actualizar(@PathVariable Integer id, @Valid @RequestBody ObjetivoDTO dto) {
         try {
             return ResponseEntity.ok(objetivoService.actualizar(id, dto));
         } catch (RuntimeException e) {

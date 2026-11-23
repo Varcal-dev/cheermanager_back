@@ -1,5 +1,6 @@
 package com.varcal.cheermanager.Controller.Eventos;
 
+import jakarta.validation.Valid;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,7 @@ public class PremioEventoController {
 
     @PostMapping
     @RequiresPermission("modificar_evento")
-    public ResponseEntity<?> crear(@RequestBody PremioEventoDTO dto) {
+    public ResponseEntity<?> crear(@Valid @RequestBody PremioEventoDTO dto) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(premioEventoService.crear(dto));
         } catch (RuntimeException e) {
@@ -40,7 +41,7 @@ public class PremioEventoController {
 
     @PutMapping("/{id}")
     @RequiresPermission("modificar_evento")
-    public ResponseEntity<?> actualizar(@PathVariable Integer id, @RequestBody PremioEventoDTO dto) {
+    public ResponseEntity<?> actualizar(@PathVariable Integer id, @Valid @RequestBody PremioEventoDTO dto) {
         try {
             return ResponseEntity.ok(premioEventoService.actualizar(id, dto));
         } catch (RuntimeException e) {
