@@ -1,5 +1,6 @@
 package com.varcal.cheermanager.Controller.Financiero;
 
+import jakarta.validation.Valid;
 import com.varcal.cheermanager.Utils.RequiresPermission;
 
 import java.util.List;
@@ -40,13 +41,13 @@ public class DivisionController {
 
     @PostMapping
     @RequiresPermission("gestionar_division")
-    public ResponseEntity<Division> crear(@RequestBody Division division) {
+    public ResponseEntity<Division> crear(@Valid @RequestBody Division division) {
         return ResponseEntity.status(HttpStatus.CREATED).body(divisionService.crear(division));
     }
 
     @PutMapping("/{id}")
     @RequiresPermission("gestionar_division")
-    public ResponseEntity<Division> actualizar(@PathVariable Integer id, @RequestBody Division division) {
+    public ResponseEntity<Division> actualizar(@PathVariable Integer id, @Valid @RequestBody Division division) {
         return ResponseEntity.ok(divisionService.actualizar(id, division));
     }
 

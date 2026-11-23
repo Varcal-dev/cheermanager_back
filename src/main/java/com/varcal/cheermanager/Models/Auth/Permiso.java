@@ -1,5 +1,8 @@
 package com.varcal.cheermanager.Models.Auth;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -19,6 +22,8 @@ public class Permiso {
     private Integer id;
 
     @Column(name = "nombre", unique = true, nullable = false)
+    @NotBlank(message = "El nombre del permiso es obligatorio")
+    @Size(max = 255, message = "El nombre del permiso no puede superar 255 caracteres")
     private String nombre;
 
     

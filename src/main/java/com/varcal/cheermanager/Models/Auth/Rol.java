@@ -1,5 +1,8 @@
 package com.varcal.cheermanager.Models.Auth;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 import java.util.Set;
 
 import jakarta.persistence.Column;
@@ -31,9 +34,12 @@ public class Rol {
     private Integer id;
 
     @Column(name = "nombre", nullable = false)
+    @NotBlank(message = "El nombre del rol es obligatorio")
+    @Size(max = 255, message = "El nombre del rol no puede superar 255 caracteres")
     private String nombre;
 
     @Column(name = "descripcion")
+    @Size(max = 255, message = "La descripción no puede superar 255 caracteres")
     private String descripcion;
 
     @ManyToMany(fetch = FetchType.EAGER)
