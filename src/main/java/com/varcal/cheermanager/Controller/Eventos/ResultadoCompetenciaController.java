@@ -1,5 +1,6 @@
 package com.varcal.cheermanager.Controller.Eventos;
 
+import jakarta.validation.Valid;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,7 @@ public class ResultadoCompetenciaController {
 
     @PostMapping
     @RequiresPermission("modificar_evento")
-    public ResponseEntity<?> registrar(@RequestBody ResultadoCompetenciaDTO dto) {
+    public ResponseEntity<?> registrar(@Valid @RequestBody ResultadoCompetenciaDTO dto) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(resultadoCompetenciaService.registrar(dto));
         } catch (RuntimeException e) {
@@ -54,7 +55,7 @@ public class ResultadoCompetenciaController {
 
     @PutMapping("/{id}")
     @RequiresPermission("modificar_evento")
-    public ResponseEntity<?> actualizar(@PathVariable Integer id, @RequestBody ResultadoCompetenciaDTO dto) {
+    public ResponseEntity<?> actualizar(@PathVariable Integer id, @Valid @RequestBody ResultadoCompetenciaDTO dto) {
         try {
             return ResponseEntity.ok(resultadoCompetenciaService.actualizar(id, dto));
         } catch (RuntimeException e) {
