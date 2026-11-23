@@ -3,6 +3,8 @@ package com.varcal.cheermanager.repository.Personas;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.lang.NonNull;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -26,6 +28,17 @@ public interface DeportistaRepository extends JpaRepository<Deportista, Integer>
             "LEFT JOIN convenios c ON c.id = d.convenio_id AND c.club_id = d.club_id " +
             "WHERE d.club_id = :#{T(com.varcal.cheermanager.tenant.TenantContext).require()}", nativeQuery = true)
     List<Object[]> obtenerDeportistasConDetalles();
+
+    // Busqueda ligera por nombre y apellidos (paleta de comandos). El filtro de club lo pone @TenantId de Hibernate.
+    // Mismo patron de LIKE sobre CONCAT(nombre, ' ', apellidos) que ya usa la busqueda de facturas.
+    @Query("SELECT d FROM Deportista d JOIN FETCH d.persona p "
+            + "WHERE LOWER(CONCAT(p.nombre, ' ', p.apellidos)) LIKE LOWER(CONCAT('%', :q, '%')) "
+            + "ORDER BY p.nombre, p.apellidos, d.id")
+    List<Deportista> buscarPorNombre(@Param("q") String q, Pageable pageable);
+
+    // Todos los deportistas (como el listado completo) pero solo para selectores: se mapea a un DTO minimo.
+    @Query("SELECT d FROM Deportista d JOIN FETCH d.persona p ORDER BY p.nombre, p.apellidos, d.id")
+    List<Deportista> listarParaOpciones();
 
     @Query(value = "SELECT DISTINCT d.* FROM deportistas d " +
             "LEFT JOIN estados_persona ep ON d.estado_id = ep.id " +

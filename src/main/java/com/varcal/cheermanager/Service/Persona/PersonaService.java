@@ -65,6 +65,9 @@ public class PersonaService {
     private DeportistaRepository deportistaRepository;
 
     @Autowired
+    private com.varcal.cheermanager.repository.Org_dep.NivelRepository nivelRepository;
+
+    @Autowired
     private EntrenadorRepository entrenadorRepository;
 
     @Autowired
@@ -407,6 +410,41 @@ public class PersonaService {
     }
 
     // Método para listar deportistas con detalles
+    /**
+     * Busqueda ligera por nombre y apellidos (paleta de comandos). Menos de 2 letras devuelve vacio; el tope es 20.
+     * Reemplaza descargar el listado completo en cada busqueda.
+     */
+    @Transactional(readOnly = true)
+    public List<com.varcal.cheermanager.DTO.Persona.DeportistaBusquedaDTO> buscarDeportistas(String q, int limite) {
+        String texto = q == null ? "" : q.trim();
+        if (texto.length() < 2) {
+            return List.of();
+        }
+        int max = Math.min(Math.max(limite, 1), 20);
+        List<Deportista> encontrados = deportistaRepository.buscarPorNombre(texto,
+                org.springframework.data.domain.PageRequest.of(0, max));
+        if (encontrados.isEmpty()) {
+            return List.of();
+        }
+        // Los niveles son un catalogo pequeno del club: se resuelven por id sin un JOIN adicional.
+        java.util.Map<Integer, String> niveles = nivelRepository.findAll().stream()
+                .collect(Collectors.toMap(n -> n.getId(), n -> n.getNombre(), (a, b) -> a));
+        return encontrados.stream()
+                .map(d -> new com.varcal.cheermanager.DTO.Persona.DeportistaBusquedaDTO(
+                        d.getId(), d.getPersona().getId(), d.getPersona().getNombre(), d.getPersona().getApellidos(),
+                        d.getNivelActualId() == null ? null : niveles.get(d.getNivelActualId())))
+                .collect(Collectors.toList());
+    }
+
+    /** Lista minima (id, persona, nombre, apellidos) de todos los deportistas, para llenar selectores. */
+    @Transactional(readOnly = true)
+    public List<com.varcal.cheermanager.DTO.Persona.DeportistaOpcionDTO> listarDeportistasOpciones() {
+        return deportistaRepository.listarParaOpciones().stream()
+                .map(d -> new com.varcal.cheermanager.DTO.Persona.DeportistaOpcionDTO(
+                        d.getId(), d.getPersona().getId(), d.getPersona().getNombre(), d.getPersona().getApellidos()))
+                .collect(Collectors.toList());
+    }
+
     public List<DeportistaVistaDTO> listarDeportistasConDetalles() {
         List<Object[]> resultados = deportistaRepository.obtenerDeportistasConDetalles();
 

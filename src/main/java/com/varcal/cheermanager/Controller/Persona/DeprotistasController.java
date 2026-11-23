@@ -100,6 +100,22 @@ public class DeprotistasController {
         }
     }
 
+    // Busqueda ligera por nombre (paleta de comandos): minimo 2 letras, hasta 20 resultados.
+    @GetMapping("/buscar")
+    @RequiresPermission("ver_deportista")
+    public List<com.varcal.cheermanager.DTO.Persona.DeportistaBusquedaDTO> buscar(
+            @RequestParam(value = "q", required = false) String q,
+            @RequestParam(value = "limite", defaultValue = "6") int limite) {
+        return personaService.buscarDeportistas(q, limite);
+    }
+
+    // Lista minima para selectores (no el listado completo con detalles).
+    @GetMapping("/opciones")
+    @RequiresPermission("ver_deportista")
+    public List<com.varcal.cheermanager.DTO.Persona.DeportistaOpcionDTO> opciones() {
+        return personaService.listarDeportistasOpciones();
+    }
+
     @GetMapping()
     @RequiresPermission("ver_deportista")
     public ResponseEntity<?> listarDeportistas(

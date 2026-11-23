@@ -30,6 +30,11 @@ import com.varcal.cheermanager.DTO.Financiero.FacturaResponseDTO;
 import com.varcal.cheermanager.DTO.Financiero.PagoDTO;
 import com.varcal.cheermanager.DTO.Financiero.PagoResponseDTO;
 import com.varcal.cheermanager.Service.Financiero.FacturaService;
+import com.varcal.cheermanager.Service.Persona.PersonaService;
+import com.varcal.cheermanager.DTO.Persona.DeportistaBusquedaDTO;
+import com.varcal.cheermanager.DTO.Persona.DeportistaOpcionDTO;
+import com.varcal.cheermanager.Models.Personas.Deportista;
+import com.varcal.cheermanager.repository.Personas.DeportistaRepository;
 import com.varcal.cheermanager.DTO.Inventario.MovimientoInventarioDTO;
 import com.varcal.cheermanager.Models.Auth.Usuario;
 import com.varcal.cheermanager.Models.Inventario.CategoriaProducto;
@@ -86,6 +91,8 @@ class MySqlRealIT {
     @Autowired JdbcTemplate jdbc;
     @Autowired PagoService pagoService;
     @Autowired FacturaService facturaService;
+    @Autowired PersonaService personaService;
+    @Autowired DeportistaRepository deportistaRepository;
     @Autowired InscripcionService inscripcionService;
     @Autowired FacturaRepository facturaRepository;
     @Autowired PersonaRepository personaRepository;
@@ -435,5 +442,46 @@ class MySqlRealIT {
         assertEquals(0, TenantContext.runAs(2, () -> pagoService.listarPagina(sufijo, "ANULADO", null, null, 0, 20)).totalElementos());
         LocalDate manana = com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy().plusDays(1);
         assertEquals(0, TenantContext.runAs(2, () -> pagoService.listarPagina(sufijo, null, manana, null, 0, 20)).totalElementos());
+    }
+
+    // ---------------------------------------------------------------------------------------------------------
+    // PERF-01 (5b): busqueda ligera y lista minima de deportistas. Las consultas HQL nuevas se validan aqui contra
+    // MySQL real (y al arrancar el contexto).
+    // ---------------------------------------------------------------------------------------------------------
+
+    @Test
+    void busquedaYOpcionesDeDeportistasFiltranPorNombreYPorClub() {
+        final String sufijo = Long.toString(System.nanoTime(), 36);
+        final Integer deportistaId = TenantContext.runAs(2, () -> {
+            Persona p = new Persona();
+            p.setNombre("ItBusca");
+            p.setApellidos("Zz" + sufijo);
+            p = personaRepository.save(p);
+            Deportista d = new Deportista();
+            d.setPersona(p);
+            return deportistaRepository.save(d).getId();
+        });
+
+        // Por nombre completo parcial, sin distinguir mayusculas.
+        List<DeportistaBusquedaDTO> r = TenantContext.runAs(2, () -> personaService.buscarDeportistas("itbusca zz" + sufijo.toUpperCase(), 6));
+        assertEquals(1, r.size());
+        assertEquals(deportistaId, r.get(0).deportistaId());
+        assertEquals("ItBusca", r.get(0).nombre());
+
+        // Menos de 2 letras: vacio.
+        assertTrue(TenantContext.runAs(2, () -> personaService.buscarDeportistas("i", 6)).isEmpty());
+
+        // El limite se respeta (todos los "ItBusca" que haya, nunca mas de 1 si se pide 1).
+        assertTrue(TenantContext.runAs(2, () -> personaService.buscarDeportistas("ItBusca", 1)).size() <= 1);
+
+        // Otro club NO ve a este deportista (el filtro de club lo pone Hibernate).
+        List<DeportistaBusquedaDTO> otroClub = TenantContext.runAs(1, () -> personaService.buscarDeportistas("zz" + sufijo, 6));
+        assertTrue(otroClub.isEmpty(), "el club 1 no debe ver deportistas del club 2");
+
+        // Opciones: incluye al deportista creado, con persona y nombre.
+        List<DeportistaOpcionDTO> opciones = TenantContext.runAs(2, () -> personaService.listarDeportistasOpciones());
+        assertTrue(opciones.stream().anyMatch(o -> o.deportistaId().equals(deportistaId) && "ItBusca".equals(o.nombre())));
+        assertTrue(TenantContext.runAs(1, () -> personaService.listarDeportistasOpciones()).stream()
+                .noneMatch(o -> o.deportistaId().equals(deportistaId)));
     }
 }
