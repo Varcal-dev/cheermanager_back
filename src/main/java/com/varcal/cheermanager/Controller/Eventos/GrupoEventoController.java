@@ -1,5 +1,6 @@
 package com.varcal.cheermanager.Controller.Eventos;
 
+import jakarta.validation.Valid;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,7 @@ public class GrupoEventoController {
 
     @PostMapping
     @RequiresPermission("modificar_evento")
-    public ResponseEntity<?> inscribir(@RequestBody GrupoEventoDTO dto) {
+    public ResponseEntity<?> inscribir(@Valid @RequestBody GrupoEventoDTO dto) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(grupoEventoService.inscribir(dto));
         } catch (RuntimeException e) {

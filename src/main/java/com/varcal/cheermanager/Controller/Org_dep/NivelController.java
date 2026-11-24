@@ -1,5 +1,6 @@
 package com.varcal.cheermanager.Controller.Org_dep;
 
+import jakarta.validation.Valid;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,7 @@ public class NivelController {
     // Crear nivel
     @PostMapping
     @RequiresPermission("crear_nivel")
-    public ResponseEntity<Nivel> crearNivel(@RequestBody Nivel nivel) {
+    public ResponseEntity<Nivel> crearNivel(@Valid @RequestBody Nivel nivel) {
         Nivel nivelCreado = nivelService.crearNivel(nivel);
         return ResponseEntity.status(HttpStatus.CREATED).body(nivelCreado);
     }
@@ -62,7 +63,7 @@ public class NivelController {
     // Actualizar nivel
     @PutMapping("/{id}")
     @RequiresPermission("modificar_nivel")
-    public ResponseEntity<Nivel> actualizarNivel(@PathVariable Integer id, @RequestBody Nivel nivel) {
+    public ResponseEntity<Nivel> actualizarNivel(@PathVariable Integer id, @Valid @RequestBody Nivel nivel) {
         try {
             Nivel nivelActualizado = nivelService.actualizarNivel(id, nivel);
             return ResponseEntity.ok(nivelActualizado);

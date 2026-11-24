@@ -1,5 +1,9 @@
 package com.varcal.cheermanager.Controller.Auth;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
+import jakarta.validation.Valid;
 import java.util.Date;
 import java.util.Map;
 
@@ -55,8 +59,8 @@ public class AuthController {
     private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
-        String ip = request.getRemoteAddr();
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletRequest request) {
+        String ip = com.varcal.cheermanager.security.ClienteIp.de(request);
         String email = loginRequest.getEmail();
 
         // 1) En que club esta este correo (consulta sin filtro de club, solo devuelve el id).
@@ -113,7 +117,7 @@ public class AuthController {
             Long userId = jwtUtil.getUserId(token);
             Usuario usuario = userRepository.findById(userId).orElse(null);
             String email = usuario != null ? usuario.getEmail() : jwtUtil.getUserEmail(token);
-            logAccesoService.registrarAcceso(usuario, email, "LOGOUT", request.getRemoteAddr(), null);
+            logAccesoService.registrarAcceso(usuario, email, "LOGOUT", com.varcal.cheermanager.security.ClienteIp.de(request), null);
         } catch (Exception e) {
             // El logout ya ocurrio; un fallo del log de auditoria no lo revierte.
         }
@@ -151,7 +155,7 @@ public class AuthController {
 
     /** Siempre responde igual, exista o no el correo, y nunca devuelve el token. */
     @PostMapping("/forgot-password")
-    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+    public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
         if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Email es requerido"));
         }
@@ -164,7 +168,7 @@ public class AuthController {
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         if (request.getToken() == null || request.getToken().trim().isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Token es requerido"));
         }
@@ -194,7 +198,7 @@ public class AuthController {
     @PostMapping("/change-password")
     public ResponseEntity<?> changePassword(
             @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
-            @RequestBody ChangePasswordRequest request) {
+            @Valid @RequestBody ChangePasswordRequest request) {
 
         String token = bearer(authorizationHeader);
         if (token == null) {
@@ -234,7 +238,11 @@ public class AuthController {
 
     // Request classes
     public static class LoginRequest {
+        @NotBlank(message = "El correo es obligatorio")
+        @Size(max = 255, message = "El correo no puede superar 255 caracteres")
         private String email;
+        @NotEmpty(message = "La contraseña es obligatoria")
+        @Size(max = 255, message = "La contraseña no puede superar 255 caracteres")
         private String password;
         public String getEmail() { return email; }
         public void setEmail(String email) { this.email = email; }
@@ -243,13 +251,16 @@ public class AuthController {
     }
 
     public static class ForgotPasswordRequest {
+        @Size(max = 255, message = "El correo no puede superar 255 caracteres")
         private String email;
         public String getEmail() { return email; }
         public void setEmail(String email) { this.email = email; }
     }
 
     public static class ResetPasswordRequest {
+        @Size(max = 255, message = "El token no puede superar 255 caracteres")
         private String token;
+        @Size(max = 72, message = "La contraseña no puede superar 72 caracteres")
         private String newPassword;
         public String getToken() { return token; }
         public void setToken(String token) { this.token = token; }
@@ -258,7 +269,9 @@ public class AuthController {
     }
 
     public static class ChangePasswordRequest {
+        @Size(max = 255, message = "La contraseña actual no puede superar 255 caracteres")
         private String currentPassword;
+        @Size(max = 72, message = "La contraseña no puede superar 72 caracteres")
         private String newPassword;
         public String getCurrentPassword() { return currentPassword; }
         public void setCurrentPassword(String currentPassword) { this.currentPassword = currentPassword; }

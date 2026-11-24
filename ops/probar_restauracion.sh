@@ -5,7 +5,9 @@
 #   DB_NAME=cheermanager DB_USER=backup DB_PASSWORD=... BACKUP_DIR=/var/backups/cheermanager ./ops/probar_restauracion.sh
 #   ./ops/probar_restauracion.sh /ruta/archivo.sql.gz[.age]    # un respaldo concreto
 # El usuario de MySQL necesita permiso para crear/borrar la base "<DB_NAME>_restore_test" (o RESTORE_DB).
-# Escribe el resultado en $BACKUP_DIR/ultima_prueba_restauracion.txt (lo lee verificar_salud.sh).
+# Escribe el resultado en $BACKUP_DIR/ultima_prueba_restauracion.txt (lo lee verificar_salud.sh). Si el resultado es OK
+# COMPLETO tambien escribe $BACKUP_DIR/ultima_restauracion_completa.txt, que un PARCIAL nunca sobrescribe: es lo que
+# permite al vigilante saber cuando fue la ultima vez que se restauro de verdad (ver registrar_restauracion_completa.sh).
 # KEEP=1 conserva la base de prueba para inspeccionarla. Nunca toca la base real.
 # RESPALDOS CIFRADOS (.sql.gz.age): la llave privada NO debe estar en el servidor. Sin BACKUP_AGE_IDENTITY la prueba
 #   automatica es PARCIAL (suma de verificacion y formato; el sello dice PARCIAL, no OK). La restauracion COMPLETA se
@@ -77,4 +79,5 @@ done
 limpiar
 RESUMEN="OK $(basename "$FILE") tablas=$TABLAS migracion=V$VERSION clubes=$CLUBES"
 mkdir -p "$BACKUP_DIR"; printf '%s %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$RESUMEN" > "$SELLO"
+printf '%s COMPLETA base %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$RESUMEN" > "$BACKUP_DIR/ultima_restauracion_completa.txt"
 echo "PRUEBA DE RESTAURACION OK: $RESUMEN"

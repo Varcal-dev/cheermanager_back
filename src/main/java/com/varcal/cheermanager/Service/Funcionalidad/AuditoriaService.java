@@ -20,7 +20,6 @@ import com.varcal.cheermanager.Models.Funcionalidad.Auditoria;
 import com.varcal.cheermanager.repository.Auth.UserRepository;
 import com.varcal.cheermanager.repository.Funcionalidad.AuditoriaRepository;
 
-import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 public class AuditoriaService {
@@ -105,12 +104,7 @@ public class AuditoriaService {
             ServletRequestAttributes attrs =
                     (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             if (attrs == null) return null;
-            HttpServletRequest request = attrs.getRequest();
-            String forwarded = request.getHeader("X-Forwarded-For");
-            if (forwarded != null && !forwarded.isBlank()) {
-                return forwarded.split(",")[0].trim();
-            }
-            return request.getRemoteAddr();
+            return com.varcal.cheermanager.security.ClienteIp.de(attrs.getRequest());
         } catch (Exception e) {
             return null;
         }

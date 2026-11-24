@@ -38,3 +38,4 @@ echo "El respaldo contiene $N entradas. Se van a ESCRIBIR en $DESTINO (sin borra
 read -r CONFIRM; [ "$CONFIRM" = "RESTAURAR" ] || { echo "Cancelado."; exit 1; }
 leer | "${EXTRAER[@]}"
 echo "Restaurado en $DESTINO. Verifica abriendo una foto de un deportista en la aplicacion."
+echo "Si fue una PRUEBA de restauracion, registrala en el servidor para el vigilante: ops/registrar_restauracion_completa.sh fotos \"nota\""

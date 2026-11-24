@@ -1,5 +1,6 @@
 package com.varcal.cheermanager.Controller.Evaluaciones;
 
+import jakarta.validation.Valid;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +42,7 @@ public class CriterioEvaluacionController {
 
     @PostMapping
     @RequiresPermission("crear_criterio_evaluacion")
-    public ResponseEntity<?> crear(@RequestBody CriterioEvaluacionDTO dto) {
+    public ResponseEntity<?> crear(@Valid @RequestBody CriterioEvaluacionDTO dto) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(criterioEvaluacionService.crear(dto));
         } catch (RuntimeException e) {
@@ -51,7 +52,7 @@ public class CriterioEvaluacionController {
 
     @PutMapping("/{id}")
     @RequiresPermission("modificar_criterio_evaluacion")
-    public ResponseEntity<?> actualizar(@PathVariable Integer id, @RequestBody CriterioEvaluacionDTO dto) {
+    public ResponseEntity<?> actualizar(@PathVariable Integer id, @Valid @RequestBody CriterioEvaluacionDTO dto) {
         try {
             return ResponseEntity.ok(criterioEvaluacionService.actualizar(id, dto));
         } catch (RuntimeException e) {

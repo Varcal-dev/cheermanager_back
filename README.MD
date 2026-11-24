@@ -57,7 +57,7 @@ src/main/java/com/varcal/cheermanager/
 │                  #   GlobalExceptionHandler, RequestIdFilter
 ├── aspect/        # AuditoriaAspect (registra altas/bajas de repositorios)
 └── Utils/         # AuthenticatedUserUtil, CalendarioHabil, ClaveTemporal, @RequiresPermission, @SinPermisoEspecifico, ...
-ops/               # backup, restore, backup_uploads, restore_uploads, probar_restauracion, verificar_salud, alertar, probar_esquema, exportar_baseline
+ops/               # backup, restore, backup_uploads, restore_uploads, probar_restauracion, registrar_restauracion_completa, verificar_salud, alertar, probar_esquema, exportar_baseline
 docs/              # GUIA_DESPLIEGUE.md, GUIA_OPERACION.md, GUIA_USUARIO_ADMIN_CLUB.md
 ajustes_claudia/   # Bitácora histórica de decisiones y resúmenes de cambios por módulo
 ```
@@ -215,7 +215,7 @@ Los secretos **no tienen valor por defecto**: si falta una obligatoria, la app n
 | `RECORDATORIOS_AUTOMATICOS` | No | `true` | `false` apaga el envío automático en todo el servidor |
 | `MAIL_FROM` + `SPRING_MAIL_HOST/PORT/USERNAME/PASSWORD` (+ `SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH`, `..._STARTTLS_ENABLE`) | No | `no-reply@cheermanager.local` | SMTP: recuperación de clave y recordatorios |
 | `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_TEMPLATE`, `WHATSAPP_LANGUAGE` | No | plantilla `recordatorio_mora`, idioma `es` | WhatsApp Business Cloud API (plantilla aprobada por Meta con 3 variables). Sin esto, se generan enlaces `wa.me` |
-| `FORWARD_HEADERS_STRATEGY` | No | `none` | `framework` detrás de Nginx/Caddy/Railway |
+| `FORWARD_HEADERS_STRATEGY` | No | `none` | `framework` detrás de Nginx/Caddy/Railway (esquema y host; la IP del cliente la resuelve `security/ClienteIp`, ver `docs/GUIA_DESPLIEGUE.md`) |
 | `RATE_LIMIT_ENABLED`, `RATE_LIMIT_LOGIN_MAX`, `RATE_LIMIT_FORGOT_MAX`, `RATE_LIMIT_RESET_MAX` (y `..._VENTANA_SEG`) | No | `true`, 20 / 5 min, 5 / 1 h, 10 / 1 h | Límite de intentos por IP: login (solo fallidos), recuperar clave, restablecer clave. Responde 429 con `Retry-After` |
 | `UPLOAD_DIR` | No | `./uploads` (en Docker: `/data/uploads`, volumen `uploads`) | Fotos y documentos (máx. 10 MB) |
 | `JPA_DDL_AUTO` / `FLYWAY_ENABLED` | No | `validate` / `true` | Nunca `update` fuera de tu máquina |
@@ -292,6 +292,7 @@ Guías completas en [`docs/GUIA_DESPLIEGUE.md`](docs/GUIA_DESPLIEGUE.md), [`docs
 | `backup.sh` | Respaldo lógico con rotación (`KEEP_DAYS`, 14 por defecto), cifrado con age (`BACKUP_AGE_RECIPIENT`) y copia externa opcional con rclone |
 | `restore.sh` | Restaura un respaldo, cifrado o no (pide confirmar el nombre de la base; el cifrado requiere `BACKUP_AGE_IDENTITY`) |
 | `probar_restauracion.sh` | Restaura el último respaldo en una base de prueba y la verifica (parcial si está cifrado y no hay llave) |
+| `registrar_restauracion_completa.sh` | Registra en el servidor que hiciste una restauración completa de prueba (base o fotos); el vigilante la exige cada ~100 días con respaldos cifrados |
 | `backup_uploads.sh` / `restore_uploads.sh` | Respaldo y restauración de fotos y documentos (volumen `uploads`), cifrados con age igual que la base; `BACKUP_UPLOADS=1` activa su vigilancia |
 | `verificar_salud.sh` | Vigilante: API, respaldo reciente, prueba de restauración reciente y disco |
 | `alertar.sh` | Alertas por webhook (Slack/Discord/Mattermost) o Telegram |

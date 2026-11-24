@@ -1,5 +1,6 @@
 package com.varcal.cheermanager.Controller.Org_dep;
 
+import jakarta.validation.Valid;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -115,7 +116,7 @@ public class InscripcionController {
 
     @PostMapping
     @RequiresPermission("gestionar_inscripciones")
-    public ResponseEntity<?> crear(@RequestBody InscripcionDto inscripcionDto) {
+    public ResponseEntity<?> crear(@Valid @RequestBody InscripcionDto inscripcionDto) {
         try {
             Inscripcion nueva = inscripcionService.crearInscripcion(inscripcionDto);
             return ResponseEntity.status(HttpStatus.CREATED).body(nueva);

@@ -53,8 +53,6 @@ public class InteresadoController {
     }
 
     private static String ip(HttpServletRequest request) {
-        String xff = request.getHeader("X-Forwarded-For");
-        if (xff != null && !xff.isBlank()) return xff.split(",")[0].trim();
-        return request.getRemoteAddr();
+        return com.varcal.cheermanager.security.ClienteIp.de(request);
     }
 }

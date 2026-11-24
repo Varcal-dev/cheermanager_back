@@ -7,12 +7,15 @@
 #            DISCO_MAX_PCT (85) · ALERTA_REPETIR_MIN (60) · ESTADO_DIR (/var/tmp)
 #            BACKUP_UPLOADS=1 : tambien exige un respaldo reciente de fotos y documentos (ops/backup_uploads.sh),
 #            con el mismo limite MAX_BACKUP_HORAS. Sin esta variable no se vigila.
+#            MAX_RESTAURACION_COMPLETA_DIAS (100): con respaldos CIFRADOS la prueba automatica es solo PARCIAL; exige que
+#            se haya registrado una restauracion COMPLETA (ops/registrar_restauracion_completa.sh) en ese plazo.
 # Sale con 1 si encontro algun problema (util tambien para monitores externos).
 set -uo pipefail
 AQUI="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 HEALTH_URL="${HEALTH_URL:-http://127.0.0.1:8081/actuator/health}"
 BACKUP_DIR="${BACKUP_DIR:-./backups}"; DB_NAME="${DB_NAME:-cheermanager}"
 MAX_BACKUP_HORAS="${MAX_BACKUP_HORAS:-26}"; MAX_PRUEBA_DIAS="${MAX_PRUEBA_DIAS:-40}"
+MAX_COMPLETA_DIAS="${MAX_RESTAURACION_COMPLETA_DIAS:-100}"
 DISCO_MAX_PCT="${DISCO_MAX_PCT:-85}"; REPETIR_MIN="${ALERTA_REPETIR_MIN:-60}"
 ESTADO_DIR="${ESTADO_DIR:-/var/tmp}"; ESTADO="$ESTADO_DIR/cheermanager_salud.estado"
 PROBLEMAS=()
@@ -50,6 +53,23 @@ else
   grep -qE ' (OK|PARCIAL) ' "$SELLO" || PROBLEMAS+=("La ultima prueba de restauracion fallo: $(cat "$SELLO")")
   EDAD_D=$(( ( $(date +%s) - $(stat -c %Y "$SELLO") ) / 86400 ))
   [ "$EDAD_D" -le "$MAX_PRUEBA_DIAS" ] || PROBLEMAS+=("La ultima prueba de restauracion tiene $EDAD_D dias (maximo $MAX_PRUEBA_DIAS)")
+fi
+
+# 3b) restauracion COMPLETA reciente. Con respaldos cifrados la prueba automatica es PARCIAL y ese sello pisa al OK
+# anterior, asi que sin esto nadie se entera de que llevan meses sin restaurar de verdad. Solo se exige si el ultimo
+# respaldo esta cifrado; con respaldos en claro la prueba automatica ya es completa.
+exigir_completa() {  # $1 = archivo de respaldo mas reciente  $2 = sello  $3 = etiqueta  $4 = ejemplo de uso
+  case "$1" in *.age) ;; *) return 0 ;; esac
+  if [ ! -f "$2" ]; then
+    PROBLEMAS+=("Nunca se registro una restauracion COMPLETA de $3 (los respaldos estan cifrados; la prueba automatica solo es parcial). Restaura uno con tu llave y registralo: $4")
+  else
+    EDAD_C=$(( ( $(date +%s) - $(stat -c %Y "$2") ) / 86400 ))
+    [ "$EDAD_C" -le "$MAX_COMPLETA_DIAS" ] || PROBLEMAS+=("Hace $EDAD_C dias (maximo $MAX_COMPLETA_DIAS) que no se registra una restauracion COMPLETA de $3. Restaura uno con tu llave y registralo: $4")
+  fi
+}
+exigir_completa "$ULT" "$BACKUP_DIR/ultima_restauracion_completa.txt" "la base de datos" "ops/registrar_restauracion_completa.sh base"
+if [ "${BACKUP_UPLOADS:-0}" = "1" ] && [ -n "${ULTU:-}" ]; then
+  exigir_completa "$ULTU" "$BACKUP_DIR/ultima_restauracion_fotos.txt" "las fotos y documentos" "ops/registrar_restauracion_completa.sh fotos"
 fi
 
 # 4) disco

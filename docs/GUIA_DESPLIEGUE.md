@@ -20,7 +20,14 @@ api.tudominio.com {
 ```
 Pon `CORS_ALLOWED_ORIGINS` con el dominio exacto del frontend.
 
-**Límite de intentos por IP (login y recuperar clave):** la API toma la IP del cliente de `X-Forwarded-For` solo si quien conecta es un proxy local o de red privada. Caddy ya envía el header. Con Nginx añade `proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;`. **No publiques el puerto 8081**: debe seguir en `127.0.0.1`, de modo que solo el proxy llegue a la API. Si algún día corres más de una instancia de la API, el contador no se comparte entre ellas.
+**IP real del cliente.** La API la usa en el límite de intentos (login y recuperar clave), el registro de accesos (login, logout y accesos de soporte), la auditoría y las aceptaciones legales y autorizaciones (evidencia). Se resuelve en un único lugar (`security/ClienteIp`): si quien conecta es un proxy local o de red privada (incluida la red Docker y la red compartida `100.64.0.0/10` de algunos hostings) se toma la **última** entrada de `X-Forwarded-For`; si quien conecta es una IP pública, el encabezado se ignora. El valor se valida como IP antes de guardarlo.
+- **Caddy** ya envía el encabezado y lo reescribe con la IP real: no hace falta nada.
+- **Nginx:** añade `proxy_set_header X-Forwarded-For $remote_addr;` (o `$proxy_add_x_forwarded_for`; la API usa la última entrada, así que las dos sirven).
+- **CDN u otro proxy delante del proxy propio** (por ejemplo Cloudflare): si Caddy/Nginx no lo conoce como proxy de confianza, verá la IP del CDN y todos los usuarios aparecerán con ella. En Caddy se configura con `trusted_proxies` en el bloque `servers`; en Nginx con el módulo `realip`. Comprueba siempre el resultado (ver abajo).
+- **No publiques el puerto 8081**: debe seguir en `127.0.0.1`, de modo que solo el proxy llegue a la API.
+- `FORWARD_HEADERS_STRATEGY` **no** cambia la IP del cliente (solo esquema y host).
+- Si algún día corres más de una instancia de la API, el contador del límite de intentos no se comparte entre ellas.
+- **Comprobación tras desplegar:** inicia sesión y mira la última fila de `log_accesos`: `ip_origen` debe ser **tu IP pública**, no `127.0.0.1` ni `172.x`. Los registros anteriores al cambio conservan la IP del proxy.
 
 ## Base de datos que ya existe (producción actual)
 Si tu BD fue creada con los scripts 01 y 02 y no tiene tabla `flyway_schema_history`, arranca la app con `baseline-version=2` (ya viene así): Flyway la marca como V2 y aplica solo V3. **Haz respaldo antes.**

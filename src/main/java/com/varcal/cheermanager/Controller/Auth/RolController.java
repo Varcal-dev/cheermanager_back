@@ -1,5 +1,6 @@
 package com.varcal.cheermanager.Controller.Auth;
 
+import jakarta.validation.Valid;
 import com.varcal.cheermanager.Utils.RequiresPermission;
 
 import java.util.List;
@@ -55,14 +56,14 @@ public class RolController {
 
     @PostMapping
     @RequiresPermission("gestionar_roles")
-    public ResponseEntity<Rol> createRol(@RequestBody Rol rol) {
+    public ResponseEntity<Rol> createRol(@Valid @RequestBody Rol rol) {
         Rol createdRol = rolService.createRol(rol);
         return ResponseEntity.ok(createdRol);
     }
 
     @PutMapping("/{id}")
     @RequiresPermission("gestionar_roles")
-    public ResponseEntity<Rol> modificarRol(@PathVariable Integer id, @RequestBody Rol rolDetails) {
+    public ResponseEntity<Rol> modificarRol(@PathVariable Integer id, @Valid @RequestBody Rol rolDetails) {
         Rol updatedRol = rolService.modificarRol(id, rolDetails);
         return updatedRol != null ? ResponseEntity.ok(updatedRol) : ResponseEntity.notFound().build();
     }
@@ -85,7 +86,7 @@ public class RolController {
 
     @PostMapping("/asignar-permisos")
     @RequiresPermission("asignar_permiso")
-    public ResponseEntity<Rol> asignarPermisosARol(@RequestBody CrearRolConPermisosDTO request) {
+    public ResponseEntity<Rol> asignarPermisosARol(@Valid @RequestBody CrearRolConPermisosDTO request) {
         Rol rolActualizado = rolService.assignPermissionsToRol(request.getRolId(), request.getPermisoIds());
         return ResponseEntity.ok(rolActualizado);
     }

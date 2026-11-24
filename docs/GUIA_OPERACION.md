@@ -74,6 +74,8 @@ BACKUP_AGE_IDENTITY=~/llave-respaldos.txt DB_NAME=cheermanager DB_USER=... DB_PA
   RESTORE_DB=cheermanager_restore_test BACKUP_DIR=./copia ./ops/probar_restauracion.sh ./copia/cheermanager_FECHA.sql.gz.age
 ```
 
+**Después, regístralo en el servidor** (si no, el vigilante no puede saber que lo hiciste): `BACKUP_DIR=/var/backups/cheermanager ./ops/registrar_restauracion_completa.sh base "restauré cheermanager_FECHA en mi PC"`. Para las fotos, igual con `fotos` tras probar `ops/restore_uploads.sh`. Si pasan `MAX_RESTAURACION_COMPLETA_DIAS` días (100 por defecto) sin ese registro y el último respaldo está cifrado, `verificar_salud.sh` avisa con el comando exacto. **Al activar esto en un servidor que nunca hizo la prueba completa, la alerta saltará de inmediato: es lo esperado; haz la prueba y regístrala.**
+
 Debe terminar en `PRUEBA DE RESTAURACION OK`. Anota la fecha.
 
 ## 4. Recuperarse de un desastre (restaurar en producción)

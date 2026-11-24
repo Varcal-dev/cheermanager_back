@@ -1,7 +1,6 @@
 package com.varcal.cheermanager.security;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.function.LongSupplier;
 
@@ -55,7 +54,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
             return;
         }
 
-        String ip = ipCliente(request);
+        String ip = ClienteIp.de(request);
         long espera = limitador.segundosParaReintentar(ip);
         if (espera > 0) {
             response.setStatus(429);
@@ -87,34 +86,5 @@ public class RateLimitFilter extends OncePerRequestFilter {
         String uri = request.getRequestURI();
         String ctx = request.getContextPath();
         return ctx != null && !ctx.isEmpty() && uri.startsWith(ctx) ? uri.substring(ctx.length()) : uri;
-    }
-
-    /**
-     * IP del cliente. Si quien conecta es un proxy local/privado (Caddy/Nginx en el mismo servidor o red Docker)
-     * se usa la ULTIMA entrada de X-Forwarded-For: es la que anade nuestro proxy con la IP que el vio; las
-     * anteriores las puede falsificar el cliente. Si quien conecta es una IP publica, el header se ignora.
-     * (server.forward-headers-strategy=framework NO modifica getRemoteAddr(), por eso no se usa aqui.)
-     */
-    static String ipCliente(HttpServletRequest request) {
-        String remota = request.getRemoteAddr();
-        String xff = request.getHeader("X-Forwarded-For");
-        if (xff != null && !xff.isBlank() && esProxyConfiable(remota)) {
-            String[] partes = xff.split(",");
-            String ultima = partes[partes.length - 1].trim();
-            if (!ultima.isEmpty() && ultima.length() <= 64) return ultima;
-        }
-        return remota == null ? "?" : remota;
-    }
-
-    static boolean esProxyConfiable(String remota) {
-        if (remota == null || remota.isBlank()) return false;
-        try {
-            InetAddress a = InetAddress.getByName(remota); // IP literal: no hace consulta DNS
-            byte[] b = a.getAddress();
-            boolean ula = b.length == 16 && (b[0] & 0xFE) == 0xFC; // fc00::/7
-            return a.isLoopbackAddress() || a.isSiteLocalAddress() || a.isLinkLocalAddress() || ula;
-        } catch (Exception e) {
-            return false;
-        }
     }
 }

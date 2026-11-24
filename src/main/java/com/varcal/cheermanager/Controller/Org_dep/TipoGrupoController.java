@@ -1,5 +1,6 @@
 package com.varcal.cheermanager.Controller.Org_dep;
 
+import jakarta.validation.Valid;
 import com.varcal.cheermanager.Utils.RequiresPermission;
 import com.varcal.cheermanager.Utils.SinPermisoEspecifico;
 
@@ -45,13 +46,13 @@ public class TipoGrupoController {
 
     @PostMapping
     @RequiresPermission("gestionar_catalogos")
-    public ResponseEntity<TipoGrupo> crear(@RequestBody TipoGrupo tipoGrupo) {
+    public ResponseEntity<TipoGrupo> crear(@Valid @RequestBody TipoGrupo tipoGrupo) {
         return ResponseEntity.status(HttpStatus.CREATED).body(tipoGrupoService.crear(tipoGrupo));
     }
 
     @PutMapping("/{id}")
     @RequiresPermission("gestionar_catalogos")
-    public ResponseEntity<?> actualizar(@PathVariable Integer id, @RequestBody TipoGrupo tipoGrupo) {
+    public ResponseEntity<?> actualizar(@PathVariable Integer id, @Valid @RequestBody TipoGrupo tipoGrupo) {
         try {
             return ResponseEntity.ok(tipoGrupoService.actualizar(id, tipoGrupo));
         } catch (RuntimeException e) {
