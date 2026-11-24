@@ -1,5 +1,6 @@
 package com.varcal.cheermanager.Controller.Org_dep;
 
+import jakarta.validation.Valid;
 import com.varcal.cheermanager.Utils.RequiresPermission;
 
 import java.time.LocalDate;
@@ -69,7 +70,7 @@ public class GrupoEntrenamientoController {
 
     @PostMapping
     @RequiresPermission("crear_grupo")
-    public ResponseEntity<?> crear(@RequestBody GrupoEntrenamientoDTO dto) {
+    public ResponseEntity<?> crear(@Valid @RequestBody GrupoEntrenamientoDTO dto) {
         Optional<TipoGrupo> tipo = tipoGrupoRepo.findById(dto.getTipoGrupoId());
         Optional<CategoriaNivel> categoria = categoriaNivelRepo.findById(dto.getCategoriaNivelId());
 
@@ -87,7 +88,7 @@ public class GrupoEntrenamientoController {
 
     @PutMapping("/{id}")
     @RequiresPermission("modificar_grupo")
-    public ResponseEntity<?> actualizar(@PathVariable Integer id, @RequestBody GrupoEntrenamientoDTO dto) {
+    public ResponseEntity<?> actualizar(@PathVariable Integer id, @Valid @RequestBody GrupoEntrenamientoDTO dto) {
         Optional<GrupoEntrenamiento> grupoOpt = grupoRepo.findById(id);
         Optional<TipoGrupo> tipo = tipoGrupoRepo.findById(dto.getTipoGrupoId());
         Optional<CategoriaNivel> categoria = categoriaNivelRepo.findById(dto.getCategoriaNivelId());
@@ -194,7 +195,7 @@ public class GrupoEntrenamientoController {
     @RequiresPermission("modificar_grupo")
     public ResponseEntity<?> agregarDeportistaAGrupo(
             @PathVariable Integer grupoId,
-            @RequestBody AgregarDeportistaRequest request) {
+            @Valid @RequestBody AgregarDeportistaRequest request) {
         try {
             String resultado = grupoEntrenamientoService.agregarDeportistaAGrupo(request.getDeportistaId(), grupoId,
                     request.getObservaciones());
@@ -222,7 +223,7 @@ public class GrupoEntrenamientoController {
     @RequiresPermission("modificar_grupo")
     public ResponseEntity<?> asignarEntrenadorAGrupo(
             @PathVariable int grupoId,
-            @RequestBody AsignacionEntrenadorDTO dto) {
+            @Valid @RequestBody AsignacionEntrenadorDTO dto) {
         dto.setGrupoId(grupoId); // asegúrate de que coincida
         try {
             String respuesta = grupoEntrenamientoService.asignarEntrenadorAGrupo(dto);

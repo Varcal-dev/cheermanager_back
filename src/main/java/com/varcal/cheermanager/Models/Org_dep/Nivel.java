@@ -1,5 +1,8 @@
 package com.varcal.cheermanager.Models.Org_dep;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,5 +23,7 @@ public class Nivel {
     private Integer id;
 
     @Column(name = "nombre", nullable = false)
+    @NotBlank(message = "El nombre del nivel es obligatorio")
+    @Size(max = 255, message = "El nombre del nivel no puede superar 255 caracteres")
     private String nombre;
 }

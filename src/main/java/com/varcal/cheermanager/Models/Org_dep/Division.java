@@ -1,5 +1,8 @@
 package com.varcal.cheermanager.Models.Org_dep;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,5 +23,7 @@ public class Division {
     private Integer id;
 
     @Column(name = "nombre", nullable = false)
+    @NotBlank(message = "El nombre de la división es obligatorio")
+    @Size(max = 255, message = "El nombre de la división no puede superar 255 caracteres")
     private String nombre;
 }

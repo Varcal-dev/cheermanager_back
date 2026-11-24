@@ -1,5 +1,6 @@
 package com.varcal.cheermanager.Controller.Horario_Asistencia;
 
+import jakarta.validation.Valid;
 import com.varcal.cheermanager.Utils.RequiresPermission;
 
 import java.util.List;
@@ -35,7 +36,7 @@ public class HorarioController {
 
     @PostMapping
     @RequiresPermission("crear_horario")
-    public ResponseEntity<Horario> crear(@RequestBody HorarioDTO dto) {
+    public ResponseEntity<Horario> crear(@Valid @RequestBody HorarioDTO dto) {
         Horario horario = horarioService.crear(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(horario);
     }
@@ -62,7 +63,7 @@ public class HorarioController {
 
     @PutMapping("/{id}")
     @RequiresPermission("modificar_horario")
-    public ResponseEntity<Horario> actualizar(@PathVariable Integer id, @RequestBody HorarioDTO dto) {
+    public ResponseEntity<Horario> actualizar(@PathVariable Integer id, @Valid @RequestBody HorarioDTO dto) {
         return ResponseEntity.ok(horarioService.actualizar(id, dto));
     }
 
@@ -77,7 +78,7 @@ public class HorarioController {
     // martes/jueves 4-6pm aplica también para el grupo Nivel 3").
     @PostMapping("/asignar-grupo")
     @RequiresPermission("modificar_horario")
-    public ResponseEntity<HorarioEntrenamiento> asignarAGrupo(@RequestBody AsignarHorarioGrupoDTO dto) {
+    public ResponseEntity<HorarioEntrenamiento> asignarAGrupo(@Valid @RequestBody AsignarHorarioGrupoDTO dto) {
         HorarioEntrenamiento he = horarioService.asignarAGrupo(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(he);
     }

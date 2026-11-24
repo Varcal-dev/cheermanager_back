@@ -1,5 +1,6 @@
 package com.varcal.cheermanager.Controller.Auth;
 
+import jakarta.validation.Valid;
 import com.varcal.cheermanager.Utils.RequiresPermission;
 
 import java.util.Optional;
@@ -40,14 +41,14 @@ public class PermisoController {
 
     @PostMapping
     @RequiresPermission("gestionar_catalogos")
-    public ResponseEntity<Permiso> crearPermiso(@RequestBody Permiso permiso) {
+    public ResponseEntity<Permiso> crearPermiso(@Valid @RequestBody Permiso permiso) {
         Permiso nuevoPermiso = permisoService.guardar(permiso);
         return ResponseEntity.ok(nuevoPermiso);
     }
 
     @PutMapping("/{id}")
     @RequiresPermission("gestionar_catalogos")
-    public ResponseEntity<Permiso> actualizarPermiso(@PathVariable Integer id, @RequestBody Permiso permiso) {
+    public ResponseEntity<Permiso> actualizarPermiso(@PathVariable Integer id, @Valid @RequestBody Permiso permiso) {
         Optional<Permiso> permisoExistente = permisoService.obtenerPorId(id);
         if (permisoExistente.isPresent()) {
             permiso.setId(id);
