@@ -59,6 +59,12 @@ import com.varcal.cheermanager.repository.Financiero.FacturaRepository;
 import com.varcal.cheermanager.repository.Financiero.MetodoPagoRepository;
 import com.varcal.cheermanager.repository.Financiero.TipoPagoRepository;
 import com.varcal.cheermanager.repository.Personas.PersonaRepository;
+import com.varcal.cheermanager.DTO.Persona.DeportistaDTO;
+import com.varcal.cheermanager.Service.Importacion.ExportesService;
+import com.varcal.cheermanager.Service.Persona.CopiaDatosService;
+import com.varcal.cheermanager.tenant.TenantLookupRepository;
+import java.nio.charset.StandardCharsets;
+import java.util.stream.Collectors;
 import com.varcal.cheermanager.tenant.TenantContext;
 
 /**
@@ -103,6 +109,9 @@ class MySqlRealIT {
     @Autowired ProductoVarianteRepository productoVarianteRepository;
     @Autowired UserRepository userRepository;
     @Autowired MetodoPagoRepository metodoPagoRepository;
+    @Autowired ExportesService exportesService;
+    @Autowired CopiaDatosService copiaDatosService;
+    @Autowired TenantLookupRepository tenantLookup;
 
     @Test
     void flywayAplicaTodoYHibernateValidaElEsquema() {
@@ -483,5 +492,190 @@ class MySqlRealIT {
         assertTrue(opciones.stream().anyMatch(o -> o.deportistaId().equals(deportistaId) && "ItBusca".equals(o.nombre())));
         assertTrue(TenantContext.runAs(1, () -> personaService.listarDeportistasOpciones()).stream()
                 .noneMatch(o -> o.deportistaId().equals(deportistaId)));
+    }
+
+    // ===== TEST-01 (D): exportes y copia de datos aislados por club, y cupo del plan contra BD real =====
+
+    /** Lo sembrado en un club para comprobar que sus datos no aparecen en otro. */
+    private record Sembrado(Integer personaId, Integer deportistaId, String apellidos, String numeroFactura,
+            String notaCaja) {
+    }
+
+    /**
+     * Siembra en el club indicado: persona + deportista, un acudiente vinculado como principal, una factura con un
+     * pago y un cierre de caja. Todo lleva el marcador en el apellido / numero / nota para buscarlo en los CSV.
+     */
+    private Sembrado sembrarDatosDeExporte(int clubId, String marcador, Integer tipoPagoId, Integer metodoPagoId,
+            boolean conCierreDeCaja) {
+        final String apellidos = "ItExp" + marcador;
+        final String numeroFactura = "ITE-" + marcador;
+        final String notaCaja = "ItCaja" + marcador;
+        final Integer[] ids = new Integer[2];
+        TenantContext.runAs(clubId, () -> {
+            Persona p = new Persona();
+            p.setNombre("Titular");
+            p.setApellidos(apellidos);
+            p = personaRepository.save(p);
+            Deportista d = new Deportista();
+            d.setPersona(p);
+            d = deportistaRepository.save(d);
+            ids[0] = p.getId();
+            ids[1] = d.getId();
+
+            Integer facturaId = crearFactura(p, numeroFactura, "100.00", false);
+            pagar(facturaId, "40.00", tipoPagoId, metodoPagoId);
+        });
+        // Acudiente y vinculo por SQL: las claves foraneas compuestas (club_id, id) los atan al mismo club.
+        Integer acudienteId = insertar(
+                "INSERT INTO acudientes (club_id, nombre, apellidos, telefono) VALUES (?, 'AcuIt', ?, '3000000000')",
+                clubId, "Acu" + apellidos);
+        insertar("INSERT INTO deportista_acudientes (club_id, deportista_id, acudiente_id, parentesco, principal) "
+                + "VALUES (?, ?, ?, 'Madre', b'1')", clubId, ids[1], acudienteId);
+        if (conCierreDeCaja) {
+            // REABIERTA (no CERRADA): un dia CERRADO bloquea pagos de ese dia y afectaria a otras pruebas de la clase.
+            // Hay un solo cierre por (club, fecha), por eso solo una prueba lo siembra.
+            insertar("INSERT INTO cierres_caja (club_id, fecha, estado, total_pagado, efectivo_esperado, nota) "
+                    + "VALUES (?, ?, 'REABIERTA', 0, 0, ?)", clubId,
+                    java.sql.Date.valueOf(com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy()), notaCaja);
+        }
+        return new Sembrado(ids[0], ids[1], apellidos, numeroFactura, notaCaja);
+    }
+
+    private java.util.Map<String, String> exportesDelClub(int clubId) {
+        final LocalDate hoy = com.varcal.cheermanager.Service.Clubes.SuscripcionService.hoy();
+        final LocalDate desde = hoy.minusDays(1);
+        final LocalDate hasta = hoy.plusDays(1);
+        return TenantContext.runAs(clubId, () -> {
+            java.util.Map<String, String> csv = new java.util.LinkedHashMap<>();
+            csv.put("deportistas", new String(exportesService.deportistas(), StandardCharsets.UTF_8));
+            csv.put("acudientes", new String(exportesService.acudientes(), StandardCharsets.UTF_8));
+            csv.put("facturas", new String(exportesService.facturas(desde, hasta), StandardCharsets.UTF_8));
+            csv.put("pagos", new String(exportesService.pagos(desde, hasta), StandardCharsets.UTF_8));
+            csv.put("cierres_caja", new String(exportesService.cierresCaja(desde, hasta), StandardCharsets.UTF_8));
+            return csv;
+        });
+    }
+
+    @Test
+    void losExportesDeUnClubNoIncluyenDatosDeOtroClub() {
+        final String s = Long.toString(System.nanoTime(), 36);
+        // Los catalogos de tipos y metodos de pago son globales: sirven para los dos clubes.
+        final Integer tipoPagoId = TenantContext.runAs(2, () -> tipoPagoRepository.findAll().get(0).getId());
+        final Integer metodoPagoId = TenantContext.runAs(2, () -> metodoPagoRepository.findAll().get(0).getId());
+
+        Sembrado club1 = sembrarDatosDeExporte(1, "1" + s, tipoPagoId, metodoPagoId, true);
+        Sembrado club2 = sembrarDatosDeExporte(2, "2" + s, tipoPagoId, metodoPagoId, true);
+
+        java.util.Map<String, String> csv1 = exportesDelClub(1);
+        java.util.Map<String, String> csv2 = exportesDelClub(2);
+
+        // Marcador de cada exporte: apellido (personas), numero de factura (facturas, pagos) y nota (caja).
+        java.util.Map<String, java.util.function.Function<Sembrado, String>> marcador = new java.util.LinkedHashMap<>();
+        marcador.put("deportistas", Sembrado::apellidos);
+        marcador.put("acudientes", Sembrado::apellidos);
+        marcador.put("facturas", Sembrado::numeroFactura);
+        marcador.put("pagos", Sembrado::numeroFactura);
+        marcador.put("cierres_caja", Sembrado::notaCaja);
+
+        for (var e : marcador.entrySet()) {
+            String nombre = e.getKey();
+            String propio1 = e.getValue().apply(club1), ajeno1 = e.getValue().apply(club2);
+            assertTrue(csv1.get(nombre).contains(propio1), "el exporte '" + nombre + "' del club 1 debe traer sus datos");
+            assertFalse(csv1.get(nombre).contains(ajeno1), "el exporte '" + nombre + "' del club 1 NO debe traer datos del club 2");
+            assertTrue(csv2.get(nombre).contains(ajeno1), "el exporte '" + nombre + "' del club 2 debe traer sus datos");
+            assertFalse(csv2.get(nombre).contains(propio1), "el exporte '" + nombre + "' del club 2 NO debe traer datos del club 1");
+        }
+    }
+
+    @Test
+    void laCopiaDeDatosDelTitularNoCruzaClubesNiMezclaTitulares() {
+        final String s = Long.toString(System.nanoTime(), 36);
+        final Integer tipoPagoId = TenantContext.runAs(2, () -> tipoPagoRepository.findAll().get(0).getId());
+        final Integer metodoPagoId = TenantContext.runAs(2, () -> metodoPagoRepository.findAll().get(0).getId());
+        Sembrado club1 = sembrarDatosDeExporte(1, "c1" + s, tipoPagoId, metodoPagoId, false);
+        Sembrado club2 = sembrarDatosDeExporte(2, "c2" + s, tipoPagoId, metodoPagoId, false);
+
+        // Un club no puede pedir la copia de una persona de otro club (el id existe, pero no es suyo).
+        IllegalArgumentException deClub2EnClub1 = assertThrows(IllegalArgumentException.class,
+                () -> TenantContext.runAs(1, () -> copiaDatosService.copia(club2.personaId())));
+        assertEquals("Persona no encontrada", deClub2EnClub1.getMessage());
+        assertThrows(IllegalArgumentException.class,
+                () -> TenantContext.runAs(2, () -> copiaDatosService.copia(club1.personaId())));
+
+        // La copia propia trae lo suyo y nada del otro club.
+        CopiaDatosService.Copia copia2 = TenantContext.runAs(2, () -> copiaDatosService.copia(club2.personaId()));
+        String todo2 = copia2.secciones().stream().flatMap(sec -> sec.filas().stream()).flatMap(List::stream)
+                .collect(Collectors.joining("|"));
+        assertTrue(todo2.contains(club2.apellidos()), "datos personales del titular");
+        assertTrue(todo2.contains("Acu" + club2.apellidos()), "su acudiente");
+        assertTrue(todo2.contains(club2.numeroFactura()), "su factura");
+        assertFalse(todo2.contains(club1.apellidos()), "nada del titular del otro club");
+        assertFalse(todo2.contains(club1.numeroFactura()));
+        assertTrue(copia2.secciones().stream().anyMatch(sec -> sec.titulo().startsWith("Historial m")),
+                "incluye la seccion de salud, aunque vacia");
+    }
+
+    @Test
+    void elCupoDelPlanSeExigeEnAltaYReactivacionContraLaBaseReal() {
+        final String s = Long.toString(System.nanoTime(), 36);
+        final Integer limiteOriginal = jdbc.queryForObject("SELECT limite_deportistas FROM clubes WHERE id = 2", Integer.class);
+        final Integer estadoActivo = jdbc.queryForObject("SELECT id FROM estados_persona WHERE estado = 'Activo'", Integer.class);
+        final Integer generoId = jdbc.queryForObject("SELECT id FROM generos ORDER BY id LIMIT 1", Integer.class);
+        try {
+            final long activos = TenantContext.runAs(2, () -> tenantLookup.contarDeportistasActivos(2));
+
+            // 1) Club exactamente lleno: el alta se rechaza y no queda NADA guardado.
+            jdbc.update("UPDATE clubes SET limite_deportistas = ? WHERE id = 2", (int) activos);
+            int personasAntes = jdbc.queryForObject("SELECT COUNT(*) FROM personas WHERE club_id = 2", Integer.class);
+            int usuariosAntes = jdbc.queryForObject("SELECT COUNT(*) FROM usuarios WHERE club_id = 2", Integer.class);
+            RuntimeException lleno = assertThrows(RuntimeException.class,
+                    () -> TenantContext.runAs(2, () -> personaService.registrarDeportista(dtoCupo("A" + s, estadoActivo, generoId))));
+            assertTrue(lleno.getMessage().contains("Tu plan permite hasta " + activos), lleno.getMessage());
+            assertEquals(personasAntes, jdbc.queryForObject("SELECT COUNT(*) FROM personas WHERE club_id = 2", Integer.class));
+            assertEquals(usuariosAntes, jdbc.queryForObject("SELECT COUNT(*) FROM usuarios WHERE club_id = 2", Integer.class));
+
+            // 2) Con un cupo libre entra uno; con el club otra vez lleno, el siguiente se rechaza.
+            jdbc.update("UPDATE clubes SET limite_deportistas = ? WHERE id = 2", (int) activos + 1);
+            Deportista a = TenantContext.runAs(2, () -> personaService.registrarDeportista(dtoCupo("B" + s, estadoActivo, generoId)));
+            assertNotNull(a.getId());
+            assertEquals(activos + 1, (long) TenantContext.runAs(2, () -> tenantLookup.contarDeportistasActivos(2)));
+            assertThrows(RuntimeException.class,
+                    () -> TenantContext.runAs(2, () -> personaService.registrarDeportista(dtoCupo("C" + s, estadoActivo, generoId))));
+
+            // 3) Retirar libera el cupo: entra otro deportista.
+            TenantContext.runAs(2, () -> personaService.eliminarDeportista(a.getId()));
+            assertEquals(activos, (long) TenantContext.runAs(2, () -> tenantLookup.contarDeportistasActivos(2)));
+            Deportista b = TenantContext.runAs(2, () -> personaService.registrarDeportista(dtoCupo("D" + s, estadoActivo, generoId)));
+            assertNotNull(b.getId());
+
+            // 4) Con el club lleno, reactivar al retirado tambien se rechaza y sigue Retirado.
+            RuntimeException sinCupo = assertThrows(RuntimeException.class,
+                    () -> TenantContext.runAs(2, () -> personaService.reactivarDeportista(a.getId(), "vuelve")));
+            assertTrue(sinCupo.getMessage().contains("Tu plan permite hasta"), sinCupo.getMessage());
+            assertEquals("Retirado", jdbc.queryForObject(
+                    "SELECT ep.estado FROM deportistas d JOIN estados_persona ep ON ep.id = d.estado_id WHERE d.id = ?",
+                    String.class, a.getId()));
+
+            // 5) Si el limite sube, la reactivacion pasa.
+            jdbc.update("UPDATE clubes SET limite_deportistas = ? WHERE id = 2", (int) activos + 2);
+            TenantContext.runAs(2, () -> personaService.reactivarDeportista(a.getId(), "vuelve"));
+            assertEquals("Activo", jdbc.queryForObject(
+                    "SELECT ep.estado FROM deportistas d JOIN estados_persona ep ON ep.id = d.estado_id WHERE d.id = ?",
+                    String.class, a.getId()));
+        } finally {
+            jdbc.update("UPDATE clubes SET limite_deportistas = ? WHERE id = 2", limiteOriginal);
+        }
+    }
+
+    private DeportistaDTO dtoCupo(String sufijo, Integer estadoId, Integer generoId) {
+        DeportistaDTO d = new DeportistaDTO();
+        d.setNombre("ItCupo");
+        d.setApellidos("Z" + sufijo);
+        d.setNumeroDocumento("IT" + sufijo);
+        d.setTipoDocumento("CC");
+        d.setFechaNacimiento(LocalDate.of(2000, 1, 1));
+        d.setGeneroId(generoId);
+        d.setEstadoId(estadoId);
+        return d;
     }
 }
