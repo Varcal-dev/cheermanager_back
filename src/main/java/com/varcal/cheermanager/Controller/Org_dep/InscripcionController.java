@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.DTO.Financiero.FacturaResponseDTO;
 import com.varcal.cheermanager.DTO.Financiero.ResumenGeneracionCobrosDTO;
 import com.varcal.cheermanager.DTO.Org_dep.DeportistaInscritoDTO;
@@ -75,7 +76,7 @@ public class InscripcionController {
         try {
             return ResponseEntity.ok(inscripcionService.obtenerPorId(id));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         }
     }
 
@@ -93,7 +94,7 @@ public class InscripcionController {
             List<FacturaResponseDTO> dtos = facturaService.toResponseDTOs(facturas);
             return ResponseEntity.ok(dtos);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         }
     }
 
@@ -110,7 +111,7 @@ public class InscripcionController {
             ResumenGeneracionCobrosDTO resumen = inscripcionService.generarCobrosMensualidad(periodoFinal);
             return ResponseEntity.ok(resumen);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(400).body(e.getMessage());
+            return ResponseEntity.status(400).body(ErrorPublico.de(e));
         }
     }
 
@@ -121,9 +122,9 @@ public class InscripcionController {
             Inscripcion nueva = inscripcionService.crearInscripcion(inscripcionDto);
             return ResponseEntity.status(HttpStatus.CREATED).body(nueva);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(400).body(e.getMessage());
+            return ResponseEntity.status(400).body(ErrorPublico.de(e));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al crear la inscripción: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al crear la inscripción: " + ErrorPublico.de(e));
         }
     }
 
@@ -140,9 +141,9 @@ public class InscripcionController {
             Inscripcion actualizada = inscripcionService.actualizarInscripcion(id, inscripcion);
             return ResponseEntity.ok(actualizada);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(400).body(e.getMessage());
+            return ResponseEntity.status(400).body(ErrorPublico.de(e));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al actualizar la inscripción: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al actualizar la inscripción: " + ErrorPublico.de(e));
         }
     }
 
@@ -153,7 +154,7 @@ public class InscripcionController {
             inscripcionService.eliminarInscripcion(id);
             return ResponseEntity.noContent().build();
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         }
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.DTO.Historiales.HistorialNivelDeportistaDTO;
 import com.varcal.cheermanager.Service.Historiales.HistorialNivelDeportistaService;
 import com.varcal.cheermanager.Utils.RequiresPermission;
@@ -38,7 +39,7 @@ public class HistorialNivelDeportistaController {
             return ResponseEntity.status(201).body(
                     historialNivelDeportistaService.registrarCambio(deportistaId, nivelId, fechaCambio, motivo));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         }
     }
 
