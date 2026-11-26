@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.Service.Consentimientos.AutorizacionPortalService;
 import com.varcal.cheermanager.Utils.AuthenticatedUserUtil;
 import com.varcal.cheermanager.Utils.RequiresPermission;
@@ -38,9 +39,9 @@ public class PortalAutorizacionesController {
             return ResponseEntity.status(201).body(service.firmar(
                     AuthenticatedUserUtil.getCurrentUserId().intValue(), id, body, ipDe(request)));
         } catch (IllegalArgumentException | IllegalStateException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("message", ErrorPublico.de(e)));
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("message", ErrorPublico.de(e)));
         }
     }
 

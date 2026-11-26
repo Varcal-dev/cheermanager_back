@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.DTO.Eventos.GrupoEventoDTO;
 import com.varcal.cheermanager.DTO.Eventos.GrupoEventoResponseDTO;
 import com.varcal.cheermanager.Service.Eventos.GrupoEventoService;
@@ -32,7 +33,7 @@ public class GrupoEventoController {
             HttpStatus status = e.getMessage() != null && e.getMessage().contains("ya está inscrito")
                     ? HttpStatus.CONFLICT
                     : HttpStatus.NOT_FOUND;
-            return ResponseEntity.status(status).body(e.getMessage());
+            return ResponseEntity.status(status).body(ErrorPublico.de(e));
         }
     }
 

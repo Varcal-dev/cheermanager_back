@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.DTO.Eventos.PremioEventoDTO;
 import com.varcal.cheermanager.Service.Eventos.PremioEventoService;
 import com.varcal.cheermanager.Utils.RequiresPermission;
@@ -25,7 +26,7 @@ public class PremioEventoController {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(premioEventoService.crear(dto));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         }
     }
 
@@ -45,7 +46,7 @@ public class PremioEventoController {
         try {
             return ResponseEntity.ok(premioEventoService.actualizar(id, dto));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         }
     }
 

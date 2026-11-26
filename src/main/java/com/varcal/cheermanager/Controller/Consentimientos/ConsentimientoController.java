@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.Models.Consentimientos.Consentimiento.Tipo;
 import com.varcal.cheermanager.Service.Consentimientos.ConsentimientoService;
 import com.varcal.cheermanager.Service.Consentimientos.ConsentimientoService.OtorgarRequest;
@@ -61,7 +62,7 @@ public class ConsentimientoController {
         try {
             return ResponseEntity.ok(service.configurarExigencia(Boolean.TRUE.equals(body.get("activa"))));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("message", ErrorPublico.de(e)));
         }
     }
 }

@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.Models.Eventos.RosterIntegrante.Rol;
 import com.varcal.cheermanager.Service.Eventos.RosterService;
 import com.varcal.cheermanager.Utils.AuthenticatedUserUtil;
@@ -81,9 +82,9 @@ public class RosterController {
         try {
             return ResponseEntity.ok(accion.get());
         } catch (IllegalStateException e) {
-            return ResponseEntity.status(409).body(Map.of("message", e.getMessage()));
+            return ResponseEntity.status(409).body(Map.of("message", ErrorPublico.de(e)));
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("message", ErrorPublico.de(e)));
         }
     }
 

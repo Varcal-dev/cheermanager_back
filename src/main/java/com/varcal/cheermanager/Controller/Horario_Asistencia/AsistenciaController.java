@@ -1,5 +1,6 @@
 package com.varcal.cheermanager.Controller.Horario_Asistencia;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.Utils.RequiresPermission;
 
 import java.time.LocalDate;
@@ -53,7 +54,7 @@ public class AsistenciaController {
         try {
             return ResponseEntity.ok(metricasService.calcular(ini, fin, grupoId));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(java.util.Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(java.util.Map.of("message", ErrorPublico.de(e)));
         }
     }
 
@@ -67,7 +68,7 @@ public class AsistenciaController {
         try {
             return ResponseEntity.ok(escaneoService.escanear(req.codigo(), req.horarioId(), req.fecha()));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(java.util.Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(java.util.Map.of("message", ErrorPublico.de(e)));
         }
     }
 

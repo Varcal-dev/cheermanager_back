@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.Models.Legal.AceptacionLegal;
 import com.varcal.cheermanager.Service.Legal.LegalService;
 import com.varcal.cheermanager.Utils.AuthenticatedUserUtil;
@@ -52,7 +53,7 @@ public class LegalController {
             if (Boolean.TRUE.equals(body.get("politica"))) confirmados.add(LegalService.POLITICA);
             return ResponseEntity.ok(legalService.aceptar(AuthenticatedUserUtil.getCurrentUserId().intValue(), ipDe(request), confirmados));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("message", ErrorPublico.de(e)));
         }
     }
 

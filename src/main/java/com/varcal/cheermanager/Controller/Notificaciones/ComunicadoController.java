@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.Models.Notificaciones.Comunicado;
 import com.varcal.cheermanager.Models.Notificaciones.ComunicadoEnvio;
 import com.varcal.cheermanager.Service.Notificaciones.CalendarioService;
@@ -61,7 +62,7 @@ public class ComunicadoController {
         try {
             return ics(calendario.nombreArchivoGrupo(grupoId), calendario.calendarioGrupo(grupoId));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("message", ErrorPublico.de(e)));
         }
     }
 
@@ -82,9 +83,9 @@ public class ComunicadoController {
         try {
             return ResponseEntity.status(ok).body(accion.get());
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("message", ErrorPublico.de(e)));
         } catch (IllegalStateException e) {
-            return ResponseEntity.status(409).body(Map.of("message", e.getMessage()));
+            return ResponseEntity.status(409).body(Map.of("message", ErrorPublico.de(e)));
         }
     }
 }

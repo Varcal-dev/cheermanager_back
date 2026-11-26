@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.DTO.Evaluaciones.EvaluacionActualizarDTO;
 import com.varcal.cheermanager.DTO.Evaluaciones.EvaluacionDTO;
 import com.varcal.cheermanager.DTO.Evaluaciones.EvaluacionPorCriterioDTO;
@@ -32,7 +33,7 @@ public class EvaluacionController {
         HttpStatus status = e instanceof IllegalArgumentException ? HttpStatus.BAD_REQUEST
                 : e instanceof IllegalStateException ? HttpStatus.CONFLICT
                 : HttpStatus.NOT_FOUND;
-        return ResponseEntity.status(status).body(e.getMessage());
+        return ResponseEntity.status(status).body(ErrorPublico.de(e));
     }
 
     private static HttpStatus estadoLote(EvaluacionService.ResultadoRegistroMasivo r) {

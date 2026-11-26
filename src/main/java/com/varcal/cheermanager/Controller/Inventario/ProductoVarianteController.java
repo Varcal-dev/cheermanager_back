@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.DTO.Inventario.ActualizarPrecioDTO;
 import com.varcal.cheermanager.DTO.Inventario.ProductoVarianteDTO;
 import com.varcal.cheermanager.DTO.Inventario.ProductoVarianteResponseDTO;
@@ -42,7 +43,7 @@ public class ProductoVarianteController {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(productoVarianteService.crear(dto));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         }
     }
 
@@ -52,7 +53,7 @@ public class ProductoVarianteController {
         try {
             return ResponseEntity.ok(productoVarianteService.actualizarPrecio(id, body.precioVenta()));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         }
     }
 

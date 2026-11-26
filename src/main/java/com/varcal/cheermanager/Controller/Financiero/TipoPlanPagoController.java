@@ -1,6 +1,7 @@
 package com.varcal.cheermanager.Controller.Financiero;
 
 import jakarta.validation.Valid;
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.Utils.RequiresPermission;
 
 import java.util.List;
@@ -57,7 +58,7 @@ public class TipoPlanPagoController {
         try {
             return ResponseEntity.ok(service.obtenerPorId(id));
         } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         }
     }
 
@@ -67,7 +68,7 @@ public class TipoPlanPagoController {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(service.crear(dto));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(ErrorPublico.de(e));
         }
     }
 
@@ -77,9 +78,9 @@ public class TipoPlanPagoController {
         try {
             return ResponseEntity.ok(service.actualizar(id, dto));
         } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(ErrorPublico.de(e));
         }
     }
 
@@ -90,10 +91,10 @@ public class TipoPlanPagoController {
             service.eliminar(id);
             return ResponseEntity.noContent().build();
         } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         } catch (IllegalStateException e) {
             // Tiene planes asociados: no se puede eliminar.
-            return ResponseEntity.status(409).body(e.getMessage());
+            return ResponseEntity.status(409).body(ErrorPublico.de(e));
         }
     }
 }

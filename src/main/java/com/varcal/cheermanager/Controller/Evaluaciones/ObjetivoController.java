@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.DTO.Evaluaciones.ObjetivoDTO;
 import com.varcal.cheermanager.DTO.Evaluaciones.ObjetivoResponseDTO;
 import com.varcal.cheermanager.Service.Evaluaciones.ObjetivoService;
@@ -26,7 +27,7 @@ public class ObjetivoController {
         try {
             return ResponseEntity.status(201).body(objetivoService.crear(dto));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         }
     }
 
@@ -36,7 +37,7 @@ public class ObjetivoController {
         try {
             return ResponseEntity.ok(objetivoService.listarPorDeportista(deportistaId));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         }
     }
 
@@ -67,7 +68,7 @@ public class ObjetivoController {
         try {
             return ResponseEntity.ok(objetivoService.actualizar(id, dto));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         }
     }
 
@@ -78,7 +79,7 @@ public class ObjetivoController {
             Integer nuevoEstadoId = body.get("estadoObjetivoId");
             return ResponseEntity.ok(objetivoService.cambiarEstado(id, nuevoEstadoId));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         }
     }
 
@@ -89,7 +90,7 @@ public class ObjetivoController {
             objetivoService.eliminar(id);
             return ResponseEntity.noContent().build();
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         }
     }
 }

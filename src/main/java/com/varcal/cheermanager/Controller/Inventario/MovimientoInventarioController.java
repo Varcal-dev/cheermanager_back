@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.DTO.Inventario.MovimientoInventarioDTO;
 import com.varcal.cheermanager.DTO.Inventario.MovimientoInventarioResponseDTO;
 import com.varcal.cheermanager.Service.Inventario.MovimientoInventarioService;
@@ -25,7 +26,7 @@ public class MovimientoInventarioController {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(movimientoInventarioService.registrar(dto));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(409).body(e.getMessage());
+            return ResponseEntity.status(409).body(ErrorPublico.de(e));
         }
     }
 

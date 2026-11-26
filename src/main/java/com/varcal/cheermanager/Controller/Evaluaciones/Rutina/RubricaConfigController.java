@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.Models.Evaluaciones.Rutina.DriverSubCriterio;
 import com.varcal.cheermanager.Models.Evaluaciones.Rutina.EscalonDriverNivel;
 import com.varcal.cheermanager.Models.Evaluaciones.Rutina.NivelCompetencia;
@@ -37,7 +38,7 @@ public class RubricaConfigController {
         HttpStatus status = e instanceof IllegalArgumentException ? HttpStatus.BAD_REQUEST
                 : e instanceof IllegalStateException ? HttpStatus.CONFLICT
                 : HttpStatus.NOT_FOUND;
-        return ResponseEntity.status(status).body(e.getMessage());
+        return ResponseEntity.status(status).body(ErrorPublico.de(e));
     }
 
     // ── Niveles ──────────────────────────────────────────────────────────────

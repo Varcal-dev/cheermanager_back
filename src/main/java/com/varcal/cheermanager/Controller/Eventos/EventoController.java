@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.DTO.Eventos.EventoDTO;
 import com.varcal.cheermanager.DTO.Eventos.EventoResponseDTO;
 import com.varcal.cheermanager.Service.Eventos.EventoService;
@@ -56,7 +57,7 @@ public class EventoController {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(eventoService.crear(dto));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         }
     }
 
@@ -66,7 +67,7 @@ public class EventoController {
         try {
             return ResponseEntity.ok(eventoService.actualizar(id, dto));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         }
     }
 
@@ -79,7 +80,7 @@ public class EventoController {
         } catch (RuntimeException e) {
             // No siempre es 404 (puede ser conflicto por resultados ya cargados),
             // pero se devuelve el mensaje explicando la causa igual.
-            return ResponseEntity.status(409).body(e.getMessage());
+            return ResponseEntity.status(409).body(ErrorPublico.de(e));
         }
     }
 }

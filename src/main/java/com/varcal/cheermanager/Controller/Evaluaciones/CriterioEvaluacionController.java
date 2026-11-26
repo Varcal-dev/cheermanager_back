@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.DTO.Evaluaciones.CriterioEvaluacionDTO;
 import com.varcal.cheermanager.DTO.Evaluaciones.CriterioEvaluacionResponseDTO;
 import com.varcal.cheermanager.Service.Evaluaciones.CriterioEvaluacionService;
@@ -76,6 +77,6 @@ public class CriterioEvaluacionController {
         HttpStatus status = e instanceof IllegalArgumentException ? HttpStatus.BAD_REQUEST
                 : e instanceof IllegalStateException ? HttpStatus.CONFLICT
                 : HttpStatus.NOT_FOUND;
-        return ResponseEntity.status(status).body(e.getMessage());
+        return ResponseEntity.status(status).body(ErrorPublico.de(e));
     }
 }

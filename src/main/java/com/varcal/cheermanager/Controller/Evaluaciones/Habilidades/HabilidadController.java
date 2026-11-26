@@ -5,6 +5,7 @@ import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.Service.Evaluaciones.Habilidades.EvaluacionHabilidadService;
 import com.varcal.cheermanager.Utils.AuthenticatedUserUtil;
 import com.varcal.cheermanager.Utils.RequiresPermission;
@@ -33,7 +34,7 @@ public class HabilidadController {
         try {
             return ResponseEntity.ok(servicio.driversDe(categoria));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("message", ErrorPublico.de(e)));
         }
     }
 
@@ -43,7 +44,7 @@ public class HabilidadController {
         try {
             return ResponseEntity.ok(servicio.estadoDeDeportista(deportistaId));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("message", ErrorPublico.de(e)));
         }
     }
 
@@ -60,9 +61,9 @@ public class HabilidadController {
             return ResponseEntity.status(201)
                     .body(servicio.evaluar(solicitud, AuthenticatedUserUtil.getCurrentUserId().intValue()));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("message", ErrorPublico.de(e)));
         } catch (IllegalStateException e) {
-            return ResponseEntity.status(409).body(Map.of("message", e.getMessage()));
+            return ResponseEntity.status(409).body(Map.of("message", ErrorPublico.de(e)));
         }
     }
 }

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.DTO.Evaluaciones.Rutina.EvaluacionRutinaDTO;
 import com.varcal.cheermanager.DTO.Evaluaciones.Rutina.EvaluacionRutinaResponseDTO;
 import com.varcal.cheermanager.Service.Evaluaciones.Rutina.EvaluacionRutinaService;
@@ -34,7 +35,7 @@ public class EvaluacionRutinaController {
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(evaluacionRutinaService.registrar(dto));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(400).body(e.getMessage());
+            return ResponseEntity.status(400).body(ErrorPublico.de(e));
         }
     }
 
@@ -48,7 +49,7 @@ public class EvaluacionRutinaController {
         try {
             return ResponseEntity.ok(evaluacionRutinaService.previsualizar(dto));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(400).body(e.getMessage());
+            return ResponseEntity.status(400).body(ErrorPublico.de(e));
         }
     }
 
@@ -64,7 +65,7 @@ public class EvaluacionRutinaController {
         try {
             return ResponseEntity.ok(evaluacionRutinaService.obtenerPorId(id));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         }
     }
 
@@ -75,7 +76,7 @@ public class EvaluacionRutinaController {
             evaluacionRutinaService.eliminar(id);
             return ResponseEntity.noContent().build();
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         }
     }
 }

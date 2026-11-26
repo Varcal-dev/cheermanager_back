@@ -7,6 +7,7 @@ import java.util.function.Supplier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.Service.Horario_Asistencia.SedeService;
 import com.varcal.cheermanager.Service.Horario_Asistencia.SedeService.EspacioSolicitud;
 import com.varcal.cheermanager.Service.Horario_Asistencia.SedeService.SedeSolicitud;
@@ -79,9 +80,9 @@ public class SedeController {
         try {
             return ResponseEntity.status(exito).body(accion.get());
         } catch (IllegalStateException e) {
-            return ResponseEntity.status(409).body(Map.of("message", e.getMessage()));
+            return ResponseEntity.status(409).body(Map.of("message", ErrorPublico.de(e)));
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("message", ErrorPublico.de(e)));
         }
     }
 }
