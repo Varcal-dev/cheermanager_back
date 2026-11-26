@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.DTO.Notificaciones.RecordatorioConfigDTO;
 import com.varcal.cheermanager.DTO.Notificaciones.RecordatorioMoraRequestDTO;
 import com.varcal.cheermanager.Service.Financiero.FacturaService;
@@ -104,6 +105,6 @@ public class RecordatorioMoraController {
     // 400 dato invalido, 409 no disponible/regla, 500 fallo al enviar.
     private ResponseEntity<String> error(RuntimeException e) {
         int status = e instanceof IllegalArgumentException ? 400 : e instanceof IllegalStateException ? 409 : 500;
-        return ResponseEntity.status(status).body(e.getMessage());
+        return ResponseEntity.status(status).body(ErrorPublico.de(e));
     }
 }

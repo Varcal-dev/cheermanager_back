@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.Models.Legal.PreRegistro;
 import com.varcal.cheermanager.Service.Legal.PreRegistroService;
 import com.varcal.cheermanager.Utils.RequiresPermission;
@@ -31,9 +32,9 @@ public class PreRegistroController {
             // Misma respuesta si se guardo o ya estaba: no revela si un correo ya se pre-registro.
             return ResponseEntity.status(201).body(Map.of("ok", true));
         } catch (PreRegistroService.TooManyRequests e) {
-            return ResponseEntity.status(429).body(Map.of("message", e.getMessage()));
+            return ResponseEntity.status(429).body(Map.of("message", ErrorPublico.de(e)));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("message", ErrorPublico.de(e)));
         }
     }
 
@@ -50,7 +51,7 @@ public class PreRegistroController {
         try {
             return ResponseEntity.ok(service.actualizar(id, body.get("estado"), body.get("notas")));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("message", ErrorPublico.de(e)));
         }
     }
 }

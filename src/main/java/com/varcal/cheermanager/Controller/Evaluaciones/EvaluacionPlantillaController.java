@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.Service.Evaluaciones.EvaluacionPlantillaService;
 import com.varcal.cheermanager.Service.Evaluaciones.EvaluacionPlantillaService.PlantillaEntrada;
 import com.varcal.cheermanager.Utils.RequiresPermission;
@@ -109,6 +110,6 @@ public class EvaluacionPlantillaController {
     private ResponseEntity<?> error(RuntimeException e) {
         HttpStatus s = e instanceof IllegalArgumentException ? HttpStatus.BAD_REQUEST
                 : e instanceof IllegalStateException ? HttpStatus.CONFLICT : HttpStatus.NOT_FOUND;
-        return ResponseEntity.status(s).body(java.util.Map.of("message", String.valueOf(e.getMessage())));
+        return ResponseEntity.status(s).body(java.util.Map.of("message", ErrorPublico.de(e)));
     }
 }

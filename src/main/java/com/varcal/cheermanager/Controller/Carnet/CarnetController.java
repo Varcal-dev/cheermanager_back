@@ -5,6 +5,7 @@ import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.Service.Carnet.CarnetService;
 import com.varcal.cheermanager.Utils.RequiresPermission;
 
@@ -25,7 +26,7 @@ public class CarnetController {
         try {
             return ResponseEntity.ok(servicio.carnet(deportistaId));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("message", ErrorPublico.de(e)));
         }
     }
 
@@ -35,7 +36,7 @@ public class CarnetController {
         try {
             return ResponseEntity.ok(servicio.verificar(codigo));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("message", ErrorPublico.de(e)));
         }
     }
 
@@ -45,7 +46,7 @@ public class CarnetController {
         try {
             return ResponseEntity.ok(servicio.carnetEntrenador(entrenadorId));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("message", ErrorPublico.de(e)));
         }
     }
 }

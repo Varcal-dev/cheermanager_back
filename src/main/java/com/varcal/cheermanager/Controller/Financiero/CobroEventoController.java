@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.DTO.Financiero.CobroEventoLoteDTO;
 import com.varcal.cheermanager.Service.Financiero.CobroEventoService;
 import com.varcal.cheermanager.Utils.RequiresPermission;
@@ -29,7 +30,7 @@ public class CobroEventoController {
         try {
             return ResponseEntity.ok(cobroEventoService.cobrar(eventoId, dto));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(409).body(e.getMessage());
+            return ResponseEntity.status(409).body(ErrorPublico.de(e));
         }
     }
 }

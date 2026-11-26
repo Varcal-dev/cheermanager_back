@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.DTO.Inventario.VentaDTO;
 import com.varcal.cheermanager.DTO.Inventario.VentaResponseDTO;
 import com.varcal.cheermanager.Service.Inventario.VentaService;
@@ -29,7 +30,7 @@ public class VentaController {
         } catch (RuntimeException e) {
             // 409 cubre tanto "comprador inválido" como "stock insuficiente"
             // (ambas son conflictos de reglas de negocio, no recursos faltantes).
-            return ResponseEntity.status(409).body(e.getMessage());
+            return ResponseEntity.status(409).body(ErrorPublico.de(e));
         }
     }
 
@@ -61,7 +62,7 @@ public class VentaController {
         try {
             return ResponseEntity.ok(ventaService.anular(id, req == null ? null : req.motivo()));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(409).body(e.getMessage());
+            return ResponseEntity.status(409).body(ErrorPublico.de(e));
         }
     }
 

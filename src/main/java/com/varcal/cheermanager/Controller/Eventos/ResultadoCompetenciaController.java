@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.DTO.Eventos.ResultadoCompetenciaDTO;
 import com.varcal.cheermanager.DTO.Eventos.ResultadoCompetenciaResponseDTO;
 import com.varcal.cheermanager.Service.Eventos.ResultadoCompetenciaService;
@@ -26,7 +27,7 @@ public class ResultadoCompetenciaController {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(resultadoCompetenciaService.registrar(dto));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         }
     }
 
@@ -59,7 +60,7 @@ public class ResultadoCompetenciaController {
         try {
             return ResponseEntity.ok(resultadoCompetenciaService.actualizar(id, dto));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         }
     }
 

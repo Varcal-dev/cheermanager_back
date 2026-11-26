@@ -7,6 +7,7 @@ import java.util.function.Supplier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.Service.Ranking.RankingService;
 import com.varcal.cheermanager.Utils.RequiresPermission;
 
@@ -52,7 +53,7 @@ public class RankingController {
         try {
             return ResponseEntity.ok(accion.get());
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("message", ErrorPublico.de(e)));
         }
     }
 }

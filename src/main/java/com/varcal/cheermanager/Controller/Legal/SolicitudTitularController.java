@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.Models.Legal.SolicitudTitular.Estado;
 import com.varcal.cheermanager.Service.Legal.SolicitudTitularService;
 import com.varcal.cheermanager.Service.Legal.SolicitudTitularService.Solicitud;
@@ -64,9 +65,9 @@ public class SolicitudTitularController {
         try {
             return ResponseEntity.status(ok).body(accion.get());
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("message", ErrorPublico.de(e)));
         } catch (IllegalStateException e) {
-            return ResponseEntity.status(409).body(Map.of("message", e.getMessage()));
+            return ResponseEntity.status(409).body(Map.of("message", ErrorPublico.de(e)));
         }
     }
 }

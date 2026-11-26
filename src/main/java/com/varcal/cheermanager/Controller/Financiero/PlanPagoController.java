@@ -1,6 +1,7 @@
 package com.varcal.cheermanager.Controller.Financiero;
 
 import jakarta.validation.Valid;
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.Utils.RequiresPermission;
 
 import java.util.List;
@@ -63,7 +64,7 @@ public class PlanPagoController {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(planPagoService.crearPlan(dto));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(ErrorPublico.de(e));
         }
     }
 
@@ -81,7 +82,7 @@ public class PlanPagoController {
         try {
             return ResponseEntity.ok(planPagoService.actualizarPlan(id, dto));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(ErrorPublico.de(e));
         }
     }
 

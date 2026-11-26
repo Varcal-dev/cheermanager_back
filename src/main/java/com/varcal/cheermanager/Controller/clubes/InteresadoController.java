@@ -5,6 +5,7 @@ import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.Service.Clubes.InteresadoService;
 import com.varcal.cheermanager.Utils.RequiresPermission;
 import com.varcal.cheermanager.Utils.SinPermisoEspecifico;
@@ -29,9 +30,9 @@ public class InteresadoController {
             // Misma respuesta si se guardo o ya estaba: no revela quien ya se registro.
             return ResponseEntity.status(201).body(Map.of("ok", true));
         } catch (InteresadoService.TooManyRequests e) {
-            return ResponseEntity.status(429).body(Map.of("message", e.getMessage()));
+            return ResponseEntity.status(429).body(Map.of("message", ErrorPublico.de(e)));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("message", ErrorPublico.de(e)));
         }
     }
 
@@ -48,7 +49,7 @@ public class InteresadoController {
         try {
             return ResponseEntity.ok(service.actualizar(id, body));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("message", ErrorPublico.de(e)));
         }
     }
 

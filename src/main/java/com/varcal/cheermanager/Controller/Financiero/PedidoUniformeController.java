@@ -5,6 +5,7 @@ import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.Service.Financiero.PedidoUniformeService;
 import com.varcal.cheermanager.Utils.AuthenticatedUserUtil;
 import com.varcal.cheermanager.Utils.RequiresPermission;
@@ -26,7 +27,7 @@ public class PedidoUniformeController {
         try {
             return ResponseEntity.ok(servicio.tallasDeGrupo(grupoId));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("message", ErrorPublico.de(e)));
         }
     }
 
@@ -43,7 +44,7 @@ public class PedidoUniformeController {
             return ResponseEntity.status(201)
                     .body(servicio.crear(solicitud, AuthenticatedUserUtil.getCurrentUserId().intValue()));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("message", ErrorPublico.de(e)));
         }
     }
 
@@ -54,9 +55,9 @@ public class PedidoUniformeController {
         try {
             return ResponseEntity.ok(servicio.facturar(id, simular));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("message", ErrorPublico.de(e)));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(409).body(Map.of("message", e.getMessage()));
+            return ResponseEntity.status(409).body(Map.of("message", ErrorPublico.de(e)));
         }
     }
 }
