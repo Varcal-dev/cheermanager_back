@@ -1,5 +1,6 @@
 package com.varcal.cheermanager.config;
 
+import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,10 +27,12 @@ import jakarta.servlet.http.HttpServletRequest;
  * Respuesta de error uniforme: { timestamp, status, error, message, path }.
  * (mismos campos que el JSON por defecto de Spring, para no romper el frontend).
  *
- * - Los RuntimeException "de negocio" que lanzan los services con un mensaje legible
- *   (p. ej. "El pago excede el saldo pendiente") se devuelven como 400 con ese mensaje.
- * - Errores de BD/infraestructura NUNCA exponen su mensaje: se registran en el log y se
- *   devuelve un texto generico.
+ * - Los errores "de negocio" que lanzan los services con un mensaje legible
+ *   (p. ej. "El pago excede el saldo pendiente") se devuelven con ese mensaje, pero solo si lo
+ *   escribimos nosotros (ver {@link ErrorPublico}): 400 para RuntimeException/IllegalArgumentException,
+ *   409 para IllegalStateException, y el estado propio para ResponseStatusException.
+ * - Errores de BD, de libreria o de infraestructura NUNCA exponen su mensaje: se registran en el
+ *   log y se devuelve un texto generico.
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -71,22 +75,59 @@ public class GlobalExceptionHandler {
         return body(HttpStatus.CONFLICT, "El registro fue modificado por otra operacion; intenta de nuevo", req);
     }
 
-    @ExceptionHandler({ NullPointerException.class, IllegalStateException.class,
-            org.springframework.dao.DataAccessException.class })
+    @ExceptionHandler({ NullPointerException.class, org.springframework.dao.DataAccessException.class })
     public ResponseEntity<Map<String, Object>> interno(Exception ex, HttpServletRequest req) {
         log.error("Error interno en {} {}", req.getMethod(), req.getRequestURI(), ex);
-        return body(HttpStatus.INTERNAL_SERVER_ERROR, "Error interno del servidor", req);
+        return body(HttpStatus.INTERNAL_SERVER_ERROR, ErrorPublico.GENERICO, req);
     }
 
-    /** Errores de negocio lanzados como RuntimeException("mensaje legible") por los services. */
+    /**
+     * ResponseStatusException (RolService, JerarquiaAccesoService...): respeta el estado que eligio el servicio
+     * (403, 409...) y muestra solo su motivo. Sin este manejador la atrapaba {@link #negocio} y salia como 400
+     * con el texto {@code 409 CONFLICT "motivo"}. Un 5xx no muestra el motivo.
+     */
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<Map<String, Object>> conEstado(ResponseStatusException ex, HttpServletRequest req) {
+        HttpStatus status = HttpStatus.resolve(ex.getStatusCode().value());
+        if (status == null || status.is5xxServerError()) {
+            log.error("Error interno ({}) en {} {}", ex.getStatusCode(), req.getMethod(), req.getRequestURI(), ex);
+            return body(HttpStatus.INTERNAL_SERVER_ERROR, ErrorPublico.GENERICO, req);
+        }
+        String motivo = ex.getReason();
+        return body(status, motivo == null || motivo.isBlank() ? status.getReasonPhrase() : motivo, req);
+    }
+
+    /**
+     * IllegalStateException: los services la usan para "no se puede hacer eso ahora" (sede duplicada, roster
+     * confirmado...), asi que si el mensaje es nuestro sale como 409 con ese texto, igual que ya hacen los
+     * controladores que la capturan. Las de infraestructura o de libreria siguen siendo 500 genericos.
+     */
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<Map<String, Object>> estadoIlegal(IllegalStateException ex, HttpServletRequest req) {
+        if (ErrorPublico.esPublico(ex)) {
+            return body(HttpStatus.CONFLICT, ex.getMessage(), req);
+        }
+        log.error("Error interno en {} {}", req.getMethod(), req.getRequestURI(), ex);
+        return body(HttpStatus.INTERNAL_SERVER_ERROR, ErrorPublico.GENERICO, req);
+    }
+
+    /**
+     * Errores de negocio lanzados como RuntimeException("mensaje legible") por los services. Solo se muestra el
+     * mensaje si lo escribimos nosotros ({@link ErrorPublico}). Un argumento invalido o una fecha ilegible que
+     * vienen de una libreria son del cliente: 400 con texto generico. Cualquier otra cosa es un fallo nuestro:
+     * 500 generico y el detalle al log.
+     */
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Map<String, Object>> negocio(RuntimeException ex, HttpServletRequest req) {
-        String m = ex.getMessage();
-        if (m == null || m.isBlank()) {
-            log.error("RuntimeException sin mensaje en {}", req.getRequestURI(), ex);
-            return body(HttpStatus.INTERNAL_SERVER_ERROR, "Error interno del servidor", req);
+        if (ErrorPublico.esPublico(ex)) {
+            return body(HttpStatus.BAD_REQUEST, ex.getMessage(), req);
         }
-        return body(HttpStatus.BAD_REQUEST, m, req);
+        if (ex instanceof IllegalArgumentException || ex instanceof DateTimeException) {
+            log.warn("Valor invalido en {} {}: {}", req.getMethod(), req.getRequestURI(), ex.getClass().getSimpleName());
+            return body(HttpStatus.BAD_REQUEST, "Peticion invalida", req);
+        }
+        log.error("Error interno en {} {}", req.getMethod(), req.getRequestURI(), ex);
+        return body(HttpStatus.INTERNAL_SERVER_ERROR, ErrorPublico.GENERICO, req);
     }
 
     @ExceptionHandler(Exception.class)
