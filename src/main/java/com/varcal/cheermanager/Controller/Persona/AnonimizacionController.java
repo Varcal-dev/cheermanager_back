@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.Service.Persona.AnonimizacionService;
 import com.varcal.cheermanager.Utils.AuthenticatedUserUtil;
 import com.varcal.cheermanager.Utils.RequiresPermission;
@@ -32,9 +33,9 @@ public class AnonimizacionController {
             return ResponseEntity.ok(service.anonimizar(personaId, body,
                     AuthenticatedUserUtil.getCurrentUserId().intValue()));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("message", ErrorPublico.de(e)));
         } catch (IllegalStateException e) {
-            return ResponseEntity.status(409).body(Map.of("message", e.getMessage()));
+            return ResponseEntity.status(409).body(Map.of("message", ErrorPublico.de(e)));
         }
     }
 }

@@ -21,6 +21,10 @@ public final class ErroresDeInfraFixture {
         return new RuntimeException(mensaje);
     }
 
+    public static jakarta.persistence.EntityNotFoundException entidadNoEncontrada(String mensaje) {
+        return new jakarta.persistence.EntityNotFoundException(mensaje);
+    }
+
     /** Una clase propia es publica aunque se cree en infraestructura: existir en nuestro codigo prueba que la escribimos. */
     public static class ErrorPropioDeInfra extends RuntimeException {
         public ErrorPropioDeInfra(String mensaje) {

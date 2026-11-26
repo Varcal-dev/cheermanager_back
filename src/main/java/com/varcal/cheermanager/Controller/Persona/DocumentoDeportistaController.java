@@ -8,6 +8,7 @@ import java.util.Set;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.Models.Personas.DocumentoDeportista.Tipo;
 import com.varcal.cheermanager.Service.Persona.DocumentoDeportistaService;
 import com.varcal.cheermanager.Service.Persona.DocumentoDeportistaService.Alertas;
@@ -39,7 +40,7 @@ public class DocumentoDeportistaController {
             Alertas a = service.alertas(dias, req, todos);
             return ResponseEntity.ok(a);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("message", ErrorPublico.de(e)));
         }
     }
 
@@ -56,7 +57,7 @@ public class DocumentoDeportistaController {
             return ResponseEntity.status(201).body(service.registrar(id, body,
                     AuthenticatedUserUtil.getCurrentUserId().intValue()));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("message", ErrorPublico.de(e)));
         }
     }
 }

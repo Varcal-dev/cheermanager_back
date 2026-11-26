@@ -9,6 +9,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.Service.Persona.CertificacionEntrenadorService;
 import com.varcal.cheermanager.Service.Persona.HorasEntrenadorService;
 import com.varcal.cheermanager.Utils.AuthenticatedUserUtil;
@@ -84,7 +85,7 @@ public class EntrenadorGestionController {
         try {
             return ResponseEntity.status(ok).body(accion.get());
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("message", ErrorPublico.de(e)));
         }
     }
 }

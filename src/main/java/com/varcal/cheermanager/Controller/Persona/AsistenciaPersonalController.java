@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.Service.Persona.AsistenciaPersonalService;
 import com.varcal.cheermanager.Utils.RequiresPermission;
 
@@ -76,6 +77,6 @@ public class AsistenciaPersonalController {
     private ResponseEntity<?> error(RuntimeException e) {
         HttpStatus s = e instanceof IllegalArgumentException ? HttpStatus.BAD_REQUEST
                 : e instanceof IllegalStateException ? HttpStatus.CONFLICT : HttpStatus.NOT_FOUND;
-        return ResponseEntity.status(s).body(Map.of("message", String.valueOf(e.getMessage())));
+        return ResponseEntity.status(s).body(Map.of("message", ErrorPublico.de(e)));
     }
 }

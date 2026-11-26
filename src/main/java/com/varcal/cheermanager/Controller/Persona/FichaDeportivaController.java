@@ -5,6 +5,7 @@ import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.Service.Persona.FichaDeportivaService;
 import com.varcal.cheermanager.Utils.RequiresPermission;
 
@@ -32,7 +33,7 @@ public class FichaDeportivaController {
         try {
             return ResponseEntity.ok(servicio.obtener(id));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("message", ErrorPublico.de(e)));
         }
     }
 
@@ -42,7 +43,7 @@ public class FichaDeportivaController {
         try {
             return ResponseEntity.ok(servicio.guardar(id, solicitud));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("message", ErrorPublico.de(e)));
         }
     }
 }

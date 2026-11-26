@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.Service.Persona.CopiaDatosService;
 import com.varcal.cheermanager.Utils.RequiresPermission;
 
@@ -28,7 +29,7 @@ public class CopiaDatosController {
         try {
             return ResponseEntity.ok(service.copia(personaId));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(404).body(Map.of("message", e.getMessage()));
+            return ResponseEntity.status(404).body(Map.of("message", ErrorPublico.de(e)));
         }
     }
 }

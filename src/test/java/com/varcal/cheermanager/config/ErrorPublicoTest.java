@@ -55,6 +55,16 @@ class ErrorPublicoTest {
     }
 
     @Test
+    void entityNotFoundDeNegocioEsPublicaPeroLaCreadaEnInfraestructuraSeOculta() {
+        var propia = ErroresDeServicioFixture.entidadNoEncontrada("Plan no encontrado");
+        assertTrue(ErrorPublico.esPublico(propia));
+        assertEquals("Plan no encontrado", ErrorPublico.de(propia));
+        var ajena = ErroresDeInfraFixture.entidadNoEncontrada("Unable to find com.varcal.cheermanager.Models.X with id 5");
+        assertFalse(ErrorPublico.esPublico(ajena));
+        assertEquals(ErrorPublico.GENERICO, ErrorPublico.de(ajena));
+    }
+
+    @Test
     void claseDeExcepcionPropiaEsPublicaVengaDeDondeVenga() {
         assertTrue(ErrorPublico.esPublico(new ErroresDeServicioFixture.ErrorPropio("Asignacion invalida")));
         assertTrue(ErrorPublico.esPublico(new ErroresDeInfraFixture.ErrorPropioDeInfra("Demasiados intentos")));
