@@ -1,6 +1,7 @@
 package com.varcal.cheermanager.Controller.Org_dep;
 
 import jakarta.validation.Valid;
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.Utils.RequiresPermission;
 import com.varcal.cheermanager.Utils.SinPermisoEspecifico;
 
@@ -40,7 +41,7 @@ public class TipoGrupoController {
         try {
             return ResponseEntity.ok(tipoGrupoService.obtenerPorId(id));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         }
     }
 
@@ -56,7 +57,7 @@ public class TipoGrupoController {
         try {
             return ResponseEntity.ok(tipoGrupoService.actualizar(id, tipoGrupo));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         }
     }
 
@@ -67,7 +68,7 @@ public class TipoGrupoController {
             tipoGrupoService.eliminar(id);
             return ResponseEntity.noContent().build();
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         }
     }
 }

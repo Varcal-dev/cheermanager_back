@@ -1,6 +1,7 @@
 package com.varcal.cheermanager.Controller.Historiales;
 
 import jakarta.validation.Valid;
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.DTO.Persona.HistorialMedicoDTO;
 import com.varcal.cheermanager.Service.Historiales.HistorialMedicoService;
 import com.varcal.cheermanager.Utils.RequiresPermission;
@@ -43,9 +44,9 @@ public class HistorialMedicoController {
             HistorialMedicoDTO creado = historialMedicoService.crearHistorialMedico(dto);
             return ResponseEntity.status(201).body(creado);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al crear historial médico: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al crear historial médico: " + ErrorPublico.de(e));
         }
     }
 
@@ -57,7 +58,7 @@ public class HistorialMedicoController {
             Page<HistorialMedicoDTO> page = historialMedicoService.obtenerHistorialMedicoPorPersona(personaId, pageable);
             return ResponseEntity.ok(page);
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al obtener historial médico: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al obtener historial médico: " + ErrorPublico.de(e));
         }
     }
 
@@ -76,9 +77,9 @@ public class HistorialMedicoController {
             HistorialMedicoDTO result = historialMedicoService.actualizarHistorialMedico(id, dto);
             return ResponseEntity.ok(result);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al actualizar historial médico: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al actualizar historial médico: " + ErrorPublico.de(e));
         }
     }
 
@@ -89,9 +90,9 @@ public class HistorialMedicoController {
             historialMedicoService.eliminarHistorialMedico(id);
             return ResponseEntity.ok("Historial médico eliminado exitosamente");
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al eliminar historial médico: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al eliminar historial médico: " + ErrorPublico.de(e));
         }
     }
 

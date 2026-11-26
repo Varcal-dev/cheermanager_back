@@ -1,6 +1,7 @@
 package com.varcal.cheermanager.Controller.Org_dep;
 
 import jakarta.validation.Valid;
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.Utils.RequiresPermission;
 
 import java.time.LocalDate;
@@ -187,7 +188,7 @@ public class GrupoEntrenamientoController {
             CandidatosGrupoResponseDTO candidatos = grupoEntrenamientoService.obtenerCandidatosGrupo(grupoId);
             return ResponseEntity.ok(candidatos);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         }
     }
 
@@ -201,7 +202,7 @@ public class GrupoEntrenamientoController {
                     request.getObservaciones());
             return ResponseEntity.ok(resultado);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(ErrorPublico.de(e));
         }
     }
 
@@ -215,7 +216,7 @@ public class GrupoEntrenamientoController {
             String resultado = grupoEntrenamientoService.quitarDeportistaDeGrupo(grupoId, deportistaId);
             return ResponseEntity.ok(resultado);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(ErrorPublico.de(e));
         }
     }
 
@@ -229,7 +230,7 @@ public class GrupoEntrenamientoController {
             String respuesta = grupoEntrenamientoService.asignarEntrenadorAGrupo(dto);
             return ResponseEntity.ok(respuesta);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(ErrorPublico.de(e));
         }
     }
 
@@ -261,7 +262,7 @@ public class GrupoEntrenamientoController {
         try {
             return ResponseEntity.ok(grupoEntrenamientoService.actualizarAsignacionEntrenador(asignacionId, dto));
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(ErrorPublico.de(e));
         }
     }
 
@@ -275,7 +276,7 @@ public class GrupoEntrenamientoController {
             String resultado = grupoEntrenamientoService.finalizarAsignacionEntrenador(asignacionId);
             return ResponseEntity.ok(resultado);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(ErrorPublico.de(e));
         }
     }
 
