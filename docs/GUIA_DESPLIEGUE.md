@@ -27,6 +27,7 @@ Pon `CORS_ALLOWED_ORIGINS` con el dominio exacto del frontend.
 - **No publiques el puerto 8081**: debe seguir en `127.0.0.1`, de modo que solo el proxy llegue a la API.
 - `FORWARD_HEADERS_STRATEGY` **no** cambia la IP del cliente (solo esquema y host).
 - Si algún día corres más de una instancia de la API, el contador del límite de intentos no se comparte entre ellas.
+- **Caché de autorización (PERF-02).** Para no consultar la base de datos varias veces en cada petición, la API guarda 30 segundos (por club y usuario) si el usuario existe y qué permisos tiene (`security/AutorizacionCache`). Todo cambio de rol, de permisos o de estado del usuario (editar, desactivar, eliminar, anonimizar) invalida el caché y se nota **al instante en esa instancia**. Lo que no pasa por esos cambios (por ejemplo, editar datos directamente en la base de datos) tarda hasta 30 s. **Con más de una instancia de la API**, las demás se enteran de un cambio solo al vencer esos 30 s: hoy corres una sola; si escalas, tenlo presente. Reiniciar la API vacía el caché. Si añades código que escribe usuarios, roles o permisos, `InvalidacionAutorizacionArquitecturaTest` falla hasta que invalide el caché.
 - **Comprobación tras desplegar:** inicia sesión y mira la última fila de `log_accesos`: `ip_origen` debe ser **tu IP pública**, no `127.0.0.1` ni `172.x`. Los registros anteriores al cambio conservan la IP del proxy.
 
 ## Base de datos que ya existe (producción actual)

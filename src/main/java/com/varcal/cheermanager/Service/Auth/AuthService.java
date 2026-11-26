@@ -206,8 +206,9 @@ public class AuthService {
         }).orElse(new PasswordChangeResult(false, "user_not_found"));
     }
 
+    /** Se llama en CADA peticion protegida (PermissionInterceptor): usa el cache de autorizacion (PERF-02). */
     public boolean tienePermiso(int userId, String permisoRequerido) {
-        return usuarioService.obtenerPermisos(userId).contains(permisoRequerido);
+        return usuarioService.permisosVigentes(userId).map(p -> p.contains(permisoRequerido)).orElse(false);
     }
 
     public Set<String> getPermisosUsuario(int userId) {

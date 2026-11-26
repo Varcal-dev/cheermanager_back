@@ -46,6 +46,7 @@ import com.varcal.cheermanager.Service.Persona.GeneroService;
 import com.varcal.cheermanager.Service.Persona.PersonaService;
 import com.varcal.cheermanager.Utils.RequiresPermission;
 import com.varcal.cheermanager.repository.Auth.RolRepository;
+import com.varcal.cheermanager.security.AutorizacionCache;
 
 @RestController
 @RequestMapping("/api/usuario")
@@ -223,6 +224,7 @@ public class UserController {
             }
 
             Usuario usuarioActualizado = userRepository.save(usuario);
+            AutorizacionCache.olvidarUsuario(id);   // cambio de rol o de activo/inactivo: debe notarse YA
             return ResponseEntity.ok(new UsuarioDTO(usuarioActualizado)); // Devolver el usuario actualizado
         } catch (org.springframework.web.server.ResponseStatusException e) {
             return negado(e);
@@ -255,6 +257,7 @@ public class UserController {
             jerarquia.exigirPuedeGestionar(objetivo);
             jerarquia.exigirNoDejarSinAdministrador(objetivo, "eliminar");
             userRepository.deleteById(id.longValue());
+            AutorizacionCache.olvidarUsuario(id);
             return ResponseEntity.ok("Usuario eliminado exitosamente");
         } catch (org.springframework.web.server.ResponseStatusException e) {
             return negado(e);

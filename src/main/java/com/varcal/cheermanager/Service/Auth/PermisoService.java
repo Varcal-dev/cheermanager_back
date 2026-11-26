@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.varcal.cheermanager.Models.Auth.Permiso;
 import com.varcal.cheermanager.repository.Auth.PermisoRepository;
+import com.varcal.cheermanager.security.AutorizacionCache;
 
 @Service
 public class PermisoService {
@@ -23,11 +24,14 @@ public class PermisoService {
     }
 
     public Permiso guardar(Permiso permiso) {
-        return permisoRepository.save(permiso);
+        Permiso guardado = permisoRepository.save(permiso);
+        AutorizacionCache.olvidarTodo();   // el catalogo es global: afecta a los roles de todos los clubes
+        return guardado;
     }
 
     public void eliminar(Integer id) {
         permisoRepository.deleteById(id);
+        AutorizacionCache.olvidarTodo();
     }
 
 }

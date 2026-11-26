@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.varcal.cheermanager.Models.Auth.Rol;
 import com.varcal.cheermanager.Models.Auth.Usuario;
+import com.varcal.cheermanager.security.AutorizacionCache;
 import com.varcal.cheermanager.repository.Auth.RolRepository;
 import com.varcal.cheermanager.repository.Auth.UserRepository;
 
@@ -34,7 +35,9 @@ public class UsuarioService {
     }
 
     public Usuario crear(Usuario usuario) {
-        return userRepository.save(usuario);
+        Usuario guardado = userRepository.save(usuario);
+        AutorizacionCache.olvidarUsuario(guardado.getId());
+        return guardado;
     }
 
     public Usuario actualizar(Integer id, Usuario usuarioDetails) {
@@ -45,11 +48,14 @@ public class UsuarioService {
         usuario.setUsername(usuarioDetails.getUsername());
         usuario.setEmail(usuarioDetails.getEmail());
         usuario.setActivo(usuarioDetails.getActivo());
-        return userRepository.save(usuario);
+        Usuario guardado = userRepository.save(usuario);
+        AutorizacionCache.olvidarUsuario(id);
+        return guardado;
     }
 
     public void eliminar(Integer id) {
         userRepository.deleteById((long) id);
+        AutorizacionCache.olvidarUsuario(id);
     }
 
     /**
@@ -67,7 +73,9 @@ public class UsuarioService {
         }
 
         usuario.setRol(rol);
-        return userRepository.save(usuario);
+        Usuario guardado = userRepository.save(usuario);
+        AutorizacionCache.olvidarUsuario(usuarioId);
+        return guardado;
     }
 
     /**
@@ -85,16 +93,26 @@ public class UsuarioService {
                 .collect(Collectors.toSet());
 
         usuario.setRoles(roles);
-        return userRepository.save(usuario);
+        Usuario guardado = userRepository.save(usuario);
+        AutorizacionCache.olvidarUsuario(usuarioId);
+        return guardado;
     }
 
     /**
      * Obtener todos los permisos del usuario (desde rol único o múltiples roles)
      */
     public Set<String> obtenerPermisos(Integer usuarioId) {
+        return permisosSiExiste(usuarioId).orElse(Set.of());
+    }
+
+    /**
+     * Permisos del usuario, o vacio si NO existe o esta inactivo. Sin cache: es siempre lo que hay en la base de datos
+     * (login, perfil...). Para decidir el acceso en cada peticion se usa {@link #permisosVigentes(int)}.
+     */
+    public java.util.Optional<Set<String>> permisosSiExiste(Integer usuarioId) {
         Usuario usuario = userRepository.findById((long) usuarioId).orElse(null);
         if (usuario == null) {
-            return Set.of();
+            return java.util.Optional.empty();
         }
 
         Set<String> permisos = new java.util.HashSet<>();
@@ -117,7 +135,20 @@ public class UsuarioService {
             });
         }
 
-        return permisos;
+        return java.util.Optional.of(permisos);
+    }
+
+    /**
+     * Para decidir el acceso en CADA peticion (PERF-02): igual que {@link #permisosSiExiste} pero con un cache de
+     * {@link AutorizacionCache#TTL_MS} ms por club y usuario. Vacio = el usuario no existe o esta inactivo. Sin club en
+     * contexto no se usa el cache.
+     */
+    public java.util.Optional<Set<String>> permisosVigentes(int usuarioId) {
+        if (!com.varcal.cheermanager.tenant.TenantContext.isSet()) {
+            return permisosSiExiste(usuarioId);
+        }
+        return AutorizacionCache.permisos(com.varcal.cheermanager.tenant.TenantContext.get(), usuarioId,
+                () -> permisosSiExiste(usuarioId));
     }
 
     /**

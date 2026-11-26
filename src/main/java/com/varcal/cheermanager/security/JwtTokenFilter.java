@@ -18,7 +18,7 @@ import com.varcal.cheermanager.Models.Clubes.Club;
 import com.varcal.cheermanager.Models.Clubes.VigenciaSuscripcion;
 import com.varcal.cheermanager.Service.Clubes.SuscripcionService;
 import com.varcal.cheermanager.Service.Legal.LegalService;
-import com.varcal.cheermanager.repository.Auth.UserRepository;
+import com.varcal.cheermanager.Service.Auth.UsuarioService;
 import com.varcal.cheermanager.repository.Clubes.ClubRepository;
 import com.varcal.cheermanager.Service.Clubes.FuncionesService;
 import com.varcal.cheermanager.Service.Clubes.SuscripcionService;
@@ -62,19 +62,19 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final TokenBlacklistService tokenBlacklistService;
-    private final UserRepository userRepository;
+    private final UsuarioService usuarioService;
     private final ClubRepository clubRepository;
     private final LegalService legalService;
     private final FuncionesService funcionesService;
 
     public JwtTokenFilter(JwtUtil jwtUtil, TokenBlacklistService tokenBlacklistService,
-            UserRepository userRepository, ClubRepository clubRepository, LegalService legalService,
+            UsuarioService usuarioService, ClubRepository clubRepository, LegalService legalService,
             FuncionesService funcionesService) {
         this.legalService = legalService;
         this.funcionesService = funcionesService;
         this.jwtUtil = jwtUtil;
         this.tokenBlacklistService = tokenBlacklistService;
-        this.userRepository = userRepository;
+        this.usuarioService = usuarioService;
         this.clubRepository = clubRepository;
     }
 
@@ -153,7 +153,8 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         TenantContext.set(clubId);
         // Con el club ya fijado, la busqueda esta filtrada por club: un token con un clubId que no
         // corresponde al usuario simplemente no lo encuentra. (@SQLRestriction filtra inactivos.)
-        if (!userRepository.existsById(id)) {
+        // Existe y esta activo = hay permisos vigentes (cache de 30 s; el interceptor reutiliza este mismo dato).
+        if (usuarioService.permisosVigentes(id.intValue()).isEmpty()) {
             TenantContext.clear();
             return false;
         }

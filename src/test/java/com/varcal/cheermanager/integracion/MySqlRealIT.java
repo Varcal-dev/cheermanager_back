@@ -30,6 +30,13 @@ import com.varcal.cheermanager.DTO.Financiero.FacturaResponseDTO;
 import com.varcal.cheermanager.DTO.Financiero.PagoDTO;
 import com.varcal.cheermanager.DTO.Financiero.PagoResponseDTO;
 import com.varcal.cheermanager.Service.Financiero.FacturaService;
+import com.varcal.cheermanager.Service.Auth.AuthService;
+import com.varcal.cheermanager.Service.Auth.UsuarioService;
+import com.varcal.cheermanager.Models.Auth.Permiso;
+import com.varcal.cheermanager.Models.Auth.Rol;
+import com.varcal.cheermanager.repository.Auth.PermisoRepository;
+import com.varcal.cheermanager.repository.Auth.RolRepository;
+import com.varcal.cheermanager.security.AutorizacionCache;
 import com.varcal.cheermanager.Service.Persona.PersonaService;
 import com.varcal.cheermanager.DTO.Persona.DeportistaBusquedaDTO;
 import com.varcal.cheermanager.DTO.Persona.DeportistaOpcionDTO;
@@ -89,6 +96,7 @@ class MySqlRealIT {
         r.add("spring.datasource.username", MYSQL::getUsername);
         r.add("spring.datasource.password", MYSQL::getPassword);
         r.add("spring.datasource.driver-class-name", () -> "com.mysql.cj.jdbc.Driver");
+        r.add("spring.jpa.properties.hibernate.generate_statistics", () -> "true");   // PERF-02: contar sentencias SQL
         r.add("spring.jpa.hibernate.ddl-auto", () -> "validate");
         r.add("spring.flyway.enabled", () -> "true");
         r.add("jwt.secret", () -> "dGVzdC1zZWNyZXRvLXBhcmEtcHJ1ZWJhcy1kZS1jaGVlcm1hbmFnZXItbWluaW1vLTMyLWJ5dGVzLW9rLW9r");
@@ -98,6 +106,11 @@ class MySqlRealIT {
     @Autowired PagoService pagoService;
     @Autowired FacturaService facturaService;
     @Autowired PersonaService personaService;
+    @Autowired UsuarioService usuarioService;
+    @Autowired AuthService authService;
+    @Autowired RolRepository rolRepository;
+    @Autowired PermisoRepository permisoRepository;
+    @Autowired jakarta.persistence.EntityManagerFactory entityManagerFactory;
     @Autowired DeportistaRepository deportistaRepository;
     @Autowired InscripcionService inscripcionService;
     @Autowired FacturaRepository facturaRepository;
@@ -677,5 +690,97 @@ class MySqlRealIT {
         d.setGeneroId(generoId);
         d.setEstadoId(estadoId);
         return d;
+    }
+
+    // ---------------------------------------------------------------------------------------------------------
+    // PERF-02: cache de autorizacion. Se MIDE cuantas sentencias SQL cuesta autorizar, y se comprueba que los cambios
+    // que afectan al acceso se notan al instante (sin esperar los 30 s del TTL).
+    // ---------------------------------------------------------------------------------------------------------
+
+    private Integer crearRolDelClub2(String nombre, Permiso conPermiso) {
+        return TenantContext.runAs(2, () -> {
+            Rol r = new Rol();
+            r.setNombre(nombre);
+            r.setPermisos(conPermiso == null ? new java.util.HashSet<>() : new java.util.HashSet<>(java.util.Set.of(conPermiso)));
+            return rolRepository.save(r).getId();
+        });
+    }
+
+    private Integer crearUsuarioDelClub2(Integer rolId) {
+        final String sufijo = Long.toString(System.nanoTime(), 36);
+        return TenantContext.runAs(2, () -> {
+            Usuario u = new Usuario();
+            u.setUsername("it-aut-" + sufijo);
+            u.setEmail("it-aut-" + sufijo + "@example.com");
+            u.setPasswordHash("no-se-usa");
+            u.setRol(rolRepository.findById(rolId).orElseThrow());
+            return usuarioService.crear(u).getId();
+        });
+    }
+
+    @Test
+    void autorizarUnaPeticionRepetidaNoVuelveALaBaseDeDatos() {
+        final String sufijo = Long.toString(System.nanoTime(), 36);
+        final Permiso permiso = permisoRepository.findAll().get(0);
+        final Integer rolId = crearRolDelClub2("IT-rol-" + sufijo, permiso);
+        final Integer usuarioId = crearUsuarioDelClub2(rolId);
+        org.hibernate.stat.Statistics st = entityManagerFactory.unwrap(org.hibernate.SessionFactory.class).getStatistics();
+        AutorizacionCache.olvidarTodo();
+
+        long a0 = st.getPrepareStatementCount();
+        boolean primera = TenantContext.runAs(2, () -> authService.tienePermiso(usuarioId, permiso.getNombre()));
+        long a1 = st.getPrepareStatementCount();
+        boolean segunda = TenantContext.runAs(2, () -> authService.tienePermiso(usuarioId, permiso.getNombre()));
+        boolean existe = TenantContext.runAs(2, () -> usuarioService.permisosVigentes(usuarioId).isPresent());   // lo que hace el filtro
+        long a2 = st.getPrepareStatementCount();
+
+        assertTrue(primera && segunda && existe);
+        System.out.println("PERF-02: autorizar la 1.a vez = " + (a1 - a0) + " sentencias SQL; las siguientes = " + (a2 - a1));
+        assertTrue(a1 - a0 >= 1, "la primera vez debe consultar la base de datos");
+        assertEquals(0, a2 - a1, "con el cache, repetir la autorizacion NO debe tocar la base de datos");
+    }
+
+    @Test
+    void cambiarElRolDeUnUsuarioSeNotaAlInstante() {
+        final String sufijo = Long.toString(System.nanoTime(), 36);
+        final Permiso permiso = permisoRepository.findAll().get(0);
+        final Integer conPermiso = crearRolDelClub2("IT-con-" + sufijo, permiso);
+        final Integer sinPermiso = crearRolDelClub2("IT-sin-" + sufijo, null);
+        final Integer usuarioId = crearUsuarioDelClub2(conPermiso);
+
+        assertTrue(TenantContext.runAs(2, () -> authService.tienePermiso(usuarioId, permiso.getNombre())));   // queda en cache
+
+        TenantContext.runAs(2, () -> usuarioService.asignarRol(usuarioId, sinPermiso));
+
+        assertFalse(TenantContext.runAs(2, () -> authService.tienePermiso(usuarioId, permiso.getNombre())),
+                "quitar el permiso debe notarse ya, no a los 30 s");
+        TenantContext.runAs(2, () -> usuarioService.asignarRol(usuarioId, conPermiso));
+        assertTrue(TenantContext.runAs(2, () -> authService.tienePermiso(usuarioId, permiso.getNombre())));
+    }
+
+    @Test
+    void eliminarUnUsuarioLoDejaSinAccesoAlInstante() {
+        final String sufijo = Long.toString(System.nanoTime(), 36);
+        final Permiso permiso = permisoRepository.findAll().get(0);
+        final Integer usuarioId = crearUsuarioDelClub2(crearRolDelClub2("IT-del-" + sufijo, permiso));
+
+        assertTrue(TenantContext.runAs(2, () -> usuarioService.permisosVigentes(usuarioId).isPresent()));   // queda en cache
+
+        TenantContext.runAs(2, () -> usuarioService.eliminar(usuarioId));
+
+        assertTrue(TenantContext.runAs(2, () -> usuarioService.permisosVigentes(usuarioId).isEmpty()),
+                "un usuario eliminado no debe seguir autenticandose por el cache");
+        assertFalse(TenantContext.runAs(2, () -> authService.tienePermiso(usuarioId, permiso.getNombre())));
+    }
+
+    @Test
+    void elCacheNoMezclaClubesConElMismoIdDeUsuario() {
+        final String sufijo = Long.toString(System.nanoTime(), 36);
+        final Permiso permiso = permisoRepository.findAll().get(0);
+        final Integer usuarioId = crearUsuarioDelClub2(crearRolDelClub2("IT-club-" + sufijo, permiso));
+
+        assertTrue(TenantContext.runAs(2, () -> usuarioService.permisosVigentes(usuarioId).isPresent()));
+        // Desde el club 1 ese usuario NO existe (filtro de club de Hibernate): el cache del club 2 no debe responder por el.
+        assertTrue(TenantContext.runAs(1, () -> usuarioService.permisosVigentes(usuarioId).isEmpty()));
     }
 }

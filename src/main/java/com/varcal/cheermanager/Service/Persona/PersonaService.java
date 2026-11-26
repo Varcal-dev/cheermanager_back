@@ -48,6 +48,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import com.varcal.cheermanager.security.AutorizacionCache;
 
 @Service
 public class PersonaService {
@@ -879,6 +880,7 @@ public class PersonaService {
         userRepository.findByPersona(deportista.getPersona()).ifPresent(usuario -> {
             usuario.setActivo(false);
             userRepository.save(usuario);
+            AutorizacionCache.olvidarUsuario(usuario.getId());
         });
     }
 
@@ -1055,6 +1057,7 @@ public class PersonaService {
         userRepository.findByPersona(entrenador.getPersona()).ifPresent(usuario -> {
             usuario.setActivo(false);
             userRepository.save(usuario);
+            AutorizacionCache.olvidarUsuario(usuario.getId());
         });
     }
 

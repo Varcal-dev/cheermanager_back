@@ -27,6 +27,7 @@ import com.varcal.cheermanager.repository.Personas.AcudienteRepository;
 import com.varcal.cheermanager.repository.Personas.DeportistaAcudienteRepository;
 import com.varcal.cheermanager.repository.Personas.DeportistaRepository;
 import com.varcal.cheermanager.repository.Personas.PersonaRepository;
+import com.varcal.cheermanager.security.AutorizacionCache;
 
 /**
  * L7: supresion de datos personales de un titular SIN romper la contabilidad (Ley 1581, art. 8 literal e).
@@ -139,6 +140,7 @@ public class AnonimizacionService {
         boolean acceso = userRepository.findByPersona(p).map(u -> {
             desactivar(u);
             userRepository.save(u);
+            AutorizacionCache.olvidarUsuario(u.getId());
             return true;
         }).orElse(false);
 
@@ -160,6 +162,7 @@ public class AnonimizacionService {
                     userRepository.findById(a.getUsuarioId().longValue()).ifPresent(u -> {
                         desactivar(u);
                         userRepository.save(u);
+                        AutorizacionCache.olvidarUsuario(u.getId());
                     });
                 }
                 acudientes++;

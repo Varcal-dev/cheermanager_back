@@ -23,6 +23,7 @@ import com.varcal.cheermanager.Models.Funcionalidad.Auditoria;
 import com.varcal.cheermanager.Service.Funcionalidad.AuditoriaService;
 import com.varcal.cheermanager.repository.Auth.PermisoRepository;
 import com.varcal.cheermanager.repository.Auth.RolRepository;
+import com.varcal.cheermanager.security.AutorizacionCache;
 
 @Service
 public class RolService {
@@ -67,7 +68,9 @@ public class RolService {
         // assignPermissionsToRol, que valida; asi no se cuela un permiso de plataforma por el body).
         rol.setId(null);
         rol.setPermisos(new HashSet<>());
-        return rolRepository.save(rol);
+        Rol guardado = rolRepository.save(rol);
+        AutorizacionCache.olvidarRolesDelClubActual();
+        return guardado;
     }
 
     public Rol modificarRol(Integer id, Rol rolDetails) {
@@ -86,7 +89,9 @@ public class RolService {
                     // el front no tenía forma de guardar cambios en la
                     // descripción aunque el formulario la mostrara.
                     rol.setDescripcion(rolDetails.getDescripcion());
-                    return rolRepository.save(rol);
+                    Rol guardado = rolRepository.save(rol);
+                    AutorizacionCache.olvidarRolesDelClubActual();
+                    return guardado;
                 })
                 .orElse(null);
     }
@@ -107,6 +112,7 @@ public class RolService {
                     "El rol tiene usuarios asignados: reasignalos a otro rol antes de eliminarlo.");
         }
         rolRepository.deleteById(id);
+        AutorizacionCache.olvidarRolesDelClubActual();
     }
 
     public Rol assignPermissionsToRol(Integer rolId, List<Integer> permisoIds) {
@@ -144,6 +150,7 @@ public class RolService {
         rol.setPermisos(new HashSet<>(permisos));
 
         Rol guardado = rolRepository.save(rol);
+        AutorizacionCache.olvidarRolesDelClubActual();   // quitar un permiso debe notarse YA, no a los 30 s
         registrarCambioDePermisos(guardado, antes, nombresDePermisos(guardado.getPermisos()));
         return guardado;
     }
