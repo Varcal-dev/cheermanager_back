@@ -2,6 +2,7 @@ package com.varcal.cheermanager.Controller.Persona;
 
 import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.DTO.Comunes.Crear;
 import java.util.List;
 
@@ -34,7 +35,7 @@ public class EntrenadoresController {
             Entrenador entrenador = personaService.registrarEntrenador(entrenadorDTO);
             return ResponseEntity.ok(entrenador);
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al registrar el entrenador: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al registrar el entrenador: " + ErrorPublico.de(e));
         }
     }
 
@@ -45,9 +46,9 @@ public class EntrenadoresController {
             Entrenador entrenador = personaService.modificarEntrenador(id, entrenadorDTO);
             return ResponseEntity.ok(entrenador); // Devolver el entrenador actualizado
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al modificar el entrenador: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al modificar el entrenador: " + ErrorPublico.de(e));
         }
     }
 
@@ -58,7 +59,7 @@ public class EntrenadoresController {
             List<Entrenador> entrenadores = personaService.listarEntrenadores();
             return ResponseEntity.ok(entrenadores); // Devolver la lista de entrenadores
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al listar los entrenadores: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al listar los entrenadores: " + ErrorPublico.de(e));
         }
     }
 
@@ -70,9 +71,9 @@ public class EntrenadoresController {
             personaService.eliminarEntrenador(id);
             return ResponseEntity.ok("Entrenador eliminado exitosamente");
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al eliminar el entrenador: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al eliminar el entrenador: " + ErrorPublico.de(e));
         }
     }*/
 }

@@ -37,6 +37,10 @@ public final class ErroresDeServicioFixture {
         return new RuntimeException();
     }
 
+    public static jakarta.persistence.EntityNotFoundException entidadNoEncontrada(String mensaje) {
+        return new jakarta.persistence.EntityNotFoundException(mensaje);
+    }
+
     public static NumberFormatException nfe(String mensaje) {
         return new NumberFormatException(mensaje);
     }

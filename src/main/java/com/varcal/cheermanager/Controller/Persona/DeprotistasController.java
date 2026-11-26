@@ -2,6 +2,7 @@ package com.varcal.cheermanager.Controller.Persona;
 
 import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.DTO.Comunes.Crear;
 import java.util.List;
 import java.util.Optional;
@@ -71,7 +72,7 @@ public class DeprotistasController {
             return ResponseEntity.ok(deportista);
         } catch (RuntimeException e) {
             // Validaciones de negocio (documento repetido, nivel/convenio que no existen en este club...)
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(ErrorPublico.de(e));
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error al registrar el deportista");
         }
@@ -84,9 +85,9 @@ public class DeprotistasController {
             Deportista deportista = personaService.modificarDeportista(id, deportistaDTO);
             return ResponseEntity.ok(deportista); // Devolver el deportista actualizado
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al modificar el deportista: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al modificar el deportista: " + ErrorPublico.de(e));
         }
     }
 
@@ -97,9 +98,9 @@ public class DeprotistasController {
             DeportistaPerfilCompletoDTO perfil = personaService.obtenerPerfilCompleto(id);
             return ResponseEntity.ok(perfil);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al obtener el perfil completo: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al obtener el perfil completo: " + ErrorPublico.de(e));
         }
     }
 
@@ -137,7 +138,7 @@ public class DeprotistasController {
             return ResponseEntity.ok(deportistas);
         } catch (Exception e) {
             e.printStackTrace(); // 👈 agregar acá
-            return ResponseEntity.status(500).body("Error al listar los deportistas: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al listar los deportistas: " + ErrorPublico.de(e));
         }
     }
 
@@ -152,9 +153,9 @@ public class DeprotistasController {
         try {
             return ResponseEntity.ok(personaService.reactivarDeportista(id, req == null ? null : req.motivo()));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(409).body(e.getMessage());
+            return ResponseEntity.status(409).body(ErrorPublico.de(e));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al reactivar el deportista: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al reactivar el deportista: " + ErrorPublico.de(e));
         }
     }
 
@@ -165,9 +166,9 @@ public class DeprotistasController {
             personaService.eliminarDeportista(id);
             return ResponseEntity.ok("Deportista eliminado exitosamente");
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al eliminar el deportista: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al eliminar el deportista: " + ErrorPublico.de(e));
         }
     }
 
@@ -199,9 +200,9 @@ public class DeprotistasController {
             personaService.vincularDeportistaConUsuario(id, dto.getUsuarioId());
             return ResponseEntity.ok("Deportista vinculado al usuario exitosamente");
         } catch (RuntimeException e) {
-            return ResponseEntity.status(400).body(e.getMessage());
+            return ResponseEntity.status(400).body(ErrorPublico.de(e));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al vincular deportista con usuario: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al vincular deportista con usuario: " + ErrorPublico.de(e));
         }
     }
 
@@ -212,9 +213,9 @@ public class DeprotistasController {
             personaService.desvinculcarDeportistaDeUsuario(id);
             return ResponseEntity.ok("Deportista desvinculado del usuario exitosamente");
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al desvinculcar deportista: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al desvinculcar deportista: " + ErrorPublico.de(e));
         }
     }
 
@@ -225,9 +226,9 @@ public class DeprotistasController {
             Usuario usuario = personaService.obtenerUsuarioDeDeportista(id);
             return ResponseEntity.ok(new com.varcal.cheermanager.DTO.Ath.UsuarioDTO(usuario));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al obtener usuario vinculado: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al obtener usuario vinculado: " + ErrorPublico.de(e));
         }
     }
 
@@ -238,7 +239,7 @@ public class DeprotistasController {
             ValidarDocumentoDTO resultado = personaService.validarDocumentoUnico(numeroDocumento);
             return ResponseEntity.ok(resultado);
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al validar documento: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al validar documento: " + ErrorPublico.de(e));
         }
     }
 
@@ -249,9 +250,9 @@ public class DeprotistasController {
             List<HistorialDeportistaEstadoDTO> historial = personaService.obtenerHistorialEstadoDeportista(id);
             return ResponseEntity.ok(historial);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al obtener historial de estado: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al obtener historial de estado: " + ErrorPublico.de(e));
         }
     }
 
@@ -262,7 +263,7 @@ public class DeprotistasController {
             List<HistorialDeportistaEstadoDTO> historial = personaService.obtenerHistorialEstadoGlobal();
             return ResponseEntity.ok(historial);
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al obtener historial global de estado: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al obtener historial global de estado: " + ErrorPublico.de(e));
         }
     }
 
@@ -279,7 +280,7 @@ public class DeprotistasController {
                 return ResponseEntity.status(400).body(resultado);
             }
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al guardar la foto: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al guardar la foto: " + ErrorPublico.de(e));
         }
     }
 
@@ -292,9 +293,9 @@ public class DeprotistasController {
                     .contentType(MediaType.IMAGE_JPEG)
                     .body(imagen);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al obtener la foto: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al obtener la foto: " + ErrorPublico.de(e));
         }
     }
 
@@ -305,9 +306,9 @@ public class DeprotistasController {
             personaService.eliminarFotoDeportista(id);
             return ResponseEntity.ok("Foto eliminada exitosamente");
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al eliminar la foto: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al eliminar la foto: " + ErrorPublico.de(e));
         }
     }
 
@@ -319,9 +320,9 @@ public class DeprotistasController {
             HistorialMedicoDTO result = historialMedicoService.crearHistorialMedicoDeDeportista(id, dto);
             return ResponseEntity.ok(result);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(400).body(e.getMessage());
+            return ResponseEntity.status(400).body(ErrorPublico.de(e));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al crear historial médico: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al crear historial médico: " + ErrorPublico.de(e));
         }
     }
 
@@ -335,9 +336,9 @@ public class DeprotistasController {
             Page<HistorialMedicoDTO> result = historialMedicoService.obtenerHistorialMedicoPorDeportista(id, pageable);
             return ResponseEntity.ok(result);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al obtener historial médico: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al obtener historial médico: " + ErrorPublico.de(e));
         }
     }
 
@@ -349,9 +350,9 @@ public class DeprotistasController {
                     .obtenerGruposElegiblesParaDeportista(id);
             return ResponseEntity.ok(resultado);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al obtener grupos elegibles: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al obtener grupos elegibles: " + ErrorPublico.de(e));
         }
     }
 

@@ -1,5 +1,10 @@
 package com.varcal.cheermanager.config;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import jakarta.persistence.EntityNotFoundException;
+
 /**
  * SEC-03: decide si el mensaje de una excepcion se puede mostrar al usuario o hay que ocultarlo.
  *
@@ -11,8 +16,10 @@ package com.varcal.cheermanager.config;
  * <p>Un mensaje es publico solo si lo escribimos nosotros:
  * <ul>
  *   <li>la clase de la excepcion es nuestra ({@code com.varcal.cheermanager.*}); o</li>
- *   <li>es exactamente IllegalArgumentException, IllegalStateException o RuntimeException (no una subclase
- *       como NumberFormatException) y se creo en la capa de negocio: el primer frame de la pila, que es el
+ *   <li>es exactamente IllegalArgumentException, IllegalStateException, RuntimeException o
+ *       jakarta.persistence.EntityNotFoundException (no una subclase como NumberFormatException; las de
+ *       Hibernate llevan "Unable to find com.varcal...Entity" pero se crean en org.hibernate, asi que se ocultan)
+ *       y se creo en la capa de negocio: el primer frame de la pila, que es el
  *       codigo que hizo {@code new}, esta en {@code Service}, {@code Controller}, {@code DTO} o
  *       {@code Models}. Un {@code Integer.parseInt} o un {@code Enum.valueOf} fallan dentro de
  *       {@code java.lang}, asi que se ocultan; tampoco se muestran las de {@code Tenant}, {@code security}
@@ -22,6 +29,8 @@ package com.varcal.cheermanager.config;
  * {@code causa.toString()}. Ante la duda, se oculta.
  */
 public final class ErrorPublico {
+
+    private static final Logger log = LoggerFactory.getLogger(ErrorPublico.class);
 
     /** Texto que se devuelve cuando el mensaje real no se puede mostrar. */
     public static final String GENERICO = "Error interno del servidor";
@@ -43,7 +52,7 @@ public final class ErrorPublico {
         Class<?> tipo = e.getClass();
         if (tipo.getName().startsWith(BASE)) return true;
         if (tipo != IllegalArgumentException.class && tipo != IllegalStateException.class
-                && tipo != RuntimeException.class) {
+                && tipo != RuntimeException.class && tipo != EntityNotFoundException.class) {
             return false;
         }
         StackTraceElement[] pila = e.getStackTrace();
@@ -55,8 +64,14 @@ public final class ErrorPublico {
         return false;
     }
 
-    /** El mensaje de la excepcion si es publico; si no, {@link #GENERICO}. Nunca devuelve null. */
+    /**
+     * El mensaje de la excepcion si es publico; si no, {@link #GENERICO}. Nunca devuelve null. Es lo que usan los
+     * controladores en sus {@code catch}: como ahi nadie mas registra el error, lo que se oculta al cliente se deja
+     * en el log (con la pila) para poder diagnosticarlo.
+     */
     public static String de(Throwable e) {
-        return esPublico(e) ? e.getMessage() : GENERICO;
+        if (esPublico(e)) return e.getMessage();
+        if (e != null) log.error("Detalle de un error que no se muestra al cliente: {}", e.toString(), e);
+        return GENERICO;
     }
 }

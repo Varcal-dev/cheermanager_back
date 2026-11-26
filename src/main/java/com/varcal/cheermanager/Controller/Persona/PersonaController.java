@@ -1,5 +1,6 @@
 package com.varcal.cheermanager.Controller.Persona;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.Utils.SinPermisoEspecifico;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +35,7 @@ public class PersonaController {
             Persona persona = personaService.registrarPersona(personaDTO);
             return ResponseEntity.ok(persona); // Devolver la persona registrada
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al registrar la persona: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al registrar la persona: " + ErrorPublico.de(e));
         }
     }
 
@@ -45,9 +46,9 @@ public class PersonaController {
             Persona persona = personaService.modificarPersona(id, personaDTO);
             return ResponseEntity.ok(persona); // Devolver la persona actualizada
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al modificar la persona: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al modificar la persona: " + ErrorPublico.de(e));
         }
     }
 
@@ -58,7 +59,7 @@ public class PersonaController {
             List<Persona> personas = personaService.listarPersonas();
             return ResponseEntity.ok(personas); // Devolver la lista de personas
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al listar las personas: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al listar las personas: " + ErrorPublico.de(e));
         }
     }
 
@@ -76,9 +77,9 @@ public class PersonaController {
             personaService.eliminarPersona(id);
             return ResponseEntity.ok("Persona eliminada exitosamente");
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al eliminar la persona: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al eliminar la persona: " + ErrorPublico.de(e));
         }
     }
 

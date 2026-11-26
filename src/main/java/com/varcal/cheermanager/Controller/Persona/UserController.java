@@ -2,6 +2,7 @@ package com.varcal.cheermanager.Controller.Persona;
 
 import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.DTO.Comunes.Crear;
 import com.varcal.cheermanager.tenant.ReferenciasClub;
 import com.varcal.cheermanager.tenant.TenantLookupRepository;
@@ -131,7 +132,7 @@ public class UserController {
         } catch (org.springframework.web.server.ResponseStatusException e) {
             return negado(e);
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al registrar el usuario: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al registrar el usuario: " + ErrorPublico.de(e));
         }
     }
 
@@ -143,7 +144,7 @@ public class UserController {
                     .orElseThrow(() -> new RuntimeException("Usuario no encontrado con el ID: " + id));
             return ResponseEntity.ok(new UsuarioDTO(usuario)); // Mapear al DTO
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al obtener el usuario: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al obtener el usuario: " + ErrorPublico.de(e));
         }
     }
 
@@ -163,7 +164,7 @@ public class UserController {
                     .collect(Collectors.toList());
             return ResponseEntity.ok(usuarios);
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al listar los usuarios: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al listar los usuarios: " + ErrorPublico.de(e));
         }
     }
 
@@ -226,7 +227,7 @@ public class UserController {
         } catch (org.springframework.web.server.ResponseStatusException e) {
             return negado(e);
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al actualizar el usuario: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al actualizar el usuario: " + ErrorPublico.de(e));
         }
     }
 
@@ -258,7 +259,7 @@ public class UserController {
         } catch (org.springframework.web.server.ResponseStatusException e) {
             return negado(e);
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al eliminar el usuario: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al eliminar el usuario: " + ErrorPublico.de(e));
         }
     }
 
@@ -276,7 +277,7 @@ public class UserController {
             Set<String> permisos = authService.getPermisosUsuario(userId);
             return ResponseEntity.ok(permisos);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+            return ResponseEntity.status(404).body(ErrorPublico.de(e));
         }
     }
 
@@ -346,7 +347,7 @@ public class UserController {
 
             return ResponseEntity.ok(new UsuarioDTO(usuarioActualizado));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("success", false, "message", "Error al actualizar el perfil: " + e.getMessage()));
+            return ResponseEntity.status(500).body(Map.of("success", false, "message", "Error al actualizar el perfil: " + ErrorPublico.de(e)));
         }
     }
 
@@ -410,7 +411,7 @@ public class UserController {
         } catch (org.springframework.web.server.ResponseStatusException e) {
             return negado(e);
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al asignar roles: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al asignar roles: " + ErrorPublico.de(e));
         }
     }
 
@@ -442,7 +443,7 @@ public class UserController {
             }
             return ResponseEntity.ok(roles);
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al obtener roles: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al obtener roles: " + ErrorPublico.de(e));
         }
     }
 
@@ -456,7 +457,7 @@ public class UserController {
             }
             return ResponseEntity.ok(permisos);
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al obtener permisos: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al obtener permisos: " + ErrorPublico.de(e));
         }
     }
 

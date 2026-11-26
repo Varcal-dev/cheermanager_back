@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.Service.Auth.UsuarioService;
 import com.varcal.cheermanager.Service.Perfil.PerfilCompetenciaSaludService;
 import com.varcal.cheermanager.Service.Perfil.PerfilDeportistaService;
@@ -42,7 +43,7 @@ public class PerfilDeportistaController {
             Set<String> permisos = usuarioService.obtenerPermisos(AuthenticatedUserUtil.getCurrentUserId().intValue());
             return ResponseEntity.ok(service.paraClub(id, permisos));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(404).body(Map.of("message", e.getMessage()));
+            return ResponseEntity.status(404).body(Map.of("message", ErrorPublico.de(e)));
         }
     }
 
@@ -53,7 +54,7 @@ public class PerfilDeportistaController {
         try {
             return ResponseEntity.ok(competenciaSalud.competencia(id));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(404).body(Map.of("message", e.getMessage()));
+            return ResponseEntity.status(404).body(Map.of("message", ErrorPublico.de(e)));
         }
     }
 
@@ -64,7 +65,7 @@ public class PerfilDeportistaController {
         try {
             return ResponseEntity.ok(competenciaSalud.salud(id, true));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(404).body(Map.of("message", e.getMessage()));
+            return ResponseEntity.status(404).body(Map.of("message", ErrorPublico.de(e)));
         }
     }
 }
