@@ -216,6 +216,47 @@ class AislamientoEntreClubesTest {
                 .contentType(MediaType.APPLICATION_JSON).content(cuerpo)).andExpect(status().isOk());
     }
 
+    /** TEN-02: lo mismo con el convenio (otro Integer suelto en Deportista): un club no puede usar el de otro. */
+    @Test
+    void deportistaNoPuedeUsarUnConvenioDeOtroClub() throws Exception {
+        String sfx = UUID.randomUUID().toString().substring(0, 6);
+        com.varcal.cheermanager.Models.Personas.EstadoPersona estado = estadoPersonaRepository.findAll().stream().findFirst()
+                .orElseGet(() -> {
+                    com.varcal.cheermanager.Models.Personas.EstadoPersona e = new com.varcal.cheermanager.Models.Personas.EstadoPersona();
+                    e.setEstado("Activo");
+                    return estadoPersonaRepository.save(e);
+                });
+        String superToken = login("root@plataforma.test", "ClaveSuperSegura1");
+        crearClub(superToken, "Club Zeta " + sfx, "z-" + sfx + "@zeta.test");
+        crearClub(superToken, "Club Eta " + sfx, "h-" + sfx + "@eta.test");
+        String tokenZ = login("z-" + sfx + "@zeta.test", PASS);
+        String tokenH = login("h-" + sfx + "@eta.test", PASS);
+
+        int descuentoZ = json.readTree(mvc.perform(post("/api/descuentos").header("Authorization", "Bearer " + tokenZ)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"nombre\":\"Empresa\",\"porcentaje\":10,\"fechaInicio\":\"2026-01-01\",\"activo\":true}"))
+                .andExpect(status().is2xxSuccessful()).andReturn().getResponse().getContentAsString()).get("id").asInt();
+        int convenioZ = json.readTree(mvc.perform(post("/api/convenios").header("Authorization", "Bearer " + tokenZ)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"nombreEmpresa\":\"Acme " + sfx + "\",\"descuentoId\":" + descuentoZ + "}"))
+                .andExpect(status().is2xxSuccessful()).andReturn().getResponse().getContentAsString()).get("id").asInt();
+
+        String cuerpo = "{\"nombre\":\"Luis\",\"apellidos\":\"Prueba\",\"numeroDocumento\":\"CNV" + sfx
+                + "\",\"estadoId\":" + estado.getId() + ",\"convenioId\":" + convenioZ + "}";
+
+        // H intenta usar el convenio de Z: rechazado y NO se guarda nada
+        MvcResult rechazado = mvc.perform(post("/api/deportistas").header("Authorization", "Bearer " + tokenH)
+                .contentType(MediaType.APPLICATION_JSON).content(cuerpo)).andReturn();
+        assertEquals(400, rechazado.getResponse().getStatus(), "debe rechazar un convenio de otro club");
+        MvcResult listado = mvc.perform(get("/api/deportistas").header("Authorization", "Bearer " + tokenH)).andReturn();
+        assertFalse(listado.getResponse().getContentAsString().contains("CNV" + sfx),
+                "no debe haber quedado ningun deportista a medias");
+
+        // Z si puede usar su propio convenio
+        mvc.perform(post("/api/deportistas").header("Authorization", "Bearer " + tokenZ)
+                .contentType(MediaType.APPLICATION_JSON).content(cuerpo)).andExpect(status().isOk());
+    }
+
     /** FASE 3: acudientes y temporadas son por club; solo una temporada activa; la inscripcion no cruza clubes. */
     @Test
     void acudientesYTemporadasSonPorClub() throws Exception {
