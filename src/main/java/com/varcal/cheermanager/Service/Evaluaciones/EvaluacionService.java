@@ -14,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.DTO.Evaluaciones.EvaluacionActualizarDTO;
 import com.varcal.cheermanager.DTO.Evaluaciones.EvaluacionDTO;
 import com.varcal.cheermanager.DTO.Evaluaciones.EvaluacionPorCriterioDTO;
@@ -92,7 +93,7 @@ public class EvaluacionService {
                 resultado.getRegistradas().add(toResponseDTO(
                         guardarNueva(deportista, criterio, dto.getFecha(), r.getPuntajeObtenido())));
             } catch (RuntimeException e) {
-                resultado.getErrores().put(r.getCriterioId(), e.getMessage());
+                resultado.getErrores().put(r.getCriterioId(), ErrorPublico.de(e));
             }
         }
         return resultado;
@@ -119,7 +120,7 @@ public class EvaluacionService {
                 resultado.getRegistradas().add(toResponseDTO(
                         guardarNueva(deportista, criterio, dto.getFecha(), r.getPuntajeObtenido())));
             } catch (RuntimeException e) {
-                resultado.getErrores().put(r.getDeportistaId(), e.getMessage());
+                resultado.getErrores().put(r.getDeportistaId(), ErrorPublico.de(e));
             }
         }
         return resultado;

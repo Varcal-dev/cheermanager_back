@@ -1,6 +1,7 @@
 
 package com.varcal.cheermanager.Service.Persona;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.Utils.ClaveTemporal;
 import com.varcal.cheermanager.tenant.ReferenciasClub;
 import com.varcal.cheermanager.tenant.TenantLookupRepository;
@@ -810,7 +811,7 @@ public class PersonaService {
         } catch (Exception e) {
             return new UploadFotoDTO(
                     false,
-                    "Error al guardar la foto: " + e.getMessage(),
+                    "Error al guardar la foto: " + ErrorPublico.de(e),
                     null,
                     null);
         }

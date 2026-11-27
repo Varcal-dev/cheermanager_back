@@ -16,6 +16,7 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.DTO.Financiero.ResumenGeneracionCobrosDTO;
 import com.varcal.cheermanager.DTO.Org_dep.DeportistaInscritoDTO;
 import com.varcal.cheermanager.DTO.Org_dep.DeportistaNoInscritoDTO;
@@ -236,7 +237,7 @@ public class InscripcionService {
                     resumen.setYaFacturadas(resumen.getYaFacturadas() + 1);
                 }
             } catch (Exception e) {
-                resumen.getErrores().add("Inscripción #" + inscripcion.getId() + ": " + e.getMessage());
+                resumen.getErrores().add("Inscripción #" + inscripcion.getId() + ": " + ErrorPublico.de(e));
             }
         }
 

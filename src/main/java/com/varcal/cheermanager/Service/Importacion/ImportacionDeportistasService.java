@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.DTO.Persona.DeportistaDTO;
 import com.varcal.cheermanager.Models.Financiero.Convenio;
 import com.varcal.cheermanager.Models.Org_dep.Nivel;
@@ -195,7 +196,7 @@ public class ImportacionDeportistasService {
                     nacimiento = ImportacionParseo.fecha(v.get("fecha_nacimiento"), hoy);
                     dto.setFechaNacimiento(nacimiento);
                 } catch (IllegalArgumentException e) {
-                    errores.add(e.getMessage());
+                    errores.add(ErrorPublico.de(e));
                 }
             }
 
@@ -252,10 +253,10 @@ public class ImportacionDeportistasService {
                             validas--;
                             conErrores++;
                             estadoFila = "ERROR";
-                            errores.add(e.getMessage() == null ? "No se pudo guardar la fila" : e.getMessage());
+                            errores.add(ErrorPublico.de(e, "No se pudo guardar la fila"));
                         } else {
                             avisos.add("El deportista se importo, pero no se pudo registrar al acudiente: "
-                                    + e.getMessage());
+                                    + ErrorPublico.de(e, "intentalo desde la ficha del deportista"));
                         }
                     }
                 }
@@ -383,7 +384,7 @@ public class ImportacionDeportistasService {
         try {
             destino.accept(ImportacionParseo.entero(txt, columna, min, max));
         } catch (IllegalArgumentException e) {
-            errores.add(e.getMessage());
+            errores.add(ErrorPublico.de(e));
         }
     }
 

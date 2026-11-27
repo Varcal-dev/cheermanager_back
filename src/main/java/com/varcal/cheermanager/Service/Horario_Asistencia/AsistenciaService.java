@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.DTO.Horario_Asistencia.AsistenciaDTO;
 import com.varcal.cheermanager.DTO.Horario_Asistencia.AsistenciaResponseDTO;
 import com.varcal.cheermanager.DTO.Horario_Asistencia.RegistroAsistenciaMasivoDTO;
@@ -101,7 +102,7 @@ public class AsistenciaService {
                 Asistencia guardada = asistenciaRepository.save(asistencia);
                 resultado.getRegistrados().add(toResponseDTO(guardada));
             } catch (RuntimeException e) {
-                resultado.getErrores().put(r.getDeportistaId(), e.getMessage());
+                resultado.getErrores().put(r.getDeportistaId(), ErrorPublico.de(e));
             }
         }
 

@@ -70,8 +70,16 @@ public final class ErrorPublico {
      * en el log (con la pila) para poder diagnosticarlo.
      */
     public static String de(Throwable e) {
+        return de(e, GENERICO);
+    }
+
+    /**
+     * Igual que {@link #de(Throwable)} pero con un texto propio cuando el mensaje no se puede mostrar, para los
+     * sitios donde "Error interno del servidor" dice menos que el contexto (p. ej. "No se pudo guardar la fila").
+     */
+    public static String de(Throwable e, String textoSiSeOculta) {
         if (esPublico(e)) return e.getMessage();
         if (e != null) log.error("Detalle de un error que no se muestra al cliente: {}", e.toString(), e);
-        return GENERICO;
+        return textoSiSeOculta;
     }
 }
