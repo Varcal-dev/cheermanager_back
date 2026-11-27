@@ -21,6 +21,7 @@ import com.varcal.cheermanager.Models.Personas.Entrenador;
 import com.varcal.cheermanager.Models.Personas.HoraEntrenador;
 import com.varcal.cheermanager.Models.Personas.Persona;
 import com.varcal.cheermanager.repository.Horario_Asistencia.HorarioEntrenamientoRepository;
+import com.varcal.cheermanager.repository.Org_dep.GrupoEntrenamientoRepository;
 import com.varcal.cheermanager.repository.Org_dep.GrupoEntrenadorRepository;
 import com.varcal.cheermanager.repository.Personas.EntrenadorRepository;
 import com.varcal.cheermanager.repository.Personas.HoraEntrenadorRepository;
@@ -54,14 +55,17 @@ public class HorasEntrenadorService {
     private final EntrenadorRepository entrenadorRepository;
     private final GrupoEntrenadorRepository grupoEntrenadorRepository;
     private final HorarioEntrenamientoRepository horarioEntrenamientoRepository;
+    private final GrupoEntrenamientoRepository grupoRepository;
 
     public HorasEntrenadorService(HoraEntrenadorRepository repo, EntrenadorRepository entrenadorRepository,
             GrupoEntrenadorRepository grupoEntrenadorRepository,
-            HorarioEntrenamientoRepository horarioEntrenamientoRepository) {
+            HorarioEntrenamientoRepository horarioEntrenamientoRepository,
+            GrupoEntrenamientoRepository grupoRepository) {
         this.repo = repo;
         this.entrenadorRepository = entrenadorRepository;
         this.grupoEntrenadorRepository = grupoEntrenadorRepository;
         this.horarioEntrenamientoRepository = horarioEntrenamientoRepository;
+        this.grupoRepository = grupoRepository;
     }
 
     protected LocalDate hoy() {
@@ -72,6 +76,10 @@ public class HorasEntrenadorService {
     public Registro registrar(Solicitud s, int usuarioId) {
         if (s.entrenadorId() == null || entrenadorRepository.findById(s.entrenadorId()).isEmpty()) {
             throw new IllegalArgumentException("Entrenador no encontrado");
+        }
+        // TEN-02: grupo_id es un Integer suelto (sin FK al club); findById lleva el filtro del club.
+        if (s.grupoId() != null && grupoRepository.findById(s.grupoId()).isEmpty()) {
+            throw new IllegalArgumentException("Grupo no encontrado");
         }
         if (s.fecha() == null || s.fecha().isAfter(hoy())) {
             throw new IllegalArgumentException("La fecha es obligatoria y no puede ser futura");

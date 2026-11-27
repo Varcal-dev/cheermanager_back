@@ -24,6 +24,7 @@ import com.varcal.cheermanager.Service.Persona.HorasEntrenadorService.Precarga;
 import com.varcal.cheermanager.Service.Persona.HorasEntrenadorService.Solicitud;
 import com.varcal.cheermanager.repository.Horario_Asistencia.HorarioEntrenamientoRepository;
 import com.varcal.cheermanager.repository.Org_dep.GrupoEntrenadorRepository;
+import com.varcal.cheermanager.repository.Org_dep.GrupoEntrenamientoRepository;
 import com.varcal.cheermanager.repository.Personas.EntrenadorRepository;
 import com.varcal.cheermanager.repository.Personas.HoraEntrenadorRepository;
 import com.varcal.cheermanager.testsupport.Fakes;
@@ -37,6 +38,8 @@ class HorasEntrenadorServiceTest {
     final List<Entrenador> entrenadores = new ArrayList<>();
     final List<GrupoEntrenador> asignaciones = new ArrayList<>();
     final List<HorarioEntrenamiento> horarios = new ArrayList<>();
+    /** Grupos DEL CLUB: findById solo los encuentra a ellos, como el filtro de tenant (uno de otro club responde vacio). */
+    final List<GrupoEntrenamiento> gruposDelClub = new ArrayList<>();
 
     final HorasEntrenadorService service = new HorasEntrenadorService(
             Fakes.proxy(HoraEntrenadorRepository.class, new Repo()
@@ -63,7 +66,9 @@ class HorasEntrenadorServiceTest {
                     .on("findAll", a -> entrenadores)
                     .on("findById", a -> entrenadores.stream().filter(e -> e.getId().equals(a[0])).findFirst())),
             Fakes.proxy(GrupoEntrenadorRepository.class, new Repo().on("findAll", a -> asignaciones)),
-            Fakes.proxy(HorarioEntrenamientoRepository.class, new Repo().on("findByGrupoEntrenamientoId", a -> horarios))) {
+            Fakes.proxy(HorarioEntrenamientoRepository.class, new Repo().on("findByGrupoEntrenamientoId", a -> horarios)),
+            Fakes.proxy(GrupoEntrenamientoRepository.class, new Repo()
+                    .on("findById", a -> gruposDelClub.stream().filter(g -> g.getId().equals(a[0])).findFirst()))) {
         @Override
         protected LocalDate hoy() {
             return hoy;
@@ -113,6 +118,7 @@ class HorasEntrenadorServiceTest {
         entrenadores.clear();
         asignaciones.clear();
         horarios.clear();
+        gruposDelClub.clear();
     }
 
     @Test
@@ -190,5 +196,28 @@ class HorasEntrenadorServiceTest {
         service.eliminar(r.id());
         assertTrue(horas.isEmpty());
         assertThrows(IllegalArgumentException.class, () -> service.eliminar(r.id()));
+    }
+
+    @Test
+    void horasManualesRechazanUnGrupoQueNoEsDelClub() {
+        reiniciar();
+        entrenador(1, "Activo");
+        // el grupo 99 existe en OTRO club: para este club findById no lo ve
+        var e = assertThrows(IllegalArgumentException.class,
+                () -> service.registrar(new Solicitud(1, hoy, new BigDecimal("2"), 99, null), 9));
+        assertEquals("Grupo no encontrado", e.getMessage());
+        assertTrue(horas.isEmpty(), "no debe guardar nada");
+    }
+
+    @Test
+    void horasManualesAceptanUnGrupoPropioOSinGrupo() {
+        reiniciar();
+        entrenador(1, "Activo");
+        GrupoEntrenamiento g = new GrupoEntrenamiento();
+        g.setId(5);
+        gruposDelClub.add(g);
+        assertEquals(5, service.registrar(new Solicitud(1, hoy, new BigDecimal("2"), 5, null), 9).grupoId());
+        assertNull(service.registrar(new Solicitud(1, hoy, new BigDecimal("1"), null, null), 9).grupoId());
+        assertEquals(2, horas.size());
     }
 }
