@@ -12,6 +12,7 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.Models.Financiero.EstadoPago;
 import com.varcal.cheermanager.Models.Financiero.Pago;
 import com.varcal.cheermanager.Service.Financiero.FacturaService;
@@ -179,7 +180,7 @@ public class ConciliacionService {
             } catch (IllegalArgumentException e) {
                 ignoradas++;
                 if (avisos.size() < 20) {
-                    avisos.add("Fila " + numero + ": " + e.getMessage() + " (se omitio)");
+                    avisos.add("Fila " + numero + ": " + ErrorPublico.de(e) + " (se omitio)");
                 }
             }
         }

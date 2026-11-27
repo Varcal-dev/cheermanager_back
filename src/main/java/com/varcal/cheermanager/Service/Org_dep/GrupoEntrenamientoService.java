@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.varcal.cheermanager.config.ErrorPublico;
 import com.varcal.cheermanager.DTO.Org_dep.CandidatoGrupoDTO;
 import com.varcal.cheermanager.DTO.Org_dep.CandidatosGrupoResponseDTO;
 import com.varcal.cheermanager.DTO.Org_dep.DeportistaInscritoDTO;
@@ -170,7 +171,7 @@ public class GrupoEntrenamientoService {
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
-            return "Error al asignar entrenador: " + e.getMessage();
+            return "Error al asignar entrenador: " + ErrorPublico.de(e);
         }
     }
 

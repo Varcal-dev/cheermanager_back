@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -24,6 +25,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import com.varcal.cheermanager.DTO.Persona.DeportistaDTO;
 import com.varcal.cheermanager.Models.Financiero.Convenio;
@@ -477,6 +479,38 @@ class ImportacionDeportistasServiceTest {
         assertEquals("OK", fila(r, 5).estado());
         assertTrue(algunoContiene(fila(r, 5).avisos(), "Acudiente sin documento"));
         verify(acudienteService, never()).crear(any());
+    }
+
+    // SEC-03: un fallo de base de datos no se le muestra al usuario (ni el SQL ni el nombre del constraint).
+    private static final String SQL_BD = "could not execute statement [Duplicate entry '111' for key "
+            + "'personas.uk_personas_documento'] [insert into personas (club_id, numero_documento) values (?, ?)]";
+
+    @Test
+    void un_fallo_de_base_de_datos_al_guardar_una_fila_no_muestra_el_sql() {
+        doThrow(new DataIntegrityViolationException(SQL_BD)).when(personaService).registrarDeportista(any(DeportistaDTO.class));
+        Resultado r = servicio.importar(csv(CAB, "Ana;Perez;111;" + ADULTO));
+
+        assertEquals(0, r.importadas());
+        assertEquals(1, r.conErrores());
+        assertEquals("ERROR", fila(r, 2).estado());
+        assertTrue(algunoContiene(fila(r, 2).errores(), "No se pudo guardar la fila"));
+        assertFalse(algunoContiene(fila(r, 2).errores(), "insert into"));
+        assertFalse(algunoContiene(fila(r, 2).errores(), "uk_personas_documento"));
+    }
+
+    @Test
+    void un_fallo_de_base_de_datos_al_vincular_al_acudiente_no_muestra_el_sql_pero_si_el_aviso() {
+        doThrow(new DataIntegrityViolationException(SQL_BD)).when(acudienteService).vincular(anyInt(), any());
+        Resultado r = servicio.importar(csv(
+                CAB + ";acudiente_nombre;acudiente_apellidos;acudiente_telefono;acudiente_parentesco",
+                "Ana;Perez;111;" + MENOR + ";Maria;Perez;3001112222;Vecina"));
+
+        assertEquals(1, r.importadas());
+        assertEquals("IMPORTADA", fila(r, 2).estado());
+        assertTrue(algunoContiene(fila(r, 2).avisos(),
+                "no se pudo registrar al acudiente: intentalo desde la ficha del deportista"));
+        assertFalse(algunoContiene(fila(r, 2).avisos(), "insert into"));
+        assertFalse(algunoContiene(fila(r, 2).avisos(), "uk_personas_documento"));
     }
 
     @Test

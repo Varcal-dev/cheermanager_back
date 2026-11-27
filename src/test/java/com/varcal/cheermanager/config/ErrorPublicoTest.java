@@ -158,6 +158,17 @@ class ErrorPublicoTest {
     }
 
     @Test
+    void conTextoPropioSeUsaEseTextoSoloCuandoElMensajeSeOculta() {
+        assertEquals("No se pudo guardar la fila",
+                ErrorPublico.de(new DataIntegrityViolationException(SQL), "No se pudo guardar la fila"));
+        assertEquals("No se pudo guardar la fila",
+                ErrorPublico.de(ErroresDeServicioFixture.runtimeSinMensaje(), "No se pudo guardar la fila"));
+        assertEquals("Parentesco no valido",
+                ErrorPublico.de(ErroresDeServicioFixture.runtime("Parentesco no valido"), "No se pudo guardar la fila"));
+        assertEquals("x", ErrorPublico.de(null, "x"));
+    }
+
+    @Test
     void nullSeOculta() {
         assertFalse(ErrorPublico.esPublico(null));
         assertEquals(ErrorPublico.GENERICO, ErrorPublico.de(null));
