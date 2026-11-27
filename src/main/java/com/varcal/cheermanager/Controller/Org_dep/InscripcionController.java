@@ -23,6 +23,7 @@ import com.varcal.cheermanager.DTO.Financiero.FacturaResponseDTO;
 import com.varcal.cheermanager.DTO.Financiero.ResumenGeneracionCobrosDTO;
 import com.varcal.cheermanager.DTO.Org_dep.DeportistaInscritoDTO;
 import com.varcal.cheermanager.DTO.Org_dep.DeportistaNoInscritoDTO;
+import com.varcal.cheermanager.DTO.Org_dep.InscripcionActualizacionDTO;
 import com.varcal.cheermanager.DTO.Org_dep.InscripcionDetalleDto;
 import com.varcal.cheermanager.DTO.Org_dep.InscripcionDto;
 import com.varcal.cheermanager.DTO.Org_dep.InscripcionSimpleDTO;
@@ -128,17 +129,16 @@ public class InscripcionController {
         }
     }
 
-    // Ojo con el body: el service espera un Inscripcion parcial, no el DTO
-    // plano. Debe llegar así:
+    // Body: InscripcionActualizacionDTO. Mismo JSON que ya envia el front:
     // { "planPago": { "id": 5 }, "planMensualidad": { "id": 8 },
     // "fechaInscripcion": "2026-07-12", "fechaVencimiento": "2026-08-12",
     // "estado": "Activa" }
-    // (el service solo usa esos campos; no toca al deportista existente).
+    // Solo se usan esos campos; lo demas que llegue en el cuerpo se ignora (no toca al deportista ni al club).
     @PutMapping("/{id}")
     @RequiresPermission("gestionar_inscripciones")
-    public ResponseEntity<?> actualizar(@PathVariable Integer id, @RequestBody Inscripcion inscripcion) {
+    public ResponseEntity<?> actualizar(@PathVariable Integer id, @Valid @RequestBody InscripcionActualizacionDTO cambios) {
         try {
-            Inscripcion actualizada = inscripcionService.actualizarInscripcion(id, inscripcion);
+            Inscripcion actualizada = inscripcionService.actualizarInscripcion(id, cambios);
             return ResponseEntity.ok(actualizada);
         } catch (RuntimeException e) {
             return ResponseEntity.status(400).body(ErrorPublico.de(e));
