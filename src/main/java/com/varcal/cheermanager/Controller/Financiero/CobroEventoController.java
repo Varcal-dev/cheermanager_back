@@ -26,7 +26,7 @@ public class CobroEventoController {
     // Cobra el evento a todos los deportistas de los grupos inscritos (simular=true: solo vista previa).
     @PostMapping
     @RequiresPermission("crear_factura")
-    public ResponseEntity<?> cobrar(@PathVariable Integer eventoId, @RequestBody CobroEventoLoteDTO dto) {
+    public ResponseEntity<?> cobrar(@PathVariable Integer eventoId, @jakarta.validation.Valid @RequestBody CobroEventoLoteDTO dto) {
         try {
             return ResponseEntity.ok(cobroEventoService.cobrar(eventoId, dto));
         } catch (RuntimeException e) {

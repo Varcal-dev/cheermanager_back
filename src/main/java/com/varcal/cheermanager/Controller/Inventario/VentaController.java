@@ -24,7 +24,7 @@ public class VentaController {
 
     @PostMapping
     @RequiresPermission("registrar_venta")
-    public ResponseEntity<?> registrar(@RequestBody VentaDTO dto) {
+    public ResponseEntity<?> registrar(@jakarta.validation.Valid @RequestBody VentaDTO dto) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(ventaService.registrar(dto));
         } catch (RuntimeException e) {

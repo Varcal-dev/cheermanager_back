@@ -36,7 +36,7 @@ public class FacturaController {
     // mensualidad las genera el sistema al inscribir / en la facturacion mensual.
     @PostMapping
     @RequiresPermission("crear_factura")
-    public ResponseEntity<FacturaResponseDTO> crearManual(@RequestBody FacturaManualDTO dto) {
+    public ResponseEntity<FacturaResponseDTO> crearManual(@jakarta.validation.Valid @RequestBody FacturaManualDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(facturaService.crearManual(dto));
     }
 
