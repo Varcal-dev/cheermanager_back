@@ -30,7 +30,7 @@ public class PersonaController {
 
     @PostMapping()
     @RequiresPermission("crear_persona")
-    public ResponseEntity<?> registrarPersona(@RequestBody PersonaDTO personaDTO) {
+    public ResponseEntity<?> registrarPersona(@jakarta.validation.Valid @RequestBody PersonaDTO personaDTO) {
         try {
             Persona persona = personaService.registrarPersona(personaDTO);
             return ResponseEntity.ok(persona); // Devolver la persona registrada
@@ -41,7 +41,7 @@ public class PersonaController {
 
     @PutMapping("/{id}")
     @RequiresPermission("modificar_persona")
-    public ResponseEntity<?> modificarPersona(@PathVariable Integer id, @RequestBody PersonaDTO personaDTO) {
+    public ResponseEntity<?> modificarPersona(@PathVariable Integer id, @jakarta.validation.Valid @RequestBody PersonaDTO personaDTO) {
         try {
             Persona persona = personaService.modificarPersona(id, personaDTO);
             return ResponseEntity.ok(persona); // Devolver la persona actualizada
