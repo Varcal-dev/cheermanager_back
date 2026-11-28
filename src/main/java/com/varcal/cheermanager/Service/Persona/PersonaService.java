@@ -208,6 +208,7 @@ public class PersonaService {
         // Mapear el DTO a la entidad Persona
         Persona persona = new Persona();
         persona.setNombre(personaDTO.getNombre());
+        persona.setApellidos(personaDTO.getApellidos());
         persona.setDireccion(personaDTO.getDireccion());
         persona.setTelefono(personaDTO.getTelefono());
         persona.setFechaNacimiento(personaDTO.getFechaNacimiento());
@@ -221,6 +222,7 @@ public class PersonaService {
     public Persona modificarPersona(Integer id, PersonaDTO personaDTO) {
         return personaRepository.findById(id).map(persona -> {
             persona.setNombre(personaDTO.getNombre());
+            persona.setApellidos(personaDTO.getApellidos());
             persona.setDireccion(personaDTO.getDireccion());
             persona.setTelefono(personaDTO.getTelefono());
             persona.setFechaNacimiento(personaDTO.getFechaNacimiento());

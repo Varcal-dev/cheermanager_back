@@ -75,14 +75,16 @@ class ValidacionLoteCPersonasLegalTest {
     @Test
     void persona_exige_nombre_y_limita_los_textos() {
         PersonaDTO d = new PersonaDTO();
-        assertEquals(Set.of("nombre"), campos(d));
+        assertEquals(Set.of("nombre", "apellidos"), campos(d));
         d.setNombre(" ");
-        assertEquals(Set.of("nombre"), campos(d));
+        assertEquals(Set.of("nombre", "apellidos"), campos(d));
         d.setNombre("Ana");
+        d.setApellidos("Perez");
         assertTrue(campos(d).isEmpty());
         d.setDireccion(x(256));
         d.setTelefono(x(256));
-        assertEquals(Set.of("direccion", "telefono"), campos(d));
+        d.setApellidos(x(256));
+        assertEquals(Set.of("direccion", "telefono", "apellidos"), campos(d));
     }
 
     // ---------- HTTP: los endpoints que recibian Map ----------
