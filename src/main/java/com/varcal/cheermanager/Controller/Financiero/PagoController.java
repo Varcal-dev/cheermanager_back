@@ -37,7 +37,7 @@ public class PagoController {
 
     @PostMapping
     @RequiresPermission("registrar_pago")
-    public ResponseEntity<PagoResponseDTO> registrar(@RequestBody PagoDTO dto) {
+    public ResponseEntity<PagoResponseDTO> registrar(@jakarta.validation.Valid @RequestBody PagoDTO dto) {
         PagoResponseDTO pago = pagoService.registrarPago(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(pago);
     }

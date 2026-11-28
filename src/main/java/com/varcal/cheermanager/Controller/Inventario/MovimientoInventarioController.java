@@ -22,7 +22,7 @@ public class MovimientoInventarioController {
 
     @PostMapping
     @RequiresPermission("registrar_movimiento_inventario")
-    public ResponseEntity<?> registrar(@RequestBody MovimientoInventarioDTO dto) {
+    public ResponseEntity<?> registrar(@jakarta.validation.Valid @RequestBody MovimientoInventarioDTO dto) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(movimientoInventarioService.registrar(dto));
         } catch (RuntimeException e) {

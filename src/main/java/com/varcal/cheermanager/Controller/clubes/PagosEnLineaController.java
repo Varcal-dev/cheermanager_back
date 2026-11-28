@@ -33,7 +33,8 @@ public class PagosEnLineaController {
 
     private static final Logger log = LoggerFactory.getLogger(PagosEnLineaController.class);
 
-    public record PagarRequest(Integer meses) {
+    public record PagarRequest(
+            @jakarta.validation.constraints.NotNull(message = "Indica cuantos meses pagar") @jakarta.validation.constraints.Min(value = 1, message = "Minimo 1 mes") @jakarta.validation.constraints.Max(value = 12, message = "Maximo 12 meses") Integer meses) {
     }
 
     private final WompiService wompi;
@@ -50,7 +51,7 @@ public class PagosEnLineaController {
 
     @PostMapping("/suscripcion/pagar")
     @RequiresPermission("pagar_suscripcion")
-    public WompiService.Cobro pagar(@RequestBody PagarRequest request) {
+    public WompiService.Cobro pagar(@jakarta.validation.Valid @RequestBody PagarRequest request) {
         String quien = SecurityContextHolder.getContext().getAuthentication() != null
                 ? SecurityContextHolder.getContext().getAuthentication().getName()
                 : null;
