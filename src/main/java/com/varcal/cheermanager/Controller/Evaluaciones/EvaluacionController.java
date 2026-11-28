@@ -42,7 +42,7 @@ public class EvaluacionController {
 
     @PostMapping
     @RequiresPermission("crear_evaluacion")
-    public ResponseEntity<?> registrar(@RequestBody EvaluacionDTO dto) {
+    public ResponseEntity<?> registrar(@jakarta.validation.Valid @RequestBody EvaluacionDTO dto) {
         try {
             return ResponseEntity.status(201).body(evaluacionService.registrar(dto));
         } catch (RuntimeException e) {
@@ -109,7 +109,7 @@ public class EvaluacionController {
     // criterio del lote fallo mientras el resto si se guardo.
     @PostMapping("/masivo")
     @RequiresPermission("crear_evaluacion")
-    public ResponseEntity<?> registrarMasivo(@RequestBody RegistroEvaluacionMasivoDTO dto) {
+    public ResponseEntity<?> registrarMasivo(@jakarta.validation.Valid @RequestBody RegistroEvaluacionMasivoDTO dto) {
         try {
             EvaluacionService.ResultadoRegistroMasivo r = evaluacionService.registrarMasivo(dto);
             return ResponseEntity.status(estadoLote(r)).body(r);

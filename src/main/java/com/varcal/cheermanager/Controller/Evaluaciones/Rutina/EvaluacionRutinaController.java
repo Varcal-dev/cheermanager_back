@@ -30,7 +30,7 @@ public class EvaluacionRutinaController {
     // request. El service calcula automáticamente cada sub-puntaje y el total.
     @PostMapping
     @RequiresPermission("crear_evaluacion_rutina")
-    public ResponseEntity<?> registrar(@RequestBody EvaluacionRutinaDTO dto) {
+    public ResponseEntity<?> registrar(@jakarta.validation.Valid @RequestBody EvaluacionRutinaDTO dto) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(evaluacionRutinaService.registrar(dto));
@@ -45,7 +45,7 @@ public class EvaluacionRutinaController {
     // hoja antes de decidir guardar.
     @PostMapping("/preview")
     @RequiresPermission("crear_evaluacion_rutina")
-    public ResponseEntity<?> previsualizar(@RequestBody EvaluacionRutinaDTO dto) {
+    public ResponseEntity<?> previsualizar(@jakarta.validation.Valid @RequestBody EvaluacionRutinaDTO dto) {
         try {
             return ResponseEntity.ok(evaluacionRutinaService.previsualizar(dto));
         } catch (RuntimeException e) {

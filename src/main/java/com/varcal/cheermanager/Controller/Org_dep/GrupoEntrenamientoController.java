@@ -258,7 +258,7 @@ public class GrupoEntrenamientoController {
     @RequiresPermission("modificar_grupo")
     public ResponseEntity<?> actualizarAsignacionEntrenador(
             @PathVariable Integer asignacionId,
-            @RequestBody AsignacionEntrenadorUpdateDTO dto) {
+            @Valid @RequestBody AsignacionEntrenadorUpdateDTO dto) {
         try {
             return ResponseEntity.ok(grupoEntrenamientoService.actualizarAsignacionEntrenador(asignacionId, dto));
         } catch (RuntimeException e) {
