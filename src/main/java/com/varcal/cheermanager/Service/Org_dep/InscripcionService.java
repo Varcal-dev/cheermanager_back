@@ -21,6 +21,7 @@ import com.varcal.cheermanager.DTO.Financiero.ResumenGeneracionCobrosDTO;
 import com.varcal.cheermanager.DTO.Org_dep.DeportistaInscritoDTO;
 import com.varcal.cheermanager.DTO.Org_dep.DeportistaNoInscritoDTO;
 import com.varcal.cheermanager.DTO.Org_dep.InscripcionDetalleDto;
+import com.varcal.cheermanager.DTO.Org_dep.InscripcionActualizacionDTO;
 import com.varcal.cheermanager.DTO.Org_dep.InscripcionDto;
 import com.varcal.cheermanager.DTO.Org_dep.InscripcionSimpleDTO;
 import com.varcal.cheermanager.Models.Financiero.Convenio;
@@ -404,19 +405,19 @@ public class InscripcionService {
     // @Transactional: lee la inscripción, la factura de inscripción asociada
     // (si existe) y guarda ambas como una sola unidad.
     @Transactional
-    public Inscripcion actualizarInscripcion(Integer id, Inscripcion nuevaInscripcion) {
+    public Inscripcion actualizarInscripcion(Integer id, InscripcionActualizacionDTO cambios) {
         Inscripcion existente = obtenerPorId(id);
 
-        boolean cambioPlan = nuevaInscripcion.getPlanPago() != null
-                && !nuevaInscripcion.getPlanPago().getId().equals(existente.getPlanPago().getId());
+        boolean cambioPlan = cambios.getPlanPago() != null
+                && !cambios.getPlanPago().getId().equals(existente.getPlanPago().getId());
 
-        existente.setFechaInscripcion(nuevaInscripcion.getFechaInscripcion());
-        existente.setFechaVencimiento(nuevaInscripcion.getFechaVencimiento());
-        existente.setEstado(nuevaInscripcion.getEstado());
+        existente.setFechaInscripcion(cambios.getFechaInscripcion());
+        existente.setFechaVencimiento(cambios.getFechaVencimiento());
+        existente.setEstado(Inscripcion.EstadoInscripcion.valueOf(cambios.getEstado()));
 
-        if (nuevaInscripcion.getPlanPago() != null) {
+        if (cambios.getPlanPago() != null) {
             PlanPago plan = planPagoRepository.findById(
-                    nuevaInscripcion.getPlanPago().getId())
+                    cambios.getPlanPago().getId())
                     .orElseThrow(() -> new RuntimeException("Plan no encontrado"));
             existente.setPlanPago(plan);
         }
@@ -426,9 +427,9 @@ public class InscripcionService {
         // facturas de mensualidad ya generadas quedan como están; el
         // siguiente cobro mensual que se genere usará el plan nuevo, que es
         // el comportamiento correcto para un cargo recurrente hacia adelante.
-        if (nuevaInscripcion.getPlanMensualidad() != null) {
+        if (cambios.getPlanMensualidad() != null) {
             PlanPago planMensualidad = planPagoRepository.findById(
-                    nuevaInscripcion.getPlanMensualidad().getId())
+                    cambios.getPlanMensualidad().getId())
                     .orElseThrow(() -> new RuntimeException("Plan de mensualidad no encontrado"));
             existente.setPlanMensualidad(planMensualidad);
         }
