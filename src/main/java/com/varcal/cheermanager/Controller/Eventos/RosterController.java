@@ -17,7 +17,7 @@ import com.varcal.cheermanager.Utils.RequiresPermission;
 @RequestMapping("/api/rosters")
 public class RosterController {
 
-    public record Agregar(Integer deportistaId, Rol rol, String posicion) {
+    public record Agregar(@jakarta.validation.constraints.NotNull(message = "Indica el deportista") Integer deportistaId, Rol rol, String posicion) {
     }
 
     public record Cambio(Rol rol, String posicion) {
@@ -43,7 +43,7 @@ public class RosterController {
 
     @PostMapping("/evento/{eventoId}/grupo/{grupoId}/integrantes")
     @RequiresPermission("asignar_grupo_evento")
-    public ResponseEntity<?> agregar(@PathVariable Integer eventoId, @PathVariable Integer grupoId, @RequestBody Agregar b) {
+    public ResponseEntity<?> agregar(@PathVariable Integer eventoId, @PathVariable Integer grupoId, @jakarta.validation.Valid @RequestBody Agregar b) {
         return ejecutar(() -> service.agregar(eventoId, grupoId, b.deportistaId(), b.rol(), b.posicion(), usuario()));
     }
 

@@ -1,5 +1,7 @@
 package com.varcal.cheermanager.DTO.Evaluaciones.Rutina;
 
+import jakarta.validation.constraints.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -8,12 +10,20 @@ import lombok.Data;
 
 @Data
 public class EvaluacionRutinaDTO {
+    @NotNull(message = "Indica el grupo")
     private Integer grupoId;
+    @NotNull(message = "Indica el nivel de competencia")
     private Integer nivelId;
+    @NotNull(message = "Indica la fecha")
     private LocalDate fecha;
+    @Size(max = 200, message = "El evento admite maximo 200 caracteres")
     private String evento;
+    @NotNull(message = "Indica la cantidad de atletas")
+    @Min(value = 1, message = "La cantidad de atletas debe ser al menos 1")
     private Integer cantidadAtletas;
+    @Size(max = 1000, message = "Las observaciones admiten maximo 1000 caracteres")
     private String observaciones;
+    @NotNull(message = "Indica los registros de la rubrica")
     private List<RegistroSubCriterioDTO> registros;
 
     @Data

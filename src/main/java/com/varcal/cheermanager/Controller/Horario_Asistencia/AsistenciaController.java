@@ -58,13 +58,14 @@ public class AsistenciaController {
         }
     }
 
-    public record EscaneoRequest(String codigo, Integer horarioId, java.time.LocalDate fecha) {
+    public record EscaneoRequest(@jakarta.validation.constraints.NotBlank(message = "Escanea o escribe el codigo del carnet") String codigo,
+            @jakarta.validation.constraints.NotNull(message = "Elige el horario de la sesion") Integer horarioId, java.time.LocalDate fecha) {
     }
 
     /** Marca presente a quien escanea su carnet. 400 si el codigo es invalido o de otro club. */
     @PostMapping("/escaneo")
     @RequiresPermission("registrar_asistencia")
-    public ResponseEntity<?> escanear(@RequestBody EscaneoRequest req) {
+    public ResponseEntity<?> escanear(@jakarta.validation.Valid @RequestBody EscaneoRequest req) {
         try {
             return ResponseEntity.ok(escaneoService.escanear(req.codigo(), req.horarioId(), req.fecha()));
         } catch (IllegalArgumentException e) {
@@ -74,7 +75,7 @@ public class AsistenciaController {
 
     @PostMapping
     @RequiresPermission("registrar_asistencia")
-    public ResponseEntity<AsistenciaResponseDTO> registrar(@RequestBody AsistenciaDTO dto) {
+    public ResponseEntity<AsistenciaResponseDTO> registrar(@jakarta.validation.Valid @RequestBody AsistenciaDTO dto) {
         AsistenciaResponseDTO registrada = asistenciaService.registrar(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(registrada);
     }
@@ -84,7 +85,7 @@ public class AsistenciaController {
     // (ej. ID inexistente) mientras el resto sí se guardó correctamente.
     @PostMapping("/masivo")
     @RequiresPermission("registrar_asistencia")
-    public ResponseEntity<AsistenciaService.ResultadoRegistroMasivo> registrarMasivo(@RequestBody RegistroAsistenciaMasivoDTO dto) {
+    public ResponseEntity<AsistenciaService.ResultadoRegistroMasivo> registrarMasivo(@jakarta.validation.Valid @RequestBody RegistroAsistenciaMasivoDTO dto) {
         AsistenciaService.ResultadoRegistroMasivo resultado = asistenciaService.registrarMasivo(dto);
         HttpStatus status = resultado.getErrores().isEmpty() ? HttpStatus.CREATED : HttpStatus.MULTI_STATUS;
         return ResponseEntity.status(status).body(resultado);
