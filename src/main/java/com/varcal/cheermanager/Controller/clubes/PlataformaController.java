@@ -46,7 +46,7 @@ public class PlataformaController {
     @PostMapping("/usuarios")
     @RequiresPermission("gestionar_clubes")
     public ResponseEntity<PlataformaService.UsuarioCreado> crearUsuario(@PathVariable Integer clubId,
-            @RequestBody PlataformaService.NuevoUsuarioRequest request) {
+            @jakarta.validation.Valid @RequestBody PlataformaService.NuevoUsuarioRequest request) {
         return ResponseEntity.status(201).body(service.crearUsuario(clubId, request));
     }
 

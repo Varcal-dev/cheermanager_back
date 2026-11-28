@@ -36,7 +36,7 @@ public class ClubController {
 
     @PostMapping
     @RequiresPermission("gestionar_clubes")
-    public ResponseEntity<ClubResponse> crear(@RequestBody ClubService.CrearClubRequest request) {
+    public ResponseEntity<ClubResponse> crear(@jakarta.validation.Valid @RequestBody ClubService.CrearClubRequest request) {
         return ResponseEntity.status(201).body(ClubResponse.de(clubService.crearClub(request)));
     }
 

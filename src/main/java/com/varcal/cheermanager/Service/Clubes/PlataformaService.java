@@ -49,7 +49,12 @@ public class PlataformaService {
     public record RolClub(Integer id, String nombre) {
     }
 
-    public record NuevoUsuarioRequest(String username, String email, Integer rolId) {
+    public record NuevoUsuarioRequest(
+            @jakarta.validation.constraints.NotBlank(message = "El usuario es obligatorio")
+            @jakarta.validation.constraints.Size(max = 255, message = "El usuario admite maximo 255 caracteres") String username,
+            @jakarta.validation.constraints.NotBlank(message = "El correo es obligatorio")
+            @jakarta.validation.constraints.Size(max = 255, message = "El correo admite maximo 255 caracteres") String email,
+            @jakarta.validation.constraints.NotNull(message = "Indica el rol") Integer rolId) {
     }
 
     public record UsuarioCreado(Integer id, String username, String email, String rol, String claveTemporal) {
