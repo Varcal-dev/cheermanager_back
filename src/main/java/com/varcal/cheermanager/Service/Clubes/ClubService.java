@@ -47,8 +47,16 @@ import com.varcal.cheermanager.tenant.TenantLookupRepository;
 @Service
 public class ClubService {
 
-    public record CrearClubRequest(String nombre, String slug, String adminUsername, String adminEmail,
-            String adminPassword, Boolean cargarPlantilla) {
+    public record CrearClubRequest(
+            @jakarta.validation.constraints.NotBlank(message = "El nombre del club es obligatorio")
+            @jakarta.validation.constraints.Size(max = 120, message = "El nombre del club admite maximo 120 caracteres") String nombre,
+            @jakarta.validation.constraints.Size(max = 60, message = "El identificador (slug) admite maximo 60 caracteres") String slug,
+            @jakarta.validation.constraints.NotBlank(message = "El usuario del administrador es obligatorio")
+            @jakarta.validation.constraints.Size(max = 255, message = "El usuario admite maximo 255 caracteres") String adminUsername,
+            @jakarta.validation.constraints.NotBlank(message = "El correo del administrador es obligatorio")
+            @jakarta.validation.constraints.Size(max = 255, message = "El correo admite maximo 255 caracteres") String adminEmail,
+            @jakarta.validation.constraints.Size(min = 10, max = 72, message = "La clave inicial debe tener entre 10 y 72 caracteres") String adminPassword,
+            Boolean cargarPlantilla) {
     }
 
     private final ClubRepository clubRepository;
@@ -102,6 +110,9 @@ public class ClubService {
         String slug = (req.slug() == null || req.slug().isBlank()) ? slugify(req.nombre()) : slugify(req.slug());
         if (slug.isEmpty()) {
             throw new RuntimeException("No se pudo generar un identificador (slug) valido para el club");
+        }
+        if (slug.length() > 60) {
+            throw new RuntimeException("El identificador (slug) admite maximo 60 caracteres: escribe uno mas corto");
         }
         if (clubRepository.existsBySlug(slug)) {
             throw new RuntimeException("Ya existe un club con el identificador '" + slug + "'");
