@@ -2,7 +2,6 @@ package com.varcal.cheermanager.Controller.Historiales;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,19 +19,19 @@ public class HistorialPlanesDeportistaController {
     @Autowired
     private HistorialPlanesDeportistaService historialPlanesDeportistaService;
 
+    public record CambioPlanRequest(
+            @jakarta.validation.constraints.NotNull(message = "Indica el deportista") Integer deportistaId,
+            @jakarta.validation.constraints.NotNull(message = "Indica el plan de pago") Integer planPagoId,
+            LocalDate fechaCambio,
+            @jakarta.validation.constraints.Size(max = 255, message = "El motivo admite maximo 255 caracteres") String motivoCambio) {
+    }
+
     @PostMapping
     @RequiresPermission("modificar_inscripcion")
-    public ResponseEntity<?> registrar(@RequestBody Map<String, Object> body) {
+    public ResponseEntity<?> registrar(@jakarta.validation.Valid @RequestBody CambioPlanRequest body) {
         try {
-            Integer deportistaId = (Integer) body.get("deportistaId");
-            Integer planPagoId = (Integer) body.get("planPagoId");
-            String motivo = (String) body.get("motivoCambio");
-            LocalDate fechaCambio = body.get("fechaCambio") != null
-                    ? LocalDate.parse(body.get("fechaCambio").toString())
-                    : null;
-
-            return ResponseEntity.status(201).body(
-                    historialPlanesDeportistaService.registrarCambioDePlan(deportistaId, planPagoId, fechaCambio, motivo));
+            return ResponseEntity.status(201).body(historialPlanesDeportistaService.registrarCambioDePlan(
+                    body.deportistaId(), body.planPagoId(), body.fechaCambio(), body.motivoCambio()));
         } catch (RuntimeException e) {
             return ResponseEntity.status(404).body(ErrorPublico.de(e));
         }

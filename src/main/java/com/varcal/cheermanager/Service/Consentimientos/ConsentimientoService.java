@@ -32,8 +32,14 @@ public class ConsentimientoService {
 
     private static final Set<String> CANALES = Set.of("PAPEL", "DIGITAL", "OTRO");
 
-    public record OtorgarRequest(Integer personaId, Tipo tipo, String versionTexto, String canal,
-            Integer acudienteId, String observaciones) {
+    public record OtorgarRequest(
+            @jakarta.validation.constraints.NotNull(message = "Indica la persona") Integer personaId,
+            @jakarta.validation.constraints.NotNull(message = "Indica el tipo de consentimiento") Tipo tipo,
+            @jakarta.validation.constraints.NotBlank(message = "Indica la version del texto firmado")
+            @jakarta.validation.constraints.Size(max = 40, message = "La version admite maximo 40 caracteres") String versionTexto,
+            @jakarta.validation.constraints.Size(max = 30, message = "El canal admite maximo 30 caracteres") String canal,
+            Integer acudienteId,
+            @jakarta.validation.constraints.Size(max = 300, message = "Las observaciones admiten maximo 300 caracteres") String observaciones) {
     }
 
     public record Resumen(Integer id, Integer personaId, Tipo tipo, String versionTexto, String canal,

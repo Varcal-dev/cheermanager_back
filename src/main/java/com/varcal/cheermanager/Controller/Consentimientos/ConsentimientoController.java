@@ -26,7 +26,7 @@ public class ConsentimientoController {
 
     @PostMapping
     @RequiresPermission("gestionar_consentimientos")
-    public ResponseEntity<Resumen> otorgar(@RequestBody OtorgarRequest req) {
+    public ResponseEntity<Resumen> otorgar(@jakarta.validation.Valid @RequestBody OtorgarRequest req) {
         return ResponseEntity.status(201).body(service.otorgar(req));
     }
 
@@ -49,6 +49,10 @@ public class ConsentimientoController {
         return service.pendientes(tipo);
     }
 
+    /** Antes un cuerpo vacio ({}) equivalia a activa=false y desactivaba la exigencia sin avisar. */
+    public record ExigenciaRequest(@jakarta.validation.constraints.NotNull(message = "Indica si la exigencia esta activa (true o false)") Boolean activa) {
+    }
+
     @GetMapping("/exigencia-salud")
     @RequiresPermission("ver_consentimientos")
     public ConsentimientoService.Exigencia exigencia() {
@@ -58,9 +62,9 @@ public class ConsentimientoController {
     /** Body: {"activa": true|false}. Activar se rechaza (400) mientras haya pendientes. */
     @PutMapping("/exigencia-salud")
     @RequiresPermission("gestionar_consentimientos")
-    public ResponseEntity<?> configurarExigencia(@RequestBody Map<String, Boolean> body) {
+    public ResponseEntity<?> configurarExigencia(@jakarta.validation.Valid @RequestBody ExigenciaRequest body) {
         try {
-            return ResponseEntity.ok(service.configurarExigencia(Boolean.TRUE.equals(body.get("activa"))));
+            return ResponseEntity.ok(service.configurarExigencia(body.activa()));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("message", ErrorPublico.de(e)));
         }

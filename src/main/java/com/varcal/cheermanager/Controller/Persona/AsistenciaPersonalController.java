@@ -21,7 +21,7 @@ import com.varcal.cheermanager.Utils.RequiresPermission;
 @RequestMapping("/api/asistencia-personal")
 public class AsistenciaPersonalController {
 
-    public record Escaneo(String codigo) {
+    public record Escaneo(@jakarta.validation.constraints.NotBlank(message = "Escanea o escribe el codigo del carnet") @jakarta.validation.constraints.Size(max = 500, message = "El codigo es demasiado largo") String codigo) {
     }
 
     @Autowired
@@ -29,7 +29,7 @@ public class AsistenciaPersonalController {
 
     @PostMapping("/escaneo")
     @RequiresPermission("registrar_asistencia")
-    public ResponseEntity<?> escanear(@RequestBody Escaneo body) {
+    public ResponseEntity<?> escanear(@jakarta.validation.Valid @RequestBody Escaneo body) {
         try {
             return ResponseEntity.ok(service.escanear(body.codigo()));
         } catch (RuntimeException e) {

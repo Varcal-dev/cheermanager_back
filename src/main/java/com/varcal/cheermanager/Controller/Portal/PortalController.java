@@ -19,7 +19,8 @@ import com.varcal.cheermanager.Utils.RequiresPermission;
 @RequestMapping("/api/portal")
 public class PortalController {
 
-    public record NuevaSolicitud(Integer temporadaId, String observaciones) {
+    public record NuevaSolicitud(@jakarta.validation.constraints.NotNull(message = "Indica la temporada") Integer temporadaId,
+            @jakarta.validation.constraints.Size(max = 300, message = "Las observaciones admiten maximo 300 caracteres") String observaciones) {
     }
 
     private final PortalService service;
@@ -130,7 +131,7 @@ public class PortalController {
 
     @PostMapping("/deportistas/{id}/solicitudes")
     @RequiresPermission("acceder_portal")
-    public ResponseEntity<SolicitudResponse> solicitar(@PathVariable Integer id, @RequestBody NuevaSolicitud req) {
+    public ResponseEntity<SolicitudResponse> solicitar(@PathVariable Integer id, @jakarta.validation.Valid @RequestBody NuevaSolicitud req) {
         return ResponseEntity.status(201).body(service.solicitar(id, req.temporadaId(), req.observaciones()));
     }
 
